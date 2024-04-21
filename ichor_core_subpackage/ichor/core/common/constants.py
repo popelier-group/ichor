@@ -449,6 +449,8 @@ type2nuclear_charge: Dict[str, float] = {
     "Uub": 112.0,
 }
 
+nuclear_charge2type = {int(v): k for k, v in type2nuclear_charge.items()}
+
 type2vdwr: Dict[str, float] = {
     "H": 0.430,
     "He": 0.741,

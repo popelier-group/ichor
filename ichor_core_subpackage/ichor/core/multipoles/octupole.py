@@ -417,3 +417,50 @@ def recover_molecular_octupole(
         return molecular_octupole_displaced
     else:
         return np.array(octupole_cartesian_to_spherical(molecular_octupole_displaced))
+
+
+def get_gaussian_and_aimall_molecular_octupole(
+    gaussian_output: "GaussianOutput", ints_directory: "IntsDir"  # noqa: F821
+):
+    """Gets the Gaussian octupole moment and converts it to traceless (still in Debye Angstrom^2)
+    Also gets the AIMAll recovered molecule octupole moment from atomic ones.
+
+    Returns a tuple of numpy arrays, where the first one is the
+    Gaussian traceless 3x3x3 octupole moment (in Debye Angstrom^2)
+    and the second one is the AIMAll recovered traceless 3x3x3
+    octupole moment (also converted from au to Debye Angstrom^2)
+    and with prefactor taken into account.
+
+    This allows for direct comparison of AIMAll to Gaussian.
+
+    :param gaussian_output: A Gaussian output file containing molecular
+        multipole moments and geometry. The same geometry and level of theory
+        must also be used in the AIMAll calculation.
+    :param ints_directory: A IntsDirectory instance containing the
+        AIMAll .int files for the same geometry that was used in Gaussian
+    :return: A tuple of 3x3x3 np.ndarrays, where the first is the Gaussian
+        octupole moment and the second is the AIMAll recovered octupole moment.
+    """
+
+    # in angstroms, convert to bohr
+    atoms = gaussian_output.atoms
+    atoms = atoms.to_bohr()
+    # in debye angstrom squared
+    raw_gaussian_octupole = np.array(gaussian_output.molecular_octupole)
+    # convert to xxx xxy xxz xyy xyz xzz yyy yyz yzz zzz
+    # because Gaussian uses a different ordering
+    converted_gaussian_octupole = octupole_element_conversion(raw_gaussian_octupole, 0)
+    # pack into 3x3x3 array
+    packed_converted_gaussian_octupole = pack_cartesian_octupole(
+        *converted_gaussian_octupole
+    )
+    # convert Gaussian to traceless because AIMAll moments are traceless
+    traceless_gaussian_octupole = octupole_nontraceless_to_traceless(
+        packed_converted_gaussian_octupole
+    )
+    # note that conversion factors are applied in the function by default
+    aimall_recovered_molecular_octupole = recover_molecular_octupole(
+        atoms, ints_directory
+    )
+
+    return traceless_gaussian_octupole, aimall_recovered_molecular_octupole

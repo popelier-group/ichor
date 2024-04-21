@@ -4,6 +4,7 @@ from typing import Union
 import numpy as np
 
 from ichor.core.atoms import Atom, Atoms
+from ichor.core.common.constants import nuclear_charge2type
 from ichor.core.common.types.multipole_moments import (
     MolecularDipole,
     MolecularHexadecapole,
@@ -12,7 +13,6 @@ from ichor.core.common.types.multipole_moments import (
     TracelessMolecularQuadrupole,
 )
 
-from ichor.core.common.units import AtomicDistance
 from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasAtoms, HasData
 
@@ -92,21 +92,23 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
                     )
                     line = next(f)
 
-                    while line.strip():
-                        l = line.split()
-                        atom_type = l[0]
-                        x = float(l[1])
-                        y = float(l[2])
-                        z = float(l[3])
-                        atoms.add(
-                            Atom(
-                                atom_type,
-                                x,
-                                y,
-                                z,
-                                units=AtomicDistance.Angstroms,
-                            )
-                        )
+                elif "Input orientation:" in line:
+
+                    line = next(f)
+                    line = next(f)
+                    line = next(f)
+                    line = next(f)
+                    line = next(f)
+
+                    # we should be at the first line that has an atom here
+                    # read until we reach another ------ line
+                    while "--------------------" not in line:
+
+                        split = line.split()
+                        atomic_num = int(split[1])
+                        atom_type = nuclear_charge2type[atomic_num]
+                        coords = map(float, split[-3:])
+                        atoms.append(Atom(atom_type, *coords))
                         line = next(f)
 
                 elif "Forces (Hartrees/Bohr)" in line:
