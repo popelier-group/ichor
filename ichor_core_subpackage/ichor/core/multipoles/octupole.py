@@ -114,10 +114,15 @@ def octupole_element_conversion(octupole_array: np.ndarray, current_ordering):
       and
       1: XXX, XXY, XXZ, XYY, XYZ, XZZ, YYY, YYZ, YZZ, ZZZ
 
-      where the 0 and 1 indicate the ordering index. The other ordering is going to be returned
+      where the 0 and 1 indicate the current ordering style.
+
+      ..note::
+        The other ordering is going to be returned.
+        If 0 is given as current ordering, ordering 1 is going to be returned.
+        If 1 is given as current ordering, ordering 0 is going to be returned.
 
     :param octupole_array: 1d unpacked octupole array
-    :type ordering: either 0 or 1
+    :param current_ordering: either 0 or 1
     """
 
     if current_ordering == 0:
