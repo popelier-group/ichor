@@ -839,12 +839,14 @@ multipole_names: List[str] = (
 )
 
 # taken from Anthony Stone Book, The Theory of Intermolecular Forces
-coulombbohr_to_debye = 2.5417464  # for dipole , au to debye
-coulombbhrsquared_to_debye_angstrom = (
-    1.3450342  # for quadrupole , au to debye angstrom (same as Buckingham)
+# Appendix D.1
+# note that the book only goes up to quadrupole conversions
+coulombbohr_to_debye = 2.5417464  # for dipole, au (ea) to Debye
+coulombbhrsquared_to_debyeangstrom = (
+    1.3450342  # for quadrupole , au (ea^2) to Debye Angstrom (same as Buckingham)
 )
-coulom_bohr_cubed_to_debye_angstrom_squared = (
-    0.7117614  # octupole au (ea^3) to debye angstrom squared
+coulombbohrcubed_to_debyeangstromsquared = (
+    0.7117614  # octupole au (ea^3) to Debye Angstrom^2
 )
 
 

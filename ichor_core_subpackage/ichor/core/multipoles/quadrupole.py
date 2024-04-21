@@ -2,7 +2,6 @@ from typing import Tuple
 
 import numpy as np
 from ichor.core.common import constants
-from ichor.core.common.constants import coulombbhrsquared_to_debye_angstrom
 
 
 def rotate_quadrupole(
@@ -380,7 +379,7 @@ def recover_molecular_quadrupole(
         molecular_quadrupole += atomic_contibution
 
     if convert_to_debye_angstrom:
-        molecular_quadrupole *= coulombbhrsquared_to_debye_angstrom
+        molecular_quadrupole *= constants.coulombbhrsquared_to_debyeangstrom
 
     if convert_to_cartesian:
         molecular_quadrupole = quadrupole_spherical_to_cartesian(*molecular_quadrupole)
