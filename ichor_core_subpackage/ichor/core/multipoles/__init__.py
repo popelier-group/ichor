@@ -2,6 +2,7 @@ from ichor.core.multipoles.dipole import (
     dipole_cartesian_to_spherical,
     dipole_rotate_cartesian,
     dipole_spherical_to_cartesian,
+    displace_dipole_cartesian,
     get_gaussian_and_aimall_molecular_dipole,
     pack_cartesian_dipole,
     recover_molecular_dipole,
@@ -17,6 +18,7 @@ from ichor.core.multipoles.hexadecapole import (
     unpack_cartesian_hexadecapole,
 )
 from ichor.core.multipoles.octupole import (
+    displace_octupole_cartesian,
     get_gaussian_and_aimall_molecular_octupole,
     octupole_cartesian_to_spherical,
     octupole_rotate_cartesian,
@@ -27,6 +29,7 @@ from ichor.core.multipoles.octupole import (
     unpack_cartesian_octupole,
 )
 from ichor.core.multipoles.quadrupole import (
+    displace_quadrupole_cartesian,
     get_gaussian_and_aimall_molecular_quadrupole,
     pack_cartesian_quadrupole,
     quadrupole_cartesian_to_spherical,
@@ -69,4 +72,7 @@ __all__ = [
     "get_gaussian_and_aimall_molecular_quadrupole",
     "recover_molecular_octupole",
     "get_gaussian_and_aimall_molecular_octupole",
+    "displace_quadrupole_cartesian",
+    "displace_dipole_cartesian",
+    "displace_octupole_cartesian",
 ]

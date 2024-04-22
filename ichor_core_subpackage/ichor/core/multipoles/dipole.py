@@ -59,7 +59,7 @@ def dipole_one_term_general_expression(
     :returns: The x,y or z component of the dipole moment as seen from a new origin.
     """
 
-    mu_alpha_disp = dipole[alpha] - displacement_vector[alpha] * monopole
+    mu_alpha_disp = dipole[alpha] + displacement_vector[alpha] * monopole
 
     return mu_alpha_disp
 
@@ -132,11 +132,11 @@ def recover_molecular_dipole(
 
         # get packed representation of all moments we need
         dipole_packed_cartesian = dipole_spherical_to_cartesian(q10, q11c, q11s)
-        displaced_dipole = displace_dipole_cartesian(
+        displaced_atomic_dipole = displace_dipole_cartesian(
             atom_coords, q00, dipole_packed_cartesian
         )
 
-        molecular_dipole += displaced_dipole
+        molecular_dipole += displaced_atomic_dipole
 
     if convert_to_debye:
         molecular_dipole *= coulombbohr_to_debye
@@ -175,45 +175,42 @@ def get_gaussian_and_aimall_molecular_dipole(
 
     # in debye
     raw_gaussian_dipole = np.array(gaussian_output.molecular_dipole)
-    # pack into 3, shape array
-    packed_converted_gaussian_dipole = pack_cartesian_dipole(*raw_gaussian_dipole)
-
     # note that conversion factors are applied in the function by default
     aimall_recovered_molecular_dipole = recover_molecular_dipole(atoms, ints_directory)
 
-    return packed_converted_gaussian_dipole, aimall_recovered_molecular_dipole
+    return raw_gaussian_dipole, aimall_recovered_molecular_dipole
 
 
-def dipole_origin_change(
-    dipole: np.ndarray,
-    old_origin: np.ndarray,
-    new_origin: np.ndarray,
-    molecular_charge: int,
-) -> np.ndarray:
-    """Changes the origin of the dipole moment and returns the dipole moment in the new origin
+# def dipole_origin_change(
+#     dipole: np.ndarray,
+#     old_origin: np.ndarray,
+#     new_origin: np.ndarray,
+#     molecular_charge: int,
+# ) -> np.ndarray:
+#     """Changes the origin of the dipole moment and returns the dipole moment in the new origin
 
-    :param dipole: a 1-dimensional np.ndarray containing the x,y,z components
-        note the dipole moment has to be in Cartesian coordinates AND in atomic units.
-    :param old_origin: The old origin with respect to which the given dipole is calculated.
-        1d array containing Cartesian x,y,z coordinates in Bohr.
-    :type old_origin: The new origin with respect to which the new dipole should be given.
-        1d array containing Cartesian x,y,z coordinates in Bohr.
-    :param molecular_charge: The charge of the system (positive or negative)
-    :return: The dipole moment as seen from the new origin, in atomic units
+#     :param dipole: a 1-dimensional np.ndarray containing the x,y,z components
+#         note the dipole moment has to be in Cartesian coordinates AND in atomic units.
+#     :param old_origin: The old origin with respect to which the given dipole is calculated.
+#         1d array containing Cartesian x,y,z coordinates in Bohr.
+#     :type old_origin: The new origin with respect to which the new dipole should be given.
+#         1d array containing Cartesian x,y,z coordinates in Bohr.
+#     :param molecular_charge: The charge of the system (positive or negative)
+#     :return: The dipole moment as seen from the new origin, in atomic units
 
-    See David Griffiths Introduction to Electrodynamics, p 157
+#     See David Griffiths Introduction to Electrodynamics, p 157
 
-    .. note::
-        The dipole calculation can be directly converted in Cartesian because it is simple
-    """
+#     .. note::
+#         The dipole calculation can be directly converted in Cartesian because it is simple
+#     """
 
-    # p_bar = p - Q * a_bar
-    # where p is is the original dipole, Q is the charge of the molecule and a is the displacement amount
-    # the displacement is the new_origin - old_origin
-    # p_bar is the new dipole
-    # if the total charge is 0, then the dipole does not change with the origin change
+#     # p_bar = p - Q * a_bar
+#     # where p is is the original dipole, Q is the charge of the molecule and a is the displacement amount
+#     # the displacement is the new_origin - old_origin
+#     # p_bar is the new dipole
+#     # if the total charge is 0, then the dipole does not change with the origin change
 
-    return dipole - (molecular_charge * (new_origin - old_origin))
+#     return dipole - (molecular_charge * (new_origin - old_origin))
 
 
 # equations come from
