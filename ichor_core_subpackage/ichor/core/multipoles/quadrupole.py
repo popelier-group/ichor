@@ -225,7 +225,7 @@ def recover_molecular_quadrupole(
     atoms = atoms.to_bohr()
 
     # Cartesian representation
-    molecular_quadrupole = np.zeros(3, 3)
+    molecular_quadrupole = np.zeros((3, 3))
 
     for atom in atoms:
 
