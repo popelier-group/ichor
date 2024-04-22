@@ -147,6 +147,43 @@ def recover_molecular_dipole(
     return molecular_dipole
 
 
+def get_gaussian_and_aimall_molecular_dipole(
+    gaussian_output: "GaussianOutput", ints_directory: "IntsDir"  # noqa: F821
+):
+    """Gets the Gaussian dipole moment (still in Debye)
+    Also gets the AIMAll recovered molecule dipole moment from atomic ones.
+
+    Returns a tuple of numpy arrays, where the first one is the
+    Gaussian traceless dipole moment (in Debye)
+    and the second one is the AIMAll recovered traceless
+    dipole moment (also converted from au to Debye)
+
+    This allows for direct comparison of AIMAll to Gaussian.
+
+    :param gaussian_output: A Gaussian output file containing molecular
+        multipole moments and geometry. The same geometry and level of theory
+        must also be used in the AIMAll calculation.
+    :param ints_directory: A IntsDirectory instance containing the
+        AIMAll .int files for the same geometry that was used in Gaussian
+    :return: A tuple of np.ndarrays of shape (3,) , where the first is the Gaussian
+        dipole moment and the second is the AIMAll recovered dipole moment.
+    """
+
+    # make sure we are in bohr
+    atoms = gaussian_output.atoms
+    atoms = atoms.to_bohr()
+
+    # in debye
+    raw_gaussian_dipole = np.array(gaussian_output.molecular_dipole)
+    # pack into 3, shape array
+    packed_converted_gaussian_dipole = pack_cartesian_dipole(*raw_gaussian_dipole)
+
+    # note that conversion factors are applied in the function by default
+    aimall_recovered_molecular_dipole = recover_molecular_dipole(atoms, ints_directory)
+
+    return packed_converted_gaussian_dipole, aimall_recovered_molecular_dipole
+
+
 def dipole_origin_change(
     dipole: np.ndarray,
     old_origin: np.ndarray,
