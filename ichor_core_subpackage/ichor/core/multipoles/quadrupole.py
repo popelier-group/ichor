@@ -2,6 +2,7 @@ from typing import Tuple
 
 import numpy as np
 from ichor.core.common import constants
+from ichor.core.common.arith import kronecker_delta
 
 
 def rotate_quadrupole(
@@ -56,7 +57,7 @@ def quadrupole_rotate_cartesian(q: np.ndarray, C: np.ndarray) -> np.ndarray:
 
 
 def quadrupole_element_conversion(quadrupole_array: np.ndarray, current_ordering):
-    """Converts between the two ways of reporting octupole moments, namely
+    """Converts between the two ways of reporting quadrupole moments, namely
 
       0: xx, yy, zz, xy, xz, yz    this is the ordering used by GAUSSIAN/ORCA
       and
@@ -64,7 +65,7 @@ def quadrupole_element_conversion(quadrupole_array: np.ndarray, current_ordering
 
       where the 0 and 1 indicate the ordering index. The other ordering is going to be returned
 
-    :param octupole_array: 1d unpacked octupole array
+    :param quadrupole_array: 1d unpacked quadrupole array
     :type ordering: either 0 or 1
     """
 
@@ -79,25 +80,235 @@ def quadrupole_element_conversion(quadrupole_array: np.ndarray, current_ordering
     )
 
 
-def calculate_traceless_quadrupole(
+def quadrupole_nontraceless_to_traceless(
     nontraceless_quadrupole_matrix: np.ndarray,
 ) -> np.ndarray:
     """Subtracts off a constant (the mean of the sum of the trace), which makes
     the quadrupole moment traceless (i.e. the new sum of the diagonal is 0.0)
 
-    The traceless multipole moments are used by AIMAll.
+    .. note::
+        AIMAll already gives traceless moments, but Gaussian does not have
+        traceless moments for higher order multipole moments (higher than
+        quadrupole.)
 
     :param nontraceless_quadrupole_matrix: A 3x3 matrix containing the (packed) quadrupole moment
     :return: A 3x3 matrix containing the traceless quadrupole moment
     """
 
-    cpy = nontraceless_quadrupole_matrix.copy()
+    arr_to_sub = np.zeros_like(nontraceless_quadrupole_matrix)
     tr_mean = np.diag(nontraceless_quadrupole_matrix).mean()
 
     for i in range(3):
-        cpy[i, i] -= tr_mean
+        arr_to_sub[i, i] += tr_mean
 
-    return cpy
+    return nontraceless_quadrupole_matrix - arr_to_sub
+
+
+def Theta_prime(alpha, beta, displacement_vector):
+
+    k = kronecker_delta(alpha, beta)
+    norm = np.linalg.norm(displacement_vector)
+
+    aprime_alpha = displacement_vector[alpha]
+    aprime_beta = displacement_vector[beta]
+
+    return 0.5 * (3 * aprime_alpha * aprime_beta - norm**2 * k)
+
+
+def quadrupole_one_term_general_expression(
+    alpha: int,
+    beta: int,
+    displacement_vector: np.ndarray,
+    monopole: float,
+    dipole: np.ndarray,
+    quadrupole: np.ndarray,
+) -> float:
+    """Origin change of one component of the quadrupole moment by a displacement vector
+
+    :param alpha: 0, 1, or 2 for x, y, or z
+    :param beta: 0, 1, or 2 for x, y, or z
+    :param displacement_vector: np.ndarray containing x,y,z components of displacement vector
+    :param monopole: monopole moment, float (charge of atom or system).
+        Note that for AIMAll, the q00 in the AIMAll .int file does not have the nuclear charge added
+        ichor automatically does that when parsing .int files.
+    :param dipole: The atomic or molecular dipole moment
+        np.ndarray containing x,y,z components of displacement vector (Cartesian)
+    :param quadrupole: The atomic or molecular quadrupole moment
+        (3x3) matrix in Cartesian coordinates
+    :returns: The component of the quadrupole moment, as seen from the new origin
+    """
+
+    term2 = Theta_prime(alpha, beta, displacement_vector) * monopole
+    term3 = 1.5 * (displacement_vector[alpha] * dipole[beta])
+    term4 = 1.5 * (displacement_vector[beta] * dipole[alpha])
+    term5 = (displacement_vector.dot(dipole)) * kronecker_delta(alpha, beta)
+
+    return quadrupole[alpha, beta] + term2 + term3 + term4 - term5
+
+
+def displace_quadrupole_cartesian(
+    displacement_vector: np.ndarray,
+    monopole: float,
+    dipole: np.ndarray,
+    quadrupole: np.ndarray,
+):
+    """Computes the full displaced quadrupole moment
+
+    :param displacement_vector: Displacement vector
+    :param monopole: monopole moment, float (charge of atom or system).
+        Note that for AIMAll, the atomic q00 (monopole) in the AIMAll .int file
+        does not have the nuclear charge added
+        ichor automatically does that when parsing .int files.
+    :param dipole: The atomic or molecular dipole moment
+        np.ndarray containing x,y,z components of displacement vector (Cartesian
+    :param quadrupole: The atomic or molecular quadrupole moment
+        (3x3) matrix in Cartesian coordinates
+    :return: np.ndarray of shape (3x3) containing displaced quadrupole moment
+    """
+
+    assert displacement_vector.shape == (3,)
+    # check that arrays are packed multipole moments
+    assert isinstance(monopole, float)
+    assert dipole.shape == (3,)
+    assert quadrupole.shape == (3, 3)
+
+    res = np.zeros((3, 3))
+
+    for i in range(3):
+        for j in range(3):
+            res[i, j] = quadrupole_one_term_general_expression(
+                i,
+                j,
+                displacement_vector,
+                monopole,
+                dipole,
+                quadrupole,
+            )
+
+    return res
+
+
+def recover_molecular_quadrupole(
+    atoms: "Atoms",  # noqa
+    ints_dir: "IntDirectory",  # noqa
+    convert_to_debye_angstrom=True,
+    convert_to_cartesian=True,
+    include_prefactor=True,
+):
+    """
+    Calculates the recovered MOLECULAR quadrupole moment from ATOMIC quadrupole moments from AIMAll,
+    given a geometry (atoms) and an ints_directory, containing the AIMAll calculations for
+    the given geometry.
+
+    .. note::
+        Assumes atomic multipole moment units are atomic units (Coulomb Bohr**2) because this is what AIMAll gives.
+
+    .. note:
+        There is a factor of (2/3) that must be included which is excluded from
+        GAUSSIAN/ORCA etc. See Anthony Stone Theory of Intermolecular Forces p20-23.
+        AIMAll obtains the true quadrupole moment.
+        GAUSSIAN and ORCA have different definitions of the multipole moments, so this
+        is why the prefactor is needed.
+
+    :param atoms: an Atoms instance containing the system geometry
+    :param ints_dir: an IntDirectory file instance, which wraps around an AIMAll output directory
+    :param convert_to_debye: Whether or not to convert the final result to DebyeAngstrom (from au),
+        default to True.
+    :param convert_to_cartesian: Whether or not to convert the recovered molecular quadrupole from spherical
+        to Cartesian, defaults to True.
+    :param prefactor: Include the (2/3) prefactor. Useful to directly compare to Gaussian
+    :returns: A numpy array containing the molecular quadrupole moment.
+    """
+
+    atoms = atoms.to_bohr()
+
+    # Cartesian representation
+    molecular_quadrupole = np.zeros(3, 3)
+
+    for atom in atoms:
+
+        # get necessary data for calculations
+        atom_coords = atom.coordinates
+        global_multipoles = ints_dir[atom.name].global_multipole_moments
+
+        # get the values for a particular atom
+        q00 = global_multipoles["q00"]
+        q10 = global_multipoles["q10"]
+        q11c = global_multipoles["q11c"]
+        q11s = global_multipoles["q11s"]
+        q20 = global_multipoles["q20"]
+        q21c = global_multipoles["q21c"]
+        q21s = global_multipoles["q21s"]
+        q22c = global_multipoles["q22c"]
+        q22s = global_multipoles["q22s"]
+
+        atomic_contibution = atomic_contribution_to_molecular_quadrupole(
+            q00, q10, q11c, q11s, q20, q21c, q21s, q22c, q22s, atom_coords
+        )
+        molecular_quadrupole += atomic_contibution
+
+    if convert_to_debye_angstrom:
+        molecular_quadrupole *= constants.coulombbhrsquared_to_debyeangstrom
+
+    if include_prefactor:
+        molecular_quadrupole = (2 / 3) * molecular_quadrupole
+
+    if not convert_to_cartesian:
+        unpacked_cartesian_quadrupole = unpack_cartesian_quadrupole(
+            molecular_quadrupole
+        )
+        return quadrupole_cartesian_to_spherical(*unpacked_cartesian_quadrupole)
+
+    return molecular_quadrupole
+
+
+def get_gaussian_and_aimall_molecular_quadrupole(
+    gaussian_output: "GaussianOutput", ints_directory: "IntsDir"  # noqa: F821
+):
+    """Gets the Gaussian quadrupole moment and converts it to traceless (still in Debye Angstrom^2)
+    Also gets the AIMAll recovered molecule quadrupole moment from atomic ones.
+
+    Returns a tuple of numpy arrays, where the first one is the
+    Gaussian traceless 3x3 quadrupole moment (in Debye Angstrom)
+    and the second one is the AIMAll recovered traceless 3x3
+    quadrupole moment (also converted from au to Debye Angstrom)
+    and with prefactor taken into account.
+
+    This allows for direct comparison of AIMAll to Gaussian.
+
+    :param gaussian_output: A Gaussian output file containing molecular
+        multipole moments and geometry. The same geometry and level of theory
+        must also be used in the AIMAll calculation.
+    :param ints_directory: A IntsDirectory instance containing the
+        AIMAll .int files for the same geometry that was used in Gaussian
+    :return: A tuple of 3x3 np.ndarrays, where the first is the Gaussian
+        quadrupole moment and the second is the AIMAll recovered quadrupole moment.
+    """
+
+    # in angstroms, convert to bohr
+    atoms = gaussian_output.atoms
+    atoms = atoms.to_bohr()
+    # in debye angstrom squared
+    raw_gaussian_quadrupole = np.array(gaussian_output.molecular_quadrupole)
+    # convert to xxx xxy xxz xyy xyz xzz yyy yyz yzz zzz
+    # because Gaussian uses a different ordering
+    converted_gaussian_quadrupole = quadrupole_element_conversion(
+        raw_gaussian_quadrupole, 0
+    )
+    # pack into 3x3x3 array
+    packed_converted_gaussian_quadrupole = pack_cartesian_quadrupole(
+        *converted_gaussian_quadrupole
+    )
+    # convert Gaussian to traceless because AIMAll moments are traceless
+    traceless_gaussian_quadrupole = quadrupole_nontraceless_to_traceless(
+        packed_converted_gaussian_quadrupole
+    )
+    # note that conversion factors are applied in the function by default
+    aimall_recovered_molecular_quadrupole = recover_molecular_quadrupole(
+        atoms, ints_directory
+    )
+
+    return traceless_gaussian_quadrupole, aimall_recovered_molecular_quadrupole
 
 
 # equations below come from
@@ -309,200 +520,3 @@ def atomic_contribution_to_molecular_quadrupole(
     )
 
     return np.array([q20_pr, q21c_pr, q21s_pr, q22c_pr, q22s_pr])
-
-
-def recover_molecular_quadrupole(
-    atoms: "Atoms",  # noqa
-    ints_dir: "IntDirectory",  # noqa
-    atoms_in_angstroms=True,
-    convert_to_debye_angstrom=True,
-    convert_to_cartesian=True,
-    unpack=True,
-    include_prefactor=True,
-):
-    """
-    Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
-    and calculates the molecular quadrupole moment of the system (in spherical coordinates)
-    from the AIMAll atomic multipole moments.
-
-    .. note::
-        Assumes atomic multipole moment units are atomic units (Coulomb Bohr**2) because this is what AIMAll gives.
-
-    :param atoms: an Atoms instance containing the system geometry
-    :param ints_dir: an IntDirectory file instance, which wraps around an AIMAll output directory
-    :param atoms_in_angstroms: Whether the Atom instance coordinates are in Bohr or Angstroms
-        , defaults to True (meaning coordinates are in Angstroms)
-    :param convert_to_debye: Whether or not to convert the final result to Debye, default to True.
-        This converts from atomic units to Debye.
-    :param convert_to_cartesian: Whether or not to convert the recovered molecular quadrupole from spherical
-        to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
-        in Cartesian coordinates, so set to True in case you are comparing against Gaussian.
-    :param unpacked: Whether to unpack the Cartesian quadrupole so it does not have redundancies.
-        Note the returned order is xx, xy, xz, yy, yz, zz
-    :param prefactor: Include the (2/3) prefactor to directly compare against GAUSSIAN
-    :returns: A numpy array containing the molecular quadrupole moment.
-
-    .. note:
-        There is a factor of (2/3) that must be included which is excluded from
-        GAUSSIAN/ORCA etc. See Anthony Stone Theory of Intermolecular Forces p22-23.
-        AIMAll obtains the true quadrupole moment (and the true molecular one can
-        be recovered), while GAUSSIAN and ORCA do not include that.
-    """
-
-    # make sure we are in Bohr
-    if atoms_in_angstroms:
-        atoms = atoms.to_bohr()
-
-    # spherical representation
-    molecular_quadrupole = np.zeros(5)
-
-    for atom in atoms:
-
-        # get necessary data for calculations
-        atom_coords = atom.coordinates
-        global_multipoles = ints_dir[atom.name].global_multipole_moments
-
-        # get the values for a particular atom
-        q00 = global_multipoles["q00"]
-        q10 = global_multipoles["q10"]
-        q11c = global_multipoles["q11c"]
-        q11s = global_multipoles["q11s"]
-        q20 = global_multipoles["q20"]
-        q21c = global_multipoles["q21c"]
-        q21s = global_multipoles["q21s"]
-        q22c = global_multipoles["q22c"]
-        q22s = global_multipoles["q22s"]
-
-        atomic_contibution = atomic_contribution_to_molecular_quadrupole(
-            q00, q10, q11c, q11s, q20, q21c, q21s, q22c, q22s, atom_coords
-        )
-        molecular_quadrupole += atomic_contibution
-
-    if convert_to_debye_angstrom:
-        molecular_quadrupole *= constants.coulombbhrsquared_to_debyeangstrom
-
-    if convert_to_cartesian:
-        molecular_quadrupole = quadrupole_spherical_to_cartesian(*molecular_quadrupole)
-
-        if unpack:
-            molecular_quadrupole = np.array(
-                unpack_cartesian_quadrupole(molecular_quadrupole)
-            )
-            # convert to xx, yy, zz, xy, xz, yz because that is what GAUSSIAN and ORCA use
-            molecular_quadrupole = quadrupole_element_conversion(
-                molecular_quadrupole, 1
-            )
-
-    if include_prefactor:
-        molecular_quadrupole = (2 / 3) * molecular_quadrupole
-
-    return molecular_quadrupole
-
-
-def quadrupole_origin_change(
-    quadrupole_moment: np.ndarray,
-    dipole_moment: np.ndarray,
-    old_origin: np.ndarray,
-    new_origin: np.ndarray,
-    molecular_charge: int,
-):
-    """Makes an origin change of the quadrupole moment and returns the quadrupole moment from a different origin.
-        Note that the returned quadrupole moment is TRACELESS.
-
-    :param quadrupole_moment: A 1d array containing the quadrupole moment in Cartesian coordinates
-        from the perspective of the old origin
-        HAS TO be ordered as: xx, yy, zz, xy, xz, yz and in atomic units
-        also HAS TO BE TRACELESS
-        Note that the division by a (2/3) prefactor is included in the implementation
-        because the true quadrupole moment is used for the equations.
-    :param dipole_moment: A 1d array containing the dipole moment in Cartesian coordinates
-        from the perspective of the old origin
-        HAS TO be ordered as x, y, z and in atomic units
-    :param old_origin: A numpy array containing the old origin x,y,z coordinates in Bohr
-    :param new_origin: A numpy array containing the new origin x,y,z coordinates in Bohr
-    :param molecular_charge: The charge of the system
-    :returns: A numpy array containing the xx, yy, zz, xy, xz, yz TRACELESS components as seen from the new origin
-        in atomic units
-
-    .. note::
-
-        See p. 21 of Anthony Stone Theory of Intermolecular forces for a discussion on the traceless / nontraceless
-        as well as a discussion on the prefactors in the multipole moments.
-
-        Also see https://doi.org/10.1021/jp067922u  The Effects of Hydrogen-Bonding Environment
-        on the Polarization and Electronic Properties of Water Molecules
-        for the equations. The equations are the for atomic quadrupole moments, however they
-        are exactly the same for molecular
-
-    .. note::
-        The equations to do the conversion have already been implemented in Spherical coordinates
-        to do the AIMAll recovery from atomic to molecular. Therefore, to reuse the code we
-        must convert the Cartesian moments to spherical ones.
-
-    .. note::
-        To convert to a traceless quadrupole moment, you just subtract take the average of the xx,yy,zz components
-        and subtract that from the diagonal (containing the xx,yy,zz components)
-    """
-
-    from ichor.core.multipoles.dipole import dipole_cartesian_to_spherical
-
-    prefactor = 2 / 3
-
-    # get the true quadrupole moment as would be calculated by AIMAll
-    # GAUSSIAN and ORCA do not include this prefactor
-    # see p21-p22 in See p. 21 of Anthony Stone Theory of Intermolecular forces
-    # we need to include this prefactor for the equations that are in https://doi.org/10.1021/jp067922u
-    # because they are for the "true" quadrupole
-    quadrupole_moment = quadrupole_moment / prefactor
-
-    # we need the dipole in the quadrupole calculations as well
-    q10, q11c, q11s = dipole_cartesian_to_spherical(dipole_moment)
-
-    # the packing function uses xx, xy, xz, yy, yz, zz ordering
-    # gives a 3x3 matrix containing the packed representation with redundancies
-    packed_traceless_quadrupole = pack_cartesian_quadrupole(
-        *quadrupole_element_conversion(quadrupole_moment, 0)
-    )
-
-    # convert to spherical because equations we are using are for spherical
-    q20, q21c, q21s, q22c, q22s = quadrupole_cartesian_to_spherical(
-        packed_traceless_quadrupole
-    )
-
-    # this is the quadrupole moment in the new origin
-    # but it is in spherical
-    # reusing the same code for the atomic contributions
-    # because the concept is exactly the same for molecular quadrupole change of origin
-    quadripole_prime = atomic_contribution_to_molecular_quadrupole(
-        molecular_charge,
-        q10,
-        q11c,
-        q11s,
-        q20,
-        q21c,
-        q21s,
-        q22c,
-        q22s,
-        old_origin
-        - new_origin,  # has to be old origin - new origin otherwise does not work
-    )
-
-    # convert back to cartesian
-    quadripole_prime_cartesian_packed = quadrupole_spherical_to_cartesian(
-        *quadripole_prime
-    )
-
-    # take into account factor again so that we can directly compare against GAUSSIAN or ORCA
-    # note that this will be in atomic unit still so an additional conversion might be needed
-    quadripole_prime_cartesian_packed *= prefactor
-
-    # ordered as xx, xy, xz, yy, yz, zz
-    unpacked_shifted_origin_quadrupole = np.array(
-        unpack_cartesian_quadrupole(quadripole_prime_cartesian_packed)
-    )
-    # ordered as xx, yy, zz, xy, xz, yz
-    unpacked_shifted_origin_quadrupole = quadrupole_element_conversion(
-        unpacked_shifted_origin_quadrupole, 1
-    )
-
-    return unpacked_shifted_origin_quadrupole
