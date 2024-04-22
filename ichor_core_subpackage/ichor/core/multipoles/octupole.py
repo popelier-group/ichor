@@ -176,7 +176,7 @@ def octupole_nontraceless_to_traceless(
     return octupole_tensor - tensor_to_subtract
 
 
-def Nu(gamma):
+def Eta(gamma):
     if gamma == 0:
         return 1, 2
     elif gamma == 1:
@@ -242,9 +242,9 @@ def Box_func(alpha, beta, gamma, displacement_vector, dipole):
 
     term1 = F_prime(alpha, beta, gamma, displacement_vector) * dipole[gamma]
 
-    nu1, nu2 = Nu(gamma)
-    theta1 = Theta_prime(nu1, gamma, displacement_vector) * dipole[nu1]
-    theta2 = Theta_prime(nu2, gamma, displacement_vector) * dipole[nu2]
+    eta1, eta2 = Eta(gamma)
+    theta1 = Theta_prime(eta1, gamma, displacement_vector) * dipole[eta1]
+    theta2 = Theta_prime(eta2, gamma, displacement_vector) * dipole[eta2]
     term2 = 2 * (theta1 + theta2) * kronecker_delta(alpha, beta)
 
     return term1 - term2
@@ -254,12 +254,12 @@ def Bar_func(alpha, beta, gamma, displacement_vector, quadrupole):
 
     term1 = F(alpha, beta, gamma, quadrupole) * displacement_vector[gamma]
 
-    nu1, nu2 = Nu(gamma)
+    eta1, eta2 = Eta(gamma)
     term2 = (
         2
         * (
-            displacement_vector[nu1] * quadrupole[nu1, gamma]
-            + displacement_vector[nu2] * quadrupole[nu2, gamma]
+            displacement_vector[eta1] * quadrupole[eta1, gamma]
+            + displacement_vector[eta2] * quadrupole[eta2, gamma]
         )
         * kronecker_delta(alpha, beta)
     )
