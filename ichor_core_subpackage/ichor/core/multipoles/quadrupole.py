@@ -285,17 +285,18 @@ def get_gaussian_and_aimall_molecular_quadrupole(
         quadrupole moment and the second is the AIMAll recovered quadrupole moment.
     """
 
-    # in angstroms, convert to bohr
+    # make sure we are in Bohr
     atoms = gaussian_output.atoms
     atoms = atoms.to_bohr()
-    # in debye angstrom squared
+
+    # in debye angstrom
     raw_gaussian_quadrupole = np.array(gaussian_output.molecular_quadrupole)
-    # convert to xxx xxy xxz xyy xyz xzz yyy yyz yzz zzz
+    # convert to xx, xy, xz, yy, yz, zz
     # because Gaussian uses a different ordering
     converted_gaussian_quadrupole = quadrupole_element_conversion(
         raw_gaussian_quadrupole, 0
     )
-    # pack into 3x3x3 array
+    # pack into 3x3 array
     packed_converted_gaussian_quadrupole = pack_cartesian_quadrupole(
         *converted_gaussian_quadrupole
     )
