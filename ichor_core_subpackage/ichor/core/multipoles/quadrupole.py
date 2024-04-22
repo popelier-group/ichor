@@ -220,6 +220,8 @@ def recover_molecular_quadrupole(
     :returns: A numpy array containing the molecular quadrupole moment.
     """
 
+    from ichor.core.multipoles.dipole import dipole_spherical_to_cartesian
+
     atoms = atoms.to_bohr()
 
     # Cartesian representation
@@ -242,10 +244,16 @@ def recover_molecular_quadrupole(
         q22c = global_multipoles["q22c"]
         q22s = global_multipoles["q22s"]
 
-        atomic_contibution = atomic_contribution_to_molecular_quadrupole(
-            q00, q10, q11c, q11s, q20, q21c, q21s, q22c, q22s, atom_coords
+        dipole_packed = dipole_spherical_to_cartesian(q10, q11c, q11s)
+        quadrupole_packed = quadrupole_spherical_to_cartesian(
+            q20, q21c, q21s, q22c, q22s
         )
-        molecular_quadrupole += atomic_contibution
+
+        displaced_atomic_quadrupole_cartesian = displace_quadrupole_cartesian(
+            atom_coords, q00, dipole_packed, quadrupole_packed
+        )
+
+        molecular_quadrupole += displaced_atomic_quadrupole_cartesian
 
     if convert_to_debye_angstrom:
         molecular_quadrupole *= constants.coulombbhrsquared_to_debyeangstrom
@@ -254,10 +262,7 @@ def recover_molecular_quadrupole(
         molecular_quadrupole = (2 / 3) * molecular_quadrupole
 
     if not convert_to_cartesian:
-        unpacked_cartesian_quadrupole = unpack_cartesian_quadrupole(
-            molecular_quadrupole
-        )
-        return quadrupole_cartesian_to_spherical(*unpacked_cartesian_quadrupole)
+        return quadrupole_cartesian_to_spherical(molecular_quadrupole)
 
     return molecular_quadrupole
 
