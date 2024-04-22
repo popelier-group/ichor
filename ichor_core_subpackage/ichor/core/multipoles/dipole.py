@@ -44,6 +44,141 @@ def dipole_rotate_cartesian(d: np.ndarray, C: np.ndarray) -> np.ndarray:
     return np.einsum("ia,a->i", C, d)
 
 
+def dipole_one_term_general_expression(
+    alpha: int, displacement_vector: np.ndarray, monopole: float, dipole: np.ndarray
+) -> float:
+    """Origin chage of the x,y, or z component of the dipole moment by a displacement vector
+
+    :param alpha: 0, 1, or 2 for x, y, or z
+    :param displacement_vector: np.ndarray containing x,y,z components of displacement vector
+    :param monopole: monopole moment, float (charge of atom or system).
+        Note that for AIMAll, the q00 in the AIMAll .int file does not have the nuclear charge added
+        ichor automatically does that when parsing .int files.
+    :param dipole: The atomic or molecular dipole moment
+        np.ndarray containing x,y,z components of displacement vector (Cartesian)
+    :returns: The x,y or z component of the dipole moment as seen from a new origin.
+    """
+
+    mu_alpha_disp = dipole[alpha] - displacement_vector[alpha] * monopole
+
+    return mu_alpha_disp
+
+
+def displace_dipole_cartesian(displacement_vector: np.ndarray, monopole: float, dipole):
+    """Computes the full displaced dipole moment
+
+    :param displacement_vector: Displacement vector
+    :param monopole: monopole moment, float (charge of atom or system).
+        Note that for AIMAll, the atomic q00 (monopole) in the AIMAll .int file
+        does not have the nuclear charge added
+        ichor automatically does that when parsing .int files.
+    :param dipole: The atomic or molecular dipole moment
+        np.ndarray containing x,y,z components of displacement vector (Cartesian
+    :return: np.ndarray of shape 3 containing x,y, and z components of displaced dipole moment
+    """
+
+    assert displacement_vector.shape == (3,)
+    # check that arrays are packed multipole moments
+    assert isinstance(monopole, float)
+    assert dipole.shape == (3,)
+
+    res = np.zeros(3)
+
+    for i in range(3):
+        res[i] = dipole_one_term_general_expression(
+            i, displacement_vector, monopole, dipole
+        )
+
+    return res
+
+
+def recover_molecular_dipole(
+    atoms: "Atoms",  # noqa
+    ints_dir: "IntDirectory",  # noqa
+    convert_to_debye=True,
+    convert_to_spherical=False,
+):
+    """
+    Calculates the recovered MOLECULAR dipole moment from ATOMIC dipole moments from AIMAll,
+    given a geometry (atoms) and an ints_directory, containing the AIMAll calculations for
+    the given geometry.
+
+    :param atoms: an Atoms instance containing the system geometry
+    :param ints_dir: an IntDirectory file instance, which wraps around an AIMAll output directory
+    :param convert_to_debye: Whether or not to convert the final result to Debye, default to True.
+        This converts from atomic units to Debye. See Appendix D of Anthony Stone "Theory of
+        Intermolecular Forces"
+    :param convert_to_cartesian: Whether or not to convert the recovered molecular dipole from spherical
+        to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
+        in Cartesian coordinates, so set to True in case you are comparing against Gaussian.
+    :returns: A numpy array containing the recovered molecular dipole moment.
+    """
+
+    atoms = atoms.to_bohr()
+
+    molecular_dipole = np.zeros(3)
+
+    for atom in atoms:
+
+        # get necessary data for calculations
+        atom_coords = atom.coordinates
+        global_multipoles = ints_dir[atom.name].global_multipole_moments
+
+        # get the values for a particular atom
+        q00 = global_multipoles["q00"]
+        q10 = global_multipoles["q10"]
+        q11c = global_multipoles["q11c"]
+        q11s = global_multipoles["q11s"]
+
+        # get packed representation of all moments we need
+        dipole_packed_cartesian = dipole_spherical_to_cartesian(q10, q11c, q11s)
+        displaced_dipole = displace_dipole_cartesian(
+            atom_coords, q00, dipole_packed_cartesian
+        )
+
+        molecular_dipole += displaced_dipole
+
+    if convert_to_debye:
+        molecular_dipole *= coulombbohr_to_debye
+
+    if convert_to_spherical:
+        molecular_dipole = dipole_cartesian_to_spherical(*molecular_dipole)
+
+    return molecular_dipole
+
+
+def dipole_origin_change(
+    dipole: np.ndarray,
+    old_origin: np.ndarray,
+    new_origin: np.ndarray,
+    molecular_charge: int,
+) -> np.ndarray:
+    """Changes the origin of the dipole moment and returns the dipole moment in the new origin
+
+    :param dipole: a 1-dimensional np.ndarray containing the x,y,z components
+        note the dipole moment has to be in Cartesian coordinates AND in atomic units.
+    :param old_origin: The old origin with respect to which the given dipole is calculated.
+        1d array containing Cartesian x,y,z coordinates in Bohr.
+    :type old_origin: The new origin with respect to which the new dipole should be given.
+        1d array containing Cartesian x,y,z coordinates in Bohr.
+    :param molecular_charge: The charge of the system (positive or negative)
+    :return: The dipole moment as seen from the new origin, in atomic units
+
+    See David Griffiths Introduction to Electrodynamics, p 157
+
+    .. note::
+        The dipole calculation can be directly converted in Cartesian because it is simple
+    """
+
+    # p_bar = p - Q * a_bar
+    # where p is is the original dipole, Q is the charge of the molecule and a is the displacement amount
+    # the displacement is the new_origin - old_origin
+    # p_bar is the new dipole
+    # if the total charge is 0, then the dipole does not change with the origin change
+
+    return dipole - (molecular_charge * (new_origin - old_origin))
+
+
 # equations come from
 # https://doi.org/10.1021/jp067922u
 # The effects of hydrogen-bonding environment on the polarization and electronic properties of water molecules
@@ -139,94 +274,3 @@ def atomic_contribution_to_molecular_dipole(
     q11s_pr = q11s_prime(q11s, atomic_coordinates[1], q00)
 
     return np.array([q10_pr, q11c_pr, q11s_pr])
-
-
-def recover_molecular_dipole(
-    atoms: "Atoms",  # noqa
-    ints_dir: "IntDirectory",  # noqa
-    atoms_in_angstroms=True,
-    convert_to_debye=True,
-    convert_to_cartesian=True,
-):
-    """
-    Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
-    and calculates the molecular dipole moment of the system (in spherical coordinates)
-    from the AIMAll atomic multipole moments.
-
-    .. note::
-        Assumes atomic multipole moment units are atomic units (Coulomb Bohr) because this is what AIMAll gives.
-
-    :param atoms: an Atoms instance containing the system geometry
-    :param ints_dir: an IntDirectory file instance, which wraps around an AIMAll output directory
-    :param atoms_in_angstroms: Whether the Atom instance coordinates are in Bohr or Angstroms
-        , defaults to True (meaning coordinates are in Angstroms)
-    :param convert_to_debye: Whether or not to convert the final result to Debye, default to True.
-        This converts from atomic units to Debye.
-    :param convert_to_cartesian: Whether or not to convert the recovered molecular dipole from spherical
-        to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
-        in Cartesian coordinates, so set to True in case you are comparing against Gaussian.
-    :returns: A numpy array containing the molecular dipole moment.
-    """
-
-    # make sure we are in Bohr
-    if atoms_in_angstroms:
-        atoms = atoms.to_bohr()
-
-    molecular_dipole = np.zeros(3)
-
-    for atom in atoms:
-
-        # get necessary data for calculations
-        atom_coords = atom.coordinates
-        global_multipoles = ints_dir[atom.name].global_multipole_moments
-
-        # get the values for a particular atom
-        q00 = global_multipoles["q00"]
-        q10 = global_multipoles["q10"]
-        q11c = global_multipoles["q11c"]
-        q11s = global_multipoles["q11s"]
-
-        atomic_contibution = atomic_contribution_to_molecular_dipole(
-            q00, q10, q11c, q11s, atom_coords
-        )
-        molecular_dipole += atomic_contibution
-
-    if convert_to_debye:
-        molecular_dipole *= coulombbohr_to_debye
-
-    if convert_to_cartesian:
-        molecular_dipole = dipole_spherical_to_cartesian(*molecular_dipole)
-
-    return molecular_dipole
-
-
-def dipole_origin_change(
-    dipole: np.ndarray,
-    old_origin: np.ndarray,
-    new_origin: np.ndarray,
-    molecular_charge: int,
-) -> np.ndarray:
-    """Changes the origin of the dipole moment and returns the dipole moment in the new origin
-
-    :param dipole: a 1-dimensional np.ndarray containing the x,y,z components
-        note the dipole moment has to be in Cartesian coordinates AND in atomic units.
-    :param old_origin: The old origin with respect to which the given dipole is calculated.
-        1d array containing Cartesian x,y,z coordinates in Bohr.
-    :type old_origin: The new origin with respect to which the new dipole should be given.
-        1d array containing Cartesian x,y,z coordinates in Bohr.
-    :param molecular_charge: The charge of the system (positive or negative)
-    :return: The dipole moment as seen from the new origin, in atomic units
-
-    See David Griffiths Introduction to Electrodynamics, p 157
-
-    .. note::
-        The dipole calculation can be directly converted in Cartesian because it is simple
-    """
-
-    # p_bar = p - Q * a_bar
-    # where p is is the original dipole, Q is the charge of the molecule and a is the displacement amount
-    # the displacement is the new_origin - old_origin
-    # p_bar is the new dipole
-    # if the total charge is 0, then the dipole does not change with the origin change
-
-    return dipole - (molecular_charge * (new_origin - old_origin))
