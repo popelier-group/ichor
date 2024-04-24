@@ -149,7 +149,13 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         return [ref.rmsd(point) for point in self]
 
-    def to_dir(self, system_name: str, every: int = 1, center=False) -> Path:
+    def to_dir(
+        self,
+        system_name: str,
+        every: int = 1,
+        center: bool = False,
+        parent_dir: Path = None,
+    ) -> Path:
         """Writes out every nth timestep to a separate .xyz file to a given directory
 
         :param system_name: The name of the system. This will be the name of the
@@ -157,6 +163,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         :param every: An integer value that indicates the nth step at which an
             xyz file should be written. Default is 1. If
             a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.
+        :param center: Whether or not to subtract mean of coordinates from atomic coordinates, defaults to False
+        :param parent_dir: A path to a parent directory where the inner directory will be created.
 
         :returns: The Path object to the made directory
         """
@@ -166,7 +174,12 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         # capitalize system name
         system_name = system_name.upper()
-        root_path = Path(system_name).with_suffix(default_root_suffix)
+        if parent_dir:
+            if not parent_dir.exists():
+                parent_dir.mkdir()
+            root_path = parent_dir / Path(system_name).with_suffix(default_root_suffix)
+        else:
+            root_path = Path(system_name).with_suffix(default_root_suffix)
 
         mkdir(root_path, empty=True)
         for i, atoms_instance in enumerate(self):
