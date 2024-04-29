@@ -4,7 +4,6 @@ from typing import Dict, Union
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.float import from_scientific_double
 from ichor.core.common.itertools import chunker
-from ichor.core.common.str import split_by
 from ichor.core.common.units import AtomicDistance
 from ichor.core.files.file import FileContents, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms, HasData
@@ -98,14 +97,12 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
 
             line = next(f)
             while not line.startswith(r"CENTRE ASSIGNMENTS"):
-                record = split_by(
-                    line, [4, 4, 16, 12, 12, 12, 10], return_remainder=True
-                )
+                record = line.split()
                 atom_type = record[0]
-                x = float(record[3])
-                y = float(record[4])
-                z = float(record[5])
-                _ = float(record[-1])  # nuclear charge, not used
+                x = float(record[-6])
+                y = float(record[-5])
+                z = float(record[-4])
+                # _ = float(record[-1])  # nuclear charge, not used
                 atoms.add(
                     Atom(
                         atom_type,
