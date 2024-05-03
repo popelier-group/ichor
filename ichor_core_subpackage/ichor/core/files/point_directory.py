@@ -62,6 +62,8 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
         # and will error out if an xyz is not present
         if self.xyz:
             return self.xyz.atoms
+        elif self.wfn:
+            return self.wfn.atoms.to_angstroms()
 
         raise FileNotFoundError(
             f"There is no .xyz file in the current {self.__class__.__name__} instance: {self.path.absolute()}"
