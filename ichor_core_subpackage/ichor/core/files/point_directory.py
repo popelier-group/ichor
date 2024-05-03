@@ -66,7 +66,7 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
             return self.wfn.atoms.to_angstroms()
 
         raise FileNotFoundError(
-            f"There is no .xyz file in the current {self.__class__.__name__} instance: {self.path.absolute()}"
+            f"There is no .xyz or .wfn file in the current {self.__class__.__name__} instance: {self.path.absolute()}"
         )
 
     def atoms_from_file(self, file_with_atoms: HasAtoms) -> Atoms:
