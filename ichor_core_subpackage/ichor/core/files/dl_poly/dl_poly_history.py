@@ -113,6 +113,7 @@ class DlpolyHistory(Trajectory):
         self.periodic_boundary = FileContents
         self.number_of_atoms = FileContents
         self.ntimesteps = FileContents
+        self.removed_timesteps = FileContents
 
     @classmethod
     def check_path(cls, path: Path) -> bool:
@@ -129,65 +130,107 @@ class DlpolyHistory(Trajectory):
             self.number_of_atoms = int(record[2])
             self.ntimesteps = int(record[3])
 
-            for line in f:
-                if "timestep" in line:
-                    timestep = DlpolyTimestep()
+            removed_timesteps = []
+            timestep_contains_binary = False
 
-                    # record = 'timestep' ntimestep number_of_atoms keytraj keypbc timestep_length timestep
-                    record = line.split()
-                    timestep.ntimestep = int(record[1])
-                    timestep.number_of_atoms = int(record[2])
-                    timestep.trajectory_key = DlpolyTrajectoryKey(int(record[3]))
-                    timestep.periodic_boundary = DlpolyPeriodicBoundary(int(record[4]))
-                    timestep.timestep_length = float(record[5])
-                    timestep.timestep = float(record[6])
+            try:
+                while True:
 
-                    timestep.unit_cell[0, :] = np.array(
-                        [float(ai) for ai in next(f).split()]
-                    )  # a vector of unit cell
-                    timestep.unit_cell[1, :] = np.array(
-                        [float(bi) for bi in next(f).split()]
-                    )  # b vector of unit cell
-                    timestep.unit_cell[2, :] = np.array(
-                        [float(ci) for ci in next(f).split()]
-                    )  # c vector of unit cell
+                    # sometimes binary data is written in HISTORY file
+                    # the binary is written to the same line as the next line that contains timestep info
+                    if not timestep_contains_binary:
+                        line = next(f)
 
-                    for _ in range(timestep.number_of_atoms):
+                    # reset the variables used to check if the timestep contains binary data
+                    add_this_timestep = True
+                    timestep_contains_binary = False
 
-                        # record = atom_type atom_index atomic_mass charge
-                        record = split_by(next(f), [8, 10, 12, 12])
+                    if "timestep" in line:
 
-                        timestep_atom_type = str(record[0])
+                        # used for dealing with binary data in HISTORY file sometimes
+                        # ideally this issue should be fixed in FFLUX
+                        timestep = DlpolyTimestep()
 
-                        timestep_atom_coordinates = np.array(
+                        # record = 'timestep' ntimestep number_of_atoms keytraj keypbc timestep_length timestep
+                        record = line.split()
+                        if "\x00" in record[0]:
+                            del record[0]
+                        timestep.ntimestep = int(record[1])
+                        timestep.number_of_atoms = int(record[2])
+                        timestep.trajectory_key = DlpolyTrajectoryKey(int(record[3]))
+                        timestep.periodic_boundary = DlpolyPeriodicBoundary(
+                            int(record[4])
+                        )
+                        timestep.timestep_length = float(record[5])
+                        timestep.timestep = float(record[6])
+
+                        timestep.unit_cell[0, :] = np.array(
+                            [float(ai) for ai in next(f).split()]
+                        )  # a vector of unit cell
+                        timestep.unit_cell[1, :] = np.array(
+                            [float(bi) for bi in next(f).split()]
+                        )  # b vector of unit cell
+                        timestep.unit_cell[2, :] = np.array(
                             [float(ci) for ci in next(f).split()]
-                        )
+                        )  # c vector of unit cell
 
-                        timestep_atom = DlpolyTimestepAtom(
-                            timestep_atom_type,
-                            timestep_atom_coordinates[0],
-                            timestep_atom_coordinates[1],
-                            timestep_atom_coordinates[2],
-                        )
+                        for _ in range(timestep.number_of_atoms):
 
-                        if timestep.trajectory_key in [
-                            DlpolyTrajectoryKey.CoordinateVelocity,
-                            DlpolyTrajectoryKey.CoordinateVelocityForce,
-                        ]:
-                            timestep_atom.velocity = np.array(
-                                [float(vi) for vi in next(f).split()]
+                            # for some reason binary is being written to the HISTORY file sometimes
+                            # this then causes issues with parsing
+                            # if the line has timestep in it, it means that the geometry is missing
+                            line = next(f)
+                            if "timestep" in line:
+                                # do not add timestep to the resulting history
+                                # ie history will have 1 less timestep
+                                add_this_timestep = False
+                                # this variable is used in the beginning of the while loop
+                                # setting to True means that the next(f) would not be called
+                                timestep_contains_binary = True
+                                # add the messed up timestep to a list
+                                removed_timesteps.append(timestep.ntimestep)
+                                break
+
+                            # record = atom_type atom_index atomic_mass charge
+                            record = split_by(line, [8, 10, 12, 12])
+
+                            timestep_atom_type = str(record[0])
+
+                            timestep_atom_coordinates = np.array(
+                                [float(ci) for ci in next(f).split()]
                             )
 
-                        if (
-                            timestep.trajectory_key
-                            is DlpolyTrajectoryKey.CoordinateVelocityForce
-                        ):
-                            timestep_atom.force = np.array(
-                                [float(fi) for fi in next(f).split()]
+                            timestep_atom = DlpolyTimestepAtom(
+                                timestep_atom_type,
+                                timestep_atom_coordinates[0],
+                                timestep_atom_coordinates[1],
+                                timestep_atom_coordinates[2],
                             )
 
-                        timestep.add(timestep_atom)
-                    self.add(timestep)
+                            if timestep.trajectory_key in [
+                                DlpolyTrajectoryKey.CoordinateVelocity,
+                                DlpolyTrajectoryKey.CoordinateVelocityForce,
+                            ]:
+                                timestep_atom.velocity = np.array(
+                                    [float(vi) for vi in next(f).split()]
+                                )
+
+                            if (
+                                timestep.trajectory_key
+                                is DlpolyTrajectoryKey.CoordinateVelocityForce
+                            ):
+                                timestep_atom.force = np.array(
+                                    [float(fi) for fi in next(f).split()]
+                                )
+
+                            timestep.add(timestep_atom)
+
+                        if add_this_timestep:
+                            self.add(timestep)
+
+            # if end of file is reached, add the removed timesteps attribute
+            except StopIteration:
+                self.removed_timesteps = removed_timesteps
 
     @convert_to_path
     def write_to_trajectory(self, path: str = "TRAJECTORY.xyz"):
