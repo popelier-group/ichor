@@ -16,7 +16,6 @@ ichor.egg-info/
 debug/
 *.pyc
 *.inp
-*_atomicfiles
 ichor_cli/ichor_cli.egg-info/PKG-INFO
 ichor_cli/ichor_cli.egg-info/SOURCES.txt
 ichor_cli/ichor_cli.egg-info/top_level.txt

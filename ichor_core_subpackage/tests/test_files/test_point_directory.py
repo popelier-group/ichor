@@ -935,7 +935,7 @@ def test_water_monomer_point_directory1():
 
     water_monomer_alf = [ALF(0, 1, 2), ALF(1, 0, 2), ALF(2, 0, 1)]
     xyz_file_inst = XYZ(
-        example_dir / "WATER_MONOMER0001.pointdir" / "WATER_MONOMER0001.xyz"
+        example_dir / "WATER_MONOMER0000.pointdir" / "WATER_MONOMER0000.xyz"
     )
     # calculate system alf and also calculate C matrices for all atoms
     C_matrices_dict = xyz_file_inst.C_matrix_dict(water_monomer_alf)
@@ -943,24 +943,24 @@ def test_water_monomer_point_directory1():
     aim_reference_atoms = {
         "O1": AimAtom(
             "O1",
-            Path("WATER_MONOMER0001.pointdir_atomicfiles/o1.inp"),
-            Path("WATER_MONOMER0001.pointdir_atomicfiles/o1.int"),
+            Path("WATER_MONOMER0000.pointdir_atomicfiles/o1.inp"),
+            Path("WATER_MONOMER0000.pointdir_atomicfiles/o1.int"),
             184,
             -4e-05,
         )
     }
 
     _test_point_directory(
-        point_dir_path=example_dir / "WATER_MONOMER0001.pointdir",
+        point_dir_path=example_dir / "WATER_MONOMER0000.pointdir",
         #######
         # Gaussian
         ########
         # .gjf
-        gjf_link0=["nproc=2", "mem=1GB"],
-        gjf_method="B3LYP",
-        gjf_basis_set="AUG-cc-pVTZ",
-        gjf_keywords=["SCRF=(Solvent=Water)", "nosymm", "output=wfn"],
-        gjf_title="WATER_MONOMER0001",
+        gjf_link0=[],
+        gjf_method="b3lyp",
+        gjf_basis_set="6-31+g(d,p)",
+        gjf_keywords=["nosymm", "output=wfn", "force", "geom=notest"],
+        gjf_title="WATER_MONOMER0000",
         gjf_charge=0,
         gjf_spin_multiplicity=1,
         gjf_atoms=reference_gjf_atoms,
@@ -1405,7 +1405,7 @@ def test_water_monomer_point_directory1():
         ######
         ints_atom_name={"O1": "O1"},
         ints_atom_num={"O1": 1},
-        ints_title={"O1": "WATER_MONOMER0001"},
+        ints_title={"O1": "WATER_MONOMER0000"},
         ints_dft_model={"O1": "Restricted B3LYP"},
         ints_basin_integration_results={
             "O1": {
@@ -1593,19 +1593,19 @@ def test_water_monomer_point_directory1():
         aim_license_check_succeeded=True,
         aim_version=Version("19.10.12"),
         aim_wfn_path=Path(
-            "/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.wfn"  # noqa E501
+            "/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0000/WATER_MONOMER0000.wfn"  # noqa E501
         ),
         aim_extout_path=Path(
-            "/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.extout"  # noqa E501
+            "/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0000/WATER_MONOMER0000.extout"  # noqa E501
         ),
         aim_mgp_path=Path(
-            "/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.mgp"  # noqa E501
+            "/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0000/WATER_MONOMER0000.mgp"  # noqa E501
         ),
         aim_sum_path=Path(
-            "/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.sum"  # noqa E501
+            "/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0000/WATER_MONOMER0000.sum"  # noqa E501
         ),
         aim_sumviz_path=Path(
-            "/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.sumviz"  # noqa E501
+            "/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0000/WATER_MONOMER0000.sumviz"  # noqa E501
         ),
         aim_nproc=2,
         aim_nacps=3,
@@ -1613,9 +1613,9 @@ def test_water_monomer_point_directory1():
         aim_nbcps=2,
         aim_nrcps=0,
         aim_nccps=0,
-        aim_output_file=Path("WATER_MONOMER0001_atomicfiles/o1.int"),
+        aim_output_file=Path("WATER_MONOMER0000.pointsdir_atomicfiles/o1.int"),
         aim_cwd=Path(
-            "/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001"
+            "/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0000"
         ),
         aim_reference_aim_atoms=aim_reference_atoms,
         xyz_atoms=reference_xyz_atoms,

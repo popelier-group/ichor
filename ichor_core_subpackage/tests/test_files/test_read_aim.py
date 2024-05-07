@@ -9,7 +9,7 @@ from ichor.core.files.aimall.aim import AimAtom
 from tests.path import get_cwd
 from tests.test_files import _assert_val_optional
 
-example_dir = get_cwd(__file__) / "example_aims"
+example_dir = get_cwd(__file__) / ".." / ".." / ".." / "example_files"
 
 
 def _assert_version(aim_version: Version, reference_version: Version):
@@ -96,7 +96,7 @@ def _test_read_aim(
 
 def test_water_monomer_aim():
 
-    aim_file_path = get_cwd(__file__) / "example_aims" / "WATER_MONOMER0001.aim"
+    aim_file_path = example_dir / "example_aims" / "WATER_MONOMER0001.aim"
     reference_version = Version("19.10.12")
 
     reference_aim_atoms = {

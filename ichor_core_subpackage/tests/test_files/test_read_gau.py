@@ -20,7 +20,7 @@ from tests.path import get_cwd
 from tests.test_atoms import _test_atoms_coords
 from tests.test_files import _assert_val_optional
 
-example_dir = get_cwd(__file__) / "example_gaus"
+example_dir = get_cwd(__file__) / ".." / ".." / ".." / "example_files" / "example_gaus"
 
 
 def _assert_atomic_forces(
