@@ -1,13 +1,13 @@
 from pathlib import Path
 
-from ichor.core.files import WFN
+from ichor.core.files import XYZ
 
-wfn = WFN(
+wfn = XYZ(
     Path("example_files")
     / "example_points_directory"
     / "WATER_MONOMER.pointsdir"
     / "WATER_MONOMER0000.pointdir"
-    / "WATER_MONOMER0000.wfn"
+    / "WATER_MONOMER0000.xyz"
 )
 
-print(wfn.virial_ratio)
+print(wfn.atoms)

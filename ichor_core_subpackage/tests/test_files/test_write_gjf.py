@@ -21,7 +21,7 @@ def test_one_atom(tmp_path):
     atoms = Atoms()
     atoms.append(Atom("O", 1.0, 2.0, 3.0))
 
-    gjf_file_contents = "#p b3lyp/6-31+g(d,p) nosymm\n\ntest\n\n0   1\nO   1.00000000   2.00000000   3.00000000\n"
+    gjf_file_contents = "#p b3lyp/6-31+g(d,p) nosymm\n\ntest\n\n0   1\nO   1.00000000   2.00000000   3.00000000\n\n"
 
     gjf_file = GJF(gjf_file_path, atoms=atoms, title="test", keywords=["nosymm"])
     gjf_file.write()
@@ -40,7 +40,7 @@ def test_multiple_atoms(tmp_path):
     atoms.append(Atom("H", 2.0, 3.0, 4.0))
     atoms.append(Atom("H", 5.0, 6.0, 7.0))
 
-    gjf_file_contents = "#p b3lyp/6-31+g(d,p) nosymm\n\ntest\n\n0   1\nO   1.00000000   2.00000000   3.00000000\nH   2.00000000   3.00000000   4.00000000\nH   5.00000000   6.00000000   7.00000000\n"  # noqa E501
+    gjf_file_contents = "#p b3lyp/6-31+g(d,p) nosymm\n\ntest\n\n0   1\nO   1.00000000   2.00000000   3.00000000\nH   2.00000000   3.00000000   4.00000000\nH   5.00000000   6.00000000   7.00000000\n\n"  # noqa E501
 
     gjf_file = GJF(gjf_file_path, atoms=atoms, title="test", keywords=["nosymm"])
     gjf_file.write()
@@ -59,7 +59,7 @@ def test_multiple_keywords(tmp_path):
     atoms.append(Atom("H", 2.0, 3.0, 4.0))
     atoms.append(Atom("H", 5.0, 6.0, 7.0))
 
-    gjf_file_contents = "#p b3lyp/6-31+g(d,p) nosymm opt freq\n\ntest\n\n0   1\nO   1.00000000   2.00000000   3.00000000\nH   2.00000000   3.00000000   4.00000000\nH   5.00000000   6.00000000   7.00000000\n"  # noqa E501
+    gjf_file_contents = "#p b3lyp/6-31+g(d,p) nosymm opt freq\n\ntest\n\n0   1\nO   1.00000000   2.00000000   3.00000000\nH   2.00000000   3.00000000   4.00000000\nH   5.00000000   6.00000000   7.00000000\n\n"  # noqa E501
 
     gjf_file = GJF(
         gjf_file_path, atoms=atoms, title="test", keywords=["nosymm", "opt", "freq"]
@@ -80,7 +80,7 @@ def test_charge(tmp_path):
     atoms.append(Atom("H", 2.0, 3.0, 4.0))
     atoms.append(Atom("H", 5.0, 6.0, 7.0))
 
-    gjf_file_contents = "#p b3lyp/6-31+g(d,p) nosymm\n\ntest\n\n5   1\nO   1.00000000   2.00000000   3.00000000\nH   2.00000000   3.00000000   4.00000000\nH   5.00000000   6.00000000   7.00000000\n"  # noqa E501
+    gjf_file_contents = "#p b3lyp/6-31+g(d,p) nosymm\n\ntest\n\n5   1\nO   1.00000000   2.00000000   3.00000000\nH   2.00000000   3.00000000   4.00000000\nH   5.00000000   6.00000000   7.00000000\n\n"  # noqa E501
 
     gjf_file = GJF(
         gjf_file_path, atoms=atoms, title="test", keywords=["nosymm"], charge=5
@@ -101,7 +101,7 @@ def test_spin_multiplicity(tmp_path):
     atoms.append(Atom("H", 2.0, 3.0, 4.0))
     atoms.append(Atom("H", 5.0, 6.0, 7.0))
 
-    gjf_file_contents = "#p b3lyp/6-31+g(d,p) nosymm\n\ntest\n\n5   10\nO   1.00000000   2.00000000   3.00000000\nH   2.00000000   3.00000000   4.00000000\nH   5.00000000   6.00000000   7.00000000\n"  # noqa E501
+    gjf_file_contents = "#p b3lyp/6-31+g(d,p) nosymm\n\ntest\n\n5   10\nO   1.00000000   2.00000000   3.00000000\nH   2.00000000   3.00000000   4.00000000\nH   5.00000000   6.00000000   7.00000000\n\n"  # noqa E501
 
     gjf_file = GJF(
         gjf_file_path,
@@ -127,7 +127,7 @@ def test_basis_set(tmp_path):
     atoms.append(Atom("H", 2.0, 3.0, 4.0))
     atoms.append(Atom("H", 5.0, 6.0, 7.0))
 
-    gjf_file_contents = "#p b3lyp/aug-cc-pvtz nosymm\n\ntest\n\n5   10\nO   1.00000000   2.00000000   3.00000000\nH   2.00000000   3.00000000   4.00000000\nH   5.00000000   6.00000000   7.00000000\n"  # noqa E501
+    gjf_file_contents = "#p b3lyp/aug-cc-pvtz nosymm\n\ntest\n\n5   10\nO   1.00000000   2.00000000   3.00000000\nH   2.00000000   3.00000000   4.00000000\nH   5.00000000   6.00000000   7.00000000\n\n"  # noqa E501
 
     gjf_file = GJF(
         gjf_file_path,
@@ -154,7 +154,7 @@ def test_method(tmp_path):
     atoms.append(Atom("H", 2.0, 3.0, 4.0))
     atoms.append(Atom("H", 5.0, 6.0, 7.0))
 
-    gjf_file_contents = "#p mp2/6-31+g(d,p) nosymm\n\ntest\n\n5   10\nO   1.00000000   2.00000000   3.00000000\nH   2.00000000   3.00000000   4.00000000\nH   5.00000000   6.00000000   7.00000000\n"  # noqa E501
+    gjf_file_contents = "#p mp2/6-31+g(d,p) nosymm\n\ntest\n\n5   10\nO   1.00000000   2.00000000   3.00000000\nH   2.00000000   3.00000000   4.00000000\nH   5.00000000   6.00000000   7.00000000\n\n"  # noqa E501
 
     gjf_file = GJF(
         gjf_file_path,
