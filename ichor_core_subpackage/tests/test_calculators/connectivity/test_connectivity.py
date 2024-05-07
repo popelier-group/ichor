@@ -16,7 +16,7 @@ class TimeStep(NamedTuple):
     atoms: Atoms
 
 
-example_dir = get_cwd(__file__).parent / "example_geometries"
+example_dir = get_cwd(__file__) / ".." / ".." / ".." / ".." / "example_files" / "xyz"
 
 # fmt: off
 water_connectivity = np.array(
