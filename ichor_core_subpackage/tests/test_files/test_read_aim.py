@@ -3,7 +3,7 @@ from typing import Dict
 
 import pytest
 from ichor.core.common.types import Version
-from ichor.core.files import AIM
+from ichor.core.files import Aim
 from ichor.core.files.aimall.aim import AimAtom
 
 from tests.path import get_cwd
@@ -74,7 +74,7 @@ def _test_read_aim(
 
     """Test for .aim AIMAll file."""
 
-    aim = AIM(aim_path)
+    aim = Aim(aim_path)
 
     _assert_val_optional(aim.license_check_succeeded, license_check_succeeded)
     _assert_version(aim.version, version)

@@ -26,7 +26,13 @@ from tests.test_files.test_read_ints import _test_ints
 from tests.test_files.test_read_wfn import _test_read_wfn
 
 example_dir = (
-    get_cwd(__file__) / "example_points_directory" / "water_monomer_points_dir"
+    get_cwd(__file__)
+    / ".."
+    / ".."
+    / ".."
+    / "example_files"
+    / "example_points_directory"
+    / "WATER_MONOMER.pointsdir"
 )
 
 
@@ -251,7 +257,6 @@ def test_water_monomer_point_directory1():
     wfn_expected_molecular_orbitals = [
         MolecularOrbital(
             1,
-            0.0,
             2.0,
             -19.154182,
             [
@@ -385,7 +390,6 @@ def test_water_monomer_point_directory1():
         ),
         MolecularOrbital(
             2,
-            0.0,
             2.0,
             -0.996981,
             [
@@ -519,7 +523,6 @@ def test_water_monomer_point_directory1():
         ),
         MolecularOrbital(
             3,
-            0.0,
             2.0,
             -0.494315,
             [
@@ -653,7 +656,6 @@ def test_water_monomer_point_directory1():
         ),
         MolecularOrbital(
             4,
-            0.0,
             2.0,
             -0.413209,
             [
@@ -787,7 +789,6 @@ def test_water_monomer_point_directory1():
         ),
         MolecularOrbital(
             5,
-            0.0,
             2.0,
             -0.323897,
             [
@@ -933,22 +934,24 @@ def test_water_monomer_point_directory1():
     }
 
     water_monomer_alf = [ALF(0, 1, 2), ALF(1, 0, 2), ALF(2, 0, 1)]
-    xyz_file_inst = XYZ(example_dir / "WATER_MONOMER0001" / "WATER_MONOMER0001.xyz")
+    xyz_file_inst = XYZ(
+        example_dir / "WATER_MONOMER0001.pointdir" / "WATER_MONOMER0001.xyz"
+    )
     # calculate system alf and also calculate C matrices for all atoms
     C_matrices_dict = xyz_file_inst.C_matrix_dict(water_monomer_alf)
 
     aim_reference_atoms = {
         "O1": AimAtom(
             "O1",
-            Path("WATER_MONOMER0001_atomicfiles/o1.inp"),
-            Path("WATER_MONOMER0001_atomicfiles/o1.int"),
+            Path("WATER_MONOMER0001.pointdir_atomicfiles/o1.inp"),
+            Path("WATER_MONOMER0001.pointdir_atomicfiles/o1.int"),
             184,
             -4e-05,
         )
     }
 
     _test_point_directory(
-        point_dir_path=example_dir / "WATER_MONOMER0001",
+        point_dir_path=example_dir / "WATER_MONOMER0001.pointdir",
         #######
         # Gaussian
         ########

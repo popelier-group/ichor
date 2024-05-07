@@ -1,0 +1,12 @@
+%nproc=2
+%mem=1GB
+#p B3LYP/aug-cc-pVTZ nosymm output=wfn
+
+WATER0001
+
+0 1
+O       -0.99873211      3.65062916      0.00994269
+H       -0.62416886      4.26690992     -0.45055934
+H       -0.54401474      2.89586390      0.23152816
+
+TRAINING_SET/WATER0001/WATER0001.wfn
