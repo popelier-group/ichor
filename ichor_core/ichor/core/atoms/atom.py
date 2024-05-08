@@ -23,7 +23,7 @@ class Atom(VarReprMixin, Coordinates3D):
         y: float,
         z: float,
         index: Optional[int] = None,
-        parent: Optional["Atoms"] = None,  # noqa F821
+        parent: Optional["ichor.core.atoms.Atoms"] = None,  # noqa F821
         units: AtomicDistance = AtomicDistance.Angstroms,
     ):
         # to be read in from coordinate line
