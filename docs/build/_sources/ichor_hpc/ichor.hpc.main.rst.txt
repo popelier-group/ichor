@@ -12,6 +12,14 @@ ichor.hpc.main.aimall module
    :undoc-members:
    :show-inheritance:
 
+ichor.hpc.main.check\_for\_missing\_files module
+------------------------------------------------
+
+.. automodule:: ichor.hpc.main.check_for_missing_files
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ichor.hpc.main.database module
 ------------------------------
 

@@ -6,14 +6,6 @@ ichor.core.useful\_functions.dl\_poly namespace
 Submodules
 ----------
 
-ichor.core.useful\_functions.dl\_poly.dl\_poly\_write\_optimization\_files module
----------------------------------------------------------------------------------
-
-.. automodule:: ichor.core.useful_functions.dl_poly.dl_poly_write_optimization_files
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ichor.core.useful\_functions.dl\_poly.write\_final\_geometry\_to\_gjf module
 ----------------------------------------------------------------------------
 

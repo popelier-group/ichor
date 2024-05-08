@@ -1,0 +1,10 @@
+#p b3lyp/6-31+g(d,p) nosymm output=wfn force geom=notest
+
+WATER_MONOMER0002
+
+0   1
+O   0.24626315   0.27573219   0.22445284
+H  -0.65974842  -0.03423965   0.33149098
+H   0.41348526  -0.24149254  -0.55594383
+
+/gpfs01/scratch/mbdxwym4/water_monomer_example_dir/WATER_MONOMER.pointsdir/WATER_MONOMER0002.pointdir/WATER_MONOMER0002.wfn

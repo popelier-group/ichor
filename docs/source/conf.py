@@ -11,9 +11,9 @@ from pathlib import Path
 import builtins
 builtins.__sphinx_build__ = True
 
-sys.path.append(Path("../../ichor_cli_subpackage/ichor/"))
-sys.path.append(Path("../../ichor_core_subpackage/ichor/"))
-sys.path.append(Path("../../ichor_hpc_subpackage/ichor/"))
+sys.path.append(Path("../../ichor_cli/ichor/"))
+sys.path.append(Path("../../ichor_core/ichor/"))
+sys.path.append(Path("../../ichor_hpc/ichor/"))
 
 
 project = 'ichor'

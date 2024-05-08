@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Working with ichor files &mdash; ichor 3.1.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
 
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=dd1205ac"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -99,7 +101,7 @@
            <div itemprop="articleBody">
 
   <section id="Working-with-ichor-files">
-<h1>Working with <code class="docutils literal notranslate"><span class="pre">ichor</span></code> files<a class="headerlink" href="#Working-with-ichor-files" title="Permalink to this heading"></a></h1>
+<h1>Working with <code class="docutils literal notranslate"><span class="pre">ichor</span></code> files<a class="headerlink" href="#Working-with-ichor-files" title="Link to this heading"></a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">ichor.core</span></code> package has classes implemented for file reading (and writing) of several input and output files of computational programs that are used (Gaussian, AIMAll, DLPOLY, etc.)</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -145,7 +147,7 @@
 </pre></div></div>
 </div>
 <section id="General-implementation-of-file-classes">
-<h2>General implementation of file classes<a class="headerlink" href="#General-implementation-of-file-classes" title="Permalink to this heading"></a></h2>
+<h2>General implementation of file classes<a class="headerlink" href="#General-implementation-of-file-classes" title="Link to this heading"></a></h2>
 <p>File classes subclass from <code class="docutils literal notranslate"><span class="pre">ichor.core.files.file.ReadFile</span></code> and/or <code class="docutils literal notranslate"><span class="pre">ichor.core.files.file.WriteFile</span></code>.</p>
 <p>When subclassing from <code class="docutils literal notranslate"><span class="pre">ReadFile</span></code>, a <code class="docutils literal notranslate"><span class="pre">_read_file</span></code> method must be defined, which is how the new file should be read and parsed. Ichor has lazy file reading implemented, meaning that a file will only be read when an attribute of the file instance is accessed, <strong>not</strong> when the file instance is created.</p>
 <p>For example:</p>
@@ -184,7 +186,7 @@ H4       2.11921902    -30.18852549     -0.75438182
 </section>
 </section>
 <section id="Example-of-Orca-Input-File-definition">
-<h1>Example of Orca Input File definition<a class="headerlink" href="#Example-of-Orca-Input-File-definition" title="Permalink to this heading"></a></h1>
+<h1>Example of Orca Input File definition<a class="headerlink" href="#Example-of-Orca-Input-File-definition" title="Link to this heading"></a></h1>
 <p>Below is an example implementation for ORCA input file. The implementation for the ORCA output file is identical, however there will be additional attributes that need to be defined (which will be the outputs of the calculation). Use the code below (or look at other implementations in ichor) as a reference to define new file formats.</p>
 <p>There are several important things to note for file reading:</p>
 <ol class="arabic simple">

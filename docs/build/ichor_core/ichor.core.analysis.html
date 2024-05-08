@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ichor.core.analysis package &mdash; ichor 3.1.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
 
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=dd1205ac"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -57,9 +59,9 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ichor.core.analysis package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.analysis.predictions">ichor.core.analysis.predictions module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.analysis.trajectory_analysis">ichor.core.analysis.trajectory_analysis module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.analysis">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ichor-core-analysis-predictions-module">ichor.core.analysis.predictions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ichor-core-analysis-trajectory-analysis-module">ichor.core.analysis.trajectory_analysis module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-contents">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.atoms.html">ichor.core.atoms package</a></li>
@@ -107,9 +109,9 @@
            <div itemprop="articleBody">
 
   <section id="ichor-core-analysis-package">
-<h1>ichor.core.analysis package<a class="headerlink" href="#ichor-core-analysis-package" title="Permalink to this heading"></a></h1>
+<h1>ichor.core.analysis package<a class="headerlink" href="#ichor-core-analysis-package" title="Link to this heading"></a></h1>
 <section id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="ichor.core.analysis.dlpoly.html">ichor.core.analysis.dlpoly package</a></li>
@@ -118,406 +120,16 @@
 </div>
 </section>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.analysis.predictions">
-<span id="ichor-core-analysis-predictions-module"></span><h2>ichor.core.analysis.predictions module<a class="headerlink" href="#module-ichor.core.analysis.predictions" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.analysis.predictions.get_predicted">
-<span class="sig-name descname"><span class="pre">get_predicted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.models.html#ichor.core.models.models.Models" title="ichor.core.models.models.Models"><span class="pre">Models</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.list_of_atoms.ListOfAtoms" title="ichor.core.atoms.list_of_atoms.ListOfAtoms"><span class="pre">ListOfAtoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#ichor.core.analysis.predictions.get_predicted" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the predicted values for a given ListOfAtoms given Models</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>models</strong> – the models to use for predicting the values of points</p></li>
-<li><p><strong>points</strong> – a ListOfAtoms containing geometries to predict</p></li>
-<li><p><strong>atoms</strong> – optional list of atoms to predict the values of points for, defaults to all atoms in models</p></li>
-<li><p><strong>types</strong> – optional list of property types, such as iqa, q00, etc.
-to predict the values of points for, defaults to all types in models</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>predictions of points given models as a ModelsResult</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.analysis.predictions.get_true">
-<span class="sig-name descname"><span class="pre">get_true</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">validation_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.html#ichor.core.files.points_directory.PointsDirectory" title="ichor.core.files.points_directory.PointsDirectory"><span class="pre">PointsDirectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#ichor.core.analysis.predictions.get_true" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the true values for a given PointsDirectory as a ModelsResult</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>validation_set</strong> – the PointsDirectory containing the true values</p></li>
-<li><p><strong>atoms</strong> – List of atoms to get the true values for</p></li>
-<li><p><strong>types</strong> – List of property types, such as iqa, q00, etc. to get the true values for</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>ModelsResult containing the true values requested from the validation set</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.analysis.predictions.get_true_predicted">
-<span class="sig-name descname"><span class="pre">get_true_predicted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.models.html#ichor.core.models.models.Models" title="ichor.core.models.models.Models"><span class="pre">Models</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.html#ichor.core.files.points_directory.PointsDirectory" title="ichor.core.files.points_directory.PointsDirectory"><span class="pre">PointsDirectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.analysis.predictions.get_true_predicted" title="Permalink to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>Returns the true and predicted values of the given model and</dt><dd><p>validation set for each of the specified atoms and types</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>models</strong> – models to use for the predictions</p></li>
-<li><p><strong>validation_set</strong> – validation set containing geometry data and true values</p></li>
-<li><p><strong>atoms</strong> – optional list of atoms to predict, defaults to all atoms found in model_location</p></li>
-<li><p><strong>types</strong> – optional list of types to predict, such as iqa, q00, etc.
-Defaults to all types found in model_location</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>ModelsResult for true and predicted values from the models and validation set provided</p>
-</dd>
-</dl>
-</dd></dl>
-
+<section id="ichor-core-analysis-predictions-module">
+<h2>ichor.core.analysis.predictions module<a class="headerlink" href="#ichor-core-analysis-predictions-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.analysis.trajectory_analysis">
-<span id="ichor-core-analysis-trajectory-analysis-module"></span><h2>ichor.core.analysis.trajectory_analysis module<a class="headerlink" href="#module-ichor.core.analysis.trajectory_analysis" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.analysis.trajectory_analysis.Stability">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Stability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.trajectory_analysis.Stability" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis" title="ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrajectoryAnalysis</span></code></a></p>
-<p>Class used to check whether a simulation of a molecule is stable given a threshold value.
-Each connected bond distance is subtracted to a reference bond distance
-(e.g. of the corresponding optimised molecule) and then checked against the threshold.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>reference_path</strong> – path to the reference structure of a molecule. Can be .gjf or .xyz file.</p></li>
-<li><p><strong>trajectory_path</strong> – path to the trajectory file. Can be a DLPOLY4 trajectory or a .xyz trajectory file.</p></li>
-<li><p><strong>threshold</strong> – threshold value for stability across the trajectory.</p></li>
-</ul>
-</dd>
-</dl>
-<p>Example usage:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>traj = Stability(&#39;path/to/reference.xyz&#39;,&#39;path/to/trajectory.xyz&#39;, threshold=0.5)
-traj.stable_trajectory()
-traj.hr(nbins=1000, max_dist=10.0)
-traj.plot_hr(&#39;path/to/figure.png&#39;)
-</pre></div>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.analysis.trajectory_analysis.Stability.bond_lengths_differences_matrix">
-<span class="sig-name descname"><span class="pre">bond_lengths_differences_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.analysis.trajectory_analysis.Stability.bond_lengths_differences_matrix" title="Permalink to this definition"></a></dt>
-<dd><p>Computes a matrix of the differences of distances
-between a reference geometry and all the timesteps of a trajectory.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy array of dimensions (timesteps,natoms,natoms)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.analysis.trajectory_analysis.Stability.bond_lengths_matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bond_lengths_matrix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#ichor.core.analysis.trajectory_analysis.Stability.bond_lengths_matrix" title="Permalink to this definition"></a></dt>
-<dd><p>Returns a distances matrix only for bonds.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy array of (timesteps,natoms,natoms) dimensions</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.analysis.trajectory_analysis.Stability.stable_trajectory">
-<span class="sig-name descname"><span class="pre">stable_trajectory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.trajectory_analysis.Stability.stable_trajectory" title="Permalink to this definition"></a></dt>
-<dd><p>Computes the bond_lengths_differences_matrix and then checks
-at which timesteps the trajectory is not stable and overwrites the original
-trajectory attribute with the stable trajectory only so that the distribution of distances
-hr can then be computed on the stable part of the trajectory.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TrajectoryAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a></p>
-<p>TrajectoryAnalysis is a class used for general analysis of
-molecular dynamics trajectories.
-Functionality for now comprehends only distribution of distances for a single molecule</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>trajectory_path</strong> (<em>Union</em><em>[</em><em>Path</em><em>, </em><em>str</em><em>]</em>) – Path to the trajectory file. Can be an xyz or a DLPOLY4 trajectory.</p>
-</dd>
-</dl>
-<p>Example usage:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>traj = TrajectoryAnalysis(&#39;path/to/trajectory&#39;)
-traj.hr(nbins=1000,max_dist=10.0)
-traj.plot_hr(&#39;path/to/figure.png&#39;)
-</pre></div>
-</div>
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.bins">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bins</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.bins" title="Permalink to this definition"></a></dt>
-<dd><p>bins attribute which returns</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>_description_</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.delta_dirac">
-<span class="sig-name descname"><span class="pre">delta_dirac</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.delta_dirac" title="Permalink to this definition"></a></dt>
-<dd><p>Computes a modified version of the Dirac delta function.
-In other words this uses the distances_matrix attribute and checks
-all the distances that are between two int values.
-This is mainly used to compute the distribution of distances h(r).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>r0</strong> – lower bound of the interval</p></li>
-<li><p><strong>r1</strong> – higher bound of the interval</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>number of values that are within that interval</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.distance_hist">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">distance_hist</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.distance_hist" title="Permalink to this definition"></a></dt>
-<dd><p>The bins to plot on a histogram</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The bins to plot</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.distances_matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">distances_matrix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.distances_matrix" title="Permalink to this definition"></a></dt>
-<dd><p>Returns a distance matrix of all timesteps of a trajectory</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>matrix of shape (timesteps, natoms, natoms)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.filetype">
-<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.xyz'</span></em><a class="headerlink" href="#ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.filetype" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.hr">
-<span class="sig-name descname"><span class="pre">hr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nbins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_dist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.hr" title="Permalink to this definition"></a></dt>
-<dd><p>Computes the distributions of distances of all pair-wise distances
-across a whole trajectory.
-This function needs to be called if the bins and distance_hist attributes need to be computed</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>nbins</strong> – number of bins to consider for the distance range considered, defaults to 1000</p></li>
-<li><p><strong>max_dist</strong> – maximum distance to consider for the distribution, defaults to 10.0</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.plot_hr">
-<span class="sig-name descname"><span class="pre">plot_hr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis.plot_hr" title="Permalink to this definition"></a></dt>
-<dd><p>Helper function which plots a quick graph for visualising the hr distribution.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>save_path</strong> – path and name of the file ending in .png</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<section id="ichor-core-analysis-trajectory-analysis-module">
+<h2>ichor.core.analysis.trajectory_analysis module<a class="headerlink" href="#ichor-core-analysis-trajectory-analysis-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.analysis">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.analysis" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.analysis.Stability">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Stability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.Stability" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis" title="ichor.core.analysis.trajectory_analysis.TrajectoryAnalysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrajectoryAnalysis</span></code></a></p>
-<p>Class used to check whether a simulation of a molecule is stable given a threshold value.
-Each connected bond distance is subtracted to a reference bond distance
-(e.g. of the corresponding optimised molecule) and then checked against the threshold.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>reference_path</strong> – path to the reference structure of a molecule. Can be .gjf or .xyz file.</p></li>
-<li><p><strong>trajectory_path</strong> – path to the trajectory file. Can be a DLPOLY4 trajectory or a .xyz trajectory file.</p></li>
-<li><p><strong>threshold</strong> – threshold value for stability across the trajectory.</p></li>
-</ul>
-</dd>
-</dl>
-<p>Example usage:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>traj = Stability(&#39;path/to/reference.xyz&#39;,&#39;path/to/trajectory.xyz&#39;, threshold=0.5)
-traj.stable_trajectory()
-traj.hr(nbins=1000, max_dist=10.0)
-traj.plot_hr(&#39;path/to/figure.png&#39;)
-</pre></div>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.analysis.Stability.bond_lengths_differences_matrix">
-<span class="sig-name descname"><span class="pre">bond_lengths_differences_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.analysis.Stability.bond_lengths_differences_matrix" title="Permalink to this definition"></a></dt>
-<dd><p>Computes a matrix of the differences of distances
-between a reference geometry and all the timesteps of a trajectory.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy array of dimensions (timesteps,natoms,natoms)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.analysis.Stability.bond_lengths_matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bond_lengths_matrix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#ichor.core.analysis.Stability.bond_lengths_matrix" title="Permalink to this definition"></a></dt>
-<dd><p>Returns a distances matrix only for bonds.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy array of (timesteps,natoms,natoms) dimensions</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.analysis.Stability.stable_trajectory">
-<span class="sig-name descname"><span class="pre">stable_trajectory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.Stability.stable_trajectory" title="Permalink to this definition"></a></dt>
-<dd><p>Computes the bond_lengths_differences_matrix and then checks
-at which timesteps the trajectory is not stable and overwrites the original
-trajectory attribute with the stable trajectory only so that the distribution of distances
-hr can then be computed on the stable part of the trajectory.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.analysis.TrajectoryAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TrajectoryAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.TrajectoryAnalysis" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a></p>
-<p>TrajectoryAnalysis is a class used for general analysis of
-molecular dynamics trajectories.
-Functionality for now comprehends only distribution of distances for a single molecule</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>trajectory_path</strong> (<em>Union</em><em>[</em><em>Path</em><em>, </em><em>str</em><em>]</em>) – Path to the trajectory file. Can be an xyz or a DLPOLY4 trajectory.</p>
-</dd>
-</dl>
-<p>Example usage:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>traj = TrajectoryAnalysis(&#39;path/to/trajectory&#39;)
-traj.hr(nbins=1000,max_dist=10.0)
-traj.plot_hr(&#39;path/to/figure.png&#39;)
-</pre></div>
-</div>
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.analysis.TrajectoryAnalysis.bins">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bins</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.analysis.TrajectoryAnalysis.bins" title="Permalink to this definition"></a></dt>
-<dd><p>bins attribute which returns</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>_description_</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.analysis.TrajectoryAnalysis.delta_dirac">
-<span class="sig-name descname"><span class="pre">delta_dirac</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#ichor.core.analysis.TrajectoryAnalysis.delta_dirac" title="Permalink to this definition"></a></dt>
-<dd><p>Computes a modified version of the Dirac delta function.
-In other words this uses the distances_matrix attribute and checks
-all the distances that are between two int values.
-This is mainly used to compute the distribution of distances h(r).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>r0</strong> – lower bound of the interval</p></li>
-<li><p><strong>r1</strong> – higher bound of the interval</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>number of values that are within that interval</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.analysis.TrajectoryAnalysis.distance_hist">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">distance_hist</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.analysis.TrajectoryAnalysis.distance_hist" title="Permalink to this definition"></a></dt>
-<dd><p>The bins to plot on a histogram</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The bins to plot</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.analysis.TrajectoryAnalysis.distances_matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">distances_matrix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#ichor.core.analysis.TrajectoryAnalysis.distances_matrix" title="Permalink to this definition"></a></dt>
-<dd><p>Returns a distance matrix of all timesteps of a trajectory</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>matrix of shape (timesteps, natoms, natoms)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.analysis.TrajectoryAnalysis.filetype">
-<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.xyz'</span></em><a class="headerlink" href="#ichor.core.analysis.TrajectoryAnalysis.filetype" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.analysis.TrajectoryAnalysis.hr">
-<span class="sig-name descname"><span class="pre">hr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nbins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_dist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.TrajectoryAnalysis.hr" title="Permalink to this definition"></a></dt>
-<dd><p>Computes the distributions of distances of all pair-wise distances
-across a whole trajectory.
-This function needs to be called if the bins and distance_hist attributes need to be computed</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>nbins</strong> – number of bins to consider for the distance range considered, defaults to 1000</p></li>
-<li><p><strong>max_dist</strong> – maximum distance to consider for the distribution, defaults to 10.0</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.analysis.TrajectoryAnalysis.path">
-<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.analysis.TrajectoryAnalysis.path" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.analysis.TrajectoryAnalysis.plot_hr">
-<span class="sig-name descname"><span class="pre">plot_hr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.TrajectoryAnalysis.plot_hr" title="Permalink to this definition"></a></dt>
-<dd><p>Helper function which plots a quick graph for visualising the hr distribution.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>save_path</strong> – path and name of the file ending in .png</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
 </section>
 </section>
 

@@ -104,9 +104,9 @@ To install each of the sub-packages, do
 
 .. code-block:: python
 
-    python3 -m pip install -e ichor_core_subpackage
-    python3 -m pip install -e ichor_hpc_subpackage
-    python3 -m pip install -e ichor_cli_subpackage
+    python3 -m pip install -e ichor_core
+    python3 -m pip install -e ichor_hpc
+    python3 -m pip install -e ichor_cli
 
 Please install these in the given order, as there are dependencies between the packages.
 

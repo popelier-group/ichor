@@ -12,18 +12,18 @@ Subpackages
 Submodules
 ----------
 
-ichor.core.processing.point\_directory\_processing module
----------------------------------------------------------
+ichor.core.processing.check\_functions module
+---------------------------------------------
 
-.. automodule:: ichor.core.processing.point_directory_processing
+.. automodule:: ichor.core.processing.check_functions
    :members:
    :undoc-members:
    :show-inheritance:
 
-ichor.core.processing.points\_directory\_processing module
-----------------------------------------------------------
+ichor.core.processing.point\_directory\_processing module
+---------------------------------------------------------
 
-.. automodule:: ichor.core.processing.points_directory_processing
+.. automodule:: ichor.core.processing.point_directory_processing
    :members:
    :undoc-members:
    :show-inheritance:

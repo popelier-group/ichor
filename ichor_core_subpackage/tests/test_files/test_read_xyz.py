@@ -7,49 +7,36 @@ from ichor.core.files import XYZ
 from tests.path import get_cwd
 from tests.test_atoms import _test_atoms_coords
 
-example_dir = get_cwd(__file__) / "example_xyzs"
+
+example_dir = (
+    get_cwd(__file__)
+    / ".."
+    / ".."
+    / ".."
+    / "example_files"
+    / "example_points_directory"
+    / "WATER_MONOMER.pointsdir"
+    / "WATER_MONOMER0000.pointdir"
+)
 
 
 def test_water_dimer():
-    xyz = XYZ(example_dir / "water-dimer.xyz")
+    xyz = XYZ(example_dir / "WATER_MONOMER0000.xyz")
 
     expected_atoms = Atoms(
         [
+            Atom("O", -0.03348733, -0.46689766, -0.00424905),
             Atom(
-                "O",
-                0.0000000000000000000,
-                0.00000000000000000,
-                0.00000000000000000,
+                "H",
+                -0.50428226,
+                0.20263196,
+                0.56694849,
             ),
             Atom(
                 "H",
-                -0.5350658173492745000,
-                -0.96513545593593150,
-                0.34177238995479650,
-            ),
-            Atom(
-                "H",
-                0.9912520884083418000,
-                0.11847125457966462,
-                -0.04195287155767175,
-            ),
-            Atom(
-                "O",
-                -6.243578624055563e-17,
-                0.00000000000000000,
-                -3.30362878833371450,
-            ),
-            Atom(
-                "H",
-                0.0000000000000000000,
-                0.33294582772684770,
-                -4.26739270395095400,
-            ),
-            Atom(
-                "H",
-                -6.180093092917877e-17,
-                -0.93417428703609300,
-                -3.63732168743662680,
+                0.53776959,
+                0.26426570,
+                -0.56269944,
             ),
         ]
     )

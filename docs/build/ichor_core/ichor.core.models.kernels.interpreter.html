@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ichor.core.models.kernels.interpreter package &mdash; ichor 3.1.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
 
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=dd1205ac"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -63,14 +65,15 @@
 <li class="toctree-l3 current"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="ichor.core.models.html#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.calculate_fflux_derivatives">ichor.core.models.calculate_fflux_derivatives module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.create_datasets">ichor.core.models.create_datasets module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.fflux_derivative_helper_functions">ichor.core.models.fflux_derivative_helper_functions module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.gaussian_energy_derivative_wrt_features">ichor.core.models.gaussian_energy_derivative_wrt_features module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.model">ichor.core.models.model module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.models">ichor.core.models.models module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.predict_forces_for_all_atoms">ichor.core.models.predict_forces_for_all_atoms module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-calculate-fflux-derivatives-module">ichor.core.models.calculate_fflux_derivatives module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-create-datasets-module">ichor.core.models.create_datasets module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-fflux-derivative-helper-functions-module">ichor.core.models.fflux_derivative_helper_functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-gaussian-energy-derivative-wrt-features-module">ichor.core.models.gaussian_energy_derivative_wrt_features module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-model-module">ichor.core.models.model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-model-with-gradient-module">ichor.core.models.model_with_gradient module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-models-module">ichor.core.models.models module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-predict-forces-for-all-atoms-module">ichor.core.models.predict_forces_for_all_atoms module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
@@ -114,242 +117,30 @@
            <div itemprop="articleBody">
 
   <section id="ichor-core-models-kernels-interpreter-package">
-<h1>ichor.core.models.kernels.interpreter package<a class="headerlink" href="#ichor-core-models-kernels-interpreter-package" title="Permalink to this heading"></a></h1>
+<h1>ichor.core.models.kernels.interpreter package<a class="headerlink" href="#ichor-core-models-kernels-interpreter-package" title="Link to this heading"></a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.models.kernels.interpreter.ast">
-<span id="ichor-core-models-kernels-interpreter-ast-module"></span><h2>ichor.core.models.kernels.interpreter.ast module<a class="headerlink" href="#module-ichor.core.models.kernels.interpreter.ast" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.ast.ASTNode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ASTNode</span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.ast.ASTNode" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.ast.ASTNode.visit">
-<span class="sig-name descname"><span class="pre">visit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.ast.ASTNode.visit" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.ast.BinOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BinOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.ast.BinOp" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.models.kernels.interpreter.ast.ASTNode" title="ichor.core.models.kernels.interpreter.ast.ASTNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ASTNode</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.ast.BinOp.visit">
-<span class="sig-name descname"><span class="pre">visit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.ast.BinOp.visit" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.ast.Num">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Num</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.ast.Num" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.models.kernels.interpreter.ast.ASTNode" title="ichor.core.models.kernels.interpreter.ast.ASTNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ASTNode</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.ast.Num.visit">
-<span class="sig-name descname"><span class="pre">visit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.ast.Num.visit" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.ast.UnaryOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnaryOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.ast.UnaryOp" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.models.kernels.interpreter.ast.ASTNode" title="ichor.core.models.kernels.interpreter.ast.ASTNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ASTNode</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.ast.UnaryOp.visit">
-<span class="sig-name descname"><span class="pre">visit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.ast.UnaryOp.visit" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.ast.Var">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.ast.Var" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.models.kernels.interpreter.ast.ASTNode" title="ichor.core.models.kernels.interpreter.ast.ASTNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ASTNode</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.ast.Var.visit">
-<span class="sig-name descname"><span class="pre">visit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.ast.Var.visit" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<section id="ichor-core-models-kernels-interpreter-ast-module">
+<h2>ichor.core.models.kernels.interpreter.ast module<a class="headerlink" href="#ichor-core-models-kernels-interpreter-ast-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.models.kernels.interpreter.interpreter">
-<span id="ichor-core-models-kernels-interpreter-interpreter-module"></span><h2>ichor.core.models.kernels.interpreter.interpreter module<a class="headerlink" href="#module-ichor.core.models.kernels.interpreter.interpreter" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.interpreter.KernelInterpreter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KernelInterpreter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.interpreter.KernelInterpreter" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.interpreter.KernelInterpreter.interpret">
-<span class="sig-name descname"><span class="pre">interpret</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.interpreter.KernelInterpreter.interpret" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<section id="ichor-core-models-kernels-interpreter-interpreter-module">
+<h2>ichor.core.models.kernels.interpreter.interpreter module<a class="headerlink" href="#ichor-core-models-kernels-interpreter-interpreter-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.models.kernels.interpreter.lexer">
-<span id="ichor-core-models-kernels-interpreter-lexer-module"></span><h2>ichor.core.models.kernels.interpreter.lexer module<a class="headerlink" href="#module-ichor.core.models.kernels.interpreter.lexer" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.lexer.Lexer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Lexer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.lexer.Lexer" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.lexer.Lexer.advance">
-<span class="sig-name descname"><span class="pre">advance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.lexer.Lexer.advance" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.lexer.Lexer.error">
-<span class="sig-name descname"><span class="pre">error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.lexer.Lexer.error" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.lexer.Lexer.get_next_token">
-<span class="sig-name descname"><span class="pre">get_next_token</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ichor.core.models.kernels.interpreter.token.Token" title="ichor.core.models.kernels.interpreter.token.Token"><span class="pre">Token</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.lexer.Lexer.get_next_token" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.lexer.Lexer.id">
-<span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ichor.core.models.kernels.interpreter.token.Token" title="ichor.core.models.kernels.interpreter.token.Token"><span class="pre">Token</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.lexer.Lexer.id" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.lexer.Lexer.number">
-<span class="sig-name descname"><span class="pre">number</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ichor.core.models.kernels.interpreter.token.Token" title="ichor.core.models.kernels.interpreter.token.Token"><span class="pre">Token</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.lexer.Lexer.number" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.lexer.Lexer.skip_whitespace">
-<span class="sig-name descname"><span class="pre">skip_whitespace</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.lexer.Lexer.skip_whitespace" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<section id="ichor-core-models-kernels-interpreter-lexer-module">
+<h2>ichor.core.models.kernels.interpreter.lexer module<a class="headerlink" href="#ichor-core-models-kernels-interpreter-lexer-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.models.kernels.interpreter.parser">
-<span id="ichor-core-models-kernels-interpreter-parser-module"></span><h2>ichor.core.models.kernels.interpreter.parser module<a class="headerlink" href="#module-ichor.core.models.kernels.interpreter.parser" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.parser.Parser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.parser.Parser" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.parser.Parser.eat">
-<span class="sig-name descname"><span class="pre">eat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ichor.core.models.kernels.interpreter.token_type.TokenType" title="ichor.core.models.kernels.interpreter.token_type.TokenType"><span class="pre">TokenType</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.parser.Parser.eat" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.parser.Parser.error">
-<span class="sig-name descname"><span class="pre">error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.parser.Parser.error" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.parser.Parser.expr">
-<span class="sig-name descname"><span class="pre">expr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ichor.core.models.kernels.interpreter.ast.ASTNode" title="ichor.core.models.kernels.interpreter.ast.ASTNode"><span class="pre">ASTNode</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.parser.Parser.expr" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.parser.Parser.factor">
-<span class="sig-name descname"><span class="pre">factor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ichor.core.models.kernels.interpreter.ast.ASTNode" title="ichor.core.models.kernels.interpreter.ast.ASTNode"><span class="pre">ASTNode</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.parser.Parser.factor" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.parser.Parser.parse">
-<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ichor.core.models.kernels.interpreter.ast.ASTNode" title="ichor.core.models.kernels.interpreter.ast.ASTNode"><span class="pre">ASTNode</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.parser.Parser.parse" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.parser.Parser.term">
-<span class="sig-name descname"><span class="pre">term</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ichor.core.models.kernels.interpreter.ast.ASTNode" title="ichor.core.models.kernels.interpreter.ast.ASTNode"><span class="pre">ASTNode</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.parser.Parser.term" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.parser.Parser.variable">
-<span class="sig-name descname"><span class="pre">variable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ichor.core.models.kernels.interpreter.ast.Var" title="ichor.core.models.kernels.interpreter.ast.Var"><span class="pre">Var</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.parser.Parser.variable" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<section id="ichor-core-models-kernels-interpreter-parser-module">
+<h2>ichor.core.models.kernels.interpreter.parser module<a class="headerlink" href="#ichor-core-models-kernels-interpreter-parser-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.models.kernels.interpreter.token">
-<span id="ichor-core-models-kernels-interpreter-token-module"></span><h2>ichor.core.models.kernels.interpreter.token module<a class="headerlink" href="#module-ichor.core.models.kernels.interpreter.token" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.token.Token">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ichor.core.models.kernels.interpreter.token_type.TokenType" title="ichor.core.models.kernels.interpreter.token_type.TokenType"><span class="pre">TokenType</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.token.Token" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-</dd></dl>
-
+<section id="ichor-core-models-kernels-interpreter-token-module">
+<h2>ichor.core.models.kernels.interpreter.token module<a class="headerlink" href="#ichor-core-models-kernels-interpreter-token-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.models.kernels.interpreter.token_type">
-<span id="ichor-core-models-kernels-interpreter-token-type-module"></span><h2>ichor.core.models.kernels.interpreter.token_type module<a class="headerlink" href="#module-ichor.core.models.kernels.interpreter.token_type" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.token_type.TokenType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TokenType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.token_type.TokenType" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
-<p>An enumeration.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.token_type.TokenType.Div">
-<span class="sig-name descname"><span class="pre">Div</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#ichor.core.models.kernels.interpreter.token_type.TokenType.Div" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.token_type.TokenType.Eof">
-<span class="sig-name descname"><span class="pre">Eof</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#ichor.core.models.kernels.interpreter.token_type.TokenType.Eof" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.token_type.TokenType.Id">
-<span class="sig-name descname"><span class="pre">Id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#ichor.core.models.kernels.interpreter.token_type.TokenType.Id" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.token_type.TokenType.LParen">
-<span class="sig-name descname"><span class="pre">LParen</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#ichor.core.models.kernels.interpreter.token_type.TokenType.LParen" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.token_type.TokenType.Minus">
-<span class="sig-name descname"><span class="pre">Minus</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#ichor.core.models.kernels.interpreter.token_type.TokenType.Minus" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.token_type.TokenType.Mul">
-<span class="sig-name descname"><span class="pre">Mul</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#ichor.core.models.kernels.interpreter.token_type.TokenType.Mul" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.token_type.TokenType.Number">
-<span class="sig-name descname"><span class="pre">Number</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#ichor.core.models.kernels.interpreter.token_type.TokenType.Number" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.token_type.TokenType.Plus">
-<span class="sig-name descname"><span class="pre">Plus</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#ichor.core.models.kernels.interpreter.token_type.TokenType.Plus" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.token_type.TokenType.RParen">
-<span class="sig-name descname"><span class="pre">RParen</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#ichor.core.models.kernels.interpreter.token_type.TokenType.RParen" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<section id="ichor-core-models-kernels-interpreter-token-type-module">
+<h2>ichor.core.models.kernels.interpreter.token_type module<a class="headerlink" href="#ichor-core-models-kernels-interpreter-token-type-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.models.kernels.interpreter">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.models.kernels.interpreter" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.KernelInterpreter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KernelInterpreter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.KernelInterpreter" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.kernels.interpreter.KernelInterpreter.interpret">
-<span class="sig-name descname"><span class="pre">interpret</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.models.kernels.html#ichor.core.models.kernels.kernel.Kernel" title="ichor.core.models.kernels.kernel.Kernel"><span class="pre">Kernel</span></a></span></span><a class="headerlink" href="#ichor.core.models.kernels.interpreter.KernelInterpreter.interpret" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
 </section>
 </section>
 

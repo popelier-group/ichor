@@ -20,9 +20,9 @@ help:
 # 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 %: docs
-	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 --force -o source/ichor_core/ ../ichor_core_subpackage/ichor/
-	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 --force -o source/ichor_cli/ ../ichor_cli_subpackage/ichor/
-	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 --force -o source/ichor_hpc/ ../ichor_hpc_subpackage/ichor/
+	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 --force -o source/ichor_core/ ../ichor_core/ichor/
+	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 --force -o source/ichor_cli/ ../ichor_cli/ichor/
+	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 --force -o source/ichor_hpc/ ../ichor_hpc/ichor/
 
 	rm -f source/ichor_core/ichor.rst
 	rm -f source/ichor_core/modules.rst
@@ -34,9 +34,9 @@ help:
 	@$(SPHINXBUILD) -a -E "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 %: quick
-	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 -o source/ichor_core/ ../ichor_core_subpackage/ichor/
-	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 -o source/ichor_cli/ ../ichor_cli_subpackage/ichor/
-	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 -o source/ichor_hpc/ ../ichor_hpc_subpackage/ichor/
+	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 -o source/ichor_core/ ../ichor_core/ichor/
+	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 -o source/ichor_cli/ ../ichor_cli/ichor/
+	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 -o source/ichor_hpc/ ../ichor_hpc/ichor/
 
 	rm -f source/ichor_core/ichor.rst
 	rm -f source/ichor_core/modules.rst

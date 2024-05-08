@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ichor.core.database package &mdash; ichor 3.1.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
 
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=dd1205ac"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -61,8 +63,8 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ichor.core.database package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.database.query_database">ichor.core.database.query_database module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.database">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ichor-core-database-query-database-module">ichor.core.database.query_database module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-contents">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.files.html">ichor.core.files package</a></li>
@@ -106,9 +108,9 @@
            <div itemprop="articleBody">
 
   <section id="ichor-core-database-package">
-<h1>ichor.core.database package<a class="headerlink" href="#ichor-core-database-package" title="Permalink to this heading"></a></h1>
+<h1>ichor.core.database package<a class="headerlink" href="#ichor-core-database-package" title="Link to this heading"></a></h1>
 <section id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="ichor.core.database.json.html">ichor.core.database.json package</a></li>
@@ -117,238 +119,13 @@
 </div>
 </section>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.database.query_database">
-<span id="ichor-core-database-query-database-module"></span><h2>ichor.core.database.query_database module<a class="headerlink" href="#module-ichor.core.database.query_database" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.query_database.check_supported_db_types">
-<span class="sig-name descname"><span class="pre">check_supported_db_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.query_database.check_supported_db_types" title="Permalink to this definition"></a></dt>
-<dd><p>Checks the given database type, raises ValueError if it is not present.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.query_database.get_alf_from_first_db_geometry">
-<span class="sig-name descname"><span class="pre">get_alf_from_first_db_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_type:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf_calc_func=&lt;function</span> <span class="pre">calculate_alf_atom_sequence&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo=False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.database.query_database.get_alf_from_first_db_geometry" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the atomic local frame for every atom from the first point.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> – Path to SQLite3 database containing <cite>Points</cite>, <cite>AtomNames</cite>, and <cite>Dataset</cite> tables.</p></li>
-<li><p><strong>db_type</strong> – The type of database, currently only sqlite and json supported</p></li>
-<li><p><strong>alf_calc_func</strong> – The function to calculate ALF with on an Atoms instance</p></li>
-<li><p><strong>echo</strong> – Whether to echo executed SQL queries, defaults to False</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A list of ALF instances for every atom in the system.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.query_database.get_database_info_from_db_type">
-<span class="sig-name descname"><span class="pre">get_database_info_from_db_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.query_database.get_database_info_from_db_type" title="Permalink to this definition"></a></dt>
-<dd><p>Gets the required information from the database to make processed csvs.
-Works for sqlite or json</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> – path to database</p></li>
-<li><p><strong>db_type</strong> – the type of database containing info, currently only “json” and “sqlite” are supported.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If the value of db_type is not in supported databases.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.query_database.rotate_multipole_moments">
-<span class="sig-name descname"><span class="pre">rotate_multipole_moments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_with_atom_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.query_database.rotate_multipole_moments" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.query_database.worker">
-<span class="sig-name descname"><span class="pre">worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.query_database.worker" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.query_database.worker_init">
-<span class="sig-name descname"><span class="pre">worker_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.query_database.worker_init" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.query_database.write_processed_data_for_atoms">
-<span class="sig-name descname"><span class="pre">write_processed_data_for_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_index_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_multipoles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.query_database.write_processed_data_for_atoms" title="Permalink to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>Writes a csv containing the features, wfn energy, -dE/df (note that these are forces wtr features),</dt><dd><p>iqa energy, and rotated multipoles for every atom in the SQL database.
-Note that only points for which the absolute integration error for the atom of interest
-is below the threshold are added to the
-corresponding atomic datasets.</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> – Path to SQLite3 database containing <cite>Points</cite>, <cite>AtomNames</cite>, and <cite>Dataset</cite> tables.</p></li>
-<li><p><strong>db_type</strong> – type of database, sqlite or json</p></li>
-<li><p><strong>alf</strong> – A list of ALF instances to be used when calculating features
-and calculating C matrices.</p></li>
-<li><p><strong>max_integration_error</strong> – Maximum integration error that a point needs to have for the atom
-of interest. Having a higher (absolute) integration error for the atom of interest means that
-this point will not be added in the dataset for the atom of interest. However, the same
-point can be added in the dataset for another atom, if the integration error is good, defaults to 0.001</p></li>
-<li><p><strong>write_index_col</strong> – Whether to write the index col in the final .csv file, defaults to False</p></li>
-<li><p><strong>echo</strong> – Whether to echo executed SQL statements, defaults to False</p></li>
-<li><p><strong>atom_names</strong> – A list of atom names for which to write db. If left to None, csv files
-will be written for all atoms.</p></li>
-<li><p><strong>properties</strong> – Which properties to write out to csv files.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.query_database.write_processed_data_for_atoms_parallel">
-<span class="sig-name descname"><span class="pre">write_processed_data_for_atoms_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_diff_iqa_wfn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.184</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_index_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_multipoles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('processed_csvs')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.query_database.write_processed_data_for_atoms_parallel" title="Permalink to this definition"></a></dt>
-<dd><p>Function uses the concurrent.futures.ProcessPoolExecutor class to parallelize the calculations
-on multiple cores, so that multiple atom calculations can be done in parallel.</p>
-<p>Writes a csv containing the features, wfn energy, -dE/df (note that these are forces wtr features),
-iqa energy, and rotated multipoles for every atom in the SQL database.
-Note that only points for which the absolute integration error for the atom of interest
-is below the threshold are added to the
-corresponding atomic datasets.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> – Path to SQLite3 database containing <cite>Points</cite>, <cite>AtomNames</cite>, and <cite>Dataset</cite> tables.
-or a json database (a directory), potentially containing multiple directories</p></li>
-<li><p><strong>db_type</strong> – The type of database that is given, currently only json or sqlite formats supported.</p></li>
-<li><p><strong>alf</strong> – A list of ALF instances to be used when calculating features
-and calculating C matrices.</p></li>
-<li><p><strong>ncores</strong> – The number of cores to use for the parallel calculations. Each core will calculate
-the data for an individual atom.</p></li>
-<li><p><strong>max_diff_iqa_wfn</strong> – The maximum difference between the sum of iqa and wfn energy (in kJ mol-1). Any point
-that is above this threshold will be filtered out before doing integration errors.</p></li>
-<li><p><strong>max_integration_error</strong> – Maximum integration error that a point needs to have for the atom
-of interest. Having a higher (absolute) integration error for the atom of interest means that
-this point will not be added in the dataset for the atom of interest. However, the same
-point can be added in the dataset for another atom, if the integration error is good, defaults to 0.001</p></li>
-<li><p><strong>write_index_col</strong> – Whether to write the index col in the final .csv file, defaults to False</p></li>
-<li><p><strong>echo</strong> – Whether to echo executed SQL statements, defaults to False</p></li>
-<li><p><strong>atom_names</strong> – A list of atom names for which to write db. If left to None, csv files
-will be written for all atoms.</p></li>
-<li><p><strong>calc_forces</strong> – Whether to calculate -dE/df, default False.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.query_database.write_processed_one_atom_data_to_csv">
-<span class="sig-name descname"><span class="pre">write_processed_one_atom_data_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_diff_iqa_wfn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.184</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_index_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_multipoles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('processed_csvs')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.query_database.write_processed_one_atom_data_to_csv" title="Permalink to this definition"></a></dt>
-<dd><p>Writes features, iqa energy, as well as rotated multipole moments (given an ALF) to a csv file
-for all points (as long as integration error for the atom of interest is below a threshold integration error).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>full_df</strong> – DataFrame object extracted from SQLite database. This object contains information for
-all points (and all atoms in every point)</p></li>
-<li><p><strong>point_ids</strong> – A list of integers representing the <cite>id</cite> column of the points table of the SQLite database.</p></li>
-<li><p><strong>atom_name</strong> – The atom for which features, local multipole moments,
-as well as local forces are going to be calculated for every point in the dataset</p></li>
-<li><p><strong>alf</strong> – A list of ALF instance to be used when calculating features
-and calculating C matrices</p></li>
-<li><p><strong>max_diff_iqa_wfn</strong> – Maximum difference between sum of IQA and wfn energy (in kJ mol-1).
-If point is above threshold, it will get filtered before doing integration error.</p></li>
-<li><p><strong>max_integration_error</strong> – Maximum integration error that a point needs to have for the atom
-of interest. Having a higher (absolute) integration error for the atom of interest means that
-this point will not be added in the dataset for the atom of interest. However, the same
-point can be added in the dataset for another atom, if the integration error is good, defaults to 0.001</p></li>
-<li><p><strong>calc_forces</strong> – Whether to calculate -dE/df forces (which takes a long time currently), default False.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
+<section id="ichor-core-database-query-database-module">
+<h2>ichor.core.database.query_database module<a class="headerlink" href="#ichor-core-database-query-database-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.database">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.database" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.get_alf_from_first_db_geometry">
-<span class="sig-name descname"><span class="pre">get_alf_from_first_db_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_type:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf_calc_func=&lt;function</span> <span class="pre">calculate_alf_atom_sequence&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo=False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.database.get_alf_from_first_db_geometry" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the atomic local frame for every atom from the first point.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> – Path to SQLite3 database containing <cite>Points</cite>, <cite>AtomNames</cite>, and <cite>Dataset</cite> tables.</p></li>
-<li><p><strong>db_type</strong> – The type of database, currently only sqlite and json supported</p></li>
-<li><p><strong>alf_calc_func</strong> – The function to calculate ALF with on an Atoms instance</p></li>
-<li><p><strong>echo</strong> – Whether to echo executed SQL queries, defaults to False</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A list of ALF instances for every atom in the system.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.get_database_info_from_db_type">
-<span class="sig-name descname"><span class="pre">get_database_info_from_db_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.get_database_info_from_db_type" title="Permalink to this definition"></a></dt>
-<dd><p>Gets the required information from the database to make processed csvs.
-Works for sqlite or json</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> – path to database</p></li>
-<li><p><strong>db_type</strong> – the type of database containing info, currently only “json” and “sqlite” are supported.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If the value of db_type is not in supported databases.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.write_processed_data_for_atoms_parallel">
-<span class="sig-name descname"><span class="pre">write_processed_data_for_atoms_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_diff_iqa_wfn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.184</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_index_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_multipoles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('processed_csvs')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.write_processed_data_for_atoms_parallel" title="Permalink to this definition"></a></dt>
-<dd><p>Function uses the concurrent.futures.ProcessPoolExecutor class to parallelize the calculations
-on multiple cores, so that multiple atom calculations can be done in parallel.</p>
-<p>Writes a csv containing the features, wfn energy, -dE/df (note that these are forces wtr features),
-iqa energy, and rotated multipoles for every atom in the SQL database.
-Note that only points for which the absolute integration error for the atom of interest
-is below the threshold are added to the
-corresponding atomic datasets.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> – Path to SQLite3 database containing <cite>Points</cite>, <cite>AtomNames</cite>, and <cite>Dataset</cite> tables.
-or a json database (a directory), potentially containing multiple directories</p></li>
-<li><p><strong>db_type</strong> – The type of database that is given, currently only json or sqlite formats supported.</p></li>
-<li><p><strong>alf</strong> – A list of ALF instances to be used when calculating features
-and calculating C matrices.</p></li>
-<li><p><strong>ncores</strong> – The number of cores to use for the parallel calculations. Each core will calculate
-the data for an individual atom.</p></li>
-<li><p><strong>max_diff_iqa_wfn</strong> – The maximum difference between the sum of iqa and wfn energy (in kJ mol-1). Any point
-that is above this threshold will be filtered out before doing integration errors.</p></li>
-<li><p><strong>max_integration_error</strong> – Maximum integration error that a point needs to have for the atom
-of interest. Having a higher (absolute) integration error for the atom of interest means that
-this point will not be added in the dataset for the atom of interest. However, the same
-point can be added in the dataset for another atom, if the integration error is good, defaults to 0.001</p></li>
-<li><p><strong>write_index_col</strong> – Whether to write the index col in the final .csv file, defaults to False</p></li>
-<li><p><strong>echo</strong> – Whether to echo executed SQL statements, defaults to False</p></li>
-<li><p><strong>atom_names</strong> – A list of atom names for which to write db. If left to None, csv files
-will be written for all atoms.</p></li>
-<li><p><strong>calc_forces</strong> – Whether to calculate -dE/df, default False.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
 </section>
 </section>
 

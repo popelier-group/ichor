@@ -53,6 +53,14 @@ ichor.core.models.model module
    :undoc-members:
    :show-inheritance:
 
+ichor.core.models.model\_with\_gradient module
+----------------------------------------------
+
+.. automodule:: ichor.core.models.model_with_gradient
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ichor.core.models.models module
 -------------------------------
 

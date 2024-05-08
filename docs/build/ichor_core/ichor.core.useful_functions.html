@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ichor.core.useful_functions package &mdash; ichor 3.1.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
 
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=dd1205ac"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -67,12 +69,11 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ichor.core.useful_functions package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.useful_functions.atomic_to_molecular_multipole_moment">ichor.core.useful_functions.atomic_to_molecular_multipole_moment module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.useful_functions.check_aimall_completed">ichor.core.useful_functions.check_aimall_completed module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.useful_functions.check_points_dir_suffix">ichor.core.useful_functions.check_points_dir_suffix module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.useful_functions.debugging">ichor.core.useful_functions.debugging module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.useful_functions.get_atoms">ichor.core.useful_functions.get_atoms module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.useful_functions">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ichor-core-useful-functions-check-aimall-completed-module">ichor.core.useful_functions.check_aimall_completed module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ichor-core-useful-functions-check-points-dir-suffix-module">ichor.core.useful_functions.check_points_dir_suffix module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ichor-core-useful-functions-debugging-module">ichor.core.useful_functions.debugging module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ichor-core-useful-functions-get-atoms-module">ichor.core.useful_functions.get_atoms module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -110,9 +111,9 @@
            <div itemprop="articleBody">
 
   <section id="ichor-core-useful-functions-package">
-<h1>ichor.core.useful_functions package<a class="headerlink" href="#ichor-core-useful-functions-package" title="Permalink to this heading"></a></h1>
+<h1>ichor.core.useful_functions package<a class="headerlink" href="#ichor-core-useful-functions-package" title="Link to this heading"></a></h1>
 <section id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="ichor.core.useful_functions.dl_poly.html">ichor.core.useful_functions.dl_poly namespace</a></li>
@@ -120,237 +121,22 @@
 </div>
 </section>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.useful_functions.atomic_to_molecular_multipole_moment">
-<span id="ichor-core-useful-functions-atomic-to-molecular-multipole-moment-module"></span><h2>ichor.core.useful_functions.atomic_to_molecular_multipole_moment module<a class="headerlink" href="#module-ichor.core.useful_functions.atomic_to_molecular_multipole_moment" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.atomic_to_molecular_multipole_moment.recover_molecular_dipole">
-<span class="sig-name descname"><span class="pre">recover_molecular_dipole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ints_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.aimall.html#ichor.core.files.aimall.ints.IntDirectory" title="ichor.core.files.aimall.ints.IntDirectory"><span class="pre">IntDirectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_in_angstroms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_debye</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_cartesian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.useful_functions.atomic_to_molecular_multipole_moment.recover_molecular_dipole" title="Permalink to this definition"></a></dt>
-<dd><p>Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
-and calculates the molecular dipole moment of the system (in spherical coordinates)
-from the AIMAll atomic multipole moments.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Assumes atomic multipole moment units are atomic units (Coulomb Bohr) because this is what AIMAll gives.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>atoms</strong> – an Atoms instance containing the system geometry</p></li>
-<li><p><strong>ints_dir</strong> – an IntDirectory file instance, which wraps around an AIMAll output directory</p></li>
-<li><p><strong>atoms_in_angstroms</strong> – Whether the Atom instance coordinates are in Bohr or Angstroms
-, defaults to True (meaning coordinates are in Angstroms)</p></li>
-<li><p><strong>convert_to_debye</strong> – Whether or not to convert the final result to Debye, default to True.
-This converts from atomic units to Debye.</p></li>
-<li><p><strong>convert_to_cartesian</strong> – Whether or not to convert the recovered molecular dipole from spherical
-to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
-in Cartesian coordinates, so set to True in case you are comparing against Gaussian.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A numpy array containing the molecular dipole moment.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.atomic_to_molecular_multipole_moment.recover_molecular_quadrupole">
-<span class="sig-name descname"><span class="pre">recover_molecular_quadrupole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ints_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.aimall.html#ichor.core.files.aimall.ints.IntDirectory" title="ichor.core.files.aimall.ints.IntDirectory"><span class="pre">IntDirectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_in_angstroms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_debye</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_cartesian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.useful_functions.atomic_to_molecular_multipole_moment.recover_molecular_quadrupole" title="Permalink to this definition"></a></dt>
-<dd><p>Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
-and calculates the molecular quadrupole moment of the system (in spherical coordinates)
-from the AIMAll atomic multipole moments.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Assumes atomic multipole moment units are atomic units (Coulomb Bohr**2) because this is what AIMAll gives.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>atoms</strong> – an Atoms instance containing the system geometry</p></li>
-<li><p><strong>ints_dir</strong> – an IntDirectory file instance, which wraps around an AIMAll output directory</p></li>
-<li><p><strong>atoms_in_angstroms</strong> – Whether the Atom instance coordinates are in Bohr or Angstroms
-, defaults to True (meaning coordinates are in Angstroms)</p></li>
-<li><p><strong>convert_to_debye</strong> – Whether or not to convert the final result to Debye, default to True.
-This converts from atomic units to Debye.</p></li>
-<li><p><strong>convert_to_cartesian</strong> – Whether or not to convert the recovered molecular quadrupole from spherical
-to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
-in Cartesian coordinates, so set to True in case you are comparing against Gaussian.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A numpy array containing the molecular quadrupole moment.</p>
-</dd>
-</dl>
-</dd></dl>
-
+<section id="ichor-core-useful-functions-check-aimall-completed-module">
+<h2>ichor.core.useful_functions.check_aimall_completed module<a class="headerlink" href="#ichor-core-useful-functions-check-aimall-completed-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.useful_functions.check_aimall_completed">
-<span id="ichor-core-useful-functions-check-aimall-completed-module"></span><h2>ichor.core.useful_functions.check_aimall_completed module<a class="headerlink" href="#module-ichor.core.useful_functions.check_aimall_completed" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.check_aimall_completed.aimall_completed">
-<span class="sig-name descname"><span class="pre">aimall_completed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wfn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.useful_functions.check_aimall_completed.aimall_completed" title="Permalink to this definition"></a></dt>
-<dd><p>This function is used when checking if AIMALL ran successfully.
-It checks if AIM file exists, and checks if the INT files
-exist. Note that it assumes that IQA energy is also calculated
-The .aim file as well as if the .int files contain the required information.</p>
-</dd></dl>
-
+<section id="ichor-core-useful-functions-check-points-dir-suffix-module">
+<h2>ichor.core.useful_functions.check_points_dir_suffix module<a class="headerlink" href="#ichor-core-useful-functions-check-points-dir-suffix-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.useful_functions.check_points_dir_suffix">
-<span id="ichor-core-useful-functions-check-points-dir-suffix-module"></span><h2>ichor.core.useful_functions.check_points_dir_suffix module<a class="headerlink" href="#module-ichor.core.useful_functions.check_points_dir_suffix" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.check_points_dir_suffix.single_or_many_points_directories">
-<span class="sig-name descname"><span class="pre">single_or_many_points_directories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pd_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.useful_functions.check_points_dir_suffix.single_or_many_points_directories" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether the current selected PointsDirectory path is a directory containing
-many PointsDirectories, or is just one PointsDirectory.</p>
-<p>This is just done by checking if parent is in the name of the directory.</p>
-</dd></dl>
-
+<section id="ichor-core-useful-functions-debugging-module">
+<h2>ichor.core.useful_functions.debugging module<a class="headerlink" href="#ichor-core-useful-functions-debugging-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.useful_functions.debugging">
-<span id="ichor-core-useful-functions-debugging-module"></span><h2>ichor.core.useful_functions.debugging module<a class="headerlink" href="#module-ichor.core.useful_functions.debugging" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.debugging.printq">
-<span class="sig-name descname"><span class="pre">printq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.core.useful_functions.debugging.printq" title="Permalink to this definition"></a></dt>
-<dd><p>Useful function to use while debugging on remote servers, simpy acts as a normal print statement
-before exiting directly afterwards</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>args</strong> – </p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-<p>Note: only to be used for debugging while developing should not be used for production</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.debugging.timer">
-<span class="sig-name descname"><span class="pre">timer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">F</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">F</span></span></span><a class="headerlink" href="#ichor.core.useful_functions.debugging.timer" title="Permalink to this definition"></a></dt>
-<dd><p>Times execution time of function f and prints to stdout</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>f</strong> – Function to time</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Return value of function f</p>
-</dd>
-</dl>
-</dd></dl>
-
+<section id="ichor-core-useful-functions-get-atoms-module">
+<h2>ichor.core.useful_functions.get_atoms module<a class="headerlink" href="#ichor-core-useful-functions-get-atoms-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.useful_functions.get_atoms">
-<span id="ichor-core-useful-functions-get-atoms-module"></span><h2>ichor.core.useful_functions.get_atoms module<a class="headerlink" href="#module-ichor.core.useful_functions.get_atoms" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.get_atoms.get_atoms_from_path">
-<span class="sig-name descname"><span class="pre">get_atoms_from_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></span><a class="headerlink" href="#ichor.core.useful_functions.get_atoms.get_atoms_from_path" title="Permalink to this definition"></a></dt>
-<dd><p>Returns first instance of <cite>Atoms</cite> found from <cite>path</cite>
-:param path: the <cite>Path</cite> to get atoms from
-:return: the instance of <cite>Atoms</cite> found from path
-:raises: AtomsNotFoundError if no atoms are found</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.get_atoms.get_trajectory_from_path">
-<span class="sig-name descname"><span class="pre">get_trajectory_from_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'new_trajectory.xyz'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.files.html#ichor.core.files.Trajectory" title="ichor.core.files.Trajectory"><span class="pre">Trajectory</span></a></span></span><a class="headerlink" href="#ichor.core.useful_functions.get_atoms.get_trajectory_from_path" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</section>
-<section id="module-ichor.core.useful_functions">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.useful_functions" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.aimall_completed">
-<span class="sig-name descname"><span class="pre">aimall_completed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wfn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.useful_functions.aimall_completed" title="Permalink to this definition"></a></dt>
-<dd><p>This function is used when checking if AIMALL ran successfully.
-It checks if AIM file exists, and checks if the INT files
-exist. Note that it assumes that IQA energy is also calculated
-The .aim file as well as if the .int files contain the required information.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.get_atoms_from_path">
-<span class="sig-name descname"><span class="pre">get_atoms_from_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></span><a class="headerlink" href="#ichor.core.useful_functions.get_atoms_from_path" title="Permalink to this definition"></a></dt>
-<dd><p>Returns first instance of <cite>Atoms</cite> found from <cite>path</cite>
-:param path: the <cite>Path</cite> to get atoms from
-:return: the instance of <cite>Atoms</cite> found from path
-:raises: AtomsNotFoundError if no atoms are found</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.get_trajectory_from_path">
-<span class="sig-name descname"><span class="pre">get_trajectory_from_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'new_trajectory.xyz'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.files.html#ichor.core.files.Trajectory" title="ichor.core.files.Trajectory"><span class="pre">Trajectory</span></a></span></span><a class="headerlink" href="#ichor.core.useful_functions.get_trajectory_from_path" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.recover_molecular_dipole">
-<span class="sig-name descname"><span class="pre">recover_molecular_dipole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ints_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.aimall.html#ichor.core.files.aimall.ints.IntDirectory" title="ichor.core.files.aimall.ints.IntDirectory"><span class="pre">IntDirectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_in_angstroms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_debye</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_cartesian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.useful_functions.recover_molecular_dipole" title="Permalink to this definition"></a></dt>
-<dd><p>Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
-and calculates the molecular dipole moment of the system (in spherical coordinates)
-from the AIMAll atomic multipole moments.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Assumes atomic multipole moment units are atomic units (Coulomb Bohr) because this is what AIMAll gives.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>atoms</strong> – an Atoms instance containing the system geometry</p></li>
-<li><p><strong>ints_dir</strong> – an IntDirectory file instance, which wraps around an AIMAll output directory</p></li>
-<li><p><strong>atoms_in_angstroms</strong> – Whether the Atom instance coordinates are in Bohr or Angstroms
-, defaults to True (meaning coordinates are in Angstroms)</p></li>
-<li><p><strong>convert_to_debye</strong> – Whether or not to convert the final result to Debye, default to True.
-This converts from atomic units to Debye.</p></li>
-<li><p><strong>convert_to_cartesian</strong> – Whether or not to convert the recovered molecular dipole from spherical
-to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
-in Cartesian coordinates, so set to True in case you are comparing against Gaussian.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A numpy array containing the molecular dipole moment.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.recover_molecular_quadrupole">
-<span class="sig-name descname"><span class="pre">recover_molecular_quadrupole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ints_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.aimall.html#ichor.core.files.aimall.ints.IntDirectory" title="ichor.core.files.aimall.ints.IntDirectory"><span class="pre">IntDirectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_in_angstroms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_debye</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_cartesian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.useful_functions.recover_molecular_quadrupole" title="Permalink to this definition"></a></dt>
-<dd><p>Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
-and calculates the molecular quadrupole moment of the system (in spherical coordinates)
-from the AIMAll atomic multipole moments.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Assumes atomic multipole moment units are atomic units (Coulomb Bohr**2) because this is what AIMAll gives.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>atoms</strong> – an Atoms instance containing the system geometry</p></li>
-<li><p><strong>ints_dir</strong> – an IntDirectory file instance, which wraps around an AIMAll output directory</p></li>
-<li><p><strong>atoms_in_angstroms</strong> – Whether the Atom instance coordinates are in Bohr or Angstroms
-, defaults to True (meaning coordinates are in Angstroms)</p></li>
-<li><p><strong>convert_to_debye</strong> – Whether or not to convert the final result to Debye, default to True.
-This converts from atomic units to Debye.</p></li>
-<li><p><strong>convert_to_cartesian</strong> – Whether or not to convert the recovered molecular quadrupole from spherical
-to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
-in Cartesian coordinates, so set to True in case you are comparing against Gaussian.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A numpy array containing the molecular quadrupole moment.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.useful_functions.single_or_many_points_directories">
-<span class="sig-name descname"><span class="pre">single_or_many_points_directories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pd_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.useful_functions.single_or_many_points_directories" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether the current selected PointsDirectory path is a directory containing
-many PointsDirectories, or is just one PointsDirectory.</p>
-<p>This is just done by checking if parent is in the name of the directory.</p>
-</dd></dl>
-
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
 </section>
 </section>
 

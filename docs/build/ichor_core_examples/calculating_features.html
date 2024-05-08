@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Calculating Features &mdash; ichor 3.1.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
 
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=dd1205ac"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -52,7 +54,10 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Calculating Features</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#Calculators">Calculators</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Defining-a-custom-feature-calculator">Defining a custom feature calculator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Defining-a-custom-feature-calculator">Defining a custom feature calculator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Coulomb-Matrix-Example---One-feature-vector-for-whole-system">Coulomb Matrix Example - One feature vector for whole system</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="interfacing_ichor_with_other_comp_chem_packages.html">Interfacing ichor files with other Computational Chemistry Python packages</a></li>
@@ -100,10 +105,10 @@
            <div itemprop="articleBody">
 
   <section id="Calculating-Features">
-<h1>Calculating Features<a class="headerlink" href="#Calculating-Features" title="Permalink to this heading"></a></h1>
+<h1>Calculating Features<a class="headerlink" href="#Calculating-Features" title="Link to this heading"></a></h1>
 <p>Calculating features is done through the <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> class, which contains a molecular geometry. This is the central class used throughout ichor that deals with manipulating molecular geometries. Files typically have the <code class="docutils literal notranslate"><span class="pre">.atoms</span></code> attribute if they contain a molecular geometry.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ichor.core.atoms</span> <span class="kn">import</span> <span class="n">Atoms</span><span class="p">,</span> <span class="n">Atom</span>
@@ -128,11 +133,11 @@ H3       5.00000000      0.00000000      4.30000000
 </pre></div></div>
 </div>
 <section id="Calculators">
-<h2>Calculators<a class="headerlink" href="#Calculators" title="Permalink to this heading"></a></h2>
+<h2>Calculators<a class="headerlink" href="#Calculators" title="Link to this heading"></a></h2>
 <p>Calculator functions take in an <code class="docutils literal notranslate"><span class="pre">Atom</span></code> instance and calculate something with it. An example below calculated the atomic local frame (ALF) features.</p>
 <p>Features are calculated using feature calculator functions, which take in an <code class="docutils literal notranslate"><span class="pre">Atom</span></code> instance and return the calculated features. The calculators might need extra arguments, which are passed in as arguments or key word arguments. Currently, only an atomic local frame calculator is implemented, but there is nothing stopping a user from implementing their own calculators as needed.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ichor.core.calculators</span> <span class="kn">import</span> <span class="n">default_alf_calculator</span><span class="p">,</span> <span class="n">default_feature_calculator</span>
@@ -163,7 +168,7 @@ H3       5.00000000      0.00000000      4.30000000
 <p>As seen above, we first calculate the ALF for every atom. There is the <code class="docutils literal notranslate"><span class="pre">alf_list</span></code> and <code class="docutils literal notranslate"><span class="pre">alf_dict</span></code> methods, which return either a list of a dictionary respectively. In both cases, the <code class="docutils literal notranslate"><span class="pre">ALF</span></code> class is used to contain information about the atom’s ALF. This <code class="docutils literal notranslate"><span class="pre">ALF</span></code> class is simply a named tuple containing the origin index, x axis index, and xy plane index. Note that these are 0-indexed as Python is 0 indexed. However, do note that the actual atom names (eg. O1, H2, etc.) do start at 1. There is
 no atom <code class="docutils literal notranslate"><span class="pre">H0</span></code> for example.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># calculating features with given alf</span>
@@ -191,7 +196,7 @@ array([[ 5.88551857, 12.46216712,  1.0341914 ],
 </div>
 <p>The ALF features for the given <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> instance are calculated as a numpy array of shape <code class="docutils literal notranslate"><span class="pre">natoms</span> <span class="pre">x</span> <span class="pre">nfeatures</span></code>. Since these features are per-atom, each atom has its own feature set. Now, we can also calculate the features for an individual atom like so</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">one_atom_features</span> <span class="o">=</span> <span class="n">atoms_instance</span><span class="p">[</span><span class="s2">&quot;O1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">features</span><span class="p">(</span><span class="n">default_feature_calculator</span><span class="p">,</span> <span class="n">alf_dict</span><span class="p">)</span>
@@ -210,10 +215,10 @@ array([ 5.88551857, 12.46216712,  1.0341914 ])
 <p>This is done by directly calculating the ALF features only for the O1 atom.</p>
 </section>
 <section id="Defining-a-custom-feature-calculator">
-<h2>Defining a custom feature calculator<a class="headerlink" href="#Defining-a-custom-feature-calculator" title="Permalink to this heading"></a></h2>
-<p>Let’s say that you want to implement a custom calculator. All you need to do is implement a function that takes in an <code class="docutils literal notranslate"><span class="pre">Atom</span></code> instance and does something with it. Note that typically you will access the <code class="docutils literal notranslate"><span class="pre">parent</span></code> attribute of <code class="docutils literal notranslate"><span class="pre">Atom</span></code>, which is the <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> instance containing the whole geometry.</p>
+<h2>Defining a custom feature calculator<a class="headerlink" href="#Defining-a-custom-feature-calculator" title="Link to this heading"></a></h2>
+<p>Let’s say that you want to implement a custom calculator. All you need to do is implement a function that takes in an <code class="docutils literal notranslate"><span class="pre">Atom</span></code> or <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> instance and does something with it. If an <code class="docutils literal notranslate"><span class="pre">Atom</span></code> is passed in, then the function should compute separate features for each atom. If an <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> instance is passed in, then the function should compute one set of features for the whole system. Below are two examples of defining custom feature calculator functions.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -243,7 +248,7 @@ array([ 5.88551857, 12.46216712,  1.0341914 ])
 </div>
 <p>Then to get the features for all atoms, we go to the <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> class instead, which just gets the features for all <code class="docutils literal notranslate"><span class="pre">Atom</span></code> instances held inside the <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> class. Note that due to the simple calculator, the features for all atoms will be the same in this case.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">new_set_of_features_all_atoms</span> <span class="o">=</span> <span class="n">atoms_instance</span><span class="o">.</span><span class="n">features</span><span class="p">(</span><span class="n">x_coordinate_features</span><span class="p">)</span>
@@ -262,6 +267,52 @@ array([ 5.88551857, 12.46216712,  1.0341914 ])
  [0.  2.1 5. ]]
 </pre></div></div>
 </div>
+<section id="Coulomb-Matrix-Example---One-feature-vector-for-whole-system">
+<h3>Coulomb Matrix Example - One feature vector for whole system<a class="headerlink" href="#Coulomb-Matrix-Example---One-feature-vector-for-whole-system" title="Link to this heading"></a></h3>
+<p>Below is an example of how to use ichor to compute the coulomb matrix representation of molecules. Note that the <code class="docutils literal notranslate"><span class="pre">is_atomic=False</span></code> is used to indicate that the calculator is going to be obtaining a feature vector used to describe the whole system. In this case, each atom does not have its own set of features.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define calculator function which is going to compute a coulomb matrix for a given geometry</span>
+
+<span class="kn">from</span> <span class="nn">ichor.core.common.constants</span> <span class="kn">import</span> <span class="n">type2nuclear_charge</span>
+<span class="kn">from</span> <span class="nn">ichor.core.atoms</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Atoms</span>
+
+<span class="k">def</span> <span class="nf">coulomb_matrix_representation</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">Atoms</span><span class="p">):</span>
+
+    <span class="n">natoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">natoms</span><span class="p">,</span> <span class="n">natoms</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atm1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">atm2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
+                <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">type2nuclear_charge</span><span class="p">[</span><span class="n">atm1</span><span class="o">.</span><span class="n">type</span><span class="p">]</span><span class="o">**</span><span class="mf">2.4</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">atm2</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">-</span> <span class="n">atm1</span><span class="o">.</span><span class="n">coordinates</span><span class="p">)</span>
+                <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">type2nuclear_charge</span><span class="p">[</span><span class="n">atm1</span><span class="o">.</span><span class="n">type</span><span class="p">]</span> <span class="o">*</span> <span class="n">type2nuclear_charge</span><span class="p">[</span><span class="n">atm2</span><span class="o">.</span><span class="n">type</span><span class="p">])</span> <span class="o">/</span> <span class="n">dist</span>
+
+    <span class="k">return</span> <span class="n">res</span>
+
+
+<span class="n">atoms</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">([</span><span class="n">Atom</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">Atom</span><span class="p">(</span><span class="s2">&quot;H&quot;</span><span class="p">,</span>  <span class="mf">0.82</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">Atom</span><span class="p">(</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.54</span><span class="p">,</span> <span class="mf">0.83</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)])</span>
+<span class="n">coulomb_matrix_descriptors</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">features</span><span class="p">(</span><span class="n">coulomb_matrix_representation</span><span class="p">,</span> <span class="n">is_atomic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">coulomb_matrix_descriptors</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([[73.51669472,  9.75609756,  8.07915961],
+       [ 9.75609756,  0.5       ,  0.62764116],
+       [ 8.07915961,  0.62764116,  0.5       ]])
+</pre></div></div>
+</div>
+</section>
 </section>
 </section>
 
