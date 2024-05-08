@@ -77,7 +77,7 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
             and has a ``.atoms`` attribute
         :raises AtomsNotFoundError: If file class does not contain atoms
         :return: _description_
-        :rtype: Atoms
+        :rtype: ichor.core.atoms.Atoms
         """
         for f in self.files:
             # try to return atoms

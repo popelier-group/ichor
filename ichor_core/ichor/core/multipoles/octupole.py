@@ -347,8 +347,8 @@ def displace_octupole_cartesian(
 
 
 def recover_molecular_octupole(
-    atoms: "Atoms",  # noqa
-    ints_dir: "IntDirectory",  # noqa
+    atoms: "ichor.core.atoms.Atoms",  # noqa F821
+    ints_dir: "ichor.core.files.IntDirectory",  # noqa F821
     convert_to_debye_angstrom_squared=True,
     convert_to_cartesian=True,
     include_prefactor=True,
@@ -420,7 +420,8 @@ def recover_molecular_octupole(
 
 
 def get_gaussian_and_aimall_molecular_octupole(
-    gaussian_output: "GaussianOutput", ints_directory: "IntsDir"  # noqa: F821
+    gaussian_output: "ichor.core.files.GaussianOutput",  # noqa F821
+    ints_directory: "ichor.core.files.IntsDir",  # noqa: F821
 ):
     """Gets the Gaussian octupole moment and converts it to traceless (still in Debye Angstrom^2)
     Also gets the AIMAll recovered molecule octupole moment from atomic ones.

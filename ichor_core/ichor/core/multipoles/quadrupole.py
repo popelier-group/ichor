@@ -189,8 +189,8 @@ def displace_quadrupole_cartesian(
 
 
 def recover_molecular_quadrupole(
-    atoms: "Atoms",  # noqa
-    ints_dir: "IntDirectory",  # noqa
+    atoms: "ichor.core.atoms.Atoms",  # noqa F821
+    ints_dir: "ichor.core.files.IntDirectory",  # noqa F821
     convert_to_debye_angstrom=True,
     convert_to_cartesian=True,
     include_prefactor=True,
@@ -268,7 +268,8 @@ def recover_molecular_quadrupole(
 
 
 def get_gaussian_and_aimall_molecular_quadrupole(
-    gaussian_output: "GaussianOutput", ints_directory: "IntsDir"  # noqa: F821
+    gaussian_output: "ichor.core.files.GaussianOutput",  # noqa F821
+    ints_directory: "ichor.core.files.IntsDir",  # noqa: F821
 ):
     """Gets the Gaussian quadrupole moment and converts it to traceless (still in Debye Angstrom^2)
     Also gets the AIMAll recovered molecule quadrupole moment from atomic ones.

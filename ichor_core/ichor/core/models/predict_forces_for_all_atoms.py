@@ -9,7 +9,9 @@ from ichor.core.models.calculate_fflux_derivatives import (
 
 
 def predict_fflux_forces_for_all_atoms(
-    atoms: "Atoms", models: "Models", system_alf: List["ALF"]  # noqa F821
+    atoms: "ichor.core.atoms.Atoms",  # noqa F821
+    models: "ichor.core.models.Models",  # noqa F821
+    system_alf: List["ALF"],  # noqa F821
 ) -> np.ndarray:
     """Predicts the forces that FFLUX predicts (which are written to IQA_FORCES file).
 
@@ -70,7 +72,9 @@ def predict_fflux_forces_for_all_atoms(
 
 
 def predict_fflux_forces_for_all_atoms_dict(
-    atoms: "Atoms", models: "Models", system_alf: List["ALF"]  # noqa F821
+    atoms: "ichor.core.atoms.Atoms",  # noqa F821
+    models: "ichor.core.models.Models",  # noqa F821
+    system_alf: List["ALF"],  # noqa F821
 ) -> Dict[str, np.ndarray]:
     """Predicts the forces that FFLUX predicts (which are written to IQA_FORCES file).
 
@@ -94,7 +98,9 @@ def predict_fflux_forces_for_all_atoms_dict(
 
 
 def predict_fflux_forces_for_all_atoms_one_dimensional(
-    atoms: "Atoms", models: "Models", system_alf: List["ALF"]  # noqa F821
+    atoms: "ichor.core.atoms.Atoms",  # noqa F821
+    models: "ichor.core.models.Models",  # noqa F821
+    system_alf: List["ALF"],  # noqa F821
 ) -> np.ndarray:
     """Predicts the forces that FFLUX predicts (which are written to IQA_FORCES file).
     Note this is for special case where the system has only one feature, eg. HCl.
