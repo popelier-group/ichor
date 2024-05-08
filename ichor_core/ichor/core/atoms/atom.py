@@ -32,10 +32,7 @@ class Atom(VarReprMixin, Coordinates3D):
         # these are used for the actual names, eg. O1 H2 H3, so the atom_number starts at 1
         self._index: Optional[int] = index
 
-        # we need the parent Atoms because we need to know what other atoms are in the system to calcualte ALF/features
-        from ichor.core.atoms.atoms import Atoms
-
-        self._parent: Optional[Atoms] = parent
+        self._parent: Optional["ichor.core.atoms.Atoms"] = parent  # noqa F821
         Coordinates3D.__init__(self, x, y, z)
         self.units: AtomicDistance = units
 
@@ -84,12 +81,12 @@ class Atom(VarReprMixin, Coordinates3D):
         self._index = idx
 
     @property
-    def parent(self) -> "Atoms":  # noqa F821
+    def parent(self) -> "ichor.core.atoms.Atoms":  # noqa F821
         """Returns the parent instance (an instance of `Atoms` class) that holds self (an instance of `Atom`).
 
         :raises ValueError: if parent is not defined
         :return: parent instance of type `Atoms`
-        :rtype: Atoms
+        :rtype: ichor.core.atoms.Atoms
         """
 
         if self._parent is None:
@@ -99,11 +96,11 @@ class Atom(VarReprMixin, Coordinates3D):
         return self._parent
 
     @parent.setter
-    def parent(self, parent: "Atoms"):  # noqa F821
+    def parent(self, parent: "ichor.core.atoms.Atoms"):  # noqa F821
         """Setter method for ._parent attribute.
 
         :param parent: The parent instance (of type `Atoms`) which holds self (an `Atom` instance)
-        :type parent: Atoms
+        :type parent: ichor.core.atoms.Atoms
         """
         self._parent = parent
 
