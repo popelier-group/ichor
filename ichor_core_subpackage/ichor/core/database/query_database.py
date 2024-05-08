@@ -407,7 +407,9 @@ def write_processed_one_atom_data_to_csv(
                 if check_for_xy_plane_atom is not None:
 
                     xy_plane_atom_name = atoms[in_alf_atom_indices[2]].name
-                    val_angle_name = x_axis_name + "-" + xy_plane_atom_name
+                    # the xy plane atom moves in the xy plane, so it itself determines what the valence angle is
+                    # the x-axis atom always stays on the x-axis
+                    val_angle_name = xy_plane_atom_name
 
                     atom_ordering_in_features = [
                         x_axis_name,
@@ -518,7 +520,9 @@ def write_processed_one_atom_data_to_csv(
             if check_for_xy_plane_atom is not None:
 
                 xy_plane_atom_name = atoms[in_alf_atom_indices[2]].name
-                val_angle_name = x_axis_name + "-" + xy_plane_atom_name
+                # the xy plane atom moves in the xy plane, so it itself determines what the valence angle is
+                # the x-axis atom always stays on the x-axis
+                val_angle_name = xy_plane_atom_name
 
                 atom_ordering_in_features = [
                     x_axis_name,
