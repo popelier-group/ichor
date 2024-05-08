@@ -36,6 +36,14 @@ ichor.core.models.kernels.kernel module
    :undoc-members:
    :show-inheritance:
 
+ichor.core.models.kernels.mixed\_kernel\_with\_derivatives module
+-----------------------------------------------------------------
+
+.. automodule:: ichor.core.models.kernels.mixed_kernel_with_derivatives
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ichor.core.models.kernels.periodic\_kernel module
 -------------------------------------------------
 

@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Submitting .gjf files to Gaussian or .wfn files to AIMALL using ichor.hpc &mdash; ichor 3.1.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
 
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=dd1205ac"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -90,7 +92,7 @@
            <div itemprop="articleBody">
 
   <section id="submitting-gjf-files-to-gaussian-or-wfn-files-to-aimall-using-ichor-hpc">
-<h1>Submitting .gjf files to Gaussian or .wfn files to AIMALL using ichor.hpc<a class="headerlink" href="#submitting-gjf-files-to-gaussian-or-wfn-files-to-aimall-using-ichor-hpc" title="Permalink to this heading"></a></h1>
+<h1>Submitting .gjf files to Gaussian or .wfn files to AIMALL using ichor.hpc<a class="headerlink" href="#submitting-gjf-files-to-gaussian-or-wfn-files-to-aimall-using-ichor-hpc" title="Link to this heading"></a></h1>
 <p>Since ICHOR can be used as a library, we can write a separate python script that uses <code class="docutils literal notranslate"><span class="pre">ichor</span></code>’s modules to do tasks like submitting a lot of gjf files at once.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">ichor.core.files.Trajectory</span></code> class can be used to convert a trajectory file (such as a <code class="docutils literal notranslate"><span class="pre">.xyz</span></code> or <code class="docutils literal notranslate"><span class="pre">DLPOLY</span> <span class="pre">History</span></code> that contain a lot of geometries) into individual <code class="docutils literal notranslate"><span class="pre">.xyz</span></code> files that are the inputs to Gaussian.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
@@ -109,7 +111,7 @@ the trajectory. Then the <code class="docutils literal notranslate"><span class=
 directories for each <code class="docutils literal notranslate"><span class="pre">.xyz</span></code> file. Finally, <code class="docutils literal notranslate"><span class="pre">submit_points_directory_to_gaussian</span></code> submits the
 Gaussian array job to a compute cluster.</p>
 <section id="submitting-aimall-jobs">
-<h2>Submitting AIMALL jobs<a class="headerlink" href="#submitting-aimall-jobs" title="Permalink to this heading"></a></h2>
+<h2>Submitting AIMALL jobs<a class="headerlink" href="#submitting-aimall-jobs" title="Link to this heading"></a></h2>
 <p>Now that we have ran Gaussian, we should have <code class="docutils literal notranslate"><span class="pre">.wfn</span></code> files which can be passed into AIMALL. After the Gaussian jobs are finished we can do</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ichor.main.aimall</span> <span class="kn">import</span> <span class="n">submit_points_directory_to_aimall</span>
 

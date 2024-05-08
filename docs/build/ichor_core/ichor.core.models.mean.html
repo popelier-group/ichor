@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ichor.core.models.mean package &mdash; ichor 3.1.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
 
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=dd1205ac"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -63,14 +65,15 @@
 <li class="toctree-l3 current"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="ichor.core.models.html#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.calculate_fflux_derivatives">ichor.core.models.calculate_fflux_derivatives module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.create_datasets">ichor.core.models.create_datasets module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.fflux_derivative_helper_functions">ichor.core.models.fflux_derivative_helper_functions module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.gaussian_energy_derivative_wrt_features">ichor.core.models.gaussian_energy_derivative_wrt_features module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.model">ichor.core.models.model module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.models">ichor.core.models.models module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models.predict_forces_for_all_atoms">ichor.core.models.predict_forces_for_all_atoms module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-ichor.core.models">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-calculate-fflux-derivatives-module">ichor.core.models.calculate_fflux_derivatives module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-create-datasets-module">ichor.core.models.create_datasets module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-fflux-derivative-helper-functions-module">ichor.core.models.fflux_derivative_helper_functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-gaussian-energy-derivative-wrt-features-module">ichor.core.models.gaussian_energy_derivative_wrt_features module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-model-module">ichor.core.models.model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-model-with-gradient-module">ichor.core.models.model_with_gradient module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-models-module">ichor.core.models.models module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#ichor-core-models-predict-forces-for-all-atoms-module">ichor.core.models.predict_forces_for_all_atoms module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.models.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
@@ -113,233 +116,27 @@
            <div itemprop="articleBody">
 
   <section id="ichor-core-models-mean-package">
-<h1>ichor.core.models.mean package<a class="headerlink" href="#ichor-core-models-mean-package" title="Permalink to this heading"></a></h1>
+<h1>ichor.core.models.mean package<a class="headerlink" href="#ichor-core-models-mean-package" title="Link to this heading"></a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.models.mean.constant">
-<span id="ichor-core-models-mean-constant-module"></span><h2>ichor.core.models.mean.constant module<a class="headerlink" href="#module-ichor.core.models.mean.constant" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.mean.constant.ConstantMean">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ConstantMean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.mean.constant.ConstantMean" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.models.mean.mean.Mean" title="ichor.core.models.mean.mean.Mean"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mean</span></code></a></p>
-<p>A constant value that is used for the mean function.
-When no training data is present close to test points, covariance is low, therefore
-the predictions for the test points will be this constant mean value.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>value</strong> – A float to be used as the constant mean value</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.constant.ConstantMean.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.models.mean.constant.ConstantMean.value" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the constant mean value.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.constant.ConstantMean.write_str">
-<span class="sig-name descname"><span class="pre">write_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.core.models.mean.constant.ConstantMean.write_str" title="Permalink to this definition"></a></dt>
-<dd><p>Used to write the mean part of a model file</p>
-</dd></dl>
-
-</dd></dl>
-
+<section id="ichor-core-models-mean-constant-module">
+<h2>ichor.core.models.mean.constant module<a class="headerlink" href="#ichor-core-models-mean-constant-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.models.mean.linear">
-<span id="ichor-core-models-mean-linear-module"></span><h2>ichor.core.models.mean.linear module<a class="headerlink" href="#module-ichor.core.models.mean.linear" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.mean.linear.LinearMean">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LinearMean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.mean.linear.LinearMean" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.models.mean.mean.Mean" title="ichor.core.models.mean.mean.Mean"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mean</span></code></a></p>
-<p>A linear mean.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.linear.LinearMean.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.models.mean.linear.LinearMean.value" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the constant mean value.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.linear.LinearMean.write_str">
-<span class="sig-name descname"><span class="pre">write_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.core.models.mean.linear.LinearMean.write_str" title="Permalink to this definition"></a></dt>
-<dd><p>Used to write the mean part of a model file</p>
-</dd></dl>
-
-</dd></dl>
-
+<section id="ichor-core-models-mean-linear-module">
+<h2>ichor.core.models.mean.linear module<a class="headerlink" href="#ichor-core-models-mean-linear-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.models.mean.mean">
-<span id="ichor-core-models-mean-mean-module"></span><h2>ichor.core.models.mean.mean module<a class="headerlink" href="#module-ichor.core.models.mean.mean" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.mean.mean.Mean">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Mean</span></span><a class="headerlink" href="#ichor.core.models.mean.mean.Mean" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>Abstract base class for implementing different mean functions for a Gaussian Process.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.mean.Mean.value">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.models.mean.mean.Mean.value" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.mean.Mean.write_str">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">write_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.core.models.mean.mean.Mean.write_str" title="Permalink to this definition"></a></dt>
-<dd><p>Used to write the mean part of a model file</p>
-</dd></dl>
-
-</dd></dl>
-
+<section id="ichor-core-models-mean-mean-module">
+<h2>ichor.core.models.mean.mean module<a class="headerlink" href="#ichor-core-models-mean-mean-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.models.mean.quadratic">
-<span id="ichor-core-models-mean-quadratic-module"></span><h2>ichor.core.models.mean.quadratic module<a class="headerlink" href="#module-ichor.core.models.mean.quadratic" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.mean.quadratic.QuadraticMean">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuadraticMean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.mean.quadratic.QuadraticMean" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.models.mean.mean.Mean" title="ichor.core.models.mean.mean.Mean"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mean</span></code></a></p>
-<p>A quadratic mean</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.quadratic.QuadraticMean.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.models.mean.quadratic.QuadraticMean.value" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the constant mean value.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.quadratic.QuadraticMean.write_str">
-<span class="sig-name descname"><span class="pre">write_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.core.models.mean.quadratic.QuadraticMean.write_str" title="Permalink to this definition"></a></dt>
-<dd><p>Used to write the mean part of a model file</p>
-</dd></dl>
-
-</dd></dl>
-
+<section id="ichor-core-models-mean-quadratic-module">
+<h2>ichor.core.models.mean.quadratic module<a class="headerlink" href="#ichor-core-models-mean-quadratic-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.models.mean.zero">
-<span id="ichor-core-models-mean-zero-module"></span><h2>ichor.core.models.mean.zero module<a class="headerlink" href="#module-ichor.core.models.mean.zero" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.mean.zero.ZeroMean">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ZeroMean</span></span><a class="headerlink" href="#ichor.core.models.mean.zero.ZeroMean" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.models.mean.mean.Mean" title="ichor.core.models.mean.mean.Mean"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mean</span></code></a></p>
-<p>Implements a zero mean for the Gaussian Process.
-When covariance between training points and a test point is low, this means the GP will return the
-mean of the GP (in this case it is set to 0).</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.zero.ZeroMean.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.models.mean.zero.ZeroMean.value" title="Permalink to this definition"></a></dt>
-<dd><p>Return 0 as this is a Zero Mean Gaussian Process</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.zero.ZeroMean.write_str">
-<span class="sig-name descname"><span class="pre">write_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.core.models.mean.zero.ZeroMean.write_str" title="Permalink to this definition"></a></dt>
-<dd><p>Used to write the mean part of a model file</p>
-</dd></dl>
-
-</dd></dl>
-
+<section id="ichor-core-models-mean-zero-module">
+<h2>ichor.core.models.mean.zero module<a class="headerlink" href="#ichor-core-models-mean-zero-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.models.mean">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.models.mean" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.mean.ConstantMean">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ConstantMean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.mean.ConstantMean" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.models.mean.mean.Mean" title="ichor.core.models.mean.mean.Mean"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mean</span></code></a></p>
-<p>A constant value that is used for the mean function.
-When no training data is present close to test points, covariance is low, therefore
-the predictions for the test points will be this constant mean value.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>value</strong> – A float to be used as the constant mean value</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.ConstantMean.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.models.mean.ConstantMean.value" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the constant mean value.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.ConstantMean.write_str">
-<span class="sig-name descname"><span class="pre">write_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.core.models.mean.ConstantMean.write_str" title="Permalink to this definition"></a></dt>
-<dd><p>Used to write the mean part of a model file</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.mean.LinearMean">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LinearMean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.mean.LinearMean" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.models.mean.mean.Mean" title="ichor.core.models.mean.mean.Mean"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mean</span></code></a></p>
-<p>A linear mean.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.LinearMean.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.models.mean.LinearMean.value" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the constant mean value.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.LinearMean.write_str">
-<span class="sig-name descname"><span class="pre">write_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.core.models.mean.LinearMean.write_str" title="Permalink to this definition"></a></dt>
-<dd><p>Used to write the mean part of a model file</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.mean.Mean">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Mean</span></span><a class="headerlink" href="#ichor.core.models.mean.Mean" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>Abstract base class for implementing different mean functions for a Gaussian Process.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.Mean.value">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.models.mean.Mean.value" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.Mean.write_str">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">write_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.core.models.mean.Mean.write_str" title="Permalink to this definition"></a></dt>
-<dd><p>Used to write the mean part of a model file</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.mean.QuadraticMean">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuadraticMean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.mean.QuadraticMean" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.models.mean.mean.Mean" title="ichor.core.models.mean.mean.Mean"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mean</span></code></a></p>
-<p>A quadratic mean</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.QuadraticMean.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.models.mean.QuadraticMean.value" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the constant mean value.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.QuadraticMean.write_str">
-<span class="sig-name descname"><span class="pre">write_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.core.models.mean.QuadraticMean.write_str" title="Permalink to this definition"></a></dt>
-<dd><p>Used to write the mean part of a model file</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.models.mean.ZeroMean">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ZeroMean</span></span><a class="headerlink" href="#ichor.core.models.mean.ZeroMean" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ichor.core.models.mean.mean.Mean" title="ichor.core.models.mean.mean.Mean"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mean</span></code></a></p>
-<p>Implements a zero mean for the Gaussian Process.
-When covariance between training points and a test point is low, this means the GP will return the
-mean of the GP (in this case it is set to 0).</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.ZeroMean.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.models.mean.ZeroMean.value" title="Permalink to this definition"></a></dt>
-<dd><p>Return 0 as this is a Zero Mean Gaussian Process</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.models.mean.ZeroMean.write_str">
-<span class="sig-name descname"><span class="pre">write_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.core.models.mean.ZeroMean.write_str" title="Permalink to this definition"></a></dt>
-<dd><p>Used to write the mean part of a model file</p>
-</dd></dl>
-
-</dd></dl>
-
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
 </section>
 </section>
 

@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ichor.core.calculators.features package &mdash; ichor 3.1.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
 
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=dd1205ac"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -60,10 +62,10 @@
 <li class="toctree-l4 current"><a class="reference internal" href="ichor.core.calculators.html#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.calculators.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.calculators.html#module-ichor.core.calculators.alf_features_to_coordinates_calculator">ichor.core.calculators.alf_features_to_coordinates_calculator module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.calculators.html#module-ichor.core.calculators.c_matrix_calculator">ichor.core.calculators.c_matrix_calculator module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.calculators.html#module-ichor.core.calculators.geometry_calculator">ichor.core.calculators.geometry_calculator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.calculators.html#ichor-core-calculators-c-matrix-calculator-module">ichor.core.calculators.c_matrix_calculator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.calculators.html#ichor-core-calculators-geometry-calculator-module">ichor.core.calculators.geometry_calculator module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.calculators.html#module-ichor.core.calculators.spherical_to_cartesian_calculator">ichor.core.calculators.spherical_to_cartesian_calculator module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.calculators.html#module-ichor.core.calculators">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.calculators.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.common.html">ichor.core.common package</a></li>
@@ -110,42 +112,15 @@
            <div itemprop="articleBody">
 
   <section id="ichor-core-calculators-features-package">
-<h1>ichor.core.calculators.features package<a class="headerlink" href="#ichor-core-calculators-features-package" title="Permalink to this heading"></a></h1>
+<h1>ichor.core.calculators.features package<a class="headerlink" href="#ichor-core-calculators-features-package" title="Link to this heading"></a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.calculators.features.alf_features_calculator">
-<span id="ichor-core-calculators-features-alf-features-calculator-module"></span><h2>ichor.core.calculators.features.alf_features_calculator module<a class="headerlink" href="#module-ichor.core.calculators.features.alf_features_calculator" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.calculators.features.alf_features_calculator.calculate_alf_features">
-<span class="sig-name descname"><span class="pre">calculate_alf_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atom.Atom" title="ichor.core.atoms.atom.Atom"><span class="pre">Atom</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.common.html#ichor.core.common.units.AtomicDistance" title="ichor.core.common.units.AtomicDistance"><span class="pre">AtomicDistance</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">AtomicDistance.Bohr</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.calculators.features.alf_features_calculator.calculate_alf_features" title="Permalink to this definition"></a></dt>
-<dd><p>Calculates the features for the given central atom.</p>
-<dl>
-<dt>:param<span class="classifier">param atom: an instance of the <cite>Atom</cite> class:</span></dt><dd><p>This atom is the central atom for which we want to calculate the C rotation matrix.</p>
-</dd>
-<dt>:param<span class="classifier">param alf: A callable or instance of <cite>ALF</cite> that is used to</span></dt><dd><p>calculate the atomic local frame for the atom. This atomic local frame then defines the
-features which are going to be calculated. If no ALF is passed by user,
-then the default way of calculating ALF is used.</p>
-</dd>
-<dt>:param<span class="classifier">param distance_unit: The distance units to use for the calculated distances</span></dt><dd><p>which are part of the features. The default distance is Bohr.</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><dl class="simple">
-<dt>type: <cite>np.ndarray</cite></dt><dd><p>A 1D numpy array of shape 3N-6, where N is the number of atoms
-in the system which <cite>atom</cite> is a part of. If there are only two atoms,
-then there is only 1 feature (the distance between the atoms).</p>
-</dd>
-</dl>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
+<section id="ichor-core-calculators-features-alf-features-calculator-module">
+<h2>ichor.core.calculators.features.alf_features_calculator module<a class="headerlink" href="#ichor-core-calculators-features-alf-features-calculator-module" title="Link to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.calculators.features">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.calculators.features" title="Permalink to this heading"></a></h2>
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
 </section>
 </section>
 
