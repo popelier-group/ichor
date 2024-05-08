@@ -12,10 +12,10 @@ ichor.core.database.sql.add\_to\_database module
    :undoc-members:
    :show-inheritance:
 
-ichor.core.database.sql.create\_database module
------------------------------------------------
+ichor.core.database.sql.database module
+---------------------------------------
 
-.. automodule:: ichor.core.database.sql.create_database
+.. automodule:: ichor.core.database.sql.database
    :members:
    :undoc-members:
    :show-inheritance:

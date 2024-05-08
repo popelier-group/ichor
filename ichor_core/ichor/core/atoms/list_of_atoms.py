@@ -91,7 +91,7 @@ class ListOfAtoms(list, ABC):
             If the trajectory instance is indexed by int, the array has shape `n_atoms` x `n_features`.
             If the trajectory instance is indexed by slice, the array has shape `n_atoms` x`slice` x `n_features`.
             If a non-atomic calculator is passed, a `n_timesteps` x features (features could be vector, matrix, etc)
-                is returned.
+            is returned.
         """
         return np.array(
             [
