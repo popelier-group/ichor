@@ -16,7 +16,13 @@ default_alf_calculator: Callable = calculate_alf_atom_sequence
 
 
 def get_atom_alf(
-    atom: "Atom", alf: Union["ALF", List["ALF"], Dict[str, "ALF"]]  # noqa F821
+    # typings need to be like this because importing classes leads to imports
+    atom: "ichor.core.atoms.Atom",  # noqa F821
+    alf: Union[
+        "ichor.core.atoms.ALF",  # noqa F821
+        List["ichor.core.atoms.ALF"],  # noqa F821
+        Dict[str, "ichor.core.atoms.ALF"],  # noqa F821
+    ],  # noqa F821
 ):  # noqa F821
 
     from ichor.core.atoms.alf import ALF

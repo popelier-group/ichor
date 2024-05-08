@@ -11,8 +11,14 @@ default_distance_unit: AtomicDistance = AtomicDistance.Bohr
 
 
 def calculate_alf_features(
-    atom: "Atom",  # noqa F821
-    alf: Union["ALF", List["ALF"], List[List[int]], Dict[str, "ALF"]],  # noqa F821
+    atom: "ichor.core.atoms.Atom",  # noqa F821
+    # need to be like this because importing classes leads to circular import issues
+    alf: Union[
+        "ichor.core.atoms.ALF",  # noqa F821
+        List["ichor.core.atoms.ALF"],  # noqa F821
+        List[List[int]],
+        Dict[str, "ichor.core.atoms.ALF"],  # noqa F821
+    ],  # noqa F821
     distance_unit: AtomicDistance = default_distance_unit,
 ) -> np.ndarray:
     """Calculates the features for the given central atom.

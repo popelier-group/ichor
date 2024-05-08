@@ -44,7 +44,7 @@ def add_atom_names_to_database(session: Session, atom_names: List[str], echo=Fal
 # TODO: check that gaussian out forces exist. Check that int file exists.
 def add_point_to_database(
     session: Session,
-    point: "PointDirectory",  # noqa F821
+    point: "ichor.core.files.PointDirectory",  # noqa F821
     echo=False,
     print_missing_data=True,
 ):
