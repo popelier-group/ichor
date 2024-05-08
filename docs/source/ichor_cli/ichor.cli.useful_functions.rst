@@ -4,6 +4,14 @@ ichor.cli.useful\_functions package
 Submodules
 ----------
 
+ichor.cli.useful\_functions.bool\_to\_str module
+------------------------------------------------
+
+.. automodule:: ichor.cli.useful_functions.bool_to_str
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ichor.cli.useful\_functions.user\_input module
 ----------------------------------------------
 
