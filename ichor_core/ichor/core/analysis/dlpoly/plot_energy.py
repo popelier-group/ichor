@@ -1,5 +1,4 @@
 import math
-import warnings
 
 from string import ascii_uppercase
 from typing import List, Union
@@ -12,23 +11,24 @@ from matplotlib import pyplot as plt
 
 ascii_uppercase = list(ascii_uppercase)
 
-try:
-    import scienceplots  # noqa
+# TODO: return an axes which can be customized by user
+# try:
+#     import scienceplots  # noqa
 
-    plt.style.use("science")
+#     plt.style.use("science")
 
-    matplotlib.rcParams.update(
-        {
-            "text.usetex": False,
-            "font.family": "sans-serif",
-            "font.serif": "DejaVu Serif",
-            "axes.formatter.use_mathtext": False,
-            "mathtext.fontset": "dejavusans",
-        }
-    )
+#     matplotlib.rcParams.update(
+#         {
+#             "text.usetex": False,
+#             "font.family": "sans-serif",
+#             "font.serif": "DejaVu Serif",
+#             "axes.formatter.use_mathtext": False,
+#             "mathtext.fontset": "dejavusans",
+#         }
+#     )
 
-except ImportError:
-    warnings.warn("Could not import scienceplots. Will not use scienceplots styles.")
+# except ImportError:
+#     warnings.warn("Could not import scienceplots. Will not use scienceplots styles.")
 
 
 def round_base_10(x):

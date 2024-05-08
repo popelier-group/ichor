@@ -1,30 +1,30 @@
-import warnings
 from typing import List
 
 import numpy as np
 from ichor.core.common.constants import bohr2ang
 from matplotlib import pyplot as plt
 
-try:
-    import matplotlib
-    import scienceplots  # noqa
+# TODO: return an axes which can be customized by user
+# try:
+#     import matplotlib
+#     import scienceplots  # noqa
 
-    # from matplotlib.ticker import AutoMinorLocator, MultipleLocator
+#     # from matplotlib.ticker import AutoMinorLocator, MultipleLocator
 
-    plt.style.use("science")
+#     plt.style.use("science")
 
-    matplotlib.rcParams.update(
-        {
-            "text.usetex": False,
-            "font.family": "sans-serif",
-            "font.serif": "DejaVu Serif",
-            "axes.formatter.use_mathtext": False,
-            "mathtext.fontset": "dejavusans",
-        }
-    )
+#     matplotlib.rcParams.update(
+#         {
+#             "text.usetex": False,
+#             "font.family": "sans-serif",
+#             "font.serif": "DejaVu Serif",
+#             "axes.formatter.use_mathtext": False,
+#             "mathtext.fontset": "dejavusans",
+#         }
+#     )
 
-except ImportError:
-    warnings.warn("Could not import scienceplots. Will not use scienceplots styles.")
+# except ImportError:
+#     warnings.warn("Could not import scienceplots. Will not use scienceplots styles.")
 
 
 def mae_forces(

@@ -452,17 +452,19 @@ def plot_with_matplotlib(
     saved_name: str = "s_curves.svg",
 ):
 
+    # TODO: return an axes which can be customized by user
     try:
         import matplotlib
 
         # import matplotlib
         import matplotlib.pyplot as plt
-        import scienceplots  # noqa
+
+        # import scienceplots  # noqa
         from matplotlib import ticker as mticker
 
         # from matplotlib.ticker import AutoMinorLocator, MultipleLocator
 
-        plt.style.use("science")
+        # plt.style.use("science")
 
         matplotlib.rcParams.update(
             {
