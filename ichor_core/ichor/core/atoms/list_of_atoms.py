@@ -85,9 +85,7 @@ class ListOfAtoms(list, ABC):
             or the whole geometry
         :param args: Positional arguments to pass to feature calculator function
         :param kwargs: Key word arguments to pass to feature calculator function
-
-        :return:
-            If the features for the whole trajectory are returned,
+        :return: If the features for the whole trajectory are returned,
             the array has shape `n_atoms` x `n_timesteps` x `n_features`
             If the trajectory instance is indexed by str, the array has shape `n_timesteps` x `n_features`.
             If the trajectory instance is indexed by int, the array has shape `n_atoms` x `n_features`.
