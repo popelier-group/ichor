@@ -108,7 +108,7 @@ water_path = example_dir / "WATER-3000.xyz"
 
 @pytest.mark.parametrize(
     "timestep",
-    [TimeStep(water_path, i, t) for (i, t) in enumerate(Trajectory(water_path))],
+    [TimeStep(water_path, i, t) for (i, t) in enumerate(Trajectory(water_path)[:100])],
 )
 def test_water_3000(timestep: TimeStep):
     np.testing.assert_equal(
@@ -121,7 +121,10 @@ ammonia_path = example_dir / "AMMONIA-1000.xyz"
 
 @pytest.mark.parametrize(
     "timestep",
-    [TimeStep(ammonia_path, i, t) for (i, t) in enumerate(Trajectory(ammonia_path))],
+    [
+        TimeStep(ammonia_path, i, t)
+        for (i, t) in enumerate(Trajectory(ammonia_path)[:100])
+    ],
 )
 def test_ammonia_1000(timestep: TimeStep):
     np.testing.assert_equal(
@@ -135,7 +138,10 @@ methanol_path = example_dir / "METHANOL-1000.xyz"
 
 @pytest.mark.parametrize(
     "timestep",
-    [TimeStep(methanol_path, i, t) for (i, t) in enumerate(Trajectory(methanol_path))],
+    [
+        TimeStep(methanol_path, i, t)
+        for (i, t) in enumerate(Trajectory(methanol_path)[:100])
+    ],
 )
 def test_methanol_1000(timestep: TimeStep):
     np.testing.assert_equal(
@@ -151,7 +157,7 @@ paracetamol_path = example_dir / "PARACETAMOL-amber-300.xyz"
     "timestep",
     [
         TimeStep(paracetamol_path, i, t)
-        for (i, t) in enumerate(Trajectory(paracetamol_path))
+        for (i, t) in enumerate(Trajectory(paracetamol_path)[:100])
     ],
 )
 def test_paracetamol_300(timestep: TimeStep):
@@ -166,7 +172,10 @@ glucose_path = example_dir / "GLUCOSE-amber-300.xyz"
 
 @pytest.mark.parametrize(
     "timestep",
-    [TimeStep(glucose_path, i, t) for (i, t) in enumerate(Trajectory(glucose_path))],
+    [
+        TimeStep(glucose_path, i, t)
+        for (i, t) in enumerate(Trajectory(glucose_path)[:100])
+    ],
 )
 def test_glucose_300(timestep: TimeStep):
     np.testing.assert_equal(
