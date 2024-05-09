@@ -1,0 +1,62 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ docs_update ]
+  pull_request:
+    branches: [ docs_update ]
+  workflow_call:
+
+jobs:
+  run_linter:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.8"
+    - name: Install dependencies
+      run: |
+        pip install pre-commit
+        pre-commit install
+    - name: Run pre-commit
+      run: | # taken from https://pre-commit.com/#pre-commit-run
+        git ls-files -- '*.py' | xargs pre-commit run --files
+    # upload when open sourced
+    # - name: Upload coverage reports to Codecov
+    #   uses: codecov/codecov-action@v3
+
+  run_unit_tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.8"
+    - name: Install dependencies
+      run: |
+        pip install -e ichor_core[dev]
+        pip install -e ichor_hpc
+        pip install -e ichor_cli
+    - name: Run pytest
+      run: |
+        pytest ichor_core/tests
+
+  run_examples:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.8"
+    - name: Install dependencies
+      run: |
+        pip install -e ichor_core[dev]
+        pip install -e ichor_hpc
+        pip install -e ichor_cli
+    - name: Run example notebooks
+      run: |
+        git ls-files -- '*.ipynb' | xargs pytest --nbval-lax --current-env
