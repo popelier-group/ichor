@@ -4,8 +4,15 @@ import numpy as np
 
 
 def spherical_to_cartesian(r, theta, phi) -> List[float]:
-    """
-    Spherical to cartesian transformation, where r in [0, \inf), \theta in [0, \pi], \phi in [-\pi, \pi).
+    r"""
+    Spherical to cartesian transformation
+
+    .. math::
+
+        r \in [0, \inf)
+        \theta in [0, \pi]
+        \phi in [-\pi, \pi)
+
         x = r sin \theta cos\phi
         y = r sin \phi sin\theta
         z = r cos\theta

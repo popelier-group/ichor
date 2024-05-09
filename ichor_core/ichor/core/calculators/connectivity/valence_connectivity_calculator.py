@@ -4,7 +4,9 @@ from ichor.core.calculators.connectivity.distance_connectivity_calculator import
 )
 
 
-def connectivity_calculator_valence(atoms: "Atoms") -> np.ndarray:  # noqa F821
+def connectivity_calculator_valence(
+    atoms: "ichor.core.atoms.Atoms",  # noqa F821
+) -> np.ndarray:  # noqa F821
     """
     Calculates the connectivity matrix (showing which atoms are bonded as 1 and those that are not bonded as 0.
     It uses the Van Der Waals radius an Atom (see `Atom` class) to determine if atoms should be bonded or not.

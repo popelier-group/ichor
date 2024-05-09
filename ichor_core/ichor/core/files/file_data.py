@@ -108,7 +108,6 @@ class HasAtoms(ABC):
         central_atom_alf: ALF,
         central_atom_name: str,
         fname: Optional[Union[str, Path]] = None,
-        **kwargs,
     ):
         """Centers all geometries (from a Trajectory of PointsDirectory instance)
         onto a central atom and then writes out a new xyz file with all geometries centered on that atom.
@@ -119,8 +118,7 @@ class HasAtoms(ABC):
         :param feature_calculator: Function which calculates features
         :param central_atom_name: the name of the central atom to center all geometries on. Eg. `O1`
         :param fname: Optional file name in which to save the rotated geometries.
-        :param \*args: Positional arguments to pass to calculator function
-        :param \**kwargs: Key word arguments to pass to calculator function
+        :param kwargs: Key word arguments to pass to calculator function
         """
 
         from ichor.core.atoms import Atoms

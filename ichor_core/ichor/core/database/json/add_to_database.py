@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 def get_data_for_point(
-    point: "PointDirectory",  # noqa F821,
+    point: "ichor.core.files.PointDirectory",  # noqa F821,
     print_missing_data=True,
 ):
     """Returns all information for a point

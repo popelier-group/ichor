@@ -237,3 +237,11 @@ class DlpolyHistory(Trajectory):
         """Writes a trajectory .xyz file from the DL POLY HISTORY file."""
 
         self.write(path)
+
+    def write_final_geometry_to_xyz(self, xyz_path: Path):
+
+        from ichor.core.files import XYZ
+
+        xyz_inst = XYZ(xyz_path)
+        xyz_inst.atoms = self[-1]
+        xyz_inst.write()

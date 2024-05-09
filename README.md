@@ -4,7 +4,17 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Website popelier-group.herokuapp.com](https://img.shields.io/website-up-down-green-red/http/shields.io.svg)](https://studious-adventure-rr4kzlv.pages.github.io/)
 
-**ichor** is a Python package used to simplify computational chemistry programs and aid with machine learning force field development. If you would like to request missing features or run into a bug, don't hesitate to create an [issue](https://github.com/popelier-group/ICHOR/issues).
+`ichor` is a Python package used to simplify computational chemistry programs and aid with machine learning force field development. If you would like to request missing features or run into a bug, don't hesitate to create an [issue](https://github.com/popelier-group/ICHOR/issues).
+
+Here is a list of things that the package is intended to do:
+
+1. provide interfaces to any computational chemistry software to allow for easy switching between similar software and results comparison.
+2. implement flexible data structures to allow for data management of hundreds of thousands of calculations from multiple programs.
+3. integrate common database formats for efficient data storage, sharing, and post-processing
+4. provide interfaces to workload managers on compute clusters to automate job submission
+5. collate tools for machine learning dataset and model analysis, as well as molecular dynamics simulation benchmarking
+
+Realistically, the file management part of `ichor` is very general, so it can be used to manage any type of data that might not be computational chemistry related. However, the focus of the source code itself is on computational chemistry data.
 
 ## Getting Started
 ---

@@ -11,8 +11,5 @@ __all__ = [
     "get_atoms_from_path",
     "get_trajectory_from_path",
     "aimall_completed",
-    "recover_molecular_dipole",
-    "recover_molecular_quadrupole",
-    "recover_molecular_octupole",
     "single_or_many_points_directories",
 ]

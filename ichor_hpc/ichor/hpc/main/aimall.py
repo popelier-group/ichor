@@ -38,7 +38,7 @@ def submit_points_directory_to_aimall(
     :param hold: Hold for a specific JobID, defaults to None
     :raises ValueError: if the provided method is not in the supported functionals, then raise error.
     :return: The job id of the submitted job
-    :rtype: Optional[JobID]
+    :rtype: Optional[ichor.hpc.batch_system.jobs.JobID]
     """
 
     if not isinstance(points_directory, PointsDirectory):

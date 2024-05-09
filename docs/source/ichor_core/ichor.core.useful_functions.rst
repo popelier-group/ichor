@@ -1,14 +1,6 @@
 ichor.core.useful\_functions package
 ====================================
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 1
-
-   ichor.core.useful_functions.dl_poly
-
 Submodules
 ----------
 

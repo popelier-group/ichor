@@ -1,18 +1,48 @@
-# -*- coding: utf-8 -*-
-
-__author__ = "Daniel Greenfeld"
-__email__ = "pydanny@gmail.com"
-__version__ = "1.5.2"
-__license__ = "BSD"
-
 import threading
 from functools import wraps
 from time import time
+
+from ichor.core.common.types.itypes import F, Scalar, T
 
 try:
     import asyncio
 except (ImportError, SyntaxError):
     asyncio = None
+from typing import Any, Sequence
+
+
+def buildermethod(func: F) -> F:
+    """
+    Executes a function on an instance of a class and returns the modified instance.
+    This allows for scenarios where we can initialize a class and call a method
+    (which does not return anything but it does modify the instance) in the same line.
+
+    :param func: The function to be executed
+
+    .. note::
+
+        Without builder decorator:
+            t = Test().add() Since the add() method does not return anything, t is `None`
+
+        With @builder decorator:
+            t = Test().add() Since the add() method does not return anything, t is an instance of test
+
+        Without builder method:
+        t = Test()
+        t.add()
+    """
+
+    # makes sure that func.__name__ returns the name of the
+    # function instead of wrapper if the decorator has been applied to func
+    @wraps(func)
+    def wrapper(self: T, *args, **kwargs) -> T:
+        func(self, *args, **kwargs)
+        return self
+
+    return wrapper
+
+
+# cached property
 
 
 class cached_property(object):
@@ -206,3 +236,90 @@ class threaded_cached_property_with_ttl(cached_property_with_ttl):
 threaded_cached_property_ttl = threaded_cached_property_with_ttl
 timed_threaded_cached_property = threaded_cached_property_with_ttl
 ntimes_cached_property = cached_property_with_ntimes
+
+
+# class property
+
+
+class ClassPropertyDescriptor:
+    def __init__(self, fget, fset=None):
+        self.fget = fget
+        self.fset = fset
+
+    def __get__(self, obj, klass=None):
+        if klass is None:
+            klass = type(obj)
+        return self.fget.__get__(obj, klass)()
+
+    def __set__(self, obj, value):
+        if not self.fset:
+            raise AttributeError("can't set attribute")
+        type_ = type(obj)
+        return self.fset.__get__(obj, type_)(value)
+
+    def setter(self, func):
+        if not isinstance(func, (classmethod, staticmethod)):
+            func = classmethod(func)
+        self.fset = func
+        return self
+
+
+def classproperty(func: F) -> ClassPropertyDescriptor:
+    """A decorator which makes it possible to make class properties,
+    where the class can call a class method without the parenthesis at the end.
+    This is useful to have as class variables are static and cannot be changed.
+    Class properties allow us to change these values on the fly."""
+    if not isinstance(func, (classmethod, staticmethod)):
+        func = classmethod(func)
+    return ClassPropertyDescriptor(func)
+
+
+# run function
+
+
+def run_function(order: Scalar) -> F:
+    """Used to decorate a method so that `get_functions_to_run` can find and return the methods in
+    the order specified by the order parameter"""
+
+    def decorator(func: F) -> F:
+        func._order = order
+
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> Any:
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+def get_functions_to_run(obj: Any) -> Sequence[F]:
+    """Finds all methods of `obj` with the `order` attribute then returns the sequence of methods
+    in the order defined"""
+    return sorted(
+        [
+            getattr(obj, field)
+            for field in dir(obj)
+            if hasattr(getattr(obj, field), "_order")
+        ],
+        key=(lambda field: field._order),
+    )
+
+
+# run once
+
+
+def run_once(func: F) -> F:
+    """Decorator which only runs the function the first
+    time it is called and stores the result. If the function is ran another time, the stored result is
+    returned."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if hasattr(func, "has_run"):
+            return func.return_value
+        func.return_value = func(*args, **kwargs)
+        func.has_run = True
+        return func.return_value
+
+    return wrapper

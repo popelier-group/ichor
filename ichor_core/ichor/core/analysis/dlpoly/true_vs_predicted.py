@@ -1,38 +1,36 @@
 import random
-import warnings
 from pathlib import Path
-from typing import List, Union
 
-import matplotlib
+# TODO: return an axes which can be customized by user
+# try:
+#     import scienceplots  # noqa
+
+#     plt.style.use("science")
+
+#     matplotlib.rcParams.update(
+#         {
+#             "text.usetex": False,
+#             "font.family": "sans-serif",
+#             "font.serif": "DejaVu Serif",
+#             "axes.formatter.use_mathtext": False,
+#             "mathtext.fontset": "dejavusans",
+#         }
+#     )
+#     # matplotlib.rcParams['mathtext.rm'] = 'DejaVu Serif'
+#     # matplotlib.rcParams['mathtext.it'] = 'DejaVu Serif:italic'
+#     # matplotlib.rcParams['mathtext.bf'] = 'DejaVu Serif:bold'
+
+# except ImportError:
+#     warnings.warn("Could not import scienceplots. Will not use scienceplots styles.")
+
+
+from string import ascii_uppercase
+from typing import List, Union
 
 import numpy as np
 from ichor.core.files import PointsDirectory, Trajectory
 from ichor.core.files.dl_poly import DlPolyFFLUX, DlpolyHistory
 from matplotlib import pyplot as plt
-
-try:
-    import scienceplots  # noqa
-
-    plt.style.use("science")
-
-    matplotlib.rcParams.update(
-        {
-            "text.usetex": False,
-            "font.family": "sans-serif",
-            "font.serif": "DejaVu Serif",
-            "axes.formatter.use_mathtext": False,
-            "mathtext.fontset": "dejavusans",
-        }
-    )
-    # matplotlib.rcParams['mathtext.rm'] = 'DejaVu Serif'
-    # matplotlib.rcParams['mathtext.it'] = 'DejaVu Serif:italic'
-    # matplotlib.rcParams['mathtext.bf'] = 'DejaVu Serif:bold'
-
-except ImportError:
-    warnings.warn("Could not import scienceplots. Will not use scienceplots styles.")
-
-
-from string import ascii_uppercase
 
 ascii_uppercase = list(ascii_uppercase)
 

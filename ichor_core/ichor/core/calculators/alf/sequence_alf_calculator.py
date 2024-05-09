@@ -1,4 +1,6 @@
-def calculate_alf_atom_sequence(atom: "Atom") -> "ALF":  # noqa F821
+def calculate_alf_atom_sequence(
+    atom: "ichor.core.atoms.Atom",  # noqa F821
+) -> "ichor.core.atoms.ALF":  # noqa F821
 
     from ichor.core.atoms.alf import ALF
 

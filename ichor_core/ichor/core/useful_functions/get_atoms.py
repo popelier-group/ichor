@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-def get_atoms_from_path(path: Path) -> "Atoms":  # noqa F821
+def get_atoms_from_path(path: Path) -> "ichor.core.atoms.Atoms":  # noqa F821
     """
     Returns first instance of `Atoms` found from `path`
     :param path: the `Path` to get atoms from
@@ -42,7 +42,7 @@ def get_atoms_from_path(path: Path) -> "Atoms":  # noqa F821
 
 def get_trajectory_from_path(
     path: Path, trajectory_name: str = "new_trajectory.xyz"
-) -> "Trajectory":  # noqa F821
+) -> "ichor.core.files.Trajectory":  # noqa F821
 
     from ichor.core.files import PointsDirectory, Trajectory
 

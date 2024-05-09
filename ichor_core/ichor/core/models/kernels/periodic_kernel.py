@@ -5,7 +5,23 @@ from ichor.core.models.kernels.kernel import Kernel
 
 
 class PeriodicKernel(Kernel):
-    """Implemtation of the Periodic Kernel."""
+    r"""Implemtation of the Periodic Kernel.
+
+    :param lengthscale: np.ndarray of n_features array of lengthscales
+    :param period: np.ndarray of n_features array of period lengths
+
+    .. note::
+        Lengthscales is typically n_features long because we want a separate lengthscale for each dimension.
+        The periodic kernel is going to be used for phi features
+        because these are the features we know can be cyclic.
+        The period of the phi angle is always :math:`2\pi`,
+        however this period can change if there is normalization
+        or standardization applied to features. The new period then becomes
+        the distance between where :math:`\pi` and :math:`-\pi`
+        land after the features are scaled. Because the period can vary
+        for individual phi angles for standardization, it is
+        still passed in as an array that is n_features long.
+    """
 
     def __init__(
         self,
@@ -14,26 +30,6 @@ class PeriodicKernel(Kernel):
         period_length: np.ndarray,
         active_dims: Optional[np.ndarray] = None,
     ):
-        """
-
-        Args:
-            :param: `lengthscale` np.ndarray of n_features:
-                array of lengthscales
-            :param: `period` np.ndarray of n_features:
-                array of period lengths
-
-        .. note::
-            Lengthscales is typically n_features long because we want a separate lengthscale for each dimension.
-            The periodic kernel is going to be used for phi features
-            because these are the features we know can be cyclic.
-            The period of the phi angle is always :math:`2\pi`,
-            however this period can change if there is normalization
-            or standardization applied to features. The new period then becomes
-            the distance between where :math:`\pi` and :math:`-\pi`
-            land after the features are scaled. Because the period can vary
-            for individual phi angles for standardization, it is
-            still passed in as an array that is n_features long.
-        """
         super().__init__(name, active_dims)
         self._thetas = thetas
         self._period_length = period_length

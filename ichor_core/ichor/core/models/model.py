@@ -375,6 +375,10 @@ class Model(ReadFile, WriteFile):
     def predict(self, x_test: np.ndarray) -> np.ndarray:
         """Returns an array containing the test point predictions."""
 
+        # make into a 2d array in case a 1d is passed in
+        if x_test.ndim == 1:
+            x_test = x_test[np.newaxis, ...]
+
         return (
             self.mean.value(x_test) + np.dot(self.r(x_test).T, self.weights)[:, -1]
         ).flatten()

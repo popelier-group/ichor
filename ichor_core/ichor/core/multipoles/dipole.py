@@ -93,8 +93,8 @@ def displace_dipole_cartesian(displacement_vector: np.ndarray, monopole: float, 
 
 
 def recover_molecular_dipole(
-    atoms: "Atoms",  # noqa
-    ints_dir: "IntDirectory",  # noqa
+    atoms: "ichor.core.atoms.Atoms",  # noqa F821
+    ints_dir: "ichor.core.files.IntDirectory",  # noqa F821
     convert_to_debye=True,
     convert_to_spherical=False,
 ):
@@ -148,7 +148,8 @@ def recover_molecular_dipole(
 
 
 def get_gaussian_and_aimall_molecular_dipole(
-    gaussian_output: "GaussianOutput", ints_directory: "IntsDir"  # noqa: F821
+    gaussian_output: "ichor.core.files.GaussianOutput",  # noqa F821
+    ints_directory: "ichor.core.files.IntsDir",  # noqa: F821
 ):
     """Gets the Gaussian dipole moment (still in Debye)
     Also gets the AIMAll recovered molecule dipole moment from atomic ones.

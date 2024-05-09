@@ -85,15 +85,13 @@ class ListOfAtoms(list, ABC):
             or the whole geometry
         :param args: Positional arguments to pass to feature calculator function
         :param kwargs: Key word arguments to pass to feature calculator function
-
-        :return:
-            If the features for the whole trajectory are returned,
+        :return: If the features for the whole trajectory are returned,
             the array has shape `n_atoms` x `n_timesteps` x `n_features`
             If the trajectory instance is indexed by str, the array has shape `n_timesteps` x `n_features`.
             If the trajectory instance is indexed by int, the array has shape `n_atoms` x `n_features`.
             If the trajectory instance is indexed by slice, the array has shape `n_atoms` x`slice` x `n_features`.
             If a non-atomic calculator is passed, a `n_timesteps` x features (features could be vector, matrix, etc)
-                is returned.
+            is returned.
         """
         return np.array(
             [
@@ -142,12 +140,12 @@ class ListOfAtoms(list, ABC):
 
         :param feature_calculator: Calculator function to be used to calculate features
         :param fname: A string to be appended to the default csv file names.
-            A .csv file is written out for every atom with default name \``atom_name\``_features.csv
-            If an fname is given, the name becomes \``fname\``_\``atom_name\``_features.csv
+            A .csv file is written out for every atom with default name ``atom_name_features.csv``
+            If an fname is given, the name becomes ``fname_atom_name_features.csv``
         :param atom_names: A list of atom names for which to write csv files.
             If None, then write out the features for every atom in the system.
-        :param \*args: positional arguments to pass to calculator function
-        :param \**kwargs: key word arguments to be passed to the feature calculator function
+        :param args: positional arguments to pass to calculator function
+        :param kwargs: key word arguments to be passed to the feature calculator function
         """
         import pandas as pd
 
@@ -180,8 +178,8 @@ class ListOfAtoms(list, ABC):
         passed in to only make sheets for certain atoms
 
         :param atom_names: A list of atom names for which to calculate features and write in excel spreadsheet
-        :param \*args: positional arguments to pass to calculator function
-        :param \**kwargs: key word arguments to be passed to the feature calculator function
+        :param args: positional arguments to pass to calculator function
+        :param kwargs: key word arguments to be passed to the feature calculator function
         :param fname: File name to save features to
         """
         import pandas as pd
@@ -226,8 +224,8 @@ class ListOfAtoms(list, ABC):
         :param central_atom_name: the name of the central atom to center
             all geometries on. Eg. 'O1'
         :param fname: Optional file name in which to save the rotated geometries.
-        :param \*args: Positional arguments to pass to calculator function
-        :param \**kwargs: Key word arguments to pass to calculator function
+        :param args: Positional arguments to pass to calculator function
+        :param kwargs: Key word arguments to pass to calculator function
         """
 
         from ichor.core.atoms import Atom

@@ -6,7 +6,7 @@ import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
 from ichor.core.files import GJF, XYZ
 from ichor.core.molecular_dynamics.cp2k import write_cp2k_input
-from ichor.hpc.batch_system import JobID
+from ichor.hpc.batch_system.jobs import JobID
 
 from ichor.hpc.global_variables import get_param_from_config
 from ichor.hpc.submission_commands import CP2KCommand
@@ -37,7 +37,7 @@ def submit_cp2k(
     :param ncores: The number of cores to use for the simulation, defaults to 2
     :raises ValueError: If incorrect filetype (not xyz or gjf) is passed in
     :return: An object containing information for the submitted job
-    :rtype: JobID
+    :rtype: ichor.hpc.batch_system.jobs.JobID
     """
 
     input_file = Path(input_file)

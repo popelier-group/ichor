@@ -4,7 +4,7 @@ from ichor.core.database.sql.add_to_database import (
     create_database_session,
 )
 
-from ichor.core.database.sql.create_database import create_database
+from ichor.core.database.sql.database import create_database
 from ichor.core.database.sql.query_database import get_sqlite_db_information
 
 __all__ = [

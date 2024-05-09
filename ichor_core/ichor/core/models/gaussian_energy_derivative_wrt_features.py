@@ -1,7 +1,7 @@
 from typing import List
 
 import numpy as np
-from ichor.core.atoms import ALF
+from ichor.core.atoms import ALF, Atoms
 from ichor.core.models.calculate_fflux_derivatives import fflux_derivs_da_df_matrix
 
 # TODO: Add method that converts back to Cartesian coordinates.
@@ -10,7 +10,7 @@ from ichor.core.models.calculate_fflux_derivatives import fflux_derivs_da_df_mat
 
 
 def form_b_matrix(
-    atoms: "Atoms", system_alf: List["ALF"], central_atom_idx  # noqa F821
+    atoms: Atoms, system_alf: List["ALF"], central_atom_idx  # noqa F821
 ) -> np.ndarray:
     r"""
     Returns a np array of shape ``n_features`` x ``n_atomsx3``, containing the derivative of

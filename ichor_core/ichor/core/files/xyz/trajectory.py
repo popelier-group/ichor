@@ -118,8 +118,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms.
         e.g. ``[[0,1,2],[1,0,2], [2,0,1]]``
 
-        :param \*args: positional arguments to pass to alf calculator
-        :param \**kwargs: key word arguments to pass to alf calculator
+        :param args: positional arguments to pass to alf calculator
+        :param kwargs: key word arguments to pass to alf calculator
         """
         return [
             alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self[0]

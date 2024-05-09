@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
-from ichor.core.database.sql.create_database import AtomNames, Dataset, Points
+from ichor.core.database.sql.database import AtomNames, Dataset, Points
 
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
@@ -44,7 +44,7 @@ def add_atom_names_to_database(session: Session, atom_names: List[str], echo=Fal
 # TODO: check that gaussian out forces exist. Check that int file exists.
 def add_point_to_database(
     session: Session,
-    point: "PointDirectory",  # noqa F821
+    point: "ichor.core.files.PointDirectory",  # noqa F821
     echo=False,
     print_missing_data=True,
 ):

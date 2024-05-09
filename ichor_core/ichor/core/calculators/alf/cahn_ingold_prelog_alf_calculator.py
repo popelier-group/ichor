@@ -2,10 +2,11 @@ from ichor.core.calculators.connectivity import default_connectivity_calculator
 
 
 # TODO: use connectivity here instead of connectivity calculator.
+# typing annotations need to be like this because of circular imports
 def calculate_alf_cahn_ingold_prelog(
-    atom: "Atom",  # noqa F821
+    atom: "ichor.core.atoms.Atom",  # noqa F821
     connectivity_calculator=default_connectivity_calculator,
-) -> "ALF":  # noqa F821
+) -> "ichor.core.atoms.ALF":  # noqa F821
 
     from ichor.core.atoms.alf import ALF
 

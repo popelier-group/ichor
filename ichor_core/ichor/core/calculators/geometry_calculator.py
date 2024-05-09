@@ -4,9 +4,10 @@ import numpy as np
 from ichor.core.common.linalg import mag
 
 
-def calculate_bond(atoms: "Atoms", i: int, j: int):  # noqa F821
+def calculate_bond(atoms: "ichor.core.atoms.Atoms", i: int, j: int):  # noqa F821
     """
-    Calculates the bond distance between atoms i and j for atoms
+    Calculates the bond distance between atoms i and j for atoms.
+
     :param atoms: instance of 'Atoms' to calculate bond distance
     :param i: 0-index atoms[i]
     :param j: 0-index atoms[j]
@@ -15,14 +16,17 @@ def calculate_bond(atoms: "Atoms", i: int, j: int):  # noqa F821
     return atoms[i].dist(atoms[j])
 
 
-def calculate_bonds(atoms: "Atoms") -> np.ndarray:  # noqa F821
+def calculate_bonds(atoms: "ichor.core.atoms.Atoms") -> np.ndarray:  # noqa F821
     connected_atoms = get_connected_atoms(atoms)
     return np.array([calculate_bond(atoms, i, j) for i, j in connected_atoms._bonds])
 
 
-def calculate_angle(atoms: "Atoms", i: int, j: int, k: int):  # noqa F821
+def calculate_angle(
+    atoms: "ichor.core.atoms.Atoms", i: int, j: int, k: int  # noqa F821
+):
     """
-    Calculates the angle between atoms i, j, and k for atoms
+    Calculates the angle between atoms i, j, and k for atoms.
+
     :param atoms: instance of 'Atoms' to calculate angle
     :param i: 0-index atoms[i]
     :param j: 0-index atoms[j]
@@ -32,7 +36,7 @@ def calculate_angle(atoms: "Atoms", i: int, j: int, k: int):  # noqa F821
     return np.degrees(atoms[j].angle(atoms[i], atoms[k]))
 
 
-def calculate_angles(atoms: "Atoms") -> np.ndarray:  # noqa F821
+def calculate_angles(atoms: "ichor.core.atoms.Atoms") -> np.ndarray:  # noqa F821
     connected_atoms = get_connected_atoms(atoms)
     return np.array(
         [calculate_angle(atoms, i, j, k) for i, j, k in connected_atoms._angles]
@@ -40,10 +44,11 @@ def calculate_angles(atoms: "Atoms") -> np.ndarray:  # noqa F821
 
 
 def calculate_dihedral(
-    atoms: "Atoms", i: int, j: int, k: int, l: int  # noqa F821
+    atoms: "ichor.core.atoms.Atoms", i: int, j: int, k: int, l: int  # noqa F821
 ) -> float:
     """
-    Calculates the dihedral angle between atoms i, j, k and l for atoms
+    Calculates the dihedral angle between atoms i, j, k and l for atoms.
+
     :param atoms: instance of 'Atoms' to calculate dihedral angle
     :param i: 0-index atoms[i]
     :param j: 0-index atoms[j]
@@ -71,7 +76,7 @@ def calculate_dihedral(
     ) % 360  # - 180 # <- Uncomment to get angle from -180 to +180
 
 
-def calculate_dihedrals(atoms: "Atoms") -> np.ndarray:  # noqa F821
+def calculate_dihedrals(atoms: "ichor.core.atoms.Atoms") -> np.ndarray:  # noqa F821
     connected_atoms = get_connected_atoms(atoms)
     return np.array(
         [
@@ -81,7 +86,9 @@ def calculate_dihedrals(atoms: "Atoms") -> np.ndarray:  # noqa F821
     )
 
 
-def get_connected_atoms(atoms: "Atoms") -> "ConnectedAtoms":  # noqa F821
+def get_connected_atoms(
+    atoms: "ichor.core.atoms.Atoms",  # noqa F821
+) -> "ichor.core.files.dl_poly.dl_poly_field.ConnectedAtoms":  # noqa F821
 
     from ichor.core.files.dl_poly.dl_poly_field import ConnectedAtoms
 
@@ -89,7 +96,7 @@ def get_connected_atoms(atoms: "Atoms") -> "ConnectedAtoms":  # noqa F821
     return connected_atoms
 
 
-def bond_names(atoms: "Atoms") -> List[str]:  # noqa F821
+def bond_names(atoms: "ichor.core.atoms.Atoms") -> List[str]:  # noqa F821
     """
     Returns the bond names for atoms
     :param atoms: 'Atoms' instance to get the bond names
@@ -98,18 +105,20 @@ def bond_names(atoms: "Atoms") -> List[str]:  # noqa F821
     return get_connected_atoms(atoms).bond_names()
 
 
-def angle_names(atoms: "Atoms") -> List[str]:  # noqa F821
+def angle_names(atoms: "ichor.core.atoms.Atoms") -> List[str]:  # noqa F821
     """
     Returns the angle names for atoms
+
     :param atoms: 'Atoms' instance to get the angle names
     :return: angle names of atoms as list of str
     """
     return get_connected_atoms(atoms).angle_names()
 
 
-def dihedral_names(atoms: "Atoms") -> List[str]:  # noqa F821
+def dihedral_names(atoms: "ichor.core.atoms.Atoms") -> List[str]:  # noqa F821
     """
     Returns the dihedral names for atoms
+
     :param atoms: 'Atoms' instance to get the dihedral names
     :return: dihedral names of atoms as list of str
     """
@@ -117,10 +126,11 @@ def dihedral_names(atoms: "Atoms") -> List[str]:  # noqa F821
 
 
 def internal_feature_names(
-    atoms: "Atoms",  # noqa F821
+    atoms: "ichor.core.atoms.Atoms",  # noqa F821
 ) -> Tuple[List[str], List[str], List[str]]:
     """
     Gets the names of the bonds, angles and dihedrals for atoms
+
     :param atoms: instance of 'Atoms' to get the names for bonds, angles and dihedrals
     :return: tuple of lists of the names for the bonds angles and dihedrals for atoms
     """
@@ -128,10 +138,11 @@ def internal_feature_names(
 
 
 def calculate_internal_features(
-    atoms: "Atoms",  # noqa F821
+    atoms: "ichor.core.atoms.Atoms",  # noqa F821
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculates the bonds, angles and dihedrals for atoms
+
     :param atoms: instance of `Atoms` to calculate the bonds, angles and dihedrals for
     :return: bonds, angles and dihedrals as a tuple of numpy arrays
     """
@@ -142,20 +153,22 @@ def calculate_internal_features(
     )
 
 
-def bonds(atoms: "Atoms") -> List[Tuple[int, int]]:  # noqa F821
+def bonds(atoms: "ichor.core.atoms.Atoms") -> List[Tuple[int, int]]:  # noqa F821
     return get_connected_atoms(atoms).bonds
 
 
-def angles(atoms: "Atoms") -> List[Tuple[int, int, int]]:  # noqa F821
+def angles(atoms: "ichor.core.atoms.Atoms") -> List[Tuple[int, int, int]]:  # noqa F821
     return get_connected_atoms(atoms).angles
 
 
-def dihedrals(atoms: "Atoms") -> List[Tuple[int, int, int, int]]:  # noqa F821
+def dihedrals(
+    atoms: "ichor.core.atoms.Atoms",  # noqa F821
+) -> List[Tuple[int, int, int, int]]:
     return get_connected_atoms(atoms).dihedrals
 
 
 def get_internal_feature_indices(
-    atoms: "Atoms",  # noqa F821
+    atoms: "ichor.core.atoms.Atoms",  # noqa F821
 ) -> Tuple[
     List[Tuple[int, int]],
     List[Tuple[int, int, int]],

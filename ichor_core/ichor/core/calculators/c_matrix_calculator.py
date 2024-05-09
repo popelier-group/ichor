@@ -3,8 +3,8 @@ from ichor.core.calculators.alf import get_atom_alf
 
 
 def calculate_c_matrix(
-    atom: "Atom",  # noqa F821
-    alf: "ALF",  # noqa F821
+    atom: "ichor.core.atoms.Atom",  # noqa F821
+    alf: "ichor.core.atoms.ALF",  # noqa F821
 ) -> np.ndarray:
 
     """Returns the C rotation matrix that relates the global Cartesian coordinates to the ALF Cartesian Coordinates.
