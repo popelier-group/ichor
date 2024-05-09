@@ -32,17 +32,3 @@ help:
 	rm -f source/ichor_cli/modules.rst
 
 	@$(SPHINXBUILD) -a -E "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-
-%: quick
-	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 -o source/ichor_core/ ../ichor_core/ichor/
-	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 -o source/ichor_cli/ ../ichor_cli/ichor/
-	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 -o source/ichor_hpc/ ../ichor_hpc/ichor/
-
-	rm -f source/ichor_core/ichor.rst
-	rm -f source/ichor_core/modules.rst
-	rm -f source/ichor_hpc/ichor.rst
-	rm -f source/ichor_hpc/modules.rst
-	rm -f source/ichor_cli/ichor.rst
-	rm -f source/ichor_cli/modules.rst
-
-	@$(SPHINXBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

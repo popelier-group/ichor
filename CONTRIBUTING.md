@@ -31,7 +31,8 @@ will run all the tests in the repository. Similarly, you can run specific unit t
 
 # Documentation
 
-[Sphinx](https://www.sphinx-doc.org/en/master/) is used to build the documentation from the source code. The documentation is found in the `docs/source` directory. Additional example `.rst` files are also found there which are incorporated in the final html documentation.
+[Sphinx](https://www.sphinx-doc.org/en/master/) is used to build the documentation from the source code. The documentation is found in the `docs/source` directory. Additional example `.rst` files are also found there which are incorporated in the final html documentation. Examples notebooks and other `.rst` pages which are not automatically created by `sphinx-apidoc` to be displayed in the final documentation must be written manually.
+
 
 To build the documentation locally, run
 
