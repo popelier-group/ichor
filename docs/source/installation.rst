@@ -1,19 +1,41 @@
 Installing ichor
 ----------------
 
+To install ichor, simply do
+
+.. code-block:: python
+
+    python3 -m pip install -e ichor_core
+    python3 -m pip install -e ichor_hpc
+    python3 -m pip install -e ichor_cli
+
+This will install all the packages in editable mode, so that any changes to the source code will
+be available to the user directly.
+
++++++++++++++++++++++++++++++++++
+Setting up ichor_config.yaml file
++++++++++++++++++++++++++++++++++
+
+The **ichor_config.yaml** file is used to store configuration settings for the high performance computing (HPC)
+clusters. This file is needed if you are using `ichor.hpc` and `ichor.cli` as these interface with the workload
+manager on the HPC cluster. An example of the config file can be found in a separate page in the documentation,
+as well as in the Github repo.
+
 ++++++++++++++++++++++++++++++
 Setting up Python environments
 ++++++++++++++++++++++++++++++
+
+Below is a more thorough explanation on how to set up ichor on a compute cluster such as CSF3 (used by the University of Manchester).
 
 
 .. warning::
 
     You will need to make separate environments for CSF3 and CSF4.
 
-    For CSF3 use ``source activate my_env`` to activate a CONDA environment in both the login node and when submitting jobs.
-    Check out the guide here. Not sure why this is required.
+    .. For CSF3 use ``source activate my_env`` to activate a CONDA environment in both the login node and when submitting jobs.
+    .. Check out the guide here. Not sure why this is required.
 
-    * `Anaconda CSF3 <https://ri.itservices.manchester.ac.uk/csf3/software/applications/anaconda-python/>`_
+    .. * `Anaconda CSF3 <https://ri.itservices.manchester.ac.uk/csf3/software/applications/anaconda-python/>`_
 
 CSF3/CSF4 have a very old Python 3 installed, so you will need to load in an anaconda module file to gain access to recent python versions.
 Please make sure that you are using the latest version of conda on CSF3/CSF4.
@@ -43,17 +65,6 @@ This goes into a submit (compute) node, you can access the internet and install 
     Create environments while in the compute node which has internet access. After you have installed all the packages,
     then you can exit out of the compute node and should be able to load in the environment on the login node.
     You should be able to submit jobs now on the login node using the Python environment made on the compute node.
-
-To make a conda environment (with the appropriate conda module loaded on csf3/csf4) do
-
-.. code-block:: text
-
-    conda create -n ichor
-
-This will create a new environment with the Python version from the base environment.
-
-To activate the conda environment do ``conda activate name_of_env``. Note that you can specify the Python version in these conda environments as well,
-just make sure to be on the compute node because it has to download things from the internet.
 
 Now you can make a ``venv`` environment which will use the Python version from the activated conda environment. To make a venv, do
 
