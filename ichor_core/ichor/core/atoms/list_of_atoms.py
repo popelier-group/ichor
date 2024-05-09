@@ -140,12 +140,12 @@ class ListOfAtoms(list, ABC):
 
         :param feature_calculator: Calculator function to be used to calculate features
         :param fname: A string to be appended to the default csv file names.
-            A .csv file is written out for every atom with default name \``atom_name\``_features.csv
-            If an fname is given, the name becomes \``fname\``_\``atom_name\``_features.csv
+            A .csv file is written out for every atom with default name ``atom_name_features.csv``
+            If an fname is given, the name becomes ``fname_atom_name_features.csv``
         :param atom_names: A list of atom names for which to write csv files.
             If None, then write out the features for every atom in the system.
-        :param \*args: positional arguments to pass to calculator function
-        :param \**kwargs: key word arguments to be passed to the feature calculator function
+        :param args: positional arguments to pass to calculator function
+        :param kwargs: key word arguments to be passed to the feature calculator function
         """
         import pandas as pd
 

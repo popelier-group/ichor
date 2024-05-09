@@ -2,8 +2,7 @@ from pathlib import Path
 from typing import Union
 
 from sqlalchemy import Column, create_engine, Float, ForeignKey, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 

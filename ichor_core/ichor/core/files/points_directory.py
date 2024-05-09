@@ -182,8 +182,8 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
         Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
         e.g. ``[[0,1,2],[1,0,2], [2,0,1]]``.
 
-        :param \*args: positional arguments to pass to alf calculator
-        :param \**kwargs: key word arguments to pass to alf calculator
+        :param args: positional arguments to pass to alf calculator
+        :param kwargs: key word arguments to pass to alf calculator
         """
         return [
             alf_calculator(atom_instance, *args, **kwargs)
@@ -527,8 +527,8 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
             If None, then writes out files for all atoms in the system, defaults to None
         :param property_types: A list of property names (iqa, multipole names) for which to write columns.
             If None, then writes out columns for all properties, defaults to None
-        :param \*args: positional arguments to pass to calculator function
-        :param \**kwargs: key word arguments to be passed to the feature calculator function
+        :param args: positional arguments to pass to calculator function
+        :param kwargs: key word arguments to be passed to the feature calculator function
         :raises TypeError: This method only works for PointsDirectory instances because it
             needs access to AIMALL information. Does not work for Trajectory instances.
         """

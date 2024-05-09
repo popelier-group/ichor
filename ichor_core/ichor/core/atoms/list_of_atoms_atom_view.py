@@ -75,7 +75,7 @@ class AtomView(ListOfAtoms):
 
         :param alf: A list of integers or a numpy array corresponding to the alf of one atom
             The atom which the atom view is for.
-        :return: The array has shape \`n_timesteps\` x \`n_features\`.
+        :return: The array has shape ``n_timesteps`` x ``n_features``.
         """
 
         return np.array(

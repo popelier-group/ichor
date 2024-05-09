@@ -59,4 +59,4 @@ jobs:
         pip install -e ichor_cli
     - name: Run example notebooks
       run: |
-        git ls-files -- '*.ipynb' | xargs pytest --nbval-lax --current-env
+        git ls-files -- '*.ipynb' | xargs pytest --nbval-lax --nbval-current-env
