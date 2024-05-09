@@ -6,7 +6,8 @@ from ichor.core.common.linalg import mag
 
 def calculate_bond(atoms: "ichor.core.atoms.Atoms", i: int, j: int):  # noqa F821
     """
-    Calculates the bond distance between atoms i and j for atoms
+    Calculates the bond distance between atoms i and j for atoms.
+
     :param atoms: instance of 'Atoms' to calculate bond distance
     :param i: 0-index atoms[i]
     :param j: 0-index atoms[j]
@@ -24,7 +25,8 @@ def calculate_angle(
     atoms: "ichor.core.atoms.Atoms", i: int, j: int, k: int  # noqa F821
 ):
     """
-    Calculates the angle between atoms i, j, and k for atoms
+    Calculates the angle between atoms i, j, and k for atoms.
+
     :param atoms: instance of 'Atoms' to calculate angle
     :param i: 0-index atoms[i]
     :param j: 0-index atoms[j]
@@ -45,7 +47,8 @@ def calculate_dihedral(
     atoms: "ichor.core.atoms.Atoms", i: int, j: int, k: int, l: int  # noqa F821
 ) -> float:
     """
-    Calculates the dihedral angle between atoms i, j, k and l for atoms
+    Calculates the dihedral angle between atoms i, j, k and l for atoms.
+
     :param atoms: instance of 'Atoms' to calculate dihedral angle
     :param i: 0-index atoms[i]
     :param j: 0-index atoms[j]
@@ -105,6 +108,7 @@ def bond_names(atoms: "ichor.core.atoms.Atoms") -> List[str]:  # noqa F821
 def angle_names(atoms: "ichor.core.atoms.Atoms") -> List[str]:  # noqa F821
     """
     Returns the angle names for atoms
+
     :param atoms: 'Atoms' instance to get the angle names
     :return: angle names of atoms as list of str
     """
@@ -114,6 +118,7 @@ def angle_names(atoms: "ichor.core.atoms.Atoms") -> List[str]:  # noqa F821
 def dihedral_names(atoms: "ichor.core.atoms.Atoms") -> List[str]:  # noqa F821
     """
     Returns the dihedral names for atoms
+
     :param atoms: 'Atoms' instance to get the dihedral names
     :return: dihedral names of atoms as list of str
     """
@@ -125,6 +130,7 @@ def internal_feature_names(
 ) -> Tuple[List[str], List[str], List[str]]:
     """
     Gets the names of the bonds, angles and dihedrals for atoms
+
     :param atoms: instance of 'Atoms' to get the names for bonds, angles and dihedrals
     :return: tuple of lists of the names for the bonds angles and dihedrals for atoms
     """
@@ -136,6 +142,7 @@ def calculate_internal_features(
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculates the bonds, angles and dihedrals for atoms
+
     :param atoms: instance of `Atoms` to calculate the bonds, angles and dihedrals for
     :return: bonds, angles and dihedrals as a tuple of numpy arrays
     """
