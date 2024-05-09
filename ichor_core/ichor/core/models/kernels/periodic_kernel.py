@@ -5,7 +5,7 @@ from ichor.core.models.kernels.kernel import Kernel
 
 
 class PeriodicKernel(Kernel):
-    """Implemtation of the Periodic Kernel.
+    r"""Implemtation of the Periodic Kernel.
 
     :param lengthscale: np.ndarray of n_features array of lengthscales
     :param period: np.ndarray of n_features array of period lengths

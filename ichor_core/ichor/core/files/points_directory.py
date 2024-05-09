@@ -200,8 +200,8 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
 
         e.g. ``{"O1":ALF(0,1,2),"H2":ALF(1,0,2), "H3":ALF(2,0,1)]``.
 
-        :param \*args: positional arguments to pass to alf calculator
-        :param \**kwargs: key word arguments to pass to alf calculator
+        :param args: positional arguments to pass to alf calculator
+        :param kwargs: key word arguments to pass to alf calculator
         """
         return self[0].alf_dict(alf_calculator, *args)
 

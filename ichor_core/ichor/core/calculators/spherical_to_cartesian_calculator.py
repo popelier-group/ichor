@@ -4,7 +4,7 @@ import numpy as np
 
 
 def spherical_to_cartesian(r, theta, phi) -> List[float]:
-    """
+    r"""
     Spherical to cartesian transformation
 
     .. math::
