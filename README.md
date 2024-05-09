@@ -27,8 +27,6 @@ The namespace package `ichor` is divided into three parts, `ichor-core`, `ichor-
 
 ## Documentation
 
-**The documentation can also be found online [here](https://studious-adventure-rr4kzlv.pages.github.io/)**. You will need to be logged in as a member of Popelier Group Organization to access it, note that this will change when the code is made public.
-
 ## Contributing
 
 Contributions are very welcome! More information on how to correctly contribute can be found in the [CONTRIBUTING.md](CONTRIBUTING.md) file.
