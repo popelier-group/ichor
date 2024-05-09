@@ -3,7 +3,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Run Tests](https://github.com/popelier-group/ICHOR/actions/workflows/run_tests.yml/badge.svg)](https://github.com/popelier-group/ICHOR/actions/workflows/run_tests.yml)
-[![GitHub release](https://img.shields.io/badge/release-v2.1-blue)](https://github.com/popelier-group/ICHOR/releases/)
+[![GitHub release](https://img.shields.io/badge/release-v4.0.1-blue)](https://github.com/popelier-group/ICHOR/releases/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![docs](https://img.shields.io/website-up-down-green-red/http/shields.io.svg)](https://studious-adventure-rr4kzlv.pages.github.io/)
 
