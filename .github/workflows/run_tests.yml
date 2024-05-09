@@ -2,9 +2,9 @@ name: Run Tests
 
 on:
   push:
-    branches: [ docs_update ]
+    branches: [ main docs_update ]
   pull_request:
-    branches: [ docs_update ]
+    branches: [ main docs_update ]
   workflow_call:
 
 jobs:
