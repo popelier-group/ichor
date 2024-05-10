@@ -9,6 +9,19 @@ Welcome to ichor's documentation!
 Introduction
 ************
 
+:code:`ichor` is a Python package used to simplify data management from computational chemistry programs and aid
+with machine learning force field development.
+
+Here is a list of things that the package is intended to do:
+
+- provide interfaces to any computational chemistry software to allow for easy switching between similar software and results comparison.
+- implement flexible data structures to allow for data management of hundreds of thousands of calculations from multiple programs.
+- integrate common database formats for efficient data storage, sharing, and post-processing
+- provide interfaces to workload managers on compute clusters to automate job submission
+- collate tools for machine learning dataset and model analysis, as well as molecular dynamics simulation benchmarking
+
+Realistically, the file management portion of ichor (as well as the workload manager integration) is very general, so it can be used for any type of data that might not even be computational chemistry related. However, the focus of the source code itself is on computational chemistry and machine learning force field development.
+
 The :code:`ichor` package is a namespace package that contains three packages:
 :code:`ichor.core`, :code:`ichor.hpc`, and :code:`ichor.cli`. The :code:`ichor.core` packages
 contains mostly file management and analysis tools for the different types of files
