@@ -14,6 +14,7 @@ comm==0.2.2
 concurrent-log-handler==0.9.25
 console-menu==0.8.0
 contourpy==1.2.1
+coverage==7.5.1
 cycler==0.12.1
 debugpy==1.8.1
 decorator==5.1.1
@@ -26,9 +27,9 @@ fastjsonschema==2.19.1
 filelock==3.14.0
 fonttools==4.51.0
 greenlet==3.0.3
--e git+ssh://git@github.com/popelier-group/ICHOR.git@9a9e30bd040a6096264ab1fabc18f951e835e7f5#egg=ichor_cli&subdirectory=ichor_cli
--e git+ssh://git@github.com/popelier-group/ICHOR.git@9a9e30bd040a6096264ab1fabc18f951e835e7f5#egg=ichor_core&subdirectory=ichor_core
--e git+ssh://git@github.com/popelier-group/ICHOR.git@9a9e30bd040a6096264ab1fabc18f951e835e7f5#egg=ichor_hpc&subdirectory=ichor_hpc
+-e git+ssh://git@github.com/popelier-group/ICHOR.git@051f062c54723da3e9155f91e926bde0449e2657#egg=ichor_cli&subdirectory=ichor_cli
+-e git+ssh://git@github.com/popelier-group/ICHOR.git@051f062c54723da3e9155f91e926bde0449e2657#egg=ichor_core&subdirectory=ichor_core
+-e git+ssh://git@github.com/popelier-group/ICHOR.git@051f062c54723da3e9155f91e926bde0449e2657#egg=ichor_hpc&subdirectory=ichor_hpc
 identify==2.5.36
 idna==3.7
 imagesize==1.4.1
@@ -56,6 +57,7 @@ nbclient==0.10.0
 nbconvert==7.16.4
 nbformat==5.10.4
 nbsphinx==0.9.4
+nbval==0.11.0
 nest-asyncio==1.6.0
 nodeenv==1.8.0
 numpy==1.26.4
