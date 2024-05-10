@@ -3,9 +3,9 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Run Tests](https://github.com/popelier-group/ICHOR/actions/workflows/run_tests.yml/badge.svg)](https://github.com/popelier-group/ICHOR/actions/workflows/run_tests.yml)
-[![GitHub release](https://img.shields.io/badge/release-v4.0.1-blue)](https://github.com/popelier-group/ICHOR/releases/)
+[![GitHub release](https://img.shields.io/badge/release-v4.0.3-blue)](https://github.com/popelier-group/ICHOR/releases/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![docs](https://img.shields.io/website-up-down-green-red/http/shields.io.svg)](https://studious-adventure-rr4kzlv.pages.github.io/)
+[![Documentation Status](https://readthedocs.org/projects/ichor/badge/?version=latest)](https://ichor.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://zenodo.org/badge/169064698.svg)](https://zenodo.org/doi/10.5281/zenodo.11174713)
 
 `ichor` is a Python package used to simplify data management from computational chemistry programs and aid with machine learning force field development. If you would like to request missing features or run into a bug, don't hesitate to create an [issue](https://github.com/popelier-group/ICHOR/issues).
