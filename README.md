@@ -3,7 +3,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Run Tests](https://github.com/popelier-group/ICHOR/actions/workflows/run_tests.yml/badge.svg)](https://github.com/popelier-group/ICHOR/actions/workflows/run_tests.yml)
-[![GitHub release](https://img.shields.io/badge/release-v4.0.3-blue)](https://github.com/popelier-group/ICHOR/releases/)
+![Release](https://img.shields.io/github/v/release/popelier-group/ICHOR?sort=semver)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Documentation Status](https://readthedocs.org/projects/ichor/badge/?version=latest)](https://ichor.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://zenodo.org/badge/169064698.svg)](https://zenodo.org/doi/10.5281/zenodo.11174713)
