@@ -28,6 +28,8 @@ The namespace package `ichor` is divided into three parts, `ichor.core`, `ichor.
 
 ## Documentation
 
+Documentation of all three packages, including examples, can be found [here](https://ichor.readthedocs.io/en/latest/).
+
 ## Contributing
 
 Contributions are very welcome! More information on how to correctly contribute can be found in the [CONTRIBUTING.md](CONTRIBUTING.md) file.
