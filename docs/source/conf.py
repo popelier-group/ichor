@@ -17,9 +17,9 @@ sys.path.append(Path("../../ichor_hpc/ichor/"))
 
 
 project = 'ichor'
-copyright = '2023, Yulian Manchev'
+copyright = '2024, Yulian Manchev'
 author = 'Yulian Manchev, Matthew Burn'
-release = '3.1.0'
+release = '4.0.2'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
