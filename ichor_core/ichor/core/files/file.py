@@ -4,6 +4,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, Union
 
+from ichor.core.common.functools import buildermethod
 from ichor.core.common.io import move
 from ichor.core.common.types import NoStr
 from ichor.core.files.path_object import PathObject
@@ -149,6 +150,7 @@ class ReadFile(File, ABC):
         """
         pass
 
+    @buildermethod
     def read(self, *args, **kwargs):
         """Read the contents of the file. Depending on the type of file, different parts will be read in.
 
