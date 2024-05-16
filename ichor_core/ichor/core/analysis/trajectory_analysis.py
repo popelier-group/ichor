@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from ichor.core.calculators import default_connectivity_calculator
 from ichor.core.common.pairwise import pairwise
-from ichor.core.files import DlpolyHistory, GJF, Trajectory, XYZ
+from ichor.core.files import DlPolyHistory, GJF, Trajectory, XYZ
 from ichor.core.files.file import ReadFile
 
 # TODO: potentially move Distance to outside of models/kernels
@@ -37,7 +37,7 @@ class TrajectoryAnalysis(ReadFile):
         self.trajectory = (
             Trajectory(trajectory_path)
             if trajectory_path.suffix == ".xyz"
-            else DlpolyHistory(trajectory_path)
+            else DlPolyHistory(trajectory_path)
         )
         self.distances_vectors = self._compute_distances_vectors()
         self._bond_lengths_matrix = None

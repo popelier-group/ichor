@@ -29,7 +29,7 @@ from typing import List, Union
 
 import numpy as np
 from ichor.core.files import PointsDirectory, Trajectory
-from ichor.core.files.dl_poly import DlPolyFFLUX, DlpolyHistory
+from ichor.core.files.dl_poly import DlPolyFFLUX, DlPolyHistory
 from matplotlib import pyplot as plt
 
 ascii_uppercase = list(ascii_uppercase)
@@ -45,7 +45,7 @@ def r2_score(true, predicted):
 
 
 def get_random_geometries_from_fflux_simulation(
-    history: Union[DlpolyHistory, Path, str],
+    history: Union[DlPolyHistory, Path, str],
     k: int = 1000,
     fflux_file: Union[DlPolyFFLUX, Path, str] = None,
 ):
@@ -68,7 +68,7 @@ def get_random_geometries_from_fflux_simulation(
     """
 
     if isinstance(history, (Path, str)):
-        history = DlpolyHistory(history)
+        history = DlPolyHistory(history)
 
     random_indices = random.sample(range(len(history)), k=1000)
 

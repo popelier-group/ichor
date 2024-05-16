@@ -2,7 +2,7 @@ import numpy as np
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.dl_poly import (
     DlPolyFFLUX,
-    DlpolyHistory,
+    DlPolyHistory,
     DlPolyIQAEnergies,
     DlPolyIQAForces,
 )
@@ -19,7 +19,7 @@ class FFLUXDirectory(AnnotatedDirectory):
         "fflux_file": DlPolyFFLUX,
         "iqa_energies_file": DlPolyIQAEnergies,
         "iqa_forces_file": DlPolyIQAForces,
-        "history_file": DlpolyHistory,
+        "history_file": DlPolyHistory,
     }
 
     @property

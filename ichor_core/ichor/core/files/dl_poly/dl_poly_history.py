@@ -93,7 +93,7 @@ class DlpolyTimestep(Atoms):
         self.timestep = None
 
 
-class DlpolyHistory(Trajectory):
+class DlPolyHistory(Trajectory):
     """
     DLPOLY HISTORY File
 
