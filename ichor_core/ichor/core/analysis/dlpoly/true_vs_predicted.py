@@ -72,6 +72,8 @@ def get_random_geometries_from_fflux_simulation(
 
     random_indices = random.sample(range(len(history)), k=1000)
 
+    # grabbing random geometries from the history file should be fine
+    # even if data is missing due to binary data in HISTORY file, it will still grab random geometries
     new_trajetory = Trajectory(f"{k}_random_geometries_from_fflux_simulation.xyz")
     with open(f"{k}_random_indices_from_trajectory.txt", "w") as writef:
         for r in random_indices:
@@ -84,7 +86,14 @@ def get_random_geometries_from_fflux_simulation(
         if isinstance(fflux_file, (Path, str)):
             fflux_file = DlPolyFFLUX(fflux_file)
 
-        total_energies = fflux_file.total_energy[random_indices]
+        # this will not work if there is missing data in the HISTORY file because
+        # it will grab the energy for a timestep that might not correspond to the geometry in the HISTORY file
+        # need to actually grab the true timestep to index the fflux file correctly
+        random_timestep_indices = []
+        for r in random_indices:
+            random_timestep_indices.append(history[r].ntimestep)
+
+        total_energies = fflux_file.total_energy[random_timestep_indices]
 
         np.save(
             f"{k}_total_predicted_energies_from_simulation_hartree.npy", total_energies
