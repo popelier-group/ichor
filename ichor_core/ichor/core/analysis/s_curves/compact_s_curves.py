@@ -631,6 +631,7 @@ def plot_with_matplotlib_simple(
 
     try:
         import matplotlib.pyplot as plt
+
         # import scienceplots  # noqa
     except ImportError:
         print("Could not import relevant packages.")
