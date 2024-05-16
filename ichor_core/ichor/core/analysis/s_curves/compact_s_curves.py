@@ -625,19 +625,19 @@ def plot_with_matplotlib(
 def plot_with_matplotlib_simple(
     total_dict: dict,
     x_axis_name: str = "Prediction Error / kJ mol$^{-1}$",
-    y_axis_name: str = "\%",
+    y_axis_name: str = r"%",
     title: str = None,
 ):
 
     try:
         import matplotlib.pyplot as plt
-        import scienceplots  # noqa
+        # import scienceplots  # noqa
     except ImportError:
         print("Could not import relevant packages.")
 
         return
 
-    plt.style.use("science")
+    # plt.style.use("science")
 
     fig, ax = plt.subplots(figsize=(9, 9))
 
@@ -678,10 +678,10 @@ def plot_with_matplotlib_simple(
     plt.legend(facecolor="white", framealpha=1, frameon=True, fontsize=24)
 
     # Show the major grid and style it slightly.
-    ax.grid(which="major", color="#DDDDDD", linewidth=1.2)
+    ax.grid(which="major", color="#DDDDDD", linewidth=2)
     # Show the minor grid as well. Style it in very light gray as a thin,
     # dotted line.
-    ax.grid(which="minor", color="#EEEEEE", linestyle=":", linewidth=1.0)
+    ax.grid(which="minor", color="#EEEEEE", linestyle=":", linewidth=1.7)
     # Make the minor ticks and gridlines show.
     ax.minorticks_on()
     ax.grid(True)
@@ -696,9 +696,10 @@ def plot_with_matplotlib_simple(
     ax.tick_params(axis="both", which="major", labelsize=18)
     ax.tick_params(axis="both", which="minor", labelsize=18)
 
-    fig.savefig("s_curves.png", dpi=300)
+    fig.savefig("s_curves.png", dpi=300, bbox_inches="tight")
     print("plotting")
     try:
+        plt.tight_layout()
         plt.show()
     except:  # noqa
         pass  # noqa
