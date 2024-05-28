@@ -238,6 +238,35 @@ class Atom(VarReprMixin, Coordinates3D):
         d2 = self.coordinates - atom2.coordinates
         return np.arccos(d1.dot(d2) / (np.sqrt(d1.dot(d1)) * np.sqrt(d2.dot(d2))))
 
+    def dihedral(
+        self, atom1: "Atom", atom2: "Atom", atom3: "Atom"
+    ) -> float:  # noqa F821
+        """Caluclates dihedral angle between the current atom and three other atoms
+
+        :param atom1: first atom in dihedral
+        :param atom2: second atom in dihedral
+        :param atom3: third atom in dihedral
+        :return: The dihedral angle between the 4 atoms
+        """
+
+        p0 = self.coordinates
+        p1 = atom1.coordinates
+        p2 = atom2.coordinates
+        p3 = atom3.coordinates
+        b0 = p0 - p1
+        b1 = p2 - p1
+        b2 = p3 - p2
+        # Normalize b1 so that it does not influence magnitude of vector rejections
+        b1 /= np.linalg.norm(b1)
+        # Vector rejections
+        v = b0 - np.dot(b0, b1) * b1
+        w = b2 - np.dot(b2, b1) * b1
+        x = np.dot(v, w)
+        y = np.dot(np.cross(b1, v), w)
+        angle_radians = np.arctan2(y, x)
+        angle_degrees = np.degrees(angle_radians)
+        return angle_degrees
+
     def connectivity(
         self, connectivity_calculator: Callable[..., np.ndarray]
     ) -> np.ndarray:
