@@ -24,7 +24,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     :param path: The path to a .xyz file that contains timesteps.
         Set to None by default as the user can initialize an empty trajectory and built it up
         themselves
-    :param overwrite_existing_traj: If the trajectory file already exist on disk, but we do not
+    :param read_geometries: If the trajectory file already exist on disk, but we do not
         to keep the geometries in it (i.e. we want to overwrite the original trajectory),
         then keep set as True. Setting to False and calling the write method twice
         will cause a second set of the geometries to be added to the original trajectory file.
@@ -32,9 +32,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
     _filetype = ".xyz"
 
-    def __init__(
-        self, path: Union[Path, str], overwrite_existing_traj=True, *args, **kwargs
-    ):
+    def __init__(self, path: Union[Path, str], read_geometries=True, *args, **kwargs):
         ListOfAtoms.__init__(self, *args, **kwargs)
         super(ReadFile, self).__init__(path)
 
@@ -50,7 +48,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         # is set to overwrite the trajectory
         # this will ensure there are no duplication of geometries if the write method
         # is called again
-        elif self.path.exists() and overwrite_existing_traj:
+        elif self.path.exists() and not read_geometries:
             self.state = FileState.Read
 
     def _read_file(self):
