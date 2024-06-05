@@ -8,8 +8,8 @@ csf3:
   software:
 
     gaussian:
-      executable_path: "$g09root/g09/g09"
-      modules: ["apps/binapps/gaussian/g09d01_em64t"]
+      executable_path: "$g16root/g16/g16"
+      modules: ["apps/binapps/gaussian/g16c01_em64t_detectcpu"]
 
     aimall:
       executable_path: "~/AIMAll/aimqb.ish"
