@@ -19,6 +19,12 @@ pre-commit install
 
 to download and set up pre-commit hooks.
 
+To run all hooks on all Python files in the repository, do:
+
+```
+git ls-files -- '*.py' | xargs pre-commit run --files
+```
+
 # Unit Testing
 
 Currently only `ichor.core` has unit tests because this is the only part of the code that can be tested in an easy way.
