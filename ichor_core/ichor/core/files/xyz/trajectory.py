@@ -530,6 +530,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         :param new_traj_name: Name of new trajectory file
         :param new_atom_ordering: A list of indices telling how to permute the current trajectory
+            The list is 0 indexed. The order of the list is the new order of the atoms.
+            e.g. rearranging atoms C1, O2, H3 to H3, C1, O2 would be [2, 0, 1]
         """
 
         if new_traj_name.suffix != ".xyz":
