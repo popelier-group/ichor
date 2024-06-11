@@ -32,7 +32,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
     _filetype = ".xyz"
 
-    def __init__(self, path: Union[Path, str], read_geometries=True, *args, **kwargs):
+    def __init__(self, path: Union[Path, str], *args, read_geometries=True, **kwargs):
         ListOfAtoms.__init__(self, *args, **kwargs)
         super(ReadFile, self).__init__(path)
 
@@ -608,9 +608,10 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         # if PointsDirectory is indexed by a slice e.g. [:50], [20:40], etc.
         elif isinstance(item, slice):
 
-            new_traj = Trajectory(self.path, list.__getitem__(self, item))
-            # need to set the filestate to read otherwise the file will be read again
-            new_traj.state = FileState.Read
+            # setting read_geometries to false will not read the file again
+            new_traj = Trajectory(
+                self.path, list.__getitem__(self, item), read_geometries=False
+            )
 
             return new_traj
 
