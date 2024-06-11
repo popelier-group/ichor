@@ -26,7 +26,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         themselves
     :param read_geometries: If the trajectory file already exist on disk, but we do not
         to keep the geometries in it (i.e. we want to overwrite the original trajectory),
-        then keep set as True. Setting to False and calling the write method twice
+        then set to False.If kept as True (the default), calling the write() method twice
         will cause a second set of the geometries to be added to the original trajectory file.
     """
 
