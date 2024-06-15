@@ -83,7 +83,7 @@ class SubmitGaussianFunctions:
         """Whether or not to recalculate wfns if they are already present"""
 
         submit_gaussian_menu_options.selected_force_calculate_wfn = user_input_bool(
-            "Overwrite existing gjfs (yes/no): ",
+            "Recalculate present wfns (yes/no): ",
             submit_gaussian_menu_options.selected_force_calculate_wfn,
         )
 
