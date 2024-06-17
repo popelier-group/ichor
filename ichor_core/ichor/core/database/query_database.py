@@ -581,7 +581,8 @@ def write_processed_one_atom_data_to_csv(
                 )
 
     # add 1 because model files start with atom index 1
-    alf_for_current_atom = [i + 1 for i in alf[central_atom_index]]
+    # need to check if i is an integer because it can also be None if less than 3 atom system
+    alf_for_current_atom = [i + 1 for i in alf[central_atom_index] if i is not None]
     alf_str = "alf_" + "_".join(list(map(str, alf_for_current_atom)))
 
     # write the total dict containing information for all points to a DataFrame and save
