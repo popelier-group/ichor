@@ -9,6 +9,10 @@ from ichor.core.models.kernels import Kernel, RBFKernelWithDerivatives
 
 
 class ModelWithGradientsRBF(ReadFile):
+    """Reads in a model file with derivative information
+    which only contains RBF dimensions and no periodic kernel.
+    This is especially useful if modelling 1D case where there is only the RBF kernel.
+    """
 
     _filetype = ".model"
 
@@ -260,7 +264,7 @@ class ModelWithGradientsRBF(ReadFile):
 
         # reshape the predictions from an npoints * (D+1) vector into a
         # matrix of shape npoints x (D+1)
-        # then add the mean (which is of shape)
+        # then add the mean.T (which is of shape 1 x ndimensions+1)
         return self.mean.T + (self.r(x_test).T @ self.weights).reshape(
             npoints, ndimensions + 1
         )

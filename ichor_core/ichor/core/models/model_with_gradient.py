@@ -9,6 +9,9 @@ from ichor.core.models.kernels import Kernel, MixedKernelWithDerivatives
 
 
 class ModelWithGradients(ReadFile):
+    """Reads in a model file with derivative information
+    which contains both the RBF and periodic kernels.
+    """
 
     _filetype = ".model"
 
@@ -252,9 +255,28 @@ class ModelWithGradients(ReadFile):
         return sign * logdet
 
     def predict(self, x_test: np.ndarray) -> np.ndarray:
-        """Returns an array containing the test point predictions."""
+        """Returns an array containing the test point predictions.
 
-        return self.mean + self.r(x_test).T @ self.weights
+        param x_test: an array containing the test set point features
+            It should either be a 2D array with shape npoints x nfeatures
+            Or a 1D array of shape nfeatures which are the features for a single point
+        """
+
+        # make into a 2d array in case a 1d is passed in
+        if x_test.ndim == 1:
+            x_test = x_test[np.newaxis, ...]
+
+        npoints, ndimensions = x_test.shape[-2:]
+
+        # check that the number of features is what we have read in the model
+        assert ndimensions == self.nfeats
+
+        # reshape the predictions from an npoints * (D+1) vector into a
+        # matrix of shape npoints x (D+1)
+        # then add the mean.T (which is of shape 1 x ndimensions+1)
+        return self.mean.T + (self.r(x_test).T @ self.weights).reshape(
+            npoints, ndimensions + 1
+        )
 
     def variance(self, x_test: np.ndarray) -> np.ndarray:
         """Return the variance for the test data points."""
