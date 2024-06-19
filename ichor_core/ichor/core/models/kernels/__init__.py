@@ -6,6 +6,9 @@ from ichor.core.models.kernels.mixed_kernel_with_derivatives import (
 from ichor.core.models.kernels.periodic_kernel import PeriodicKernel
 from ichor.core.models.kernels.rbf import RBF
 from ichor.core.models.kernels.rbf_cyclic import RBFCyclic
+from ichor.core.models.kernels.rbf_kernel_with_derivatives import (
+    RBFKernelWithDerivatives,
+)
 
 __all__ = [
     "Kernel",
@@ -14,4 +17,5 @@ __all__ = [
     "RBFCyclic",
     "PeriodicKernel",
     "MixedKernelWithDerivatives",
+    "RBFKernelWithDerivatives",
 ]
