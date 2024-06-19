@@ -57,7 +57,7 @@ class RBFKernelWithDerivatives(Kernel):
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """
-        Calculates RBF covariance matrix from two sets of points
+        Calculates RBF covariance matrix with derivatives from two sets of points
 
         Args:
             :param: `x1` np.ndarray of shape n x ndimensions:
@@ -67,7 +67,7 @@ class RBFKernelWithDerivatives(Kernel):
 
         Returns:
             :type: `np.ndarray`
-                The RBF covariance matrix of shape (n, m)
+                The covariance matrix of shape (m*(ndim+1), n*(ndim+1))
         """
         # Get lengthscale and square it
         # gpytorch does not use already squared lengthscale for RBF kernel with gradient
