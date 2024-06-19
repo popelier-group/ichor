@@ -60,9 +60,9 @@ class RBFKernelWithDerivatives(Kernel):
         Calculates RBF covariance matrix with derivatives from two sets of points
 
         Args:
-            :param: `x1` np.ndarray of shape n x ndimensions:
+            :param: `x1` np.ndarray of shape m x ndimensions:
                 First matrix of n points
-            :param: `x2` np.ndarray of shape m x ndimensions:
+            :param: `x2` np.ndarray of shape n x ndimensions:
                 Second matrix of m points, can be identical to the first matrix `x1`
 
         Returns:
