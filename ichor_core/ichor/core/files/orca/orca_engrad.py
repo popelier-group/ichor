@@ -5,6 +5,8 @@ import numpy as np
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.constants import type2nuclear_charge
 
+from ichor.core.common.units import AtomicDistance
+
 # from enum import Enum
 from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasAtoms, HasData
@@ -90,7 +92,7 @@ class OrcaEngrad(ReadFile, HasAtoms, HasData):
                     while line.strip():
                         line_split = line.split()
                         line_split[0] = nuclear_charge2type[int(line_split[0])]
-                        atoms.append(Atom(*line_split))
+                        atoms.append(Atom(*line_split, units=AtomicDistance.Bohr))
                         try:
                             line = next(f)
                         except StopIteration:
