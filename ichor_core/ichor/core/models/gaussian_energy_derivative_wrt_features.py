@@ -238,9 +238,12 @@ def convert_to_feature_forces(
     # can use np.linalg.pinv here as well
     g_inv = form_g_inverse(g_matrix)
 
-    gradient_dE_df = g_inv @ b_matrix @ copied_forces_array
+    # note that if the forces are passed in, will get the
+    # feature forces, which are the -ve of the gradient
+    # the gradient is what is used for models
+    feature_forces = g_inv @ b_matrix @ copied_forces_array
 
-    return gradient_dE_df
+    return feature_forces
 
 
 def convert_to_cartesian_forces(
