@@ -20,6 +20,7 @@ from ichor.core.database.json import get_json_db_info
 from ichor.core.database.sql import get_sqlite_db_information
 from ichor.core.models.gaussian_energy_derivative_wrt_features import (
     convert_to_feature_forces,
+    form_b_matrix,
 )
 from ichor.core.multipoles import (
     rotate_dipole,
@@ -429,8 +430,9 @@ def write_processed_one_atom_data_to_csv(
                 n_features = len(one_atom_features)
 
                 if global_forces_array is not None:
+                    b_matrix = form_b_matrix(atoms, alf, central_atom_index)
                     negative_dE_df = convert_to_feature_forces(
-                        atoms, global_forces_array, alf, central_atom_index
+                        global_forces_array, b_matrix, alf, central_atom_index
                     )
                 else:
                     negative_dE_df = [None] * n_features
@@ -539,8 +541,9 @@ def write_processed_one_atom_data_to_csv(
             n_features = len(one_atom_features)
 
             if global_forces_array is not None:
+                b_matrix = form_b_matrix(atoms, alf, central_atom_index)
                 negative_dE_df = convert_to_feature_forces(
-                    atoms, global_forces_array, alf, central_atom_index
+                    global_forces_array, b_matrix, alf, central_atom_index
                 )
             else:
                 negative_dE_df = [None] * n_features

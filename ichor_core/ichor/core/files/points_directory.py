@@ -592,6 +592,7 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
 
         from ichor.core.models.gaussian_energy_derivative_wrt_features import (
             convert_to_feature_forces,
+            form_b_matrix,
         )
 
         training_data = []
@@ -603,11 +604,12 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
             )
             nfeatures = len(features)
             wfn_energy = point_dir.wfn.total_energy
+            b_matrix = form_b_matrix(atoms, alf_list, central_atom_idx)
             cart_forces = np.array(
                 list(point_dir.gaussian_output.global_forces.values())
             )
             dE_df = convert_to_feature_forces(
-                atoms, cart_forces, alf_list, central_atom_idx
+                cart_forces, b_matrix, alf_list, central_atom_idx
             )
             training_data.append([*features, wfn_energy, *dE_df])
 
