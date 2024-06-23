@@ -215,7 +215,7 @@ def form_g_inverse(g_matrix: np.ndarray):
 
 
 def convert_to_feature_forces(
-    global_cartesian_forces: np.ndarray, b_matrix, system_alf, central_atom_idx
+    atoms, global_cartesian_forces: np.ndarray, system_alf, central_atom_idx
 ):
     """
     Compute -dE/df (since the global Cartesian forces are negative of the derivative of the potential).
@@ -224,8 +224,8 @@ def convert_to_feature_forces(
 
     dE/df are the values that need to be used when adding derivatives to GP model.
 
+    :param atoms: an Atoms instance to which the Cartesian forces correspond to
     :param global_cartesian_forces: A 2D numpy array of shape (N_atoms, 3) containing the global Cartesian forces.
-        The rows of this array are swapped internally to match the rows of the b-matrix.
     :param b_matrix: Wilson B matrix to be used to calculate, as well as dE/df. Should be of shape
         (3N-6) x 3N where N is the number of atoms.
     :param system_alf: A list of ALF instances containing the ALF of every atom.
@@ -233,37 +233,16 @@ def convert_to_feature_forces(
         features (and feature derivatives) were calculated.
 
     .. note::
-        The ordering of the forces should match up with the ordering of the b_matrix.
+        The ordering of the forces should match up with the ordering of the B matrix.
+        The B matrix calculated with ichor always preserves the columns ordering
+        to be in the ordering of the Atoms instance for any ALF that is used.
 
     See Using Redundant Internal Coordinates to Optimize Equilibrium Geometries and Transition States
     https://doi.org/10.1002/(SICI)1096-987X(19960115)17:1<49::AID-JCC5>3.0.CO;2-0
     https://doi.org/10.1063/1.462844
     """
 
-    # copy array so that original array is not altered unintentionally.
-    copied_forces_array = global_cartesian_forces.copy()
-    natoms = global_cartesian_forces.shape[0]
-
-    # original row indices
-    original_row_indices = [i for i in range(natoms)]
-
-    # contains indices of central atom, x-axis atom, xy-plane atom
-    alf_atom_indices = list(system_alf[central_atom_idx])
-    if None in alf_atom_indices:
-        alf_atom_indices.remove(None)
-
-    # contains all other atom indices not in the alf
-    non_local_atom_indices = [
-        t for t in range(natoms) if t not in system_alf[central_atom_idx]
-    ]
-    # the correct order which the forces array should be in
-    atom_indices_new_order = alf_atom_indices + non_local_atom_indices
-
-    # swap rows of forces array
-    copied_forces_array[
-        [atom_indices_new_order, original_row_indices], :
-    ] = copied_forces_array[[original_row_indices, atom_indices_new_order], :]
-    copied_forces_array = copied_forces_array.flatten()
+    b_matrix = form_b_matrix(atoms, system_alf, central_atom_idx)
 
     g_matrix = form_g_matrix(b_matrix)
     # can use np.linalg.pinv here as well
@@ -272,7 +251,7 @@ def convert_to_feature_forces(
     # note that if the forces are passed in, will get the
     # feature forces, which are the -ve of the gradient
     # the gradient is what is used for models
-    feature_forces = g_inv @ b_matrix @ copied_forces_array
+    feature_forces = g_inv @ b_matrix @ global_cartesian_forces
 
     return feature_forces
 
