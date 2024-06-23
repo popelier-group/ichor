@@ -58,6 +58,16 @@ def form_b_matrix(
         Also the `system_alf` argument is 0-indexed (as calculated by ichor methods),
         while the ALF in the .model files is 1-indexed.
 
+    .. note::
+        The ordering of the rows (corresponding to 3N-6 features) is going to depend on the ALF
+        that is chosen for the atom. A different ALF would mean that a different set of features
+        is defined, which will have different values and a different ordering of the features to
+        which the atoms correspond to.
+
+        The ordering of the columns (corresponding to 3N Cartesian coordinates) is always is the
+        original ordering corresponding to the Atoms instance that is passed in. This ensures that
+        the correct ordering is used when converting to feature forces.
+
     :param atoms: The Atoms instance for which to calculate the Wilson B matrix.
         The B matrix is calculated from the coordinates of the atoms.
     :param system_alf: The system alf as a list of `ALF` instances (the `ALF` instances are just a named tuple
@@ -70,25 +80,44 @@ def form_b_matrix(
     atoms = atoms.to_bohr()
     natoms = len(atoms)
 
-    all_derivs = []
-
     # loop over all atoms in the system and calculate n_features x 3 submatrix
     # matrix contains derivatives of Global cartesian coordinates for one atom wrt all features.
 
     if natoms == 2:
+        b_matrix = np.zeros((1, 6))
         for j in range(2):
             da_df = fflux_derivs_da_df_matrix(
                 central_atom_idx, system_alf[central_atom_idx][j], atoms, system_alf
             )
-            all_derivs.append(da_df)
+            # fill in the three columns corresponding to df_i / dx_j for the specific atom
+            # this way ensures that the original ordering of the atoms is preserved in the B matrix
+            b_matrix[
+                :,
+                [
+                    3 * system_alf[central_atom_idx][j],
+                    3 * system_alf[central_atom_idx][j] + 1,
+                    3 * system_alf[central_atom_idx][j] + 2,
+                ],
+            ] = da_df
 
     elif natoms > 2:
         # first three atoms that are central, x-axis, xy-plane
+        nfeatures = 3 * natoms - 6
+        b_matrix = np.zeros((nfeatures, 3 * natoms))
         for j in range(3):
             da_df = fflux_derivs_da_df_matrix(
                 central_atom_idx, system_alf[central_atom_idx][j], atoms, system_alf
             )
-            all_derivs.append(da_df)
+            # fill in the three columns corresponding to df_i / dx_j for the specific atom
+            # this way ensures that the original ordering of the atoms is preserved in the B matrix
+            b_matrix[
+                :,
+                [
+                    3 * system_alf[central_atom_idx][j],
+                    3 * system_alf[central_atom_idx][j] + 1,
+                    3 * system_alf[central_atom_idx][j] + 2,
+                ],
+            ] = da_df
 
         non_local_atoms = [
             t for t in range(natoms) if t not in system_alf[central_atom_idx]
@@ -98,12 +127,14 @@ def form_b_matrix(
             da_df = fflux_derivs_da_df_matrix(
                 central_atom_idx, non_local_atm, atoms, system_alf
             )
-            all_derivs.append(da_df)
-
-    da_df = np.hstack(all_derivs)
+            # fill in the three columns corresponding to df_i / dx_j for the specific atom
+            # this way ensures that the original ordering of the atoms is preserved in the B matrix
+            b_matrix[
+                :, [3 * non_local_atm, 3 * non_local_atm + 1, 3 * non_local_atm + 2]
+            ] = da_df
 
     # return B matrix
-    return da_df
+    return b_matrix
 
 
 def b_matrix_true_finite_differences(atoms, system_alf, central_atom_idx=0, h=1e-6):
