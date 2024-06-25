@@ -33,9 +33,7 @@ The `ichor.hpc` package is used to submit jobs on compute clusters (SGE/SLURM).
 ### `ichor.cli`
 The `ichor.cli` package provides a simple to use command line interface (CLI), providing an easy access to access the most commonly used tools from ichor.
 
-**You will need to create a `ichor_config.yaml` in your home directory for configuration settings relating to compute clusters, see the documentation for examples.**
-
-Use the command `cp ichor_config.yaml ~/` to perform this action whilst in the git repository.
+**You will need to have an `ichor_config.yaml` file in your home directory for configuration settings relating to HPC clusters, refer to the documentation for examples. An example `ichor_config.yaml` is provided in the repository.**
 
 ## Documentation
 
