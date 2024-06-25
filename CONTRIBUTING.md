@@ -46,7 +46,7 @@ To build the documentation locally, run
 cd docs
 make docs
 ```
-
+(you will need `pandoc` installed)
 which will generate the html files. Opening the `index.html` file into a browser will show the documentation.
 
 # Making pull requests
@@ -55,4 +55,4 @@ Pull requests are very welcome! Please ensure you follow the above steps as when
 
 # Discussions and Issues
 
-If you have questions on `ichor` or would like to discuss new features please open up a discussion page. An requests or issues or issues with the code can be opened up as issues.
+If you have questions on `ichor` or would like to discuss new features please open up a discussion page. Any requests or issues or issues with the code can be opened up as issues.
