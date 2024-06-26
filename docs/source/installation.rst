@@ -74,6 +74,7 @@ Now you can make a ``venv`` environment which will use the Python version from t
 
 This creates a virtual environment in the ``~/.venv/ichor`` folder and all environment packages will be installed here.
 To active the venv environment, do ``source ~/.venv/env_name/bin/activate``. Use this is you have problems with the anaconda for some reason or problems installing packages in anaconda.
+To activate on GitBash, do ``. ~/.venv/ichor/Scripts/activate``.  
 
 .. note::
 
