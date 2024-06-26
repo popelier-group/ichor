@@ -332,6 +332,12 @@ class Model(ReadFile, WriteFile):
 
     def r(self, x_test: np.ndarray) -> np.ndarray:
         """Returns the n_train by n_test covariance matrix"""
+
+        # make into a 2d array in case a 1d is passed in
+        # add check here in case not called from predict method
+        if x_test.ndim == 1:
+            x_test = x_test[np.newaxis, ...]
+
         return self.kernel.r(self.x, x_test)
 
     @property

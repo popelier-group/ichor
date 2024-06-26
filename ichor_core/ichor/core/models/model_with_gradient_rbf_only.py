@@ -221,6 +221,11 @@ class ModelWithGradientsRBF(ReadFile):
 
     def r(self, x_test: np.ndarray) -> np.ndarray:
         """Returns the n_train by n_test covariance matrix"""
+
+        # add check here in case not called from predict method
+        if x_test.ndim == 1:
+            x_test = x_test[np.newaxis, ...]
+
         return self.kernel.r(self.x, x_test)
 
     @property
