@@ -26,6 +26,10 @@ The namespace package `ichor` is divided into three parts, `ichor.core`, `ichor.
 
 **You will need to create a `ichor_config.yaml` in your home directory for configuration settings relating to compute clusters, see the documentation for examples.**
 
+## Papers
+
+The working paper for `ichor` can be found [here](https://doi.org/10.26434/chemrxiv-2024-f8h7n).
+
 ## Documentation
 
 Documentation of all three packages, including examples, can be found [here](https://ichor.readthedocs.io/en/latest/).
