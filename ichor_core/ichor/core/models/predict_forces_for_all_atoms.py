@@ -13,7 +13,7 @@ def predict_fflux_forces_for_all_atoms(
     models: "ichor.core.models.Models",  # noqa F821
     system_alf: List[ALF],  # noqa F821
 ) -> np.ndarray:
-    """Predicts the forces that FFLUX predicts (which are written to IQA_FORCES file).
+    """Predicts the Cartesian forces that FFLUX predicts (which are written to IQA_FORCES file).
 
     .. note::
         The atoms instance is converted to Bohr internally because the forces are per Bohr in FFLUX.
