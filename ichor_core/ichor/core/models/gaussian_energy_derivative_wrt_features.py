@@ -253,7 +253,7 @@ def convert_to_feature_forces(global_cartesian_forces: np.ndarray, b_matrix):
     # note that if the forces are passed in, will get the
     # feature forces, which are the -ve of the gradient
     # the gradient is what is used for models
-    feature_forces = g_inv @ b_matrix @ global_cartesian_forces
+    feature_forces = g_inv @ b_matrix @ global_cartesian_forces.flatten()
 
     return feature_forces
 
