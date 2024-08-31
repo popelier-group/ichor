@@ -43,7 +43,7 @@ class PointsDirectoryParent(list, Directory):
         # wrap the new directory as a PointDirectory instance and add to self
         # sort by the names of the directories (by the numbers in their name)
         # since the system name is always the same
-        self = self.sort(key=lambda x: x.path.name)
+        self.sort(key=lambda x: x.path.name)
 
     @property
     def raw_data(self) -> dict:
