@@ -37,7 +37,7 @@ The `ichor.cli` package provides a simple to use command line interface (CLI), p
 
 ## Papers
 
-The working paper for `ichor` can be found [here](https://doi.org/10.26434/chemrxiv-2024-f8h7n).
+The published paper for `ichor` can be found [here](https://doi.org/10.1002/jcc.27477).
 
 ## Documentation
 
