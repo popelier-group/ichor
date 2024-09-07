@@ -10,7 +10,7 @@ Introduction
 ************
 
 :code:`ichor` is a Python package used to simplify data management from computational chemistry programs and aid
-with machine learning force field development.
+with machine learning force field development. The source code can be found at https://github.com/popelier-group/ichor.
 
 Here is a list of things that the package is intended to do:
 
