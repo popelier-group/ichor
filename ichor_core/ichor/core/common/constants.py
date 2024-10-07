@@ -850,6 +850,9 @@ coulombbhrsquared_to_debyeangstrom = (
 coulombbohrcubed_to_debyeangstromsquared = (
     0.7117614  # octupole au (ea^3) to Debye Angstrom^2
 )
+coulombbohrcubed_to_debyeangstromcubed = (
+    0.37664789266  # hexadecupole au (ea^4) to Debye Angstrom^3
+)
 
 
 # ha_to_kj_mol = 2625.5

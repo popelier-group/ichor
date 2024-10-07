@@ -310,13 +310,290 @@ def eta1_alpha(alpha):
         return [0, 1, 2]
 
 
-def eta2_alpha_gamma(alpha, gamma):
+def check_gamma(alpha):
 
-    pass
+    if alpha == 0:
+        return 1
+    elif alpha == 1:
+        return 2
+    elif alpha == 2:
+        return 3
+    elif alpha == 3:
+        return 0
 
 
-# def G(alpha, beta, gamma, chi, dipole, quadripole, octupole, hexadecupole, displacement_vector):
+def eta2_alpha_gamma(alpha):
 
-#     term1 = 24 * f1(alpha, alpha, alpha, alpha, dipole, octupole, displacement_vector)
+    gamma = check_gamma(alpha)
 
-# eta1 =
+    for i in range(4):
+        if i != alpha and i != gamma:
+            return i
+
+
+def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector):
+
+    eta1_1, eta1_2, eta1_3 = eta1_alpha(alpha)
+    eta2 = eta2_alpha_gamma(alpha)
+
+    if alpha == beta == gamma:
+
+        term1 = 24 * f1(
+            alpha, alpha, alpha, alpha, dipole, octupole, displacement_vector
+        )
+        term2 = 18 * (
+            f1(eta1_1, eta1_1, alpha, alpha, dipole, octupole, displacement_vector)
+            + f1(eta1_2, eta1_2, alpha, alpha, dipole, octupole, displacement_vector)
+        )
+        term3 = 36 * f2(alpha, alpha, alpha, alpha, quadrupole, displacement_vector)
+        term4 = f2(eta1_1, eta1_1, eta1_1, eta1_1, quadrupole, displacement_vector)
+        term5 = 2 * f2(eta1_1, eta1_1, eta1_2, eta1_2, quadrupole, displacement_vector)
+        term6 = f2(eta1_2, eta1_2, eta1_2, eta1_2, quadrupole, displacement_vector)
+        return term1 - term2 + term3 + term4 - term5 + term6
+
+    elif alpha == beta != gamma:
+
+        term1 = 10.5 * f1(
+            gamma, alpha, alpha, alpha, dipole, octupole, displacement_vector
+        )
+        term2 = 9 * f1(
+            gamma, alpha, gamma, gamma, dipole, octupole, displacement_vector
+        )
+        term3 = 22.5 * f1(
+            alpha, gamma, alpha, alpha, dipole, octupole, displacement_vector
+        )
+        term4 = 9 * (eta2, gamma, alpha, eta2, dipole, octupole, displacement_vector)
+        term5 = 35 * f2(alpha, alpha, alpha, gamma, quadrupole, displacement_vector)
+        term6 = 10 * (
+            f2(alpha, gamma, eta2, eta2, quadrupole, displacement_vector)
+            - f2(alpha, eta2, gamma, eta2, quadrupole, displacement_vector)
+        )
+
+        return term1 - term2 + term3 - term4 + term5 + term6
+
+    elif alpha != beta == gamma:
+
+        term1 = 18 * (
+            f1(alpha, alpha, gamma, gamma, dipole, octupole, displacement_vector)
+            + f1(gamma, gamma, alpha, alpha, dipole, octupole, displacement_vector)
+        )
+        term2 = 3 * (
+            f1(alpha, alpha, alpha, alpha, dipole, quadrupole, displacement_vector)
+            + f1(gamma, gamma, gamma, gamma, dipole, octupole, displacement_vector)
+            + f1(eta2, eta2, alpha, alpha, dipole, octupole, displacement_vector)
+            + f1(eta2, eta2, gamma, gamma, dipole, octupole, displacement_vector)
+        )
+        term3 = (35 / 3) * f2(
+            alpha, alpha, gamma, gamma, quadrupole, displacement_vector
+        )
+        term4 = (8 / 3) * (
+            f2(gamma, gamma, gamma, gamma, quadrupole, displacement_vector)
+            + f2(alpha, alpha, alpha, alpha, quadrupole, displacement_vector)
+        )
+        term5 = (2 / 3) * f2(eta2, eta2, eta2, eta2, quadrupole, displacement_vector)
+        term6 = 18 * f2(alpha, gamma, alpha, gamma, quadrupole, displacement_vector)
+        term7 = 2 * (
+            f2(alpha, eta2, alpha, eta2, quadrupole, displacement_vector)
+            + f2(gamma, eta2, gamma, eta2, quadrupole, displacement_vector)
+        )
+
+        return term1 - term2 + term3 - term4 + term5 + term6 - term7
+
+    elif alpha != beta != gamma:
+
+        term1 = 18 * f1(
+            alpha, alpha, beta, gamma, dipole, octupole, displacement_vector
+        )
+        term2 = 10.5 * (
+            f1(beta, gamma, alpha, alpha, dipole, octupole, displacement_vector)
+            + f1(gamma, beta, alpha, alpha, dipole, octupole, displacement_vector)
+        )
+        term3 = 3 * (
+            f1(beta, gamma, beta, beta, dipole, octupole, displacement_vector)
+            + f1(gamma, beta, gamma, gamma, dipole, octupole, displacement_vector)
+        )
+        term4 = 15 * f2(alpha, alpha, beta, gamma, quadrupole, displacement_vector)
+        term5 = 20 * f2(alpha, beta, alpha, gamma, quadrupole, displacement_vector)
+
+        return term1 + term2 - term3 + term4 + term5
+
+
+def hexadecupole_one_term_general_expression(
+    alpha: int,
+    beta: int,
+    gamma: int,
+    chi: int,
+    displacement_vector: np.ndarray,
+    monopole: float,
+    dipole: np.ndarray,
+    quadrupole: np.ndarray,
+    octupole: np.ndarray,
+    hexadecupole: np.ndarray,
+):
+    """
+    Calculates a single component of the displaced hexadecupole tensor
+
+    :param alpha: 0 1 2 or 3 for dimension index
+    :param beta: 0 1 2 or 3 for dimension index
+    :param gamma: 0 1 2 or 3 for dimension index
+    :param chi: 0 1 2 or 3 for dimension index
+    :param displacement vector: displacement vector containing x,y,z displacement
+    :param monopole: Monopole moment, single float
+    :param dipole: Dipole moment vector, needs to be a vector of shape 3
+    :param quadrupole: Quadrupole moment matrix, needs to be 3x3 matrix
+    :param octupole: Octupole moment tensor, needs to be a 3x3x3 tensor
+    :param hexadecupole: Hexadecupole moment tensor, needs to be a 3x3x3x3 tensor
+    :returns: Returns a single element of the Cartesian hexadecupole tensor,
+        Phi_{alpha, beta, gamma, chi} that has been displaced by x y z coordinates
+    """
+
+    return (
+        hexadecupole[alpha, beta, gamma, chi]
+        + phi_prime(alpha, beta, gamma, chi, displacement_vector) * monopole
+        + (1 / 6)
+        * G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector)
+    )
+
+
+def displace_hexadecupole_cartesian(
+    displacement_vector: np.array,
+    monopole: float,
+    dipole: np.ndarray,
+    quadrupole: np.ndarray,
+    octupole: np.ndarray,
+    hexadecupole: np.ndarray,
+):
+    """Calculates a new octupole moment displaced by a displacement vector
+
+    :param displacement_vector: array containing x, y, z components of shape 3,
+    :param monopole: monopole moment (charge), float
+    :param dipole: dipole moment, array of shape 3,
+    :param quadrupole: quadrupole moment, matrix of shape 3,3
+    :param octupole: octupole moment, tensor of shape 3,3,3
+    :param hexadecupole: hexadecupole moment, tensor of shape 3,3,3,3
+    :return: The displaced hexadecupole moment as array of shape 3,3,3,3
+    :rtype: np.ndarray
+    """
+
+    assert displacement_vector.shape == (3,)
+    # check that arrays are packed multipole moments
+    assert isinstance(monopole, float)
+    assert dipole.shape == (3,)
+    assert quadrupole.shape == (3, 3)
+    assert octupole.shape == (3, 3, 3)
+    assert hexadecupole.shape == (3, 3, 3, 3)
+
+    res = np.zeros_like(hexadecupole)
+
+    for i in range(3):
+        for j in range(3):
+            for k in range(3):
+                for l in range(3):
+                    res[i, j, k, l] = hexadecupole_one_term_general_expression(
+                        i,
+                        j,
+                        k,
+                        l,
+                        displacement_vector,
+                        monopole,
+                        dipole,
+                        quadrupole,
+                        octupole,
+                        hexadecupole,
+                    )
+
+    return res
+
+
+def recover_molecular_hexadecupole(
+    atoms: "ichor.core.atoms.Atoms",  # noqa F821
+    ints_dir: "ichor.core.files.IntDirectory",  # noqa F821
+    convert_to_debye_angstrom_squared=True,
+    convert_to_cartesian=True,
+    include_prefactor=True,
+):
+
+    from ichor.core.multipoles.dipole import dipole_spherical_to_cartesian
+    from ichor.core.multipoles.octupole import octupole_spherical_to_cartesian
+    from ichor.core.multipoles.quadrupole import quadrupole_spherical_to_cartesian
+
+    atoms = atoms.to_bohr()
+
+    # from anthony stone theory of intermolecular forces p21-22
+    # note that aimall * (2/5) = Gaussian (if both are in atomic units)
+    # Gaussian is not in atomic units by default
+    # TODO: prefactor needs to be corrected for hexadecupole
+    prefactor = 2 / 5
+
+    molecular_hexadecupole_displaced = np.zeros((3, 3, 3, 3))
+
+    for atom in atoms:
+
+        # get necessary data for calculations
+        atom_coords = atom.coordinates
+        global_multipoles = ints_dir[atom.name].global_multipole_moments
+
+        # get the values for a particular atom
+        q00 = global_multipoles["q00"]
+        q10 = global_multipoles["q10"]
+        q11c = global_multipoles["q11c"]
+        q11s = global_multipoles["q11s"]
+        q20 = global_multipoles["q20"]
+        q21c = global_multipoles["q21c"]
+        q21s = global_multipoles["q21s"]
+        q22c = global_multipoles["q22c"]
+        q22s = global_multipoles["q22s"]
+        q30 = global_multipoles["q30"]
+        q31c = global_multipoles["q31c"]
+        q31s = global_multipoles["q31s"]
+        q32c = global_multipoles["q32c"]
+        q32s = global_multipoles["q32s"]
+        q33c = global_multipoles["q33c"]
+        q33s = global_multipoles["q33s"]
+        q40 = global_multipoles["q40"]
+        q41c = global_multipoles["q41c"]
+        q41s = global_multipoles["q41s"]
+        q42c = global_multipoles["q42c"]
+        q42s = global_multipoles["q42s"]
+        q43c = global_multipoles["q43c"]
+        q43s = global_multipoles["q43s"]
+        q44c = global_multipoles["q44c"]
+        q44s = global_multipoles["q44s"]
+
+        # get packed representation of all moments we need
+        dipole_packed = dipole_spherical_to_cartesian(q10, q11c, q11s)
+        quadrupole_packed = quadrupole_spherical_to_cartesian(
+            q20, q21c, q21s, q22c, q22s
+        )
+        octupole_packed = octupole_spherical_to_cartesian(
+            q30, q31c, q31s, q32c, q32s, q33c, q33s
+        )
+        hexadecupole_packed = hexadecapole_spherical_to_cartesian(
+            q40, q41c, q41s, q42c, q42s, q43c, q43s, q44c, q44s
+        )
+
+        displaced_hexadecupole_cart = displace_hexadecupole_cartesian(
+            atom_coords,
+            q00,
+            dipole_packed,
+            quadrupole_packed,
+            octupole_packed,
+            hexadecupole_packed,
+        )
+
+        molecular_hexadecupole_displaced += displaced_hexadecupole_cart
+
+    if include_prefactor:
+        molecular_hexadecupole_displaced *= prefactor
+
+    if convert_to_debye_angstrom_squared:
+        molecular_hexadecupole_displaced *= (
+            constants.coulombbohrcubed_to_debyeangstromcubed
+        )
+
+    if convert_to_cartesian:
+        return molecular_hexadecupole_displaced
+    else:
+        return np.array(
+            hexadecapole_cartesian_to_spherical(molecular_hexadecupole_displaced)
+        )
