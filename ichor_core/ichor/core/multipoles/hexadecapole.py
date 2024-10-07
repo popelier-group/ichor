@@ -224,7 +224,7 @@ def omega_prime(alpha, beta, gamma, displacement_vector):
     )
 
 
-def phi(alpha, beta, gamma, chi, displacement_vector):
+def phi_prime(alpha, beta, gamma, chi, displacement_vector):
 
     norm = np.linalg.norm(displacement_vector)
     displacement_alpha = displacement_vector[alpha]
@@ -263,8 +263,8 @@ def f1(
     gamma: int,
     chi: int,
     dipole: np.ndarray,
-    quadrupole: np.ndarray,
     octupole: np.ndarray,
+    displacement_vector: np.ndarray,
 ):
     """_summary_
 
@@ -276,3 +276,47 @@ def f1(
     :param quadrupole: Cartesian quadrupole
     :param octupole: Cartesian octupole
     """
+
+    dipole_alpha = dipole[alpha]
+    oct_prime = omega_prime(beta, gamma, chi, displacement_vector)
+    dipole_prime = mu_prime(alpha, displacement_vector)
+    oct_beta_gamma_chi = octupole[beta, gamma, chi]
+
+    return dipole_alpha * oct_prime + dipole_prime * oct_beta_gamma_chi
+
+
+def f2(alpha, beta, gamma, chi, quadrupole, displacement_vector):
+
+    theta_alpha_beta = quadrupole[alpha, beta]
+    theta_gamma_chi_prime = theta_prime(gamma, chi, displacement_vector)
+    theta_alpha_beta_prime = theta_prime(alpha, beta, displacement_vector)
+    theta_gamma_chi = quadrupole[gamma, chi]
+
+    return (
+        theta_alpha_beta * theta_gamma_chi_prime
+        + theta_alpha_beta_prime * theta_gamma_chi
+    )
+
+
+def eta1_alpha(alpha):
+
+    if alpha == 0:
+        return [1, 2, 3]
+    elif alpha == 1:
+        return [0, 2, 3]
+    elif alpha == 2:
+        return [0, 1, 3]
+    elif alpha == 3:
+        return [0, 1, 2]
+
+
+def eta2_alpha_gamma(alpha, gamma):
+
+    pass
+
+
+# def G(alpha, beta, gamma, chi, dipole, quadripole, octupole, hexadecupole, displacement_vector):
+
+#     term1 = 24 * f1(alpha, alpha, alpha, alpha, dipole, octupole, displacement_vector)
+
+# eta1 =
