@@ -248,8 +248,8 @@ def phi(alpha, beta, gamma, chi, displacement_vector):
             + displacement_alpha * displacement_beta * kronecker_delta(gamma, chi)
             + displacement_alpha * displacement_gamma * kronecker_delta(beta, chi)
         )
-        + norm
-        ** 4(
+        + norm**4
+        * (
             kronecker_delta(alpha, beta) * kronecker_delta(gamma, chi)
             + kronecker_delta(alpha, gamma) * kronecker_delta(beta, chi)
             + kronecker_delta(alpha, chi) * kronecker_delta(beta, gamma)
