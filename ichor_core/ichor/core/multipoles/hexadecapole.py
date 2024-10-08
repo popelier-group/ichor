@@ -189,6 +189,77 @@ def hexadecapole_rotate_cartesian(h: np.ndarray, C: np.ndarray) -> np.ndarray:
     return np.einsum("ia,jb,kc,ld,abcd->ijkl", C, C, C, C, h)
 
 
+def hexadecupole_element_conversion(
+    hexadecupole_array: np.ndarray, current_ordering: int
+):
+    """Converts between the (unpacked) two ways of reporting hexadecupole moments, namely
+
+      0:  XXXX, YYYY, ZZZZ, XXXY, XXXZ, YYYX, YYYZ, ZZZX, ZZZY, XXYY, XXZZ,
+        YYZZ, XXYZ, YYXZ, ZZXY (this is the ordering given in Gaussian)
+      and
+      1: XXXX, XXXY, XXXZ, XXYY, XXYZ, XXZZ, XYYY, XYYZ, XYZZ, XZZZ, YYYY,
+        YYYZ, YYZZ, YZZZ, ZZZZ
+
+      where the 0 and 1 indicate the current ordering style.
+
+      ..note::
+        The other ordering is going to be returned.
+        If 0 is given as current ordering, ordering 1 is going to be returned.
+        If 1 is given as current ordering, ordering 0 is going to be returned.
+
+    :param hexadecupole_array: 1d unpacked hexadecupole array
+    :param current_ordering: either 0 or 1
+    :returns: The other ordering of the unpacked hexadecupole array
+    """
+
+    if current_ordering == 0:
+        return hexadecupole_array[[0, 3, 4, 9, 12, 10, 5, 13, 14, 7, 1, 6, 11, 8, 2]]
+
+    elif current_ordering == 1:
+        return hexadecupole_array[[0, 10, 14, 1, 2, 6, 11, 9, 13, 3, 5, 12, 4, 7, 8]]
+
+    raise ValueError(
+        f"Current ordering can be either 0 or 1, but it is {current_ordering}"
+    )
+
+
+def hexadecupole_nontraceless_to_traceless(hexadecupole_tensor: np.ndarray):
+    """Converts a non-traceless hexadecupole to a traceless hexadecupole tensor.
+    GAUSSIAN and ORCA, as well as other computational chemistry software
+    usually only give the non-traceless hexadecupole moments. These must
+    be converted to traceless ones in order to be compared to AIMAll
+    recovered multipole moments.
+
+    :param hexadecupole_tensor: The packed (Cartesian) octupole tensor (of shape 3x3x3x3)
+    :returns: The traceless packed (Cartesian) hexadecupole tensor
+    """
+
+    # make a temporary tensor which will contain the things we need to subtract off from each term
+    tensor_to_subtract = np.zeros((3, 3, 3, 3))
+
+    # Equation 157 from  https://doi.org/10.1016/S1380-7323(02)80033-4
+    # Chapter Seven - Post Dirac-Hartree-Fock Methods - Properties by Trond Saue
+
+    for i in range(3):
+        for j in range(3):
+            for k in range(3):
+                for l in range(3):
+                    tensor_to_subtract[i, j, k, l] += (
+                        1
+                        / 35
+                        * (
+                            (np.einsum("ll", hexadecupole_tensor[i]))
+                            * kronecker_delta(j, k)
+                            + (np.einsum("ll", hexadecupole_tensor[j]))
+                            * kronecker_delta(i, k)
+                            + (np.einsum("ll", hexadecupole_tensor[k]))
+                            * kronecker_delta(i, j)
+                        )
+                    )
+
+    return hexadecupole_tensor - tensor_to_subtract
+
+
 def mu_prime(alpha, displacement_vector):
 
     return displacement_vector[alpha]
@@ -597,3 +668,53 @@ def recover_molecular_hexadecupole(
         return np.array(
             hexadecapole_cartesian_to_spherical(molecular_hexadecupole_displaced)
         )
+
+
+def get_gaussian_and_aimall_molecular_hexadecupole(
+    gaussian_output: "ichor.core.files.GaussianOutput",  # noqa F821
+    ints_directory: "ichor.core.files.IntsDir",  # noqa: F821
+):
+    """Gets the Gaussian hexadecupole moment and converts it to traceless (still in Debye Angstrom^3)
+    Also gets the AIMAll recovered molecule hexadecupole moment from atomic ones.
+
+    Returns a tuple of numpy arrays, where the first one is the
+    Gaussian traceless 3x3x3x3 hexadecupole moment (in Debye Angstrom^3)
+    and the second one is the AIMAll recovered traceless 3x3x3x3
+    hexadecupole moment (also converted from au to Debye Angstrom^3)
+    and with prefactor taken into account.
+
+    This allows for direct comparison of AIMAll to Gaussian.
+
+    :param gaussian_output: A Gaussian output file containing molecular
+        multipole moments and geometry. The same geometry and level of theory
+        must also be used in the AIMAll calculation.
+    :param ints_directory: A IntsDirectory instance containing the
+        AIMAll .int files for the same geometry that was used in Gaussian
+    :return: A tuple of 3x3x3x3 np.ndarrays, where the first is the Gaussian
+        hexadecupole moment and the second is the AIMAll recovered hexadecupole moment.
+    """
+
+    # in angstroms, convert to bohr
+    atoms = gaussian_output.atoms
+    atoms = atoms.to_bohr()
+    # in debye angstrom squared
+    raw_gaussian_octupole = np.array(gaussian_output.molecular_octupole)
+    # convert to xxx xxy xxz xyy xyz xzz yyy yyz yzz zzz
+    # because Gaussian uses a different ordering
+    converted_gaussian_octupole = hexadecupole_element_conversion(
+        raw_gaussian_octupole, 0
+    )
+    # pack into 3x3x3 array
+    packed_converted_gaussian_octupole = pack_cartesian_hexadecapole(
+        *converted_gaussian_octupole
+    )
+    # convert Gaussian to traceless because AIMAll moments are traceless
+    traceless_gaussian_octupole = hexadecupole_nontraceless_to_traceless(
+        packed_converted_gaussian_octupole
+    )
+    # note that conversion factors are applied in the function by default
+    aimall_recovered_molecular_octupole = recover_molecular_hexadecupole(
+        atoms, ints_directory
+    )
+
+    return traceless_gaussian_octupole, aimall_recovered_molecular_octupole
