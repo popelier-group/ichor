@@ -1,3 +1,4 @@
+from collections import Counter
 from typing import Tuple
 
 import numpy as np
@@ -260,10 +261,11 @@ def hexadecapole_nontraceless_to_traceless(hexadecapole_tensor: np.ndarray):
                         + (np.einsum("mm", hexadecapole_tensor[i, l]))
                         * kronecker_delta(k, l)
                     ) - (
-                        kronecker_delta(i, j) * kronecker_delta(k, l)
-                        + kronecker_delta(i, k) * kronecker_delta(j, l)
-                        + kronecker_delta(i, l)
-                        * kronecker_delta(j, k)
+                        (
+                            kronecker_delta(i, j) * kronecker_delta(k, l)
+                            + kronecker_delta(i, k) * kronecker_delta(j, l)
+                            + kronecker_delta(i, l) * kronecker_delta(j, k)
+                        )
                         * np.einsum("mmnn", hexadecapole_tensor * (1 / 35))
                     )
 
@@ -424,19 +426,18 @@ def sorting_function(alpha: int, beta: int, gamma: int, chi: int):
     """
     li = [alpha, beta, gamma, chi]
 
-    # dictionary containing key: 0, 1, or 2 for x,y, or z
-    # and value number the corresponding number of counts
-    counts = {0: 0, 1: 0, 2: 0}
+    # https://stackoverflow.com/a/23429481
+    sorted_li = sorted(li, key=Counter(li).get, reverse=True)
 
-    for i in li:
-        counts[i] = counts[i] + 1
-
-    counts_sorted = {k: v for k, v in sorted(counts.items(), key=lambda x: x[1])}
-
-    return tuple(counts_sorted.keys())
+    # there will always be at least one repeating index
+    # the 0 and 1 indices will always be repeating
+    # this is where the alpha, alpha, beta, gamma) comes from
+    return sorted_li[0], sorted_li[2], sorted_li[3]
 
 
 def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector):
+
+    print(alpha, beta, gamma, chi)
 
     # sort by number of repeating indices
     # the largest amount of repetitions are on the left
@@ -447,7 +448,7 @@ def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector
     onealpha, twoalpha = get_other_alphas(alpha)
     alphagamma = get_alphagamma(alpha, gamma)
 
-    if alpha == beta == gamma:
+    if (alpha == beta) and (beta == gamma):
 
         term1 = 24 * f3(
             alpha, alpha, alpha, alpha, dipole, octupole, displacement_vector
@@ -469,13 +470,16 @@ def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector
             twoalpha, twoalpha, twoalpha, twoalpha, quadrupole, displacement_vector
         )
         term7 = 16 * (
-            f4(alpha, onealpha, alpha, onealpha) + f4(alpha, twoalpha, alpha, twoalpha)
+            f4(alpha, onealpha, alpha, onealpha, quadrupole, displacement_vector)
+            + f4(alpha, twoalpha, alpha, twoalpha, quadrupole, displacement_vector)
         )
-        term8 = 4 * f4(onealpha, twoalpha, onealpha, twoalpha)
+        term8 = 4 * f4(
+            onealpha, twoalpha, onealpha, twoalpha, quadrupole, displacement_vector
+        )
 
         return term1 - term2 + term3 + term4 - term5 + term6 - term7 + term8
 
-    elif alpha == beta != gamma:
+    elif (alpha == beta) and (beta != gamma):
 
         term1 = 10.5 * f3(
             gamma, alpha, alpha, alpha, dipole, octupole, displacement_vector
@@ -491,20 +495,20 @@ def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector
         )
         term5 = 35 * f4(alpha, alpha, alpha, gamma, quadrupole, displacement_vector)
         term6 = 10 * (
-            f3(alpha, gamma, alphagamma, alphagamma, quadrupole, displacement_vector)
-            - f3(alpha, alphagamma, gamma, alphagamma, quadrupole, displacement_vector)
+            f4(alpha, gamma, alphagamma, alphagamma, quadrupole, displacement_vector)
+            - f4(alpha, alphagamma, gamma, alphagamma, quadrupole, displacement_vector)
         )
 
         return term1 - term2 + term3 - term4 + term5 + term6
 
-    elif alpha != beta == gamma:
+    elif (alpha != beta) and (beta == gamma):
 
         term1 = 18 * (
             f3(alpha, alpha, gamma, gamma, dipole, octupole, displacement_vector)
             + f3(gamma, gamma, alpha, alpha, dipole, octupole, displacement_vector)
         )
         term2 = 3 * (
-            f3(alpha, alpha, alpha, alpha, dipole, quadrupole, displacement_vector)
+            f3(alpha, alpha, alpha, alpha, dipole, octupole, displacement_vector)
             + f3(gamma, gamma, gamma, gamma, dipole, octupole, displacement_vector)
             + f3(
                 alphagamma,
@@ -529,8 +533,8 @@ def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector
             alpha, alpha, gamma, gamma, quadrupole, displacement_vector
         )
         term4 = (8 / 3) * (
-            f4(gamma, gamma, gamma, gamma, quadrupole, displacement_vector)
-            + f4(alpha, alpha, alpha, alpha, quadrupole, displacement_vector)
+            f4(alpha, alpha, alpha, alpha, quadrupole, displacement_vector)
+            + f4(gamma, gamma, gamma, gamma, quadrupole, displacement_vector)
         )
         term5 = (2 / 3) * f4(
             alphagamma,
@@ -548,7 +552,7 @@ def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector
 
         return term1 - term2 + term3 - term4 + term5 + term6 - term7
 
-    elif alpha != beta != gamma:
+    else:
 
         term1 = 18 * f3(
             alpha, alpha, beta, gamma, dipole, octupole, displacement_vector
