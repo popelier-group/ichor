@@ -437,8 +437,6 @@ def sorting_function(alpha: int, beta: int, gamma: int, chi: int):
 
 def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector):
 
-    print(alpha, beta, gamma, chi)
-
     # sort by number of repeating indices
     # the largest amount of repetitions are on the left
     # eg. yxxx becomes xxxy, xyzx becomes xxyz, xxxx is xxxx
