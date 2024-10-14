@@ -247,10 +247,10 @@ def hexadecupole_nontraceless_to_traceless(hexadecupole_tensor: np.ndarray):
                     tensor_to_subtract[i, j, k, l] += 1 / 7 * (
                         (np.einsum("mm", hexadecupole_tensor[k, l]))
                         * kronecker_delta(i, j)
-                        + (np.einsum("mm", hexadecupole_tensor[j]))
+                        + (np.einsum("mm", hexadecupole_tensor[j, l]))
                         * kronecker_delta(i, k)
-                        + (np.einsum("mm", hexadecupole_tensor[k]))
-                        * kronecker_delta(i, j)
+                        + (np.einsum("mm", hexadecupole_tensor[j, k]))
+                        * kronecker_delta(i, l)
                     ) - (
                         kronecker_delta(i, j) * kronecker_delta(k, l)
                         + kronecker_delta(i, k) * kronecker_delta(j, l)
@@ -305,7 +305,7 @@ def phi_prime(alpha, beta, gamma, chi, displacement_vector):
     displacement_gamma = displacement_vector[gamma]
     displacement_chi = displacement_vector[chi]
 
-    0.125 * (
+    return 0.125 * (
         35
         * displacement_alpha
         * displacement_beta
@@ -415,11 +415,13 @@ def sorting_function(alpha: int, beta: int, gamma: int, chi: int):
     :param chi: 0, 1, or 2 (corresponding to x,y, or z)
     """
     li = [alpha, beta, gamma, chi]
-    # dictionary containing key: 0, 1, or 2
-    # and value number of counts of 0, 1, or 2
-    counts = dict()
+
+    # dictionary containing key: 0, 1, or 2 for x,y, or z
+    # and value number the corresponding number of counts
+    counts = {0: 0, 1: 0, 2: 0}
+
     for i in li:
-        counts[i] = counts.get(i, 0) + 1
+        counts[i] = counts[i] + 1
 
     counts_sorted = {k: v for k, v in sorted(counts.items(), key=lambda x: x[1])}
 
@@ -435,7 +437,7 @@ def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector
     alpha, beta, gamma = sorting_function(alpha, beta, gamma, chi)
 
     onealpha, twoalpha = get_other_alphas(alpha)
-    alphagamma = get_alphagamma(alpha)
+    alphagamma = get_alphagamma(alpha, gamma)
 
     if alpha == beta == gamma:
 
@@ -762,19 +764,19 @@ def get_gaussian_and_aimall_molecular_hexadecupole(
     atoms = gaussian_output.atoms
     atoms = atoms.to_bohr()
     # in debye angstrom squared
-    raw_gaussian_octupole = np.array(gaussian_output.molecular_octupole)
+    raw_gaussian_octupole = np.array(gaussian_output.molecular_hexadecapole)
     # convert to xxx xxy xxz xyy xyz xzz yyy yyz yzz zzz
     # because Gaussian uses a different ordering
-    converted_gaussian_octupole = hexadecupole_element_conversion(
+    converted_gaussian_hexadecupole = hexadecupole_element_conversion(
         raw_gaussian_octupole, 0
     )
     # pack into 3x3x3x3 array
-    packed_converted_gaussian_octupole = pack_cartesian_hexadecapole(
-        *converted_gaussian_octupole
+    packed_converted_gaussian_hexadecupole = pack_cartesian_hexadecapole(
+        *converted_gaussian_hexadecupole
     )
     # convert Gaussian to traceless because AIMAll moments are traceless
     traceless_gaussian_octupole = hexadecupole_nontraceless_to_traceless(
-        packed_converted_gaussian_octupole
+        packed_converted_gaussian_hexadecupole
     )
     # note that conversion factors are applied in the function by default
     aimall_recovered_molecular_octupole = recover_molecular_hexadecupole(
