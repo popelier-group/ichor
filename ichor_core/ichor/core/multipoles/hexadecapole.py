@@ -239,24 +239,32 @@ def hexadecapole_nontraceless_to_traceless(hexadecapole_tensor: np.ndarray):
 
     # Equation 157 from  https://doi.org/10.1016/S1380-7323(02)80033-4
     # Chapter Seven - Post Dirac-Hartree-Fock Methods - Properties by Trond Saue
+    # in that equation, pull out the 35 factor so you get (35/8) * (Q_{ijkl}....)
+    # that will lead to the equations below
 
     for i in range(3):
         for j in range(3):
             for k in range(3):
                 for l in range(3):
-                    tensor_to_subtract[i, j, k, l] += 1 / 7 * (
+                    tensor_to_subtract[i, j, k, l] += (1 / 7) * (
                         (np.einsum("mm", hexadecapole_tensor[k, l]))
                         * kronecker_delta(i, j)
                         + (np.einsum("mm", hexadecapole_tensor[j, l]))
                         * kronecker_delta(i, k)
                         + (np.einsum("mm", hexadecapole_tensor[j, k]))
                         * kronecker_delta(i, l)
+                        + (np.einsum("mm", hexadecapole_tensor[i, l]))
+                        * kronecker_delta(j, k)
+                        + (np.einsum("mm", hexadecapole_tensor[i, k]))
+                        * kronecker_delta(j, l)
+                        + (np.einsum("mm", hexadecapole_tensor[i, l]))
+                        * kronecker_delta(k, l)
                     ) - (
                         kronecker_delta(i, j) * kronecker_delta(k, l)
                         + kronecker_delta(i, k) * kronecker_delta(j, l)
-                        + kronecker_delta(i, l) * kronecker_delta(j, k)
-                    ) * np.einsum(
-                        "mmnn", hexadecapole_tensor
+                        + kronecker_delta(i, l)
+                        * kronecker_delta(j, k)
+                        * np.einsum("mmnn", hexadecapole_tensor * (1 / 35))
                     )
 
     return hexadecapole_tensor - tensor_to_subtract
