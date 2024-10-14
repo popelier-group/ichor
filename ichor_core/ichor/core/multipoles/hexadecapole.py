@@ -244,17 +244,19 @@ def hexadecupole_nontraceless_to_traceless(hexadecupole_tensor: np.ndarray):
         for j in range(3):
             for k in range(3):
                 for l in range(3):
-                    tensor_to_subtract[i, j, k, l] += (
-                        1
-                        / 35
-                        * (
-                            (np.einsum("ll", hexadecupole_tensor[i]))
-                            * kronecker_delta(j, k)
-                            + (np.einsum("ll", hexadecupole_tensor[j]))
-                            * kronecker_delta(i, k)
-                            + (np.einsum("ll", hexadecupole_tensor[k]))
-                            * kronecker_delta(i, j)
-                        )
+                    tensor_to_subtract[i, j, k, l] += 1 / 7 * (
+                        (np.einsum("mm", hexadecupole_tensor[k, l]))
+                        * kronecker_delta(i, j)
+                        + (np.einsum("mm", hexadecupole_tensor[j]))
+                        * kronecker_delta(i, k)
+                        + (np.einsum("mm", hexadecupole_tensor[k]))
+                        * kronecker_delta(i, j)
+                    ) - (
+                        kronecker_delta(i, j) * kronecker_delta(k, l)
+                        + kronecker_delta(i, k) * kronecker_delta(j, l)
+                        + kronecker_delta(i, l) * kronecker_delta(j, k)
+                    ) * np.einsum(
+                        "mmnn", hexadecupole_tensor
                     )
 
     return hexadecupole_tensor - tensor_to_subtract
@@ -328,7 +330,7 @@ def phi_prime(alpha, beta, gamma, chi, displacement_vector):
     )
 
 
-def f1(
+def f3(
     alpha: int,
     beta: int,
     gamma: int,
@@ -356,7 +358,7 @@ def f1(
     return dipole_alpha * oct_prime + dipole_prime * oct_beta_gamma_chi
 
 
-def f2(alpha, beta, gamma, chi, quadrupole, displacement_vector):
+def f4(alpha, beta, gamma, chi, quadrupole, displacement_vector):
 
     theta_alpha_beta = quadrupole[alpha, beta]
     theta_gamma_chi_prime = theta_prime(gamma, chi, displacement_vector)
@@ -369,75 +371,118 @@ def f2(alpha, beta, gamma, chi, quadrupole, displacement_vector):
     )
 
 
-def eta1_alpha(alpha):
+def get_other_alphas(alpha: int) -> Tuple[int, int]:
+    """Calculates the 1alpha, and 2alpha terms.
+    These must be different than the input alpha.
+
+    :param alpha: 0, 1, or 2 (corresponding to x,y or z)
+    :returns: The onealpha, and twoalpha terms
+    """
 
     if alpha == 0:
-        return [1, 2, 3]
+        return 1, 2
     elif alpha == 1:
-        return [0, 2, 3]
+        return 0, 2
     elif alpha == 2:
-        return [0, 1, 3]
-    elif alpha == 3:
-        return [0, 1, 2]
+        return 0, 1
 
 
-def check_gamma(alpha):
+def get_alphagamma(alpha: int, gamma: int) -> int:
+    """Calculates the alphagamma term, which is defined to be
+    alphagamma != alpha != gamma, e.g. if alpha=0, and gamma=1,
+    this function will return 2
 
-    if alpha == 0:
-        return 1
-    elif alpha == 1:
-        return 2
-    elif alpha == 2:
-        return 3
-    elif alpha == 3:
-        return 0
+    :param alpha: 0, 1, or 2 (corresponding to x,y, or z)
+    :param gamma: 0, 1, or 2 (corresponding to x,y, or z)
+    :return: the remaining term
+    """
 
-
-def eta2_alpha_gamma(alpha):
-
-    gamma = check_gamma(alpha)
-
-    for i in range(4):
+    for i in range(3):
         if i != alpha and i != gamma:
             return i
 
 
+def sorting_function(alpha: int, beta: int, gamma: int, chi: int):
+    """Sorts the alpha, beta, gamma, chi so that
+    the most repeated index is first. Note that
+    at least one of the index will be repeating because
+    there are four inputs (alpha, beta, gamma, chi)
+    but they can only equal 0, 1, or 2 (corresponding to x, y, or z)
+
+    :param alpha: 0, 1, or 2 (corresponding to x,y, or z)
+    :param beta: 0, 1, or 2 (corresponding to x,y, or z)
+    :param gamma: 0, 1, or 2 (corresponding to x,y, or z)
+    :param chi: 0, 1, or 2 (corresponding to x,y, or z)
+    """
+    li = [alpha, beta, gamma, chi]
+    # dictionary containing key: 0, 1, or 2
+    # and value number of counts of 0, 1, or 2
+    counts = dict()
+    for i in li:
+        counts[i] = counts.get(i, 0) + 1
+
+    counts_sorted = {k: v for k, v in sorted(counts.items(), key=lambda x: x[1])}
+
+    return tuple(counts_sorted.keys())
+
+
 def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector):
 
-    eta1_1, eta1_2, eta1_3 = eta1_alpha(alpha)
-    eta2 = eta2_alpha_gamma(alpha)
+    # sort by number of repeating indices
+    # the largest amount of repetitions are on the left
+    # eg. yxxx becomes xxxy, xyzx becomes xxyz, xxxx is xxxx
+    # there will always be at least one repeated index
+    alpha, beta, gamma = sorting_function(alpha, beta, gamma, chi)
+
+    onealpha, twoalpha = get_other_alphas(alpha)
+    alphagamma = get_alphagamma(alpha)
 
     if alpha == beta == gamma:
 
-        term1 = 24 * f1(
+        term1 = 24 * f3(
             alpha, alpha, alpha, alpha, dipole, octupole, displacement_vector
         )
         term2 = 18 * (
-            f1(eta1_1, eta1_1, alpha, alpha, dipole, octupole, displacement_vector)
-            + f1(eta1_2, eta1_2, alpha, alpha, dipole, octupole, displacement_vector)
+            f3(onealpha, onealpha, alpha, alpha, dipole, octupole, displacement_vector)
+            + f3(
+                twoalpha, twoalpha, alpha, alpha, dipole, octupole, displacement_vector
+            )
         )
-        term3 = 36 * f2(alpha, alpha, alpha, alpha, quadrupole, displacement_vector)
-        term4 = f2(eta1_1, eta1_1, eta1_1, eta1_1, quadrupole, displacement_vector)
-        term5 = 2 * f2(eta1_1, eta1_1, eta1_2, eta1_2, quadrupole, displacement_vector)
-        term6 = f2(eta1_2, eta1_2, eta1_2, eta1_2, quadrupole, displacement_vector)
-        return term1 - term2 + term3 + term4 - term5 + term6
+        term3 = 18 * f4(alpha, alpha, alpha, alpha, quadrupole, displacement_vector)
+        term4 = f4(
+            onealpha, onealpha, onealpha, onealpha, quadrupole, displacement_vector
+        )
+        term5 = 2 * f4(
+            onealpha, onealpha, twoalpha, twoalpha, quadrupole, displacement_vector
+        )
+        term6 = f4(
+            twoalpha, twoalpha, twoalpha, twoalpha, quadrupole, displacement_vector
+        )
+        term7 = 16 * (
+            f4(alpha, onealpha, alpha, onealpha) + f4(alpha, twoalpha, alpha, twoalpha)
+        )
+        term8 = 4 * f4(onealpha, twoalpha, onealpha, twoalpha)
+
+        return term1 - term2 + term3 + term4 - term5 + term6 - term7 + term8
 
     elif alpha == beta != gamma:
 
-        term1 = 10.5 * f1(
+        term1 = 10.5 * f3(
             gamma, alpha, alpha, alpha, dipole, octupole, displacement_vector
         )
-        term2 = 9 * f1(
+        term2 = 9 * f3(
             gamma, alpha, gamma, gamma, dipole, octupole, displacement_vector
         )
-        term3 = 22.5 * f1(
+        term3 = 22.5 * f3(
             alpha, gamma, alpha, alpha, dipole, octupole, displacement_vector
         )
-        term4 = 9 * (eta2, gamma, alpha, eta2, dipole, octupole, displacement_vector)
-        term5 = 35 * f2(alpha, alpha, alpha, gamma, quadrupole, displacement_vector)
+        term4 = 9 * f3(
+            alphagamma, gamma, alpha, alphagamma, dipole, octupole, displacement_vector
+        )
+        term5 = 35 * f4(alpha, alpha, alpha, gamma, quadrupole, displacement_vector)
         term6 = 10 * (
-            f2(alpha, gamma, eta2, eta2, quadrupole, displacement_vector)
-            - f2(alpha, eta2, gamma, eta2, quadrupole, displacement_vector)
+            f3(alpha, gamma, alphagamma, alphagamma, quadrupole, displacement_vector)
+            - f3(alpha, alphagamma, gamma, alphagamma, quadrupole, displacement_vector)
         )
 
         return term1 - term2 + term3 - term4 + term5 + term6
@@ -445,46 +490,69 @@ def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector
     elif alpha != beta == gamma:
 
         term1 = 18 * (
-            f1(alpha, alpha, gamma, gamma, dipole, octupole, displacement_vector)
-            + f1(gamma, gamma, alpha, alpha, dipole, octupole, displacement_vector)
+            f3(alpha, alpha, gamma, gamma, dipole, octupole, displacement_vector)
+            + f3(gamma, gamma, alpha, alpha, dipole, octupole, displacement_vector)
         )
         term2 = 3 * (
-            f1(alpha, alpha, alpha, alpha, dipole, quadrupole, displacement_vector)
-            + f1(gamma, gamma, gamma, gamma, dipole, octupole, displacement_vector)
-            + f1(eta2, eta2, alpha, alpha, dipole, octupole, displacement_vector)
-            + f1(eta2, eta2, gamma, gamma, dipole, octupole, displacement_vector)
+            f3(alpha, alpha, alpha, alpha, dipole, quadrupole, displacement_vector)
+            + f3(gamma, gamma, gamma, gamma, dipole, octupole, displacement_vector)
+            + f3(
+                alphagamma,
+                alphagamma,
+                alpha,
+                alpha,
+                dipole,
+                octupole,
+                displacement_vector,
+            )
+            + f3(
+                alphagamma,
+                alphagamma,
+                gamma,
+                gamma,
+                dipole,
+                octupole,
+                displacement_vector,
+            )
         )
-        term3 = (35 / 3) * f2(
+        term3 = (35 / 3) * f4(
             alpha, alpha, gamma, gamma, quadrupole, displacement_vector
         )
         term4 = (8 / 3) * (
-            f2(gamma, gamma, gamma, gamma, quadrupole, displacement_vector)
-            + f2(alpha, alpha, alpha, alpha, quadrupole, displacement_vector)
+            f4(gamma, gamma, gamma, gamma, quadrupole, displacement_vector)
+            + f4(alpha, alpha, alpha, alpha, quadrupole, displacement_vector)
         )
-        term5 = (2 / 3) * f2(eta2, eta2, eta2, eta2, quadrupole, displacement_vector)
-        term6 = 18 * f2(alpha, gamma, alpha, gamma, quadrupole, displacement_vector)
+        term5 = (2 / 3) * f4(
+            alphagamma,
+            alphagamma,
+            alphagamma,
+            alphagamma,
+            quadrupole,
+            displacement_vector,
+        )
+        term6 = 18 * f4(alpha, gamma, alpha, gamma, quadrupole, displacement_vector)
         term7 = 2 * (
-            f2(alpha, eta2, alpha, eta2, quadrupole, displacement_vector)
-            + f2(gamma, eta2, gamma, eta2, quadrupole, displacement_vector)
+            f4(alpha, alphagamma, alpha, alphagamma, quadrupole, displacement_vector)
+            + f4(gamma, alphagamma, gamma, alphagamma, quadrupole, displacement_vector)
         )
 
         return term1 - term2 + term3 - term4 + term5 + term6 - term7
 
     elif alpha != beta != gamma:
 
-        term1 = 18 * f1(
+        term1 = 18 * f3(
             alpha, alpha, beta, gamma, dipole, octupole, displacement_vector
         )
         term2 = 10.5 * (
-            f1(beta, gamma, alpha, alpha, dipole, octupole, displacement_vector)
-            + f1(gamma, beta, alpha, alpha, dipole, octupole, displacement_vector)
+            f3(beta, gamma, alpha, alpha, dipole, octupole, displacement_vector)
+            + f3(gamma, beta, alpha, alpha, dipole, octupole, displacement_vector)
         )
         term3 = 3 * (
-            f1(beta, gamma, beta, beta, dipole, octupole, displacement_vector)
-            + f1(gamma, beta, gamma, gamma, dipole, octupole, displacement_vector)
+            f3(beta, gamma, beta, beta, dipole, octupole, displacement_vector)
+            + f3(gamma, beta, gamma, gamma, dipole, octupole, displacement_vector)
         )
-        term4 = 15 * f2(alpha, alpha, beta, gamma, quadrupole, displacement_vector)
-        term5 = 20 * f2(alpha, beta, alpha, gamma, quadrupole, displacement_vector)
+        term4 = 15 * f4(alpha, alpha, beta, gamma, quadrupole, displacement_vector)
+        term5 = 20 * f4(alpha, beta, alpha, gamma, quadrupole, displacement_vector)
 
         return term1 + term2 - term3 + term4 + term5
 
@@ -590,11 +658,7 @@ def recover_molecular_hexadecupole(
 
     atoms = atoms.to_bohr()
 
-    # from anthony stone theory of intermolecular forces p21-22
-    # note that aimall * (2/5) = Gaussian (if both are in atomic units)
-    # Gaussian is not in atomic units by default
-    # TODO: prefactor needs to be corrected for hexadecupole
-    prefactor = 2 / 5
+    prefactor = 8 / 35
 
     molecular_hexadecupole_displaced = np.zeros((3, 3, 3, 3))
 
@@ -704,7 +768,7 @@ def get_gaussian_and_aimall_molecular_hexadecupole(
     converted_gaussian_octupole = hexadecupole_element_conversion(
         raw_gaussian_octupole, 0
     )
-    # pack into 3x3x3 array
+    # pack into 3x3x3x3 array
     packed_converted_gaussian_octupole = pack_cartesian_hexadecapole(
         *converted_gaussian_octupole
     )
