@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 
@@ -93,7 +93,7 @@ def displace_dipole_cartesian(displacement_vector: np.ndarray, monopole: float, 
 
 
 def recover_molecular_dipole(
-    atoms: "ichor.core.atoms.Atoms",  # noqa F821
+    atoms: Union["ichor.core.Atoms", List["Atoms"]],  # noqa F821
     ints_dir: "ichor.core.files.IntDirectory",  # noqa F821
     convert_to_debye=True,
     convert_to_spherical=False,
@@ -114,7 +114,7 @@ def recover_molecular_dipole(
     :returns: A numpy array containing the recovered molecular dipole moment.
     """
 
-    atoms = atoms.to_bohr()
+    atoms = [a.to_bohr() for a in atoms]
 
     molecular_dipole = np.zeros(3)
 
@@ -150,6 +150,7 @@ def recover_molecular_dipole(
 def get_gaussian_and_aimall_molecular_dipole(
     gaussian_output: "ichor.core.files.GaussianOutput",  # noqa F821
     ints_directory: "ichor.core.files.IntsDir",  # noqa: F821
+    atom_names: list = None,
 ):
     """Gets the Gaussian dipole moment (still in Debye)
     Also gets the AIMAll recovered molecule dipole moment from atomic ones.
@@ -166,6 +167,8 @@ def get_gaussian_and_aimall_molecular_dipole(
         must also be used in the AIMAll calculation.
     :param ints_directory: A IntsDirectory instance containing the
         AIMAll .int files for the same geometry that was used in Gaussian
+    :param atom_names: Optional list of atom names, which represent a subset of
+        the atoms. The atomic multipole moments for this subset of atoms will be summed
     :return: A tuple of np.ndarrays of shape (3,) , where the first is the Gaussian
         dipole moment and the second is the AIMAll recovered dipole moment.
     """
@@ -173,6 +176,9 @@ def get_gaussian_and_aimall_molecular_dipole(
     # make sure we are in bohr
     atoms = gaussian_output.atoms
     atoms = atoms.to_bohr()
+
+    if atom_names:
+        atoms = [i for i in atoms if i.name in atom_names]
 
     # in debye
     raw_gaussian_dipole = np.array(gaussian_output.molecular_dipole)
