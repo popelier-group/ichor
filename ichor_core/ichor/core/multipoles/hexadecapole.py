@@ -189,10 +189,10 @@ def hexadecapole_rotate_cartesian(h: np.ndarray, C: np.ndarray) -> np.ndarray:
     return np.einsum("ia,jb,kc,ld,abcd->ijkl", C, C, C, C, h)
 
 
-def hexadecupole_element_conversion(
-    hexadecupole_array: np.ndarray, current_ordering: int
+def hexadecapole_element_conversion(
+    hexadecapole_array: np.ndarray, current_ordering: int
 ):
-    """Converts between the (unpacked) two ways of reporting hexadecupole moments, namely
+    """Converts between the (unpacked) two ways of reporting hexadecapole moments, namely
 
       0:  XXXX, YYYY, ZZZZ, XXXY, XXXZ, YYYX, YYYZ, ZZZX, ZZZY, XXYY, XXZZ,
         YYZZ, XXYZ, YYXZ, ZZXY (this is the ordering given in Gaussian)
@@ -207,31 +207,31 @@ def hexadecupole_element_conversion(
         If 0 is given as current ordering, ordering 1 is going to be returned.
         If 1 is given as current ordering, ordering 0 is going to be returned.
 
-    :param hexadecupole_array: 1d unpacked hexadecupole array
+    :param hexadecapole_array: 1d unpacked hexadecapole array
     :param current_ordering: either 0 or 1
-    :returns: The other ordering of the unpacked hexadecupole array
+    :returns: The other ordering of the unpacked hexadecapole array
     """
 
     if current_ordering == 0:
-        return hexadecupole_array[[0, 3, 4, 9, 12, 10, 5, 13, 14, 7, 1, 6, 11, 8, 2]]
+        return hexadecapole_array[[0, 3, 4, 9, 12, 10, 5, 13, 14, 7, 1, 6, 11, 8, 2]]
 
     elif current_ordering == 1:
-        return hexadecupole_array[[0, 10, 14, 1, 2, 6, 11, 9, 13, 3, 5, 12, 4, 7, 8]]
+        return hexadecapole_array[[0, 10, 14, 1, 2, 6, 11, 9, 13, 3, 5, 12, 4, 7, 8]]
 
     raise ValueError(
         f"Current ordering can be either 0 or 1, but it is {current_ordering}"
     )
 
 
-def hexadecupole_nontraceless_to_traceless(hexadecupole_tensor: np.ndarray):
-    """Converts a non-traceless hexadecupole to a traceless hexadecupole tensor.
+def hexadecapole_nontraceless_to_traceless(hexadecapole_tensor: np.ndarray):
+    """Converts a non-traceless hexadecapole to a traceless hexadecapole tensor.
     GAUSSIAN and ORCA, as well as other computational chemistry software
-    usually only give the non-traceless hexadecupole moments. These must
+    usually only give the non-traceless hexadecapole moments. These must
     be converted to traceless ones in order to be compared to AIMAll
     recovered multipole moments.
 
-    :param hexadecupole_tensor: The packed (Cartesian) octupole tensor (of shape 3x3x3x3)
-    :returns: The traceless packed (Cartesian) hexadecupole tensor
+    :param hexadecapole_tensor: The packed (Cartesian) octupole tensor (of shape 3x3x3x3)
+    :returns: The traceless packed (Cartesian) hexadecapole tensor
     """
 
     # make a temporary tensor which will contain the things we need to subtract off from each term
@@ -245,21 +245,21 @@ def hexadecupole_nontraceless_to_traceless(hexadecupole_tensor: np.ndarray):
             for k in range(3):
                 for l in range(3):
                     tensor_to_subtract[i, j, k, l] += 1 / 7 * (
-                        (np.einsum("mm", hexadecupole_tensor[k, l]))
+                        (np.einsum("mm", hexadecapole_tensor[k, l]))
                         * kronecker_delta(i, j)
-                        + (np.einsum("mm", hexadecupole_tensor[j, l]))
+                        + (np.einsum("mm", hexadecapole_tensor[j, l]))
                         * kronecker_delta(i, k)
-                        + (np.einsum("mm", hexadecupole_tensor[j, k]))
+                        + (np.einsum("mm", hexadecapole_tensor[j, k]))
                         * kronecker_delta(i, l)
                     ) - (
                         kronecker_delta(i, j) * kronecker_delta(k, l)
                         + kronecker_delta(i, k) * kronecker_delta(j, l)
                         + kronecker_delta(i, l) * kronecker_delta(j, k)
                     ) * np.einsum(
-                        "mmnn", hexadecupole_tensor
+                        "mmnn", hexadecapole_tensor
                     )
 
-    return hexadecupole_tensor - tensor_to_subtract
+    return hexadecapole_tensor - tensor_to_subtract
 
 
 def mu_prime(alpha, displacement_vector):
@@ -559,7 +559,7 @@ def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector
         return term1 + term2 - term3 + term4 + term5
 
 
-def hexadecupole_one_term_general_expression(
+def hexadecapole_one_term_general_expression(
     alpha: int,
     beta: int,
     gamma: int,
@@ -569,10 +569,10 @@ def hexadecupole_one_term_general_expression(
     dipole: np.ndarray,
     quadrupole: np.ndarray,
     octupole: np.ndarray,
-    hexadecupole: np.ndarray,
+    hexadecapole: np.ndarray,
 ):
     """
-    Calculates a single component of the displaced hexadecupole tensor
+    Calculates a single component of the displaced hexadecapole tensor
 
     :param alpha: 0 1 2 or 3 for dimension index
     :param beta: 0 1 2 or 3 for dimension index
@@ -583,26 +583,26 @@ def hexadecupole_one_term_general_expression(
     :param dipole: Dipole moment vector, needs to be a vector of shape 3
     :param quadrupole: Quadrupole moment matrix, needs to be 3x3 matrix
     :param octupole: Octupole moment tensor, needs to be a 3x3x3 tensor
-    :param hexadecupole: Hexadecupole moment tensor, needs to be a 3x3x3x3 tensor
-    :returns: Returns a single element of the Cartesian hexadecupole tensor,
+    :param hexadecapole: hexadecapole moment tensor, needs to be a 3x3x3x3 tensor
+    :returns: Returns a single element of the Cartesian hexadecapole tensor,
         Phi_{alpha, beta, gamma, chi} that has been displaced by x y z coordinates
     """
 
     return (
-        hexadecupole[alpha, beta, gamma, chi]
+        hexadecapole[alpha, beta, gamma, chi]
         + phi_prime(alpha, beta, gamma, chi, displacement_vector) * monopole
         + (1 / 6)
         * G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector)
     )
 
 
-def displace_hexadecupole_cartesian(
+def displace_hexadecapole_cartesian(
     displacement_vector: np.array,
     monopole: float,
     dipole: np.ndarray,
     quadrupole: np.ndarray,
     octupole: np.ndarray,
-    hexadecupole: np.ndarray,
+    hexadecapole: np.ndarray,
 ):
     """Calculates a new octupole moment displaced by a displacement vector
 
@@ -611,8 +611,8 @@ def displace_hexadecupole_cartesian(
     :param dipole: dipole moment, array of shape 3,
     :param quadrupole: quadrupole moment, matrix of shape 3,3
     :param octupole: octupole moment, tensor of shape 3,3,3
-    :param hexadecupole: hexadecupole moment, tensor of shape 3,3,3,3
-    :return: The displaced hexadecupole moment as array of shape 3,3,3,3
+    :param hexadecapole: hexadecapole moment, tensor of shape 3,3,3,3
+    :return: The displaced hexadecapole moment as array of shape 3,3,3,3
     :rtype: np.ndarray
     """
 
@@ -622,15 +622,15 @@ def displace_hexadecupole_cartesian(
     assert dipole.shape == (3,)
     assert quadrupole.shape == (3, 3)
     assert octupole.shape == (3, 3, 3)
-    assert hexadecupole.shape == (3, 3, 3, 3)
+    assert hexadecapole.shape == (3, 3, 3, 3)
 
-    res = np.zeros_like(hexadecupole)
+    res = np.zeros_like(hexadecapole)
 
     for i in range(3):
         for j in range(3):
             for k in range(3):
                 for l in range(3):
-                    res[i, j, k, l] = hexadecupole_one_term_general_expression(
+                    res[i, j, k, l] = hexadecapole_one_term_general_expression(
                         i,
                         j,
                         k,
@@ -640,13 +640,13 @@ def displace_hexadecupole_cartesian(
                         dipole,
                         quadrupole,
                         octupole,
-                        hexadecupole,
+                        hexadecapole,
                     )
 
     return res
 
 
-def recover_molecular_hexadecupole(
+def recover_molecular_hexadecapole(
     atoms: "ichor.core.atoms.Atoms",  # noqa F821
     ints_dir: "ichor.core.files.IntDirectory",  # noqa F821
     convert_to_debye_angstrom_squared=True,
@@ -662,7 +662,7 @@ def recover_molecular_hexadecupole(
 
     prefactor = 8 / 35
 
-    molecular_hexadecupole_displaced = np.zeros((3, 3, 3, 3))
+    molecular_hexadecapole_displaced = np.zeros((3, 3, 3, 3))
 
     for atom in atoms:
 
@@ -705,48 +705,48 @@ def recover_molecular_hexadecupole(
         octupole_packed = octupole_spherical_to_cartesian(
             q30, q31c, q31s, q32c, q32s, q33c, q33s
         )
-        hexadecupole_packed = hexadecapole_spherical_to_cartesian(
+        hexadecapole_packed = hexadecapole_spherical_to_cartesian(
             q40, q41c, q41s, q42c, q42s, q43c, q43s, q44c, q44s
         )
 
-        displaced_hexadecupole_cart = displace_hexadecupole_cartesian(
+        displaced_hexadecapole_cart = displace_hexadecapole_cartesian(
             atom_coords,
             q00,
             dipole_packed,
             quadrupole_packed,
             octupole_packed,
-            hexadecupole_packed,
+            hexadecapole_packed,
         )
 
-        molecular_hexadecupole_displaced += displaced_hexadecupole_cart
+        molecular_hexadecapole_displaced += displaced_hexadecapole_cart
 
     if include_prefactor:
-        molecular_hexadecupole_displaced *= prefactor
+        molecular_hexadecapole_displaced *= prefactor
 
     if convert_to_debye_angstrom_squared:
-        molecular_hexadecupole_displaced *= (
+        molecular_hexadecapole_displaced *= (
             constants.coulombbohrcubed_to_debyeangstromcubed
         )
 
     if convert_to_cartesian:
-        return molecular_hexadecupole_displaced
+        return molecular_hexadecapole_displaced
     else:
         return np.array(
-            hexadecapole_cartesian_to_spherical(molecular_hexadecupole_displaced)
+            hexadecapole_cartesian_to_spherical(molecular_hexadecapole_displaced)
         )
 
 
-def get_gaussian_and_aimall_molecular_hexadecupole(
+def get_gaussian_and_aimall_molecular_hexadecapole(
     gaussian_output: "ichor.core.files.GaussianOutput",  # noqa F821
     ints_directory: "ichor.core.files.IntsDir",  # noqa: F821
 ):
-    """Gets the Gaussian hexadecupole moment and converts it to traceless (still in Debye Angstrom^3)
-    Also gets the AIMAll recovered molecule hexadecupole moment from atomic ones.
+    """Gets the Gaussian hexadecapole moment and converts it to traceless (still in Debye Angstrom^3)
+    Also gets the AIMAll recovered molecule hexadecapole moment from atomic ones.
 
     Returns a tuple of numpy arrays, where the first one is the
-    Gaussian traceless 3x3x3x3 hexadecupole moment (in Debye Angstrom^3)
+    Gaussian traceless 3x3x3x3 hexadecapole moment (in Debye Angstrom^3)
     and the second one is the AIMAll recovered traceless 3x3x3x3
-    hexadecupole moment (also converted from au to Debye Angstrom^3)
+    hexadecapole moment (also converted from au to Debye Angstrom^3)
     and with prefactor taken into account.
 
     This allows for direct comparison of AIMAll to Gaussian.
@@ -757,7 +757,7 @@ def get_gaussian_and_aimall_molecular_hexadecupole(
     :param ints_directory: A IntsDirectory instance containing the
         AIMAll .int files for the same geometry that was used in Gaussian
     :return: A tuple of 3x3x3x3 np.ndarrays, where the first is the Gaussian
-        hexadecupole moment and the second is the AIMAll recovered hexadecupole moment.
+        hexadecapole moment and the second is the AIMAll recovered hexadecapole moment.
     """
 
     # in angstroms, convert to bohr
@@ -767,19 +767,19 @@ def get_gaussian_and_aimall_molecular_hexadecupole(
     raw_gaussian_octupole = np.array(gaussian_output.molecular_hexadecapole)
     # convert to xxx xxy xxz xyy xyz xzz yyy yyz yzz zzz
     # because Gaussian uses a different ordering
-    converted_gaussian_hexadecupole = hexadecupole_element_conversion(
+    converted_gaussian_hexadecapole = hexadecapole_element_conversion(
         raw_gaussian_octupole, 0
     )
     # pack into 3x3x3x3 array
-    packed_converted_gaussian_hexadecupole = pack_cartesian_hexadecapole(
-        *converted_gaussian_hexadecupole
+    packed_converted_gaussian_hexadecapole = pack_cartesian_hexadecapole(
+        *converted_gaussian_hexadecapole
     )
     # convert Gaussian to traceless because AIMAll moments are traceless
-    traceless_gaussian_octupole = hexadecupole_nontraceless_to_traceless(
-        packed_converted_gaussian_hexadecupole
+    traceless_gaussian_octupole = hexadecapole_nontraceless_to_traceless(
+        packed_converted_gaussian_hexadecapole
     )
     # note that conversion factors are applied in the function by default
-    aimall_recovered_molecular_octupole = recover_molecular_hexadecupole(
+    aimall_recovered_molecular_octupole = recover_molecular_hexadecapole(
         atoms, ints_directory
     )
 
