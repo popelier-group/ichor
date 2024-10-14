@@ -178,6 +178,12 @@ def get_gaussian_and_aimall_molecular_dipole(
     atoms = atoms.to_bohr()
 
     if atom_names:
+        # ensure that the passed in atom names are a subset of the all of the atom names
+        if not set(atom_names).issubset(set(atoms.names)):
+            raise ValueError(
+                "The passed atom names must be a subset of all the atom names."
+            )
+
         atoms = [i for i in atoms if i.name in atom_names]
 
     # in debye
