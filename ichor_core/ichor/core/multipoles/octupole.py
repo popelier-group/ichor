@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 from ichor.core.common import constants
@@ -347,7 +347,7 @@ def displace_octupole_cartesian(
 
 
 def recover_molecular_octupole(
-    atoms: "ichor.core.atoms.Atoms",  # noqa F821
+    atoms: Union["ichor.core.Atoms", List["Atoms"]],  # noqa F821
     ints_dir: "ichor.core.files.IntDirectory",  # noqa F821
     convert_to_debye_angstrom_squared=True,
     convert_to_cartesian=True,
@@ -357,7 +357,7 @@ def recover_molecular_octupole(
     from ichor.core.multipoles.dipole import dipole_spherical_to_cartesian
     from ichor.core.multipoles.quadrupole import quadrupole_spherical_to_cartesian
 
-    atoms = atoms.to_bohr()
+    atoms = [a.to_bohr() for a in atoms]
 
     # from anthony stone theory of intermolecular forces p21-22
     # note that aimall * (2/5) = Gaussian (if both are in atomic units)
@@ -422,6 +422,7 @@ def recover_molecular_octupole(
 def get_gaussian_and_aimall_molecular_octupole(
     gaussian_output: "ichor.core.files.GaussianOutput",  # noqa F821
     ints_directory: "ichor.core.files.IntsDir",  # noqa: F821
+    atom_names: list = None,
 ):
     """Gets the Gaussian octupole moment and converts it to traceless (still in Debye Angstrom^2)
     Also gets the AIMAll recovered molecule octupole moment from atomic ones.
@@ -439,6 +440,8 @@ def get_gaussian_and_aimall_molecular_octupole(
         must also be used in the AIMAll calculation.
     :param ints_directory: A IntsDirectory instance containing the
         AIMAll .int files for the same geometry that was used in Gaussian
+    :param atom_names: Optional list of atom names, which represent a subset of
+        the atoms. The atomic multipole moments for this subset of atoms will be summed
     :return: A tuple of 3x3x3 np.ndarrays, where the first is the Gaussian
         octupole moment and the second is the AIMAll recovered octupole moment.
     """
@@ -446,6 +449,16 @@ def get_gaussian_and_aimall_molecular_octupole(
     # in angstroms, convert to bohr
     atoms = gaussian_output.atoms
     atoms = atoms.to_bohr()
+
+    if atom_names:
+        # ensure that the passed in atom names are a subset of the all of the atom names
+        if not set(atom_names).issubset(set(atoms.names)):
+            raise ValueError(
+                f"The passed atom names : {atom_names} must be a subset of all the atom names {atoms.names}."
+            )
+
+        atoms = [i for i in atoms if i.name in atom_names]
+
     # in debye angstrom squared
     raw_gaussian_octupole = np.array(gaussian_output.molecular_octupole)
     # convert to xxx xxy xxz xyy xyz xzz yyy yyz yzz zzz
