@@ -3,7 +3,7 @@ csf3:
   hpc:
 
     parallel_environments:
-      smp.pe: [2, 32]
+      amd.pe: [2, 32]
 
   software:
 
