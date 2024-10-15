@@ -428,9 +428,20 @@ def get_alphagamma(alpha: int, gamma: int) -> int:
     :return: the remaining term
     """
 
-    for i in range(3):
-        if (i != alpha) and (i != gamma):
-            return i
+    if alpha == 0 and gamma == 1:
+        return 2
+    elif alpha == 0 and gamma == 2:
+        return 1
+    elif alpha == 1 and gamma == 0:
+        return 2
+    elif alpha == 1 and gamma == 2:
+        return 0
+    elif alpha == 2 and gamma == 0:
+        return 1
+    elif alpha == 2 and gamma == 1:
+        return 0
+    else:
+        raise ValueError("The function should have returned the last index already.")
 
 
 def sorting_function(alpha: int, beta: int, gamma: int, chi: int):
@@ -471,7 +482,6 @@ def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector
     alpha, beta, gamma = sorting_function(alpha, beta, gamma, chi)
 
     onealpha, twoalpha = get_other_alphas(alpha)
-    alphagamma = get_alphagamma(alpha, gamma)
 
     if (alpha == beta) and (beta == gamma):
 
@@ -506,6 +516,8 @@ def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector
 
     elif (alpha == beta) and (beta != gamma):
 
+        alphagamma = get_alphagamma(alpha, gamma)
+
         term1 = 10.5 * f3(
             gamma, alpha, alpha, alpha, dipole, octupole, displacement_vector
         )
@@ -527,6 +539,8 @@ def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector
         return term1 - term2 + term3 - term4 + term5 + term6
 
     elif (alpha != beta) and (beta == gamma):
+
+        alphagamma = get_alphagamma(alpha, gamma)
 
         term1 = 18 * (
             f3(alpha, alpha, gamma, gamma, dipole, octupole, displacement_vector)
@@ -577,7 +591,7 @@ def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector
 
         return term1 - term2 + term3 - term4 + term5 + term6 - term7
 
-    else:
+    elif (alpha != beta) and (beta != gamma):
 
         term1 = 18 * f3(
             alpha, alpha, beta, gamma, dipole, octupole, displacement_vector
