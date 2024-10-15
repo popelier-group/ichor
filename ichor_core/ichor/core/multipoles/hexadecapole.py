@@ -424,10 +424,16 @@ def sorting_function(alpha: int, beta: int, gamma: int, chi: int):
     :param gamma: 0, 1, or 2 (corresponding to x,y, or z)
     :param chi: 0, 1, or 2 (corresponding to x,y, or z)
     """
-    li = [alpha, beta, gamma, chi]
+    l = [alpha, beta, gamma, chi]
 
-    # https://stackoverflow.com/a/23429481
-    sorted_li = sorted(li, key=Counter(li).get, reverse=True)
+    sorted_li = []
+    # the most common returns a tuple of item: ncounts
+    # with the most common ones being on the left
+    for item, c in Counter(l).most_common():
+        # makes a list that has a length of c repeating the item
+        for i in [item] * c:
+            # add to the sorted list
+            sorted_li.append(i)
 
     # there will always be at least one repeating index
     # the 0 and 1 indices will always be repeating
