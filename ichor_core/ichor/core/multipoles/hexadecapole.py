@@ -408,7 +408,7 @@ def get_alphagamma(alpha: int, gamma: int) -> int:
     """
 
     for i in range(3):
-        if i != alpha and i != gamma:
+        if (i != alpha) and (i != gamma):
             return i
 
 
