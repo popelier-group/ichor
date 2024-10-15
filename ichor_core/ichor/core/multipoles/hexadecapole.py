@@ -659,7 +659,7 @@ def displace_hexadecapole_cartesian(
 def recover_molecular_hexadecapole(
     atoms: Union["ichor.core.Atoms", List["Atoms"]],  # noqa F821
     ints_dir: "ichor.core.files.IntDirectory",  # noqa F821
-    convert_to_debye_angstrom_squared=True,
+    convert_to_debye_angstrom_cubed=True,
     convert_to_cartesian=True,
     include_prefactor=True,
 ):
@@ -733,7 +733,7 @@ def recover_molecular_hexadecapole(
     if include_prefactor:
         molecular_hexadecapole_displaced *= prefactor
 
-    if convert_to_debye_angstrom_squared:
+    if convert_to_debye_angstrom_cubed:
         molecular_hexadecapole_displaced *= (
             constants.coulombbohrcubed_to_debyeangstromcubed
         )
