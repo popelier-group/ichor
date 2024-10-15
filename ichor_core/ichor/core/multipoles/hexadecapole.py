@@ -368,6 +368,27 @@ def f3(
     return dipole_alpha * oct_prime + dipole_prime * oct_beta_gamma_chi
 
 
+# TODO: remove this function after hexadecupole works
+def f3prime(gamma, beta, alpha, dipole, octupole, displacement_vector):
+
+    dipole_term = dipole[gamma]
+
+    displacement_alpha = displacement_vector[alpha]
+    displacement_beta = displacement_vector[beta]
+    displacement_gamma = displacement_vector[gamma]
+
+    return (
+        0.5
+        * dipole_term
+        * (
+            4 * displacement_beta * displacement_alpha**2
+            - displacement_beta**3
+            - displacement_beta * displacement_gamma**2
+        )
+        + displacement_gamma * octupole[beta, alpha, alpha]
+    )
+
+
 def f4(alpha, beta, gamma, chi, quadrupole, displacement_vector):
 
     theta_alpha_beta = quadrupole[alpha, beta]
@@ -563,7 +584,10 @@ def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector
         )
         term2 = 10.5 * (
             f3(beta, gamma, alpha, alpha, dipole, octupole, displacement_vector)
-            + f3(gamma, beta, alpha, alpha, dipole, octupole, displacement_vector)
+            + f3(
+                gamma, beta, alpha, alpha, dipole, octupole, displacement_vector
+            )  # TODO: remove this comment after hexadecupole works
+            # f3prime(gamma, beta, alpha, dipole, octupole, displacement_vector)
         )
         term3 = 3 * (
             f3(beta, gamma, beta, beta, dipole, octupole, displacement_vector)
