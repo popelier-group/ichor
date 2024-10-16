@@ -817,9 +817,8 @@ def get_gaussian_and_aimall_molecular_hexadecapole(
         hexadecapole moment and the second is the AIMAll recovered hexadecapole moment.
     """
 
-    # in angstroms, convert to bohr
+    # in angstroms, convert to Bohr in recover_molecular_hexadecapole
     atoms = gaussian_output.atoms
-    atoms = atoms.to_bohr()
 
     if atom_names:
         # ensure that the passed in atom names are a subset of the all of the atom names
