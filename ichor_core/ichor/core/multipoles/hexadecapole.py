@@ -243,6 +243,9 @@ def hexadecapole_nontraceless_to_traceless(hexadecapole_tensor: np.ndarray):
     # in that equation, pull out the 35 factor so you get (35/8) * (Q_{ijkl}....)
     # that will lead to the equations below
 
+    # NOTE: The equation given in 157 has a typo in the second to last term
+    # where it should be kronecker_delta(k,l) * Q_{ijmm}
+
     for i in range(3):
         for j in range(3):
             for k in range(3):
@@ -258,7 +261,7 @@ def hexadecapole_nontraceless_to_traceless(hexadecapole_tensor: np.ndarray):
                         * kronecker_delta(j, k)
                         + (np.einsum("mm", hexadecapole_tensor[i, k]))
                         * kronecker_delta(j, l)
-                        + (np.einsum("mm", hexadecapole_tensor[i, l]))
+                        + (np.einsum("mm", hexadecapole_tensor[i, j]))
                         * kronecker_delta(k, l)
                     ) - (
                         (
