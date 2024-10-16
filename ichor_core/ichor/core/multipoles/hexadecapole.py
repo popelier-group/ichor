@@ -322,7 +322,7 @@ def phi_prime(alpha, beta, gamma, chi, displacement_vector):
         35
         * displacement_alpha
         * displacement_beta
-        * displacement_beta
+        * displacement_gamma
         * displacement_chi
         - 5
         * norm**2
