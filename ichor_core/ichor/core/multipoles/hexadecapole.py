@@ -831,23 +831,23 @@ def get_gaussian_and_aimall_molecular_hexadecapole(
         atoms = [i for i in atoms if i.name in atom_names]
 
     # in debye angstrom squared
-    raw_gaussian_octupole = np.array(gaussian_output.molecular_hexadecapole)
+    raw_gaussian_hexadecapole = np.array(gaussian_output.molecular_hexadecapole)
     # convert to xxx xxy xxz xyy xyz xzz yyy yyz yzz zzz
     # because Gaussian uses a different ordering
     converted_gaussian_hexadecapole = hexadecapole_element_conversion(
-        raw_gaussian_octupole, 0
+        raw_gaussian_hexadecapole, 0
     )
     # pack into 3x3x3x3 array
     packed_converted_gaussian_hexadecapole = pack_cartesian_hexadecapole(
         *converted_gaussian_hexadecapole
     )
     # convert Gaussian to traceless because AIMAll moments are traceless
-    traceless_gaussian_octupole = hexadecapole_nontraceless_to_traceless(
+    traceless_gaussian_hexadecapole = hexadecapole_nontraceless_to_traceless(
         packed_converted_gaussian_hexadecapole
     )
     # note that conversion factors are applied in the function by default
-    aimall_recovered_molecular_octupole = recover_molecular_hexadecapole(
+    aimall_recovered_molecular_hexadecapole = recover_molecular_hexadecapole(
         atoms, ints_directory
     )
 
-    return traceless_gaussian_octupole, aimall_recovered_molecular_octupole
+    return traceless_gaussian_hexadecapole, aimall_recovered_molecular_hexadecapole
