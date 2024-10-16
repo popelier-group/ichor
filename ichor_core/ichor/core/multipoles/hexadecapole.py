@@ -455,7 +455,7 @@ def sorting_function(alpha: int, beta: int, gamma: int, chi: int):
     return sorted_li[0], sorted_li[2], sorted_li[3]
 
 
-def G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector):
+def g(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector):
 
     # sort by number of repeating indices
     # the largest amount of repetitions are on the left
@@ -625,7 +625,7 @@ def hexadecapole_one_term_general_expression(
         hexadecapole[alpha, beta, gamma, chi]
         + phi_prime(alpha, beta, gamma, chi, displacement_vector) * monopole
         + (1 / 6)
-        * G(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector)
+        * g(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector)
     )
 
 
