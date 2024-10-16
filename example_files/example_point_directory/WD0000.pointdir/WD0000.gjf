@@ -1,0 +1,13 @@
+#p b3lyp/aug-cc-pvtz nosymm output=wfn force geom=notest
+
+WD_FSv2_small00000
+
+0   1
+O   0.00000000   0.00000000   0.00000000
+H   0.97094712   0.00000000   0.00000000
+H  -0.21803131   1.02625221   0.00000000
+O  -1.82648327  -1.39588913  -1.60444113
+H  -1.89310786  -1.96791408  -2.43971942
+H  -1.10322566  -0.71233863  -1.83472942
+
+/gpfs01/scratch/mbdxwym4/WD_FSv2_small/WD_FSv2_small_PARENT/WD_FSv2_small0/WD_FSv2_small00000/WD_FSv2_small00000.wfn
