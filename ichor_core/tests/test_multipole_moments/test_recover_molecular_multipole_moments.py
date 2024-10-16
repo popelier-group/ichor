@@ -13,17 +13,15 @@ from tests.path import get_cwd
 
 example_dir = get_cwd(__file__) / ".." / ".." / ".." / "example_files"
 
+gaussian_output = GaussianOutput(
+    example_dir / "example_point_directory" / "WD0000.pointdir" / "WD0000.gau"
+)
+aimall_ints = IntDirectory(
+    example_dir / "example_point_directory" / "WD0000.pointdir" / "WD0000_atomicfiles"
+)
+
 
 def test_recover_molecular_dipole_moment():
-    gaussian_output = GaussianOutput(
-        example_dir / "example_point_directory" / "WD0000.pointdir" / "WD0000.gau"
-    )
-    aimall_ints = IntDirectory(
-        example_dir
-        / "example_point_directory"
-        / "WD0000.pointdir"
-        / "WD0000_atomicfiles"
-    )
 
     gaussian, aimall_recovered = get_gaussian_and_aimall_molecular_dipole(
         gaussian_output, aimall_ints
@@ -33,15 +31,6 @@ def test_recover_molecular_dipole_moment():
 
 
 def test_recover_molecular_quadrupole_moment():
-    gaussian_output = GaussianOutput(
-        example_dir / "example_point_directory" / "WD0000.pointdir" / "WD0000.gau"
-    )
-    aimall_ints = IntDirectory(
-        example_dir
-        / "example_point_directory"
-        / "WD0000.pointdir"
-        / "WD0000_atomicfiles"
-    )
 
     gaussian, aimall_recovered = get_gaussian_and_aimall_molecular_quadrupole(
         gaussian_output, aimall_ints
@@ -51,15 +40,6 @@ def test_recover_molecular_quadrupole_moment():
 
 
 def test_recover_molecular_octupole_moment():
-    gaussian_output = GaussianOutput(
-        example_dir / "example_point_directory" / "WD0000.pointdir" / "WD0000.gau"
-    )
-    aimall_ints = IntDirectory(
-        example_dir
-        / "example_point_directory"
-        / "WD0000.pointdir"
-        / "WD0000_atomicfiles"
-    )
 
     gaussian, aimall_recovered = get_gaussian_and_aimall_molecular_octupole(
         gaussian_output, aimall_ints
@@ -69,15 +49,6 @@ def test_recover_molecular_octupole_moment():
 
 
 def test_recover_molecular_hexadecapole_moment():
-    gaussian_output = GaussianOutput(
-        example_dir / "example_point_directory" / "WD0000.pointdir" / "WD0000.gau"
-    )
-    aimall_ints = IntDirectory(
-        example_dir
-        / "example_point_directory"
-        / "WD0000.pointdir"
-        / "WD0000_atomicfiles"
-    )
 
     gaussian, aimall_recovered = get_gaussian_and_aimall_molecular_hexadecapole(
         gaussian_output, aimall_ints
