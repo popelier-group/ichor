@@ -160,6 +160,7 @@ def recover_molecular_dipole(
     :returns: A numpy array containing the recovered molecular dipole moment.
     """
 
+    # must convert to Bohr
     atoms = [a.to_bohr() for a in atoms]
 
     molecular_dipole = np.zeros(3)
@@ -219,9 +220,7 @@ def get_gaussian_and_aimall_molecular_dipole(
         dipole moment and the second is the AIMAll recovered dipole moment.
     """
 
-    # make sure we are in bohr
     atoms = gaussian_output.atoms
-    atoms = atoms.to_bohr()
 
     if atom_names:
         # ensure that the passed in atom names are a subset of the all of the atom names
