@@ -4,16 +4,25 @@ import numpy as np
 
 from ichor.core.common.constants import coulombbohr_to_debye
 
+# links to papers relating to dipole moment origin change
+# https://doi.org/10.1021/jp067922u
+# The effects of hydrogen-bonding environment on the polarization and electronic properties of water molecules
+# https://doi.org/10.1080/15533170701854189
+# The Asymptotic Behavior of the Dipole and Quadrupole Moment of a Single Water Molecule from Gas Phase to
+# Large Clusters: A QCT Analysis
+
 
 def rotate_dipole(
     q10: float, q11c: float, q11s: float, C: np.ndarray
 ) -> Tuple[float, float, float]:
-    """Rotates dipole moment from global spherical to local spherical.
+    """Converts dipole to Cartesian from spherical, after which
+    it rotates it using the C matrix, after which the rotated dipole
+    is converted back into spherical tensor formulation.
 
-    :param q10: q10 component
-    :param q11c: q11c component
-    :param q11s: q11s component
-    :param C: C matrix to use to rotate dipoles
+    :param q10: q10 component of dipole
+    :param q11c: q11c component of dipole
+    :param q11s: q11s component of dipole
+    :param C: rotation matrix (typically the ALF C matrix, but can be any other)
     """
 
     # Global cartesian dipole moment d is a simple rearrangement of the spherical form
@@ -24,23 +33,60 @@ def rotate_dipole(
     return dipole_cartesian_to_spherical(rotated_d)
 
 
-def dipole_spherical_to_cartesian(q10, q11c, q11s) -> np.ndarray:
+def dipole_spherical_to_cartesian(q10: float, q11c: float, q11s: float) -> np.ndarray:
+    """Converts the dipole moment from spherical tensor to Cartesian
+    tensor formulation.
+
+    :param q10: q10 component of dipole
+    :param q11c: q11c component of dipole
+    :param q11s: q11s component of dipole
+    :return: 1-dimensional np.ndarray containing the converted dipole moment
+    """
     return np.array([q11c, q11s, q10])
 
 
 def dipole_cartesian_to_spherical(d: np.ndarray) -> Tuple[float, float, float]:
+    """Converts the dipole moment from Cartesian tensor to spherical
+    tensor formulation
+
+    :param d: np.ndarray containing the Cartesian dipole
+    :return: A tuple containing the q10, q11c, and q11s components
+    """
+
     return d[2], d[0], d[1]
 
 
-def pack_cartesian_dipole(d_x, d_y, d_z):
+def pack_cartesian_dipole(d_x: float, d_y: float, d_z: float) -> np.ndarray:
+    """Packs the three Cartesian dipole moment
+    components into a 1-dimensional array
+
+    :param d_x: The x component of the dipole
+    :param d_y: The y component of the dipole
+    :param d_z: The z component of the dipole
+    :return: 1 dimensional np.ndarray representing the dipole moment
+    """
+
     return np.array([d_x, d_y, d_z])
 
 
-def unpack_cartesian_dipole(d):
+def unpack_cartesian_dipole(d: Union[list, np.ndarray]) -> Tuple[float, float, float]:
+    """Unpacks the three Cartesian dipole moment from a 1-dimensional array
+    into a tuple of the three separate components
+
+    :param d: The 1-dimensional array representing the dipole moment
+    """
+
     return d[0], d[1], d[2]
 
 
 def dipole_rotate_cartesian(d: np.ndarray, C: np.ndarray) -> np.ndarray:
+    """Rotates the dipole moment using a rotation matrix.
+
+    :param d: The 1-dimensional Cartesian dipole moment
+    :param C: The 2-dimensional 3x3 rotation matrix
+    :return: The rotated Cartesian dipole moment
+    """
+
     return np.einsum("ia,a->i", C, d)
 
 
@@ -192,132 +238,3 @@ def get_gaussian_and_aimall_molecular_dipole(
     aimall_recovered_molecular_dipole = recover_molecular_dipole(atoms, ints_directory)
 
     return raw_gaussian_dipole, aimall_recovered_molecular_dipole
-
-
-# def dipole_origin_change(
-#     dipole: np.ndarray,
-#     old_origin: np.ndarray,
-#     new_origin: np.ndarray,
-#     molecular_charge: int,
-# ) -> np.ndarray:
-#     """Changes the origin of the dipole moment and returns the dipole moment in the new origin
-
-#     :param dipole: a 1-dimensional np.ndarray containing the x,y,z components
-#         note the dipole moment has to be in Cartesian coordinates AND in atomic units.
-#     :param old_origin: The old origin with respect to which the given dipole is calculated.
-#         1d array containing Cartesian x,y,z coordinates in Bohr.
-#     :type old_origin: The new origin with respect to which the new dipole should be given.
-#         1d array containing Cartesian x,y,z coordinates in Bohr.
-#     :param molecular_charge: The charge of the system (positive or negative)
-#     :return: The dipole moment as seen from the new origin, in atomic units
-
-#     See David Griffiths Introduction to Electrodynamics, p 157
-
-#     .. note::
-#         The dipole calculation can be directly converted in Cartesian because it is simple
-#     """
-
-#     # p_bar = p - Q * a_bar
-#     # where p is is the original dipole, Q is the charge of the molecule and a is the displacement amount
-#     # the displacement is the new_origin - old_origin
-#     # p_bar is the new dipole
-#     # if the total charge is 0, then the dipole does not change with the origin change
-
-#     return dipole - (molecular_charge * (new_origin - old_origin))
-
-
-# equations come from
-# https://doi.org/10.1021/jp067922u
-# The effects of hydrogen-bonding environment on the polarization and electronic properties of water molecules
-# https://doi.org/10.1080/15533170701854189
-# The Asymptotic Behavior of the Dipole and Quadrupole Moment of a Single Water Molecule from Gas Phase to
-# Large Clusters: A QCT Analysis
-
-# note that the units for distances are in Bohr
-# Gaussian calculates multipole moments in Debye, while atomic units are using in AIMAll (Coulomb Bohr)
-# TODO: Gaussian defines the x,y,z axes a different way, therefore the values are switched around for dipole moment.
-# TODO: Figure out how axes are swapped and what changes that has on quadrupole, octupole, hexadecapole values
-
-# You should be able to recover the Gaussain molecular values by
-# doing the necessary conversions of AIMAll values and summing across all atoms
-# Note that the axes that Gaussian uses are different though.
-# Importantly, there is NO NEED to rotate multipole moments in ALF frame if directly comparing AIMAll and Gaussian
-# however, if making predictions with FFLUX, you WILL need to
-# convert the local multipole moments to the global frame before summing up the components
-# across atoms/molecules. Otherwise you will get the wrong answer.
-
-# note that AIMAll multipole moments are in Spherical coordinates but Gaussian ones are in Cartesian
-# for dipole moment, the number of values for spherical/Cartesian is the same (3)
-# for higher multipole moments, there are less spherical ones than Cartesian
-
-
-def q10_prime(q10: float, r_z: float, q00: float):
-    """Calculates math:Q'_{10}, representing the total ATOMIC contribution for the molecular
-    dipole moment.
-
-    .. note::
-        This is the contribution of one atom, which needs to be summed over to get the molecular value.
-        Also, make sure the units for multipole moments / distances are correct.
-
-    :param q_10: AIMAll Q_10 value
-    :param r_z: Distance of atom from the origin in the z-direction. In Bohr.
-    :param q_omega: The charge of the atom (q00). Note that this AIMAll gives q00 without adding the nuclear charge.
-        When obtaining q00 through ichor, the nuclear charge is always added to the q00 value.
-    """
-
-    return q10 + r_z * q00
-
-
-def q11c_prime(q11c: float, r_x: float, q00: float):
-    """Calculates math:Q'_{11c}, representing the total ATOMIC contribution for the molecular
-    dipole moment.
-
-    .. note::
-        This is the contribution of one atom, which needs to be summed over to get the molecular value.
-        Also, make sure the units for multipole moments / distances are correct.
-
-    :param q_10: AIMAll Q_11c value
-    :param r_x: Distance of atom from the origin in the x-direction. In Bohr.
-    :param q_omega: The charge of the atom (q00). Note that this AIMAll gives q00 without adding the nuclear charge.
-        When obtaining q00 through ichor, the nuclear charge is always added to the q00 value.
-    """
-
-    return q11c + r_x * q00
-
-
-def q11s_prime(q11s: float, r_y: float, q00: float):
-    """Calculates math:Q'_{11s}, representing the total ATOMIC contribution for the molecular
-    dipole moment.
-
-    .. note::
-        This is the contribution of one atom, which needs to be summed over to get the molecular value.
-        Also, make sure the units for multipole moments / distances are correct.
-
-    :param q_10: AIMAll Q_11c value
-    :param r_y: Distance of atom from the origin in the y-direction. In Bohr.
-    :param q_omega: The charge of the atom (q00). Note that this AIMAll gives q00 without adding the nuclear charge.
-        When obtaining q00 through ichor, the nuclear charge is always added to the q00 value.
-    """
-
-    return q11s + r_y * q00
-
-
-def atomic_contribution_to_molecular_dipole(
-    q00, q10: float, q11c: float, q11s: float, atomic_coordinates: np.ndarray
-):
-    """Calculates the atomic contribution to the molecular dipole moment.
-
-    .. note::
-        This is contribution of ONE atom.
-
-    :param q10: AIMAll q10 value
-    :param q11c: AIMAll q11c value
-    :param q11s: AIMAll q11s value
-    :param atomic_coordinates: 1D numpy array containing the x,y,z values (in bohr)
-    """
-
-    q10_pr = q10_prime(q10, atomic_coordinates[2], q00)
-    q11c_pr = q11c_prime(q11c, atomic_coordinates[0], q00)
-    q11s_pr = q11s_prime(q11s, atomic_coordinates[1], q00)
-
-    return np.array([q10_pr, q11c_pr, q11s_pr])
