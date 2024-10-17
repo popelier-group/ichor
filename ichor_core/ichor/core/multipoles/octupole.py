@@ -40,6 +40,20 @@ def octupole_spherical_to_cartesian(
     q33c: float,
     q33s: float,
 ) -> np.ndarray:
+    """
+    Converts the octupole from spherical to Cartesian tensor form
+    Returns a 3x3x3 tensor
+
+    :param q30: q30 spherical tensor component
+    :param q31c: q31c spherical tensor component
+    :param q31s: q31s spherical tensor component
+    :param q32c: q32c spherical tensor component
+    :param q32s: q32s spherical tensor component
+    :param q33c: q33c spherical tensor component
+    :param q33s: q33s spherical tensor component
+    :returns: 3x3x3 np.ndarray containing the Cartesian octupole
+    """
+
     o_xxx = constants.rt5_8 * q33c - constants.rt3_8 * q31c
     o_xxy = constants.rt5_8 * q33s - constants.rt1_24 * q31s
     o_xxz = constants.rt5_12 * q32c - 0.5 * q30
@@ -59,6 +73,11 @@ def octupole_spherical_to_cartesian(
 def octupole_cartesian_to_spherical(
     o: np.ndarray,
 ) -> Tuple[float, float, float, float, float, float, float]:
+    """Converts the Carteisan tensor octupole into its spherical components.
+
+    :param o: Cartesian octupole of shape 3x3x3
+    """
+
     q30 = o[2, 2, 2]
     q31c = constants.rt3_2 * o[0, 2, 2]
     q31s = constants.rt3_2 * o[1, 2, 2]
@@ -72,6 +91,8 @@ def octupole_cartesian_to_spherical(
 def pack_cartesian_octupole(
     o_xxx, o_xxy, o_xxz, o_xyy, o_xyz, o_xzz, o_yyy, o_yyz, o_yzz, o_zzz
 ):
+    """Packs the Cartesian octupole to form a 3x3x3 tensor"""
+
     return np.array(
         [
             [
@@ -93,7 +114,13 @@ def pack_cartesian_octupole(
     )
 
 
-def unpack_cartesian_octupole(o):
+def unpack_cartesian_octupole(
+    o: np.ndarray,
+) -> Tuple[float, float, float, float, float, float, float, float, float, float]:
+    """Unpacks the Cartesian octupole moment into its unique elements
+
+    :returns: A tuple of the unique Cartesian elements of the octupole moment.
+    """
     return (
         o[0, 0, 0],
         o[0, 0, 1],
@@ -138,6 +165,13 @@ def octupole_element_conversion(octupole_array: np.ndarray, current_ordering):
 
 
 def octupole_rotate_cartesian(o: np.ndarray, C: np.ndarray) -> np.ndarray:
+    """Rotates the octupole moment given a rotation matrix C
+
+    :param o: The Cartesian octupole moment (3x3x3 array)
+    :param C: The 3x3 rotation matrix
+    :returns: The rotated Cartesian octupole moment (3x3x3 array)
+    """
+
     return np.einsum("ia,jb,kc,abc->ijk", C, C, C, o)
 
 
@@ -275,6 +309,17 @@ def recover_molecular_octupole(
     convert_to_cartesian=True,
     include_prefactor=True,
 ):
+    """Recovers the octupole moment fora collection of atoms.
+
+    .. note::
+        The atoms might be a subset of the whole molecule, so the
+        calculated octupole moment will be for that fragment only
+
+    :param atoms: The atoms over which to sum the atomic multipole moments
+    :param convert_to_cartesian: Whether to return the Cartesian octupole moment or spherical, defaults to True
+    :param include_prefactor: Whether to include the (2/5) prefactor, defaults to True
+    :return: The recovered octupole moment with origin (0,0,0)
+    """
 
     from ichor.core.multipoles.dipole import dipole_spherical_to_cartesian
     from ichor.core.multipoles.quadrupole import quadrupole_spherical_to_cartesian
@@ -370,7 +415,6 @@ def get_gaussian_and_aimall_molecular_octupole(
 
     # in angstroms, convert to bohr
     atoms = gaussian_output.atoms
-    atoms = atoms.to_bohr()
 
     if atom_names:
         # ensure that the passed in atom names are a subset of the all of the atom names
