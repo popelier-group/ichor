@@ -3,6 +3,7 @@ from typing import List, Tuple, Union
 import numpy as np
 
 from ichor.core.common.constants import coulombbohr_to_debye
+from ichor.core.multipoles.primed_functions import mu_prime
 
 # links to papers relating to dipole moment origin change
 # https://doi.org/10.1021/jp067922u
@@ -105,7 +106,7 @@ def dipole_one_term_general_expression(
     :returns: The x,y or z component of the dipole moment as seen from a new origin.
     """
 
-    mu_alpha_disp = dipole[alpha] + displacement_vector[alpha] * monopole
+    mu_alpha_disp = dipole[alpha] + mu_prime(alpha, displacement_vector) * monopole
 
     return mu_alpha_disp
 
