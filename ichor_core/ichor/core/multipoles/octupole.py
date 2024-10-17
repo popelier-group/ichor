@@ -3,6 +3,7 @@ from typing import List, Tuple, Union
 import numpy as np
 from ichor.core.common import constants
 from ichor.core.common.arith import kronecker_delta
+from ichor.core.multipoles.primed_functions import mu_prime, omega_prime, theta_prime
 
 # Discussion of traceless tensors https://ocw.mit.edu/courses/8-07-electromagnetism-ii-fall-2012/pages/lecture-notes/
 # https://ocw.mit.edu/courses/8-07-electromagnetism-ii-fall-2012/resources/mit8_07f12_ln9/
@@ -140,9 +141,7 @@ def octupole_rotate_cartesian(o: np.ndarray, C: np.ndarray) -> np.ndarray:
     return np.einsum("ia,jb,kc,abc->ijk", C, C, C, o)
 
 
-def octupole_nontraceless_to_traceless(
-    octupole_tensor: np.ndarray, include_prefactor=False
-):
+def octupole_nontraceless_to_traceless(octupole_tensor: np.ndarray):
     """Converts a non-traceless octupole to a traceless octupole.
     GAUSSIAN and ORCA, as well as other computational chemistry software
     usually only give the non-traceless octupole moments. These must
@@ -150,7 +149,6 @@ def octupole_nontraceless_to_traceless(
     recovered multipole moments.
 
     :param octupole_tensor: The packed (Cartesian) octupole tensor
-    :param include_prefactor: The prefactor (5/2)
     :returns: The traceless packed (Cartesian) octupole tensor
     """
 
@@ -176,95 +174,24 @@ def octupole_nontraceless_to_traceless(
     return octupole_tensor - tensor_to_subtract
 
 
-def Eta(gamma):
-    if gamma == 0:
-        return 1, 2
-    elif gamma == 1:
-        return 0, 2
-    elif gamma == 2:
-        return 0, 1
+def f2(alpha, beta, gamma, dipole, quadrupole, displacement_vector):
 
-
-def Omega_prime(alpha, beta, gamma, displacement_vector: np.ndarray):
-
-    norm = np.linalg.norm(displacement_vector)
-
-    aprime_alpha, aprime_beta, aprime_gamma = (
-        displacement_vector[alpha],
-        displacement_vector[beta],
-        displacement_vector[gamma],
-    )
-
-    k1 = kronecker_delta(beta, gamma)
-    k2 = kronecker_delta(alpha, gamma)
-    k3 = kronecker_delta(alpha, beta)
-
-    return 0.5 * (
-        5 * aprime_alpha * aprime_beta * aprime_gamma
-        - norm**2 * (aprime_alpha * k1 + aprime_beta * k2 + aprime_gamma * k3)
+    return (
+        quadrupole[alpha, beta] * mu_prime(gamma, displacement_vector)
+        + theta_prime(alpha, beta, displacement_vector) * dipole[gamma]
     )
 
 
-def Theta_prime(alpha, beta, displacement_vector):
+def h(alpha, beta, gamma, dipole, quadrupole, displacement_vector):
 
-    k = kronecker_delta(alpha, beta)
-    norm = np.linalg.norm(displacement_vector)
+    last_term = 0.0
+    for i in range(3):
+        last_term += f2(i, gamma, i, dipole, quadrupole, displacement_vector)
 
-    aprime_alpha = displacement_vector[alpha]
-    aprime_beta = displacement_vector[beta]
-
-    return 0.5 * (3 * aprime_alpha * aprime_beta - norm**2 * k)
-
-
-def F_prime(alpha, beta, gamma, displacement_vector):
-
-    if alpha == beta == gamma:
-        return 3 * Theta_prime(alpha, alpha, displacement_vector)
-    elif alpha == beta != gamma:
-        term1 = 5 * Theta_prime(alpha, alpha, displacement_vector)
-        term2 = 2 * Theta_prime(gamma, gamma, displacement_vector)
-        return term1 - term2
-    else:
-        return 5 * Theta_prime(alpha, beta, displacement_vector)
-
-
-def F(alpha, beta, gamma, quadrupole):
-
-    if alpha == beta == gamma:
-        return 3 * quadrupole[alpha, alpha]
-    elif alpha == beta != gamma:
-        return 5 * quadrupole[alpha, alpha] - 2 * quadrupole[gamma, gamma]
-    else:
-        return 5 * quadrupole[alpha, beta]
-
-
-def Box_func(alpha, beta, gamma, displacement_vector, dipole):
-
-    term1 = F_prime(alpha, beta, gamma, displacement_vector) * dipole[gamma]
-
-    eta1, eta2 = Eta(gamma)
-    theta1 = Theta_prime(eta1, gamma, displacement_vector) * dipole[eta1]
-    theta2 = Theta_prime(eta2, gamma, displacement_vector) * dipole[eta2]
-    term2 = 2 * (theta1 + theta2) * kronecker_delta(alpha, beta)
-
-    return term1 - term2
-
-
-def Bar_func(alpha, beta, gamma, displacement_vector, quadrupole):
-
-    term1 = F(alpha, beta, gamma, quadrupole) * displacement_vector[gamma]
-
-    eta1, eta2 = Eta(gamma)
-    term2 = (
-        2
-        * (
-            displacement_vector[eta1] * quadrupole[eta1, gamma]
-            + displacement_vector[eta2] * quadrupole[eta2, gamma]
-        )
-        * kronecker_delta(alpha, beta)
+    return (
+        5 * f2(alpha, beta, gamma, dipole, quadrupole, displacement_vector)
+        - 2 * kronecker_delta(alpha, beta) * last_term
     )
-
-    return term1 - term2
 
 
 def octupole_one_term_general_expression(
@@ -292,20 +219,15 @@ def octupole_one_term_general_expression(
         Omega_{alpha, beta, gamma} that has been displaced by x y z coordinates
     """
 
-    omega_pr = Omega_prime(alpha, beta, gamma, displacement_vector)
-
-    box1 = Box_func(alpha, beta, gamma, displacement_vector, dipole)
-    box2 = Box_func(alpha, gamma, beta, displacement_vector, dipole)
-    box3 = Box_func(beta, gamma, alpha, displacement_vector, dipole)
-
-    bar1 = Bar_func(alpha, beta, gamma, displacement_vector, quadrupole)
-    bar2 = Bar_func(alpha, gamma, beta, displacement_vector, quadrupole)
-    bar3 = Bar_func(beta, gamma, alpha, displacement_vector, quadrupole)
-
     return (
         octupole[alpha, beta, gamma]
-        + omega_pr * monopole
-        + (1 / 3) * (box1 + box2 + box3 + bar1 + bar2 + bar3)
+        + omega_prime(alpha, beta, gamma, displacement_vector) * monopole
+        + (1 / 3)
+        * (
+            h(alpha, beta, gamma, dipole, quadrupole, displacement_vector)
+            + h(alpha, gamma, beta, dipole, quadrupole, displacement_vector)
+            + h(beta, gamma, alpha, dipole, quadrupole, displacement_vector)
+        )
     )
 
 
