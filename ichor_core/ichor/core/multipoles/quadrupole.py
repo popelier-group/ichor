@@ -3,6 +3,7 @@ from typing import List, Tuple, Union
 import numpy as np
 from ichor.core.common import constants
 from ichor.core.common.arith import kronecker_delta
+from ichor.core.multipoles.primed_functions import mu_prime, theta_prime
 
 
 def rotate_quadrupole(
@@ -104,15 +105,14 @@ def quadrupole_nontraceless_to_traceless(
     return nontraceless_quadrupole_matrix - arr_to_sub
 
 
-def Theta_prime(alpha, beta, displacement_vector):
+def f1(
+    alpha: int, beta: int, dipole: np.ndarray, displacement_vector: np.ndarray
+) -> float:
 
-    k = kronecker_delta(alpha, beta)
-    norm = np.linalg.norm(displacement_vector)
-
-    aprime_alpha = displacement_vector[alpha]
-    aprime_beta = displacement_vector[beta]
-
-    return 0.5 * (3 * aprime_alpha * aprime_beta - norm**2 * k)
+    return (
+        dipole[alpha] * mu_prime(beta, displacement_vector)
+        + mu_prime(alpha, displacement_vector) * dipole[beta]
+    )
 
 
 def quadrupole_one_term_general_expression(
@@ -138,12 +138,11 @@ def quadrupole_one_term_general_expression(
     :returns: The component of the quadrupole moment, as seen from the new origin
     """
 
-    term2 = Theta_prime(alpha, beta, displacement_vector) * monopole
-    term3 = 1.5 * (displacement_vector[alpha] * dipole[beta])
-    term4 = 1.5 * (displacement_vector[beta] * dipole[alpha])
-    term5 = (displacement_vector.dot(dipole)) * kronecker_delta(alpha, beta)
+    term2 = theta_prime(alpha, beta, displacement_vector) * monopole
+    term3 = 1.5 * f1(alpha, beta, dipole, displacement_vector)
+    term4 = (displacement_vector.dot(dipole)) * kronecker_delta(alpha, beta)
 
-    return quadrupole[alpha, beta] + term2 + term3 + term4 - term5
+    return quadrupole[alpha, beta] + term2 + term3 - term4
 
 
 def displace_quadrupole_cartesian(
