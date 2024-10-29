@@ -15,11 +15,11 @@ from ichor.core.files.file_data import HasAtoms, HasData
 
 
 class OrcaOutput(HasAtoms, HasData, ReadFile):
-    """Wraps around a .gau/.log file that is the output of Gaussian.
-    This file contains coordinates (in Angstroms),
-    forces, as well as molecular multipole moments.
-
-    :param path: Path object or string to the .gau or .log file that are Gaussian output files
+    """Wraps around an .orcaoutput file that is the output of ORCA.
+    Contains information such as coordinates (in Angstroms) and molecular
+    dipoles and quadrupoles.
+    
+    :param path: Path object or string to the .orcaoutput file that are ORCA output files
     """
 
     _filetype = ".orcaoutput"
@@ -48,7 +48,7 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
         }
 
     def _read_file(self):
-        """Parse through a .wfn file to look for the relevant information.
+        """Parse through a .orcaoutput file to look for the relevant information.
         This is automatically called if an attribute is being accessed, but the
         FileState of the file is FileState.Unread"""
 
