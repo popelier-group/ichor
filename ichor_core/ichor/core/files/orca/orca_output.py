@@ -18,7 +18,7 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
     """Wraps around an .orcaoutput file that is the output of ORCA.
     Contains information such as coordinates (in Angstroms) and molecular
     dipoles and quadrupoles.
-    
+
     :param path: Path object or string to the .orcaoutput file that are ORCA output files
     """
 
