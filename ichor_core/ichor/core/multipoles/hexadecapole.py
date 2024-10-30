@@ -393,6 +393,125 @@ def sorting_function(alpha: int, beta: int, gamma: int, chi: int):
     return sorted_li[0], sorted_li[2], sorted_li[3]
 
 
+# newer g definition that is not tested and currently not working. TODO: check in the future.
+# def g(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector):
+
+#     # sort by number of repeating indices
+#     # the largest amount of repetitions are on the left
+#     # eg. yxxx becomes xxxy, xyzx becomes xxyz, xxxx is xxxx
+#     # there will always be at least one repeated index
+#     alpha, beta, gamma = sorting_function(alpha, beta, gamma, chi)
+
+#     onealpha, twoalpha = get_other_alphas(alpha)
+#     alphagamma = get_alphagamma(alpha, gamma)
+
+#     return (
+#         18 * f3(alpha, alpha, beta, gamma, dipole, octupole, displacement_vector)
+#         + 10.5
+#         * (
+#             f3(beta, gamma, alpha, alpha, dipole, octupole, displacement_vector)
+#             + f3(gamma, beta, alpha, alpha, dipole, octupole, displacement_vector)
+#         )
+#         - 3
+#         * (
+#             f3(beta, gamma, beta, beta, dipole, octupole, displacement_vector)
+#             + f3(gamma, beta, gamma, gamma, dipole, octupole, displacement_vector)
+#         )
+#         + 15 * f4(alpha, alpha, beta, gamma, quadrupole, displacement_vector)
+#         + 20 * f4(alpha, beta, alpha, gamma, quadrupole, displacement_vector)
+#         + kronecker_delta(alpha, beta)
+#         * (
+#             6 * f3(alpha, alpha, alpha, gamma, dipole, octupole, displacement_vector)
+#             + 3 * f3(gamma, gamma, alpha, gamma, dipole, octupole, displacement_vector)
+#             - 9
+#             * (
+#                 f3(0, 0, alpha, gamma, dipole, octupole, displacement_vector)
+#                 + f3(1, 1, alpha, gamma, dipole, octupole, displacement_vector)
+#                 + f3(2, 2, alpha, gamma, dipole, octupole, displacement_vector)
+#             )
+#             - 10
+#             * (
+#                 f4(alpha, 0, gamma, 0, quadrupole, displacement_vector)
+#                 + f4(alpha, 1, gamma, 1, quadrupole, displacement_vector)
+#                 + f4(alpha, 2, gamma, 2, quadrupole, displacement_vector)
+#             )
+#         )
+#         + kronecker_delta(beta, gamma)
+#         * (
+#             3 * f3(alpha, alpha, gamma, gamma, dipole, octupole, displacement_vector)
+#             - 18 * f3(gamma, gamma, alpha, alpha, dipole, octupole, displacement_vector)
+#             + 6 * f3(gamma, gamma, gamma, gamma, dipole, octupole, displacement_vector)
+#             - 3
+#             * (
+#                 f3(0, 0, alpha, alpha, dipole, octupole, displacement_vector)
+#                 + f3(1, 1, alpha, alpha, dipole, octupole, displacement_vector)
+#                 + f3(2, 2, alpha, alpha, dipole, octupole, displacement_vector)
+#                 + (
+#                     f3(0, 0, gamma, gamma, dipole, octupole, displacement_vector)
+#                     + f3(1, 1, gamma, gamma, dipole, octupole, displacement_vector)
+#                     + f3(2, 2, gamma, gamma, dipole, octupole, displacement_vector)
+#                 )
+#             )
+#             - (10 / 3) * f4(alpha, gamma, alpha, gamma, quadrupole, displacement_vector)
+#             + (8 / 3)
+#             * (
+#                 f4(
+#                     alphagamma,
+#                     alphagamma,
+#                     alphagamma,
+#                     alphagamma,
+#                     quadrupole,
+#                     displacement_vector,
+#                 )
+#                 - f4(alpha, alpha, alpha, alpha, quadrupole, displacement_vector)
+#                 - f4(gamma, gamma, gamma, gamma, quadrupole, displacement_vector)
+#             )
+#             - 2
+#             * (
+#                 f4(0, alphagamma, 0, alphagamma, quadrupole, displacement_vector)
+#                 + f4(1, alphagamma, 1, alphagamma, quadrupole, displacement_vector)
+#                 + f4(2, alphagamma, 2, alphagamma, quadrupole, displacement_vector)
+#             )
+#         )
+#         + kronecker_delta(alpha, beta)
+#         * kronecker_delta(beta, gamma)
+#         * (
+#             9 * f3(alpha, alpha, alpha, alpha, dipole, octupole, displacement_vector)
+#             - 3
+#             * (
+#                 f3(0, 0, alpha, alpha, dipole, octupole, displacement_vector)
+#                 + f3(1, 1, alpha, alpha, dipole, octupole, displacement_vector)
+#                 + f3(2, 2, alpha, alpha, dipole, octupole, displacement_vector)
+#             )
+#             + (16 / 3) * f4(alpha, alpha, alpha, alpha, quadrupole, displacement_vector)
+#             - 16
+#             * (
+#                 f4(alpha, 0, alpha, 0, quadrupole, displacement_vector)
+#                 + f4(alpha, 1, alpha, 1, quadrupole, displacement_vector)
+#                 + f4(alpha, 2, alpha, 2, quadrupole, displacement_vector)
+#             )
+#             + 4(
+#                 f4(
+#                     onealpha,
+#                     twoalpha,
+#                     onealpha,
+#                     twoalpha,
+#                     quadrupole,
+#                     displacement_vector,
+#                 )
+#                 - f4(
+#                     onealpha,
+#                     onealpha,
+#                     twoalpha,
+#                     twoalpha,
+#                     quadrupole,
+#                     displacement_vector,
+#                 )
+#             )
+#         )
+#     )
+
+
 def g(alpha, beta, gamma, chi, dipole, quadrupole, octupole, displacement_vector):
 
     # sort by number of repeating indices
