@@ -38,3 +38,4 @@ test.*
 .pytest_cache
 output.txt
 docs/build
+Dockerfile

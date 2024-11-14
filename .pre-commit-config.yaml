@@ -31,7 +31,7 @@ repos:
         exclude: ^(examples/*)|(.github/ISSUE_TEMPLATE/*)|(docs/source/_static/*)|(docs/build)
     -   id: script-must-have-extension
     -   id: forbid-binary
-        exclude: ^(examples/*)|(example_files/*)|(docs/build)
+        exclude: ^(examples/*)|(example_files/*)|(docs/build)|(docs/source/extra_files/*)
 -   repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:

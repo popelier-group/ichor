@@ -40,6 +40,7 @@ Below are examples of how to use ``ichor``.
    ichor_core_examples_toc
    ichor_hpc_examples_toc
    ichor_cli_examples_toc
+   file_formats
 
 .. toctree::
    :maxdepth: 1
