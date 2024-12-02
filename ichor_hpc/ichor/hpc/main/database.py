@@ -20,7 +20,7 @@ AVAILABLE_DATABASE_FORMATS = {
 def submit_make_database(
     points_dir_path: Path,
     database_format: str = "sqlite",
-    ncores=1,
+    ncores: int = 1,
 ):
     """Method for making a PointsDirectory or parent to PointsDirectory into a database.
     Infers if it is a PointsDirectory or PointsDirectoryParent based on the suffix of
