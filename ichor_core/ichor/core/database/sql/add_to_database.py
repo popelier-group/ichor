@@ -62,8 +62,16 @@ def add_point_to_database(
     #############################################
     # file checks before adding point to database
     #############################################
-    found_xyz = False
+
     for _f in point.path.iterdir():
+
+        # check for missing xyz file
+        if not point.xyz:
+            if print_missing_data:
+                print(
+                    f"No '.xyz' file was found in {point.path.absolute()}, so pd not added to database."
+                )
+                return
 
         # check for .sh file in directory as AIMALL should delete it if it ran successfully
         # if .sh file is found then do not append this point to the database as it can cause problems
@@ -74,17 +82,6 @@ def add_point_to_database(
                     f"A '.sh' was found in {point.path.absolute()}, so AIMAll likely crashed. Not added to db."
                 )
                 return
-        # check for .xyz file in directory
-        if _f.suffix == ".xyz":
-            found_xyz = True
-
-    # if .xyz missing then do not append this point to the database
-    if not found_xyz:
-        if print_missing_data:
-            print(
-                f"No '.xyz' was found in {point.path.absolute()}, so pd not added to database."
-            )
-            return
 
     ###############################
     # wfn information
