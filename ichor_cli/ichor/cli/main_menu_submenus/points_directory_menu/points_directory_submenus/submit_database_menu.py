@@ -6,7 +6,11 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_bool, user_input_restricted
+from ichor.cli.useful_functions import (
+    user_input_bool,
+    user_input_int,
+    user_input_restricted,
+)
 from ichor.core.files import PointsDirectory, PointsDirectoryParent
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main.database import AVAILABLE_DATABASE_FORMATS, submit_make_database
@@ -19,6 +23,7 @@ SUBMIT_DATABASE_MENU_DESCRIPTION = MenuDescription(
 # TODO: possibly make this be read from a file
 SUBMIT_DATABASE_MENU_DEFAULTS = {
     "default_database_format": "sqlite",
+    "default_ncores": 1,
     "default_submit_on_compute": True,
 }
 
@@ -28,6 +33,7 @@ SUBMIT_DATABASE_MENU_DEFAULTS = {
 class SubmitDatabaseMenuOptions(MenuOptions):
 
     selected_database_format: str
+    selected_number_of_cores: int
     selected_submit_on_compute: bool
 
 
@@ -52,6 +58,14 @@ class SubmitDatabaseFunctions:
         )
 
     @staticmethod
+    def select_number_of_cores():
+        """Asks user to select number of cores."""
+        submit_database_menu_options.selected_number_of_cores = user_input_int(
+            "Enter number of cores: ",
+            submit_database_menu_options.selected_number_of_cores,
+        )
+
+    @staticmethod
     def select_submit_on_compute():
         """
         Asks user whether or not to submit database making on compute.
@@ -73,8 +87,9 @@ class SubmitDatabaseFunctions:
             )
         )
 
-        database_format, submit_on_compute = (
+        database_format, ncores, submit_on_compute = (
             submit_database_menu_options.selected_database_format,
+            submit_database_menu_options.selected_number_of_cores,
             submit_database_menu_options.selected_submit_on_compute,
         )
 
@@ -87,6 +102,7 @@ class SubmitDatabaseFunctions:
             submit_make_database(
                 ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH,
                 database_format,
+                ncores=ncores,
             )
 
         else:
@@ -112,6 +128,10 @@ submit_database_menu_items = [
     FunctionItem(
         "Change database format",
         SubmitDatabaseFunctions.select_database,
+    ),
+    FunctionItem(
+        "Change number of cores",
+        SubmitDatabaseFunctions.select_number_of_cores,
     ),
     FunctionItem(
         "Change submit to compute",

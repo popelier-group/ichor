@@ -59,15 +59,38 @@ def add_point_to_database(
         the rest the point can still be used in the training set for the other atoms.
     """
 
+    #############################################
+    # file checks before adding point to database
+    #############################################
+
+    # check for missing atomicfiles directory. If none then do not append this point to the database
+    if not point.ints:
+        if print_missing_data:
+            print(
+                f"{point.path.absolute()}: No atomicfiles directory (containing AIMAll .int) was found."
+                "Not added to db"
+            )
+            return
+
     # check for .sh file in directory as AIMALL should delete it if it ran successfully
     # if .sh file is found then do not append this point to the database as it can cause problems
     # when reading the database
-
     for _f in point.path.iterdir():
         if _f.suffix == ".sh":
             if print_missing_data:
                 print(
-                    f"A '.sh' was found in {point.path.absolute()}, so AIMAll likely crashed. Not added to db."
+                    f"{point.path.absolute()}: A '.sh' was found so AIMAll likely crashed. Not added to db."
+                )
+                return
+
+    # check for any .mog files within atomicfiles directory.
+    # These are intermediate data files that indicate AIMALL hasn't completed.
+    # If found then do not append this point to the database.
+    for _f in point.ints.path.iterdir():
+        if _f.suffix == ".mog" or ".mog2":
+            if print_missing_data:
+                print(
+                    f"{point.path.absolute()}: A '.mog' was found so AIMAll likely crashed. Not added to db."
                 )
                 return
 
@@ -109,13 +132,6 @@ def add_point_to_database(
     ###############################
     # _atomicfiles directory check
     ###############################
-
-    if not point.ints:
-
-        if print_missing_data:
-            print(
-                f"Point {point.path} does not contain an atomicfiles directory (containing AIMAll .int)."
-            )
 
     # add database point to session. Need to do this before adding the dataset stuff
     # because the id needs to be assigned to the point (because dataset contains foreign key point_id)
