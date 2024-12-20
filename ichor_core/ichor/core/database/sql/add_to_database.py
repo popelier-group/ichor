@@ -90,7 +90,7 @@ def add_point_to_database(
         if _f.suffix == ".mog" or ".mog2":
             if print_missing_data:
                 print(
-                    f"{point.path.absolute()}: A '.sh' was found so AIMAll likely crashed. Not added to db."
+                    f"{point.path.absolute()}: A '.mog' was found so AIMAll likely crashed. Not added to db."
                 )
                 return
 
