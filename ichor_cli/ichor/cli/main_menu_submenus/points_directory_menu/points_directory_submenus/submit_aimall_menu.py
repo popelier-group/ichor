@@ -89,8 +89,8 @@ class SubmitAIMALLFunctions:
         """Whether or not to search for mog files, which indicate AIMALL previously
         failed. Reruns point if present"""
 
-        submit_aimall_menu_options.selected_force_calculate_wfn = user_input_bool(
-            "Check for mog files and rerun (yes/no): ",
+        submit_aimall_menu_options.selected_rerun_on_mogs = user_input_bool(
+            "Check for failed points and rerun (yes/no): ",
             submit_aimall_menu_options.selected_rerun_on_mogs,
         )
 
@@ -180,7 +180,7 @@ submit_aimall_menu_items = [
         SubmitAIMALLFunctions.select_encomp,
     ),
     FunctionItem(
-        "Check for mog files and rerun if present",
+        "Check for '.mog' files and rerun",
         SubmitAIMALLFunctions.select_rerun_on_mogs,
     ),
     FunctionItem(
