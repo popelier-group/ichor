@@ -140,7 +140,14 @@ def submit_wfns(
                 rerun_on_mogs
                 and wfn.with_suffix("").with_name(f"{wfn.stem}.mog").exists()
             ):
-                print("mog file found")
+
+                submission_script.add_command(
+                    AIMAllCommand(
+                        wfn, atoms=aimall_atoms, ncores=ncores, naat=naat, **kwargs
+                    )
+                )
+
+                nsubmitted_jobs += 1
 
         ichor.hpc.global_variables.LOGGER.info(
             f"Adding {nsubmitted_jobs}/{len(wfns)} to {submission_script.path}. \
