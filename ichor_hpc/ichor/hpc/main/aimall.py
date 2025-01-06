@@ -19,6 +19,7 @@ def submit_points_directory_to_aimall(
     naat: int = 1,
     aimall_atoms: List[str] = None,
     force_calculate_ints=False,
+    rerun_on_mogs=False,
     hold: JobID = None,
     script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["aimall"],
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
@@ -59,6 +60,7 @@ def submit_points_directory_to_aimall(
         ncores=ncores,
         naat=naat,
         force_calculate_ints=force_calculate_ints,
+        rerun_on_mogs=rerun_on_mogs,
         hold=hold,
         script_name=script_name,
         outputs_dir_path=outputs_dir_path,
@@ -95,6 +97,7 @@ def submit_wfns(
     ncores=2,
     naat=1,
     force_calculate_ints=False,
+    rerun_on_mogs=False,
     hold: Optional[JobID] = None,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
@@ -132,6 +135,12 @@ def submit_wfns(
                 )
 
                 nsubmitted_jobs += 1
+
+            elif (
+                rerun_on_mogs
+                and wfn.with_suffix("").with_name(f"{wfn.stem}.mog").exists()
+            ):
+                print("mog file found")
 
         ichor.hpc.global_variables.LOGGER.info(
             f"Adding {nsubmitted_jobs}/{len(wfns)} to {submission_script.path}. \

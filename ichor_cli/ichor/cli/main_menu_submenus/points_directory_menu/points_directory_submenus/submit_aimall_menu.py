@@ -6,7 +6,11 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_free_flow, user_input_int
+from ichor.cli.useful_functions import (
+    user_input_bool,
+    user_input_free_flow,
+    user_input_int,
+)
 from ichor.core.files import PointsDirectory
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main import submit_points_directory_to_aimall
@@ -22,6 +26,7 @@ SUBMIT_AIMALL_MENU_DEFAULTS = {
     "default_ncores": 2,
     "default_naat": 1,
     "default_encomp": 3,
+    "default_rerun_on_mogs": False,
 }
 
 
@@ -33,6 +38,7 @@ class SubmitAIMALLMenuOptions(MenuOptions):
     selected_number_of_cores: str
     selected_naat: int
     selected_encomp: bool
+    selected_rerun_on_mogs: bool
 
 
 # initialize dataclass for storing information for menu
@@ -45,7 +51,7 @@ submit_aimall_menu_options = SubmitAIMALLMenuOptions(
 class SubmitAIMALLFunctions:
     @staticmethod
     def select_method():
-        """Asks user to update the ethod for AIMALL. The method
+        """Asks user to update the method for AIMALL. The method
         needs to be added to the WFN file so that AIMALL does the correct
         calculation."""
 
@@ -79,14 +85,25 @@ class SubmitAIMALLFunctions:
         )
 
     @staticmethod
+    def select_rerun_on_mogs():
+        """Whether or not to search for mog files, which indicate AIMALL previously
+        failed. Reruns point if present"""
+
+        submit_aimall_menu_options.selected_force_calculate_wfn = user_input_bool(
+            "Check for mog files and rerun (yes/no): ",
+            submit_aimall_menu_options.selected_rerun_on_mogs,
+        )
+
+    @staticmethod
     def points_directory_to_aimall_on_compute():
         """Submits a single PointsDirectory or many PointsDirectory-ies to AIMAll on compute."""
 
-        method, ncores, naat, encomp = (
+        method, ncores, naat, encomp, rerun_on_mogs = (
             submit_aimall_menu_options.selected_method,
             submit_aimall_menu_options.selected_number_of_cores,
             submit_aimall_menu_options.selected_naat,
             submit_aimall_menu_options.selected_encomp,
+            submit_aimall_menu_options.selected_rerun_on_mogs,
         )
 
         is_parent_directory_to_many_points_directories = (
@@ -111,6 +128,7 @@ class SubmitAIMALLFunctions:
                     ncores=ncores,
                     naat=naat,
                     encomp=encomp,
+                    rerun_on_mogs=rerun_on_mogs,
                     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
                         "outputs"
                     ]
@@ -132,6 +150,7 @@ class SubmitAIMALLFunctions:
                 ncores=ncores,
                 naat=naat,
                 encomp=encomp,
+                rerun_on_mogs=rerun_on_mogs,
                 outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
                 / pd.path.name
                 / "AIMALL",
@@ -159,6 +178,10 @@ submit_aimall_menu_items = [
     FunctionItem(
         "Change 'encomp' setting",
         SubmitAIMALLFunctions.select_encomp,
+    ),
+    FunctionItem(
+        "Check for mog files and rerun if present",
+        SubmitAIMALLFunctions.select_rerun_on_mogs,
     ),
     FunctionItem(
         "Submit AIMAll to compute nodes",
