@@ -122,22 +122,10 @@ def submit_wfns(
         nsubmitted_jobs = 0
 
         for wfn in wfns:
-            atomicfiles_dir = (
-                wfn.with_suffix("").with_name(f"{wfn.stem}_atomicfiles").exists()
-            )
 
-            if force_calculate_ints or not atomicfiles_dir.exists():
-
-                submission_script.add_command(
-                    AIMAllCommand(
-                        wfn, atoms=aimall_atoms, ncores=ncores, naat=naat, **kwargs
-                    )
-                )
-
-                nsubmitted_jobs += 1
-
-            elif rerun_on_mogs and any(
-                file.suffix == ".mog" for file in atomicfiles_dir.iterdir()
+            if (
+                force_calculate_ints
+                or not wfn.with_suffix("").with_name(f"{wfn.stem}_atomicfiles").exists()
             ):
 
                 submission_script.add_command(
