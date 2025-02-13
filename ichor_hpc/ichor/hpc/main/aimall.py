@@ -122,6 +122,9 @@ def submit_wfns(
         nsubmitted_jobs = 0
 
         for wfn in wfns:
+            atomicfiles_dir = (
+                wfn.with_suffix("").with_name(f"{wfn.stem}_atomicfiles").exists()
+            )
 
             if (
                 force_calculate_ints
@@ -135,6 +138,25 @@ def submit_wfns(
                 )
 
                 nsubmitted_jobs += 1
+
+            elif rerun_on_mogs:
+                for f in atomicfiles_dir.iterdir():
+                    if f.suffix == ".mog":
+
+                        submission_script.add_command(
+                            AIMAllCommand(
+                                wfn,
+                                atoms=aimall_atoms,
+                                ncores=ncores,
+                                naat=naat,
+                                **kwargs,
+                            )
+                        )
+
+                        ichor.hpc.global_variables.LOGGER.info(
+                            f"A mog was found in {atomicfiles_dir.name}, calculations rerun"
+                        )
+                        nsubmitted_jobs += 1
 
         ichor.hpc.global_variables.LOGGER.info(
             f"Adding {nsubmitted_jobs}/{len(wfns)} to {submission_script.path}. \
