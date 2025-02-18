@@ -7,6 +7,7 @@ import ichor.hpc.global_variables
 from ichor.core.common.constants import AIMALL_FUNCTIONALS
 
 from ichor.core.files import PointsDirectory
+from ichor.core.files.file import FileWriteError
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import AIMAllCommand
 from ichor.hpc.submission_script import SubmissionScript
@@ -75,11 +76,16 @@ def add_method_and_get_wfn_paths(points: PointsDirectory, method: str) -> List[P
     wfns = []
     for point in points:
         # write out the wfn file with the method modified because AIMAll needs to know the functional used
-        if point.wfn:
-            if point.wfn.exists():
+        if point.wfn and point.wfn.exists():
+            try:
                 point.wfn.method = method
                 point.wfn.write()
                 wfns.append(point.wfn.path)
+            except FileWriteError:
+                ichor.hpc.global_variables.LOGGER.info(
+                    f"Exception occured for {point.path} wavefunction file. Point skipped."
+                )
+                continue
         else:
             warn(f"Wavefunction file of point {point.path} does not exist.")
             ichor.hpc.global_variables.LOGGER.info(
