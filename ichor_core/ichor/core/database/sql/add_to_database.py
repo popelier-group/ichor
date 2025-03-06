@@ -40,8 +40,6 @@ def add_atom_names_to_database(session: Session, atom_names: List[str], echo=Fal
     session.commit()
 
 
-# TODO: make this more robust as some data might be absent. Check that .wfn exists before adding wfn data
-# TODO: check that gaussian out forces exist. Check that int file exists.
 def add_point_to_database(
     session: Session,
     point: "ichor.core.files.PointDirectory",  # noqa F821
@@ -58,19 +56,13 @@ def add_point_to_database(
         the information for the point will still be added to the database. This is because
         the rest the point can still be used in the training set for the other atoms.
     """
+    ###############################
+    # NEW CODE STARTS HERE
+    ##############################
 
-    #############################################
-    # file checks before adding point to database
-    #############################################
-
-    # check for missing atomicfiles directory. If none then do not append this point to the database
-    if not point.ints:
-        if print_missing_data:
-            print(
-                f"{point.path.absolute()}: No atomicfiles directory (containing AIMAll .int) was found."
-                "Not added to db"
-            )
-            return
+    ###############################
+    # file checks
+    ###############################
 
     # check for .sh file in directory as AIMALL should delete it if it ran successfully
     # if .sh file is found then do not append this point to the database as it can cause problems
@@ -79,20 +71,25 @@ def add_point_to_database(
         if _f.suffix == ".sh":
             if print_missing_data:
                 print(
-                    f"{point.path.absolute()}: A '.sh' was found so AIMAll likely crashed. Not added to db."
+                    f"Skipping {point.path.name}: A '.sh' was found, indicating AIMAll crashed."
                 )
                 return
 
-    # check for any .mog files within atomicfiles directory.
-    # These are intermediate data files that indicate AIMALL hasn't completed.
-    # If found then do not append this point to the database.
-    for _f in point.ints.path.iterdir():
-        if _f.suffix == ".mog" or ".mog2":
-            if print_missing_data:
-                print(
-                    f"{point.path.absolute()}: A '.mog' was found so AIMAll likely crashed. Not added to db."
-                )
-                return
+    # check for missing gaussian output file. If none then do not append this point to the database
+    if not point.gaussian_output:
+        if print_missing_data:
+            print(
+                f"Skipping {point.path.name}: Does not contain a Gaussian output (.gau) file."
+            )
+            return
+
+    # check for missing _atomicfiles directory. If none then do not append this point to the database
+    if not point.ints:
+        if print_missing_data:
+            print(
+                f"Skipping {point.path.name}: Does not contain an atomicfiles directory (containing AIMAll .int)."
+            )
+            return
 
     ###############################
     # wfn information
@@ -100,37 +97,28 @@ def add_point_to_database(
 
     # if wfn file exists
     if point.wfn:
-        # ORM for points table
-        db_point = Points(
-            date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
-            name=point.name_without_suffix,
-            wfn_energy=point.wfn.total_energy,
-        )
-    # if file does not exist, still add to database, but do not contain wfn information
+        try:
+            # ORM for points table
+            db_point = Points(
+                date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
+                name=point.name_without_suffix,
+                wfn_energy=point.wfn.total_energy,
+            )
+        except Exception as e:  # skip point if .wfn is incomplete
+            print(
+                f"Skipping {point.path.name}: Contains an invalid Gaussian wavefunction (.wfn) file - {e}."
+            )
+            return
+    # skip point if file does not exist
     else:
-        # ORM for points table
-        db_point = Points(
-            date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
-            # wfn energy might not exist if Gaussian has not been ran yet (or wfn file does not exist.)
-            # add a None for wfn energy if wfn energy is not present
-            name=point.name_without_suffix,
-            wfn_energy=None,
-        )
         if print_missing_data:
             print(
-                f"Point {point.path} does not contain a Gaussian wavefunction (.wfn) file."
+                f"Skipping {point.path.name}: Does not contain a Gaussian wavefunction (.wfn) file."
             )
+            return
 
     ###############################
-    # gaussian output file check
-    ###############################
-
-    if not point.gaussian_output:
-        if print_missing_data:
-            print(f"Point {point.path} does not contain a Gaussian output (.gau) file.")
-
-    ###############################
-    # _atomicfiles directory check
+    # Add database information
     ###############################
 
     # add database point to session. Need to do this before adding the dataset stuff
@@ -143,34 +131,31 @@ def add_point_to_database(
     # (because one point contains many atoms and each atom has information for it)
     db_dataset_list = []
 
-    # list that will add missing int files
-    # (if _atomicfiles directory exists) but .int file for an atom does not.
-    missing_int_files = []
-
     # add information to dataset table for each atom
-    for atom_name in point.atom_names:
+    try:
+        for atom_name in point.atom_names:
 
-        # make select statement to get atom name
-        atom_select_statement = select(AtomNames).where(AtomNames.name == atom_name)
-        # get the id of the atom from the atom_names table.
-        # use scalars instead of execute and return the first row (there should be one row as atom names are unique)
-        atom_id = session.scalars(atom_select_statement).first().id
+            # make select statement to get atom name
+            atom_select_statement = select(AtomNames).where(AtomNames.name == atom_name)
+            # get the id of the atom from the atom_names table.
+            # use scalars instead of execute and return the first row (there should be one row as atom names are unique)
+            atom_id = session.scalars(atom_select_statement).first().id
 
-        # get x, y, z coordinates of atom which can then be used to calculated features
-        # based on the coordinates of the other atoms in the molecule
-        atom_coordinates = point[atom_name].coordinates
-        x_coord = atom_coordinates[0]
-        y_coord = atom_coordinates[1]
-        z_coord = atom_coordinates[2]
+            # get x, y, z coordinates of atom which can then be used to calculated features
+            # based on the coordinates of the other atoms in the molecule
+            atom_coordinates = point[atom_name].coordinates
+            x_coord = atom_coordinates[0]
+            y_coord = atom_coordinates[1]
+            z_coord = atom_coordinates[2]
 
-        ###############################
-        # .gau / gaussian output information
-        ###############################
+            ###############################
+            # .gau / gaussian output information
+            ###############################
 
-        # forces are saved directly from gaussian out file, thus they are in
-        # global cartesian coordinates. This means these forces need to be rotated later
-        # when an ALF is chosen for atoms.
-        if point.gaussian_output:
+            # forces are saved directly from gaussian out file, thus they are in
+            # global cartesian coordinates. This means these forces need to be rotated later
+            # when an ALF is chosen for atoms.
+
             if point.gaussian_output.global_forces:
                 atom_global_forces = point.gaussian_output.global_forces[atom_name]
                 atom_force_x = atom_global_forces[0]
@@ -183,14 +168,11 @@ def add_point_to_database(
                 print(
                     f"Point {point.path} does not have forces in Gaussian output (.gau) file."
                 )
-        # in case that gaussian out does not exist in point directory
-        else:
-            atom_force_x, atom_force_y, atom_force_z = None, None, None
 
-        ###############################
-        # .int file information
-        ###############################
-        if point.ints:
+            ###############################
+            # .int file information
+            ###############################
+
             # add information from int file for the current atom
             # get the INT instance representing the .int file for the atom
             # use get here to get a default value of None if .int file is missing for some atom
@@ -232,49 +214,235 @@ def add_point_to_database(
             # if .int file for an atom does not exist then (but _atomicfiles directory exists)
             # then just append the coordinates and any other read in information
             else:
-                # add the Dataset object to list so it can be bulk written later
-                db_dataset_list.append(
-                    Dataset(
-                        point_id=db_point.id,
-                        atom_id=atom_id,
-                        x=x_coord,
-                        y=y_coord,
-                        z=z_coord,
-                        force_x=atom_force_x,
-                        force_y=atom_force_y,
-                        force_z=atom_force_z,
-                        # the .int file arguments will be None by default
-                        # as they can be nullable because of the dataset SQL table definition
+                if print_missing_data:
+                    print(
+                        f"Skipping {point.path.name}: Atomicfiles directory is incomplete (indicating AIMALL crashed)."
                     )
-                )
-                missing_int_files.append(atom_name)
-
-        else:
-            # add the Dataset object to list so it can be bulk written later
-            db_dataset_list.append(
-                Dataset(
-                    point_id=db_point.id,
-                    atom_id=atom_id,
-                    x=x_coord,
-                    y=y_coord,
-                    z=z_coord,
-                    force_x=atom_force_x,
-                    force_y=atom_force_y,
-                    force_z=atom_force_z,
-                    # the .int file arguments will be None by default
-                    # as they can be nullable because of the dataset SQL table definition
-                )
-            )
-
-    # if there are missing atoms, then print these out
-    if len(missing_int_files) > 0:
-
-        if print_missing_data:
-            print(
-                f"Point {point.path} has missing .int files for atoms: {missing_int_files}."
-            )
+                return
+    except Exception as e:
+        print(f"Skipping {point.path.name}: An exception occured - {e}.")
 
     # bulk save the information for all atoms in the point
     session.bulk_save_objects(db_dataset_list)
     # commit to database
     session.commit()
+
+    # #############################################
+    # # OLD CODE
+    # #############################################
+
+    # # check for missing atomicfiles directory. If none then do not append this point to the database
+    # if not point.ints:
+    #     if print_missing_data:
+    #         print(
+    #             f"{point.path.absolute()}: No atomicfiles directory (containing AIMAll .int) was found."
+    #             "Not added to db"
+    #         )
+    #         return
+
+    # # check for .sh file in directory as AIMALL should delete it if it ran successfully
+    # # if .sh file is found then do not append this point to the database as it can cause problems
+    # # when reading the database
+    # for _f in point.path.iterdir():
+    #     if _f.suffix == ".sh":
+    #         if print_missing_data:
+    #             print(
+    #                 f"{point.path.absolute()}: A '.sh' was found so AIMAll likely crashed. Not added to db."
+    #             )
+    #             return
+
+    # # check for any .mog files within atomicfiles directory.
+    # # These are intermediate data files that indicate AIMALL hasn't completed.
+    # # If found then do not append this point to the database.
+    # for _f in point.ints.path.iterdir():
+    #     if _f.suffix == ".mog" or ".mog2":
+    #         if print_missing_data:
+    #             print(
+    #                 f"{point.path.absolute()}: A '.mog' was found so AIMAll likely crashed. Not added to db."
+    #             )
+    #             return
+
+    # ###############################
+    # # wfn information
+    # ###############################
+
+    # # if wfn file exists
+    # if point.wfn:
+    #     # ORM for points table
+    #     db_point = Points(
+    #         date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
+    #         name=point.name_without_suffix,
+    #         wfn_energy=point.wfn.total_energy,
+    #     )
+    # # if file does not exist, still add to database, but do not contain wfn information
+    # else:
+    #     # ORM for points table
+    #     db_point = Points(
+    #         date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
+    #         # wfn energy might not exist if Gaussian has not been ran yet (or wfn file does not exist.)
+    #         # add a None for wfn energy if wfn energy is not present
+    #         name=point.name_without_suffix,
+    #         wfn_energy=None,
+    #     )
+    #     if print_missing_data:
+    #         print(
+    #             f"Point {point.path} does not contain a Gaussian wavefunction (.wfn) file."
+    #         )
+
+    # ###############################
+    # # gaussian output file check
+    # ###############################
+
+    # if not point.gaussian_output:
+    #     if print_missing_data:
+    #         print(f"Point {point.path} does not contain a Gaussian output (.gau) file.")
+
+    # ###############################
+    # # _atomicfiles directory check
+    # ###############################
+
+    # # add database point to session. Need to do this before adding the dataset stuff
+    # # because the id needs to be assigned to the point (because dataset contains foreign key point_id)
+    # session.add(db_point)
+
+    # # use this list later to bulk add all Dataset instances to database
+    # # there are multiple Dataset instances because each single point (one row in points table)
+    # # relates to multiple rows in the dataset table
+    # # (because one point contains many atoms and each atom has information for it)
+    # db_dataset_list = []
+
+    # # list that will add missing int files
+    # # (if _atomicfiles directory exists) but .int file for an atom does not.
+    # missing_int_files = []
+
+    # # add information to dataset table for each atom
+    # for atom_name in point.atom_names:
+
+    #     # make select statement to get atom name
+    #     atom_select_statement = select(AtomNames).where(AtomNames.name == atom_name)
+    #     # get the id of the atom from the atom_names table.
+    #     # use scalars instead of execute and return the first row (there should be one row as atom names are unique)
+    #     atom_id = session.scalars(atom_select_statement).first().id
+
+    #     # get x, y, z coordinates of atom which can then be used to calculated features
+    #     # based on the coordinates of the other atoms in the molecule
+    #     atom_coordinates = point[atom_name].coordinates
+    #     x_coord = atom_coordinates[0]
+    #     y_coord = atom_coordinates[1]
+    #     z_coord = atom_coordinates[2]
+
+    #     ###############################
+    #     # .gau / gaussian output information
+    #     ###############################
+
+    #     # forces are saved directly from gaussian out file, thus they are in
+    #     # global cartesian coordinates. This means these forces need to be rotated later
+    #     # when an ALF is chosen for atoms.
+    #     if point.gaussian_output:
+    #         if point.gaussian_output.global_forces:
+    #             atom_global_forces = point.gaussian_output.global_forces[atom_name]
+    #             atom_force_x = atom_global_forces[0]
+    #             atom_force_y = atom_global_forces[1]
+    #             atom_force_z = atom_global_forces[2]
+
+    #         # in case that the force keyword was not used but gaussian out exists
+    #         else:
+    #             atom_force_x, atom_force_y, atom_force_z = None, None, None
+    #             print(
+    #                 f"Point {point.path} does not have forces in Gaussian output (.gau) file."
+    #             )
+    #     # in case that gaussian out does not exist in point directory
+    #     else:
+    #         atom_force_x, atom_force_y, atom_force_z = None, None, None
+
+    #     ###############################
+    #     # .int file information
+    #     ###############################
+    #     if point.ints:
+    #         # add information from int file for the current atom
+    #         # get the INT instance representing the .int file for the atom
+    #         # use get here to get a default value of None if .int file is missing for some atom
+    #         atom_int_file = point.ints.get(atom_name, None)
+
+    #         # if .int file / INT instance exists, then data can be read in
+    #         if atom_int_file:
+
+    #             # do not display warning from .int file if iqa energy is not there
+    #             # iqa energy will not be in an existing .int file in -encomp setting is below 3
+    #             with warnings.catch_warnings():
+    #                 warnings.filterwarnings("ignore")
+    #                 atom_iqa_energy = atom_int_file.iqa
+
+    #             # integration error should always exist
+    #             atom_integration_error = atom_int_file.integration_error
+
+    #             # note that these are not rotated because the alf has not been chosen yet
+    #             # the user can choose an alf and rotate the global spherical multipoles as needed
+    #             global_multipole_moments = atom_int_file.global_spherical_multipoles
+
+    #             # add the Dataset object to list so it can be bulk written later
+    #             db_dataset_list.append(
+    #                 Dataset(
+    #                     point_id=db_point.id,
+    #                     atom_id=atom_id,
+    #                     x=x_coord,
+    #                     y=y_coord,
+    #                     z=z_coord,
+    #                     force_x=atom_force_x,
+    #                     force_y=atom_force_y,
+    #                     force_z=atom_force_z,
+    #                     iqa=atom_iqa_energy,
+    #                     integration_error=atom_integration_error,
+    #                     **global_multipole_moments,
+    #                 )
+    #             )
+
+    #         # if .int file for an atom does not exist then (but _atomicfiles directory exists)
+    #         # then just append the coordinates and any other read in information
+    #         else:
+    #             # add the Dataset object to list so it can be bulk written later
+    #             db_dataset_list.append(
+    #                 Dataset(
+    #                     point_id=db_point.id,
+    #                     atom_id=atom_id,
+    #                     x=x_coord,
+    #                     y=y_coord,
+    #                     z=z_coord,
+    #                     force_x=atom_force_x,
+    #                     force_y=atom_force_y,
+    #                     force_z=atom_force_z,
+    #                     # the .int file arguments will be None by default
+    #                     # as they can be nullable because of the dataset SQL table definition
+    #                 )
+    #             )
+    #             missing_int_files.append(atom_name)
+
+    #     else:
+    #         # add the Dataset object to list so it can be bulk written later
+    #         db_dataset_list.append(
+    #             Dataset(
+    #                 point_id=db_point.id,
+    #                 atom_id=atom_id,
+    #                 x=x_coord,
+    #                 y=y_coord,
+    #                 z=z_coord,
+    #                 force_x=atom_force_x,
+    #                 force_y=atom_force_y,
+    #                 force_z=atom_force_z,
+    #                 # the .int file arguments will be None by default
+    #                 # as they can be nullable because of the dataset SQL table definition
+    #             )
+    #         )
+
+    # # if there are missing atoms, then print these out
+    # if len(missing_int_files) > 0:
+
+    #     if print_missing_data:
+    #         print(
+    #             f"Point {point.path} has missing .int files for atoms: {missing_int_files}."
+    #         )
+
+    # # bulk save the information for all atoms in the point
+    # session.bulk_save_objects(db_dataset_list)
+    # # commit to database
+    # session.commit()
