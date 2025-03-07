@@ -73,7 +73,7 @@ def add_point_to_database(
                 print(
                     f"Skipping {point.path.name}: A '.sh' was found, indicating AIMAll crashed."
                 )
-        return
+            return
 
     # check for missing gaussian output file. If none then do not append this point to the database
     if not point.gaussian_output:
@@ -97,7 +97,7 @@ def add_point_to_database(
                 print(
                     f"Skipping {point.path.name}: A '.mog' was found, indicating AIMAll crashed."
                 )
-        return
+            return
 
     ###############################
     # wfn information
