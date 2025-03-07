@@ -73,7 +73,7 @@ def add_point_to_database(
                 print(
                     f"Skipping {point.path.name}: A '.sh' was found, indicating AIMAll crashed."
                 )
-                return
+        return
 
     # check for missing gaussian output file. If none then do not append this point to the database
     if not point.gaussian_output:
@@ -81,7 +81,7 @@ def add_point_to_database(
             print(
                 f"Skipping {point.path.name}: Does not contain a Gaussian output (.gau) file."
             )
-            return
+        return
 
     # check for missing _atomicfiles directory. If none then do not append this point to the database
     if not point.ints:
@@ -89,7 +89,15 @@ def add_point_to_database(
             print(
                 f"Skipping {point.path.name}: Does not contain an atomicfiles directory (containing AIMAll .int)."
             )
-            return
+        return
+
+    for _f in point.ints.path.iterdir():
+        if _f.suffix in [".mog", ".mog2"]:
+            if print_missing_data:
+                print(
+                    f"Skipping {point.path.name}: A '.mog' was found, indicating AIMAll crashed."
+                )
+        return
 
     ###############################
     # wfn information
@@ -115,7 +123,7 @@ def add_point_to_database(
             print(
                 f"Skipping {point.path.name}: Does not contain a Gaussian wavefunction (.wfn) file."
             )
-            return
+        return
 
     ###############################
     # Add database information
