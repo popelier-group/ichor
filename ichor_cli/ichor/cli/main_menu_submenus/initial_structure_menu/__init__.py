@@ -1,6 +1,6 @@
-from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu import (
-    points_directory_menu,
-    POINTS_DIRECTORY_MENU_DESCRIPTION,
+from ichor.cli.main_menu_submenus.initial_structure_menu.initial_structure_menu import (
+    initial_structure_menu,
+    INITIAL_STRUCTURE_MENU_DESCRIPTION,
 )
 
-__all__ = ["points_directory_menu", "POINTS_DIRECTORY_MENU_DESCRIPTION"]
+__all__ = ["initial_structure_menu", "INITIAL_STRUCTURE_MENU_DESCRIPTION"]
