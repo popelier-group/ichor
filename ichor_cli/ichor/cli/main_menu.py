@@ -14,6 +14,10 @@ from ichor.cli.main_menu_submenus.database_menu.submit_csvs_from_database import
     submit_csvs_menu,
     SUBMIT_CSVS_MENU_DESCRIPTION,
 )
+from ichor.cli.main_menu_submenus.initial_structure_menu import (
+    initial_structure_menu,
+    INITIAL_STRUCTURE_MENU_DESCRIPTION,
+)
 from ichor.cli.main_menu_submenus.molecular_dynamics_menu.molecular_dynamics_menu import (
     molecular_dynamics_menu,
     MOLECULAR_DYNAMICS_MENU_DESCRIPTION,
@@ -90,6 +94,9 @@ main_menu_items = [
         MOLECULAR_DYNAMICS_MENU_DESCRIPTION.title, molecular_dynamics_menu, main_menu
     ),
     SubmenuItem(TOOLS_MENU_DESCRIPTION.title, tools_menu, main_menu),
+    SubmenuItem(
+        INITIAL_STRUCTURE_MENU_DESCRIPTION.title, initial_structure_menu, main_menu
+    ),
 ]
 
 # add items to menu
