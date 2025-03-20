@@ -21,7 +21,7 @@ from ichor.core.files import PointsDirectory, PointsDirectoryParent
 
 INITIAL_STRUCTURE_MENU_DESCRIPTION = MenuDescription(
     "Initial Structure Menu",
-    subtitle="Hello.\n",
+    subtitle="Hello hello hello.\n",
 )
 
 
