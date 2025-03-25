@@ -15,12 +15,12 @@ from ichor.core.files import PointsDirectory
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main import submit_points_directory_to_gaussian
 
-SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
-    "Submit Gaussian Menu",
-    subtitle="Use this menu to submit a PointsDirectory to Gaussian.\n",
+OPTIMISATION_MENU_DESCRIPTION = MenuDescription(
+    "Optimisation Menu",
+    subtitle="Use this menu to optimise an xyz file.\n",
 )
 
-SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
+OPTIMISATION_MENU_DEFAULTS = {
     "default_method": "b3lyp",
     "default_basis_set": "6-31+g(d,p)",
     "default_ncores": 2,
@@ -29,9 +29,9 @@ SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
 }
 
 
-# dataclass used to store values for SubmitGaussianMenu
+# dataclass used to store values for OptimisationMenu
 @dataclass
-class SubmitGaussianMenuOptions(MenuOptions):
+class OptimisationMenuOptions(MenuOptions):
 
     selected_method: str
     selected_basis_set: str
@@ -41,50 +41,50 @@ class SubmitGaussianMenuOptions(MenuOptions):
 
 
 # initialize dataclass for storing information for menu
-submit_gaussian_menu_options = SubmitGaussianMenuOptions(
-    *SUBMIT_GAUSSIAN_MENU_DEFAULTS.values()
+optimisation_menu_options = OptimisationMenuOptions(
+    *OPTIMISATION_MENU_DEFAULTS.values()
 )
 
 
 # class with static methods for each menu item that calls a function.
-class SubmitGaussianFunctions:
+class OptimisationFunctions:
     @staticmethod
     def select_method():
         """Asks user to update the method for Gaussian"""
-        submit_gaussian_menu_options.selected_method = user_input_free_flow(
-            "Enter method: ", submit_gaussian_menu_options.selected_method
+        optimisation_menu_options.selected_method = user_input_free_flow(
+            "Enter method: ", optimisation_menu_options.selected_method
         )
 
     @staticmethod
     def select_basis_set():
         """Asks user to update the basis set."""
-        submit_gaussian_menu_options.selected_basis_set = user_input_free_flow(
-            "Enter basis set: ", submit_gaussian_menu_options.selected_basis_set
+        optimisation_menu_options.selected_basis_set = user_input_free_flow(
+            "Enter basis set: ", optimisation_menu_options.selected_basis_set
         )
 
     @staticmethod
     def select_number_of_cores():
         """Asks user to update the basis set."""
-        submit_gaussian_menu_options.selected_number_of_cores = user_input_int(
+        optimisation_menu_options.selected_number_of_cores = user_input_int(
             "Enter number of cores: ",
-            submit_gaussian_menu_options.selected_number_of_cores,
+            optimisation_menu_options.selected_number_of_cores,
         )
 
     @staticmethod
     def select_overwrite_existing_gjfs():
         """Asks user whether or not to overwrite existing gjfs"""
-        submit_gaussian_menu_options.selected_overwrite_existing_gjfs = user_input_bool(
+        optimisation_menu_options.selected_overwrite_existing_gjfs = user_input_bool(
             "Overwrite existing gjfs (yes/no): ",
-            submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
+            optimisation_menu_options.selected_overwrite_existing_gjfs,
         )
 
     @staticmethod
     def select_force_calculate_wfns():
         """Whether or not to recalculate wfns if they are already present"""
 
-        submit_gaussian_menu_options.selected_force_calculate_wfn = user_input_bool(
+        optimisation_menu_options.selected_force_calculate_wfn = user_input_bool(
             "Recalculate present wfns (yes/no): ",
-            submit_gaussian_menu_options.selected_force_calculate_wfn,
+            optimisation_menu_options.selected_force_calculate_wfn,
         )
 
     @staticmethod
@@ -92,11 +92,11 @@ class SubmitGaussianFunctions:
         """Submits a single PointsDirectory to Gaussian on compute."""
 
         (method, basis_set, ncores, overwrite_existing, force_calculate_wfn,) = (
-            submit_gaussian_menu_options.selected_method,
-            submit_gaussian_menu_options.selected_basis_set,
-            submit_gaussian_menu_options.selected_number_of_cores,
-            submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
-            submit_gaussian_menu_options.selected_force_calculate_wfn,
+            optimisation_menu_options.selected_method,
+            optimisation_menu_options.selected_basis_set,
+            optimisation_menu_options.selected_number_of_cores,
+            optimisation_menu_options.selected_overwrite_existing_gjfs,
+            optimisation_menu_options.selected_force_calculate_wfn,
         )
 
         is_parent_directory_to_many_points_directories = (
@@ -157,41 +157,41 @@ class SubmitGaussianFunctions:
 
 # make menu items
 # can use lambda functions to change text of options as well :)
-submit_gaussian_menu_items = [
+optimisation_menu_items = [
     FunctionItem(
         "Change method",
-        SubmitGaussianFunctions.select_method,
+        OptimisationFunctions.select_method,
     ),
     FunctionItem(
         "Change basis set",
-        SubmitGaussianFunctions.select_basis_set,
+        OptimisationFunctions.select_basis_set,
     ),
     FunctionItem(
         "Change number of cores",
-        SubmitGaussianFunctions.select_number_of_cores,
+        OptimisationFunctions.select_number_of_cores,
     ),
     FunctionItem(
         "Overwrite GJF files (if any are already present)",
-        SubmitGaussianFunctions.select_overwrite_existing_gjfs,
+        OptimisationFunctions.select_overwrite_existing_gjfs,
     ),
     FunctionItem(
         "Recalculate all WFNs (if any are already present)",
-        SubmitGaussianFunctions.select_force_calculate_wfns,
+        OptimisationFunctions.select_force_calculate_wfns,
     ),
     FunctionItem(
         "Submit to Gaussian",
-        SubmitGaussianFunctions.points_directory_to_gaussian_on_compute,
+        OptimisationFunctions.points_directory_to_gaussian_on_compute,
     ),
 ]
 
 # initialize menu
-submit_gaussian_menu = ConsoleMenu(
-    this_menu_options=submit_gaussian_menu_options,
-    title=SUBMIT_GAUSSIAN_MENU_DESCRIPTION.title,
-    subtitle=SUBMIT_GAUSSIAN_MENU_DESCRIPTION.subtitle,
-    prologue_text=SUBMIT_GAUSSIAN_MENU_DESCRIPTION.prologue_description_text,
-    epilogue_text=SUBMIT_GAUSSIAN_MENU_DESCRIPTION.epilogue_description_text,
-    show_exit_option=SUBMIT_GAUSSIAN_MENU_DESCRIPTION.show_exit_option,
+optimisation_menu = ConsoleMenu(
+    this_menu_options=optimisation_menu_options,
+    title=OPTIMISATION_MENU_DESCRIPTION.title,
+    subtitle=OPTIMISATION_MENU_DESCRIPTION.subtitle,
+    prologue_text=OPTIMISATION_MENU_DESCRIPTION.prologue_description_text,
+    epilogue_text=OPTIMISATION_MENU_DESCRIPTION.epilogue_description_text,
+    show_exit_option=OPTIMISATION_MENU_DESCRIPTION.show_exit_option,
 )
 
-add_items_to_menu(submit_gaussian_menu, submit_gaussian_menu_items)
+add_items_to_menu(optimisation_menu, optimisation_menu_items)

@@ -6,13 +6,11 @@ import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
 from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
-from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus import (
-    submit_aimall_menu,
-    SUBMIT_AIMALL_MENU_DESCRIPTION,
-    submit_database_menu,
-    SUBMIT_DATABASE_MENU_DESCRIPTION,
-    submit_gaussian_menu,
-    SUBMIT_GAUSSIAN_MENU_DESCRIPTION,
+from ichor.cli.main_menu_submenus.initial_structure_menu.initial_structure_submenus import (
+    file_conversion_menu,
+    FILE_CONVERSION_MENU_DESCRIPTION,
+    optimisation_menu,
+    OPTIMISATION_MENU_DESCRIPTION,
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
@@ -81,22 +79,17 @@ initial_structure_menu = ConsoleMenu(
 # make menu items
 # can use lambda functions to change text of options as well :)
 point_directory_menu_items = [
+    SubmenuItem(
+        FILE_CONVERSION_MENU_DESCRIPTION.title,
+        file_conversion_menu,
+        initial_structure_menu,
+    ),
+    SubmenuItem(
+        OPTIMISATION_MENU_DESCRIPTION.title, optimisation_menu, initial_structure_menu
+    ),
     FunctionItem(
-        "Select PointsDirectory Path or Parent to PointsDirectory",
+        "Set path to geometry for checking.",
         PointsDirectoryFunctions.select_points_directory,
-    ),
-    SubmenuItem(
-        SUBMIT_GAUSSIAN_MENU_DESCRIPTION.title,
-        submit_gaussian_menu,
-        initial_structure_menu,
-    ),
-    SubmenuItem(
-        SUBMIT_AIMALL_MENU_DESCRIPTION.title, submit_aimall_menu, initial_structure_menu
-    ),
-    SubmenuItem(
-        SUBMIT_DATABASE_MENU_DESCRIPTION.title,
-        submit_database_menu,
-        initial_structure_menu,
     ),
 ]
 

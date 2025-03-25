@@ -11,13 +11,13 @@ from ichor.core.files import PointsDirectory
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main import submit_points_directory_to_aimall
 
-SUBMIT_AIMALL_MENU_DESCRIPTION = MenuDescription(
-    "Submit AIMAll Menu",
-    subtitle="Use this menu to submit a PointsDirectory to AIMAll.\n",
+FILE_CONVERSION_MENU_DESCRIPTION = MenuDescription(
+    "File Conversiom Menu",
+    subtitle="Use this menu to to convert between common file types.\n",
 )
 
 # TODO: possibly make this be read from a file
-SUBMIT_AIMALL_MENU_DEFAULTS = {
+FILE_CONVERSION_MENU_DEFAULTS = {
     "default_method": "b3lyp",
     "default_ncores": 2,
     "default_naat": 1,
@@ -25,9 +25,9 @@ SUBMIT_AIMALL_MENU_DEFAULTS = {
 }
 
 
-# dataclass used to store values for SubmitAIMALLMenu
+# dataclass used to store values for FileConversionMenu
 @dataclass
-class SubmitAIMALLMenuOptions(MenuOptions):
+class FileConversionMenuOptions(MenuOptions):
 
     selected_method: str
     selected_number_of_cores: str
@@ -36,46 +36,46 @@ class SubmitAIMALLMenuOptions(MenuOptions):
 
 
 # initialize dataclass for storing information for menu
-submit_aimall_menu_options = SubmitAIMALLMenuOptions(
-    *SUBMIT_AIMALL_MENU_DEFAULTS.values()
+file_conversion_menu_options = FileConversionMenuOptions(
+    *FILE_CONVERSION_MENU_DEFAULTS.values()
 )
 
 
 # class with static methods for each menu item that calls a function.
-class SubmitAIMALLFunctions:
+class FileConversionFunctions:
     @staticmethod
     def select_method():
         """Asks user to update the ethod for AIMALL. The method
         needs to be added to the WFN file so that AIMALL does the correct
         calculation."""
 
-        submit_aimall_menu_options.selected_method = user_input_free_flow(
-            "Enter method: ", submit_aimall_menu_options.selected_method
+        file_conversion_menu_options.selected_method = user_input_free_flow(
+            "Enter method: ", file_conversion_menu_options.selected_method
         )
 
     @staticmethod
     def select_number_of_cores():
         """Asks user to select number of cores."""
-        submit_aimall_menu_options.selected_number_of_cores = user_input_int(
+        file_conversion_menu_options.selected_number_of_cores = user_input_int(
             "Enter number of cores: ",
-            submit_aimall_menu_options.selected_number_of_cores,
+            file_conversion_menu_options.selected_number_of_cores,
         )
 
     @staticmethod
     def select_naat():
         """Asks user to select AIMAll -naat setting"""
-        submit_aimall_menu_options.selected_naat = user_input_int(
+        file_conversion_menu_options.selected_naat = user_input_int(
             "Select 'naat' setting: ",
-            submit_aimall_menu_options.selected_naat,
+            file_conversion_menu_options.selected_naat,
         )
 
     @staticmethod
     def select_encomp():
         """Asks user to select AIMAll -encomp setting"""
 
-        submit_aimall_menu_options.selected_encomp = user_input_int(
+        file_conversion_menu_options.selected_encomp = user_input_int(
             "Select 'encomp' setting: ",
-            submit_aimall_menu_options.selected_encomp,
+            file_conversion_menu_options.selected_encomp,
         )
 
     @staticmethod
@@ -83,10 +83,10 @@ class SubmitAIMALLFunctions:
         """Submits a single PointsDirectory or many PointsDirectory-ies to AIMAll on compute."""
 
         method, ncores, naat, encomp = (
-            submit_aimall_menu_options.selected_method,
-            submit_aimall_menu_options.selected_number_of_cores,
-            submit_aimall_menu_options.selected_naat,
-            submit_aimall_menu_options.selected_encomp,
+            file_conversion_menu_options.selected_method,
+            file_conversion_menu_options.selected_number_of_cores,
+            file_conversion_menu_options.selected_naat,
+            file_conversion_menu_options.selected_encomp,
         )
 
         is_parent_directory_to_many_points_directories = (
@@ -143,37 +143,37 @@ class SubmitAIMALLFunctions:
 
 # make menu items
 # can use lambda functions to change text of options as well :)
-submit_aimall_menu_items = [
+file_conversion_menu_items = [
     FunctionItem(
         "Change method",
-        SubmitAIMALLFunctions.select_method,
+        FileConversionFunctions.select_method,
     ),
     FunctionItem(
         "Change number of cores",
-        SubmitAIMALLFunctions.select_number_of_cores,
+        FileConversionFunctions.select_number_of_cores,
     ),
     FunctionItem(
         "Change 'naat' setting",
-        SubmitAIMALLFunctions.select_naat,
+        FileConversionFunctions.select_naat,
     ),
     FunctionItem(
         "Change 'encomp' setting",
-        SubmitAIMALLFunctions.select_encomp,
+        FileConversionFunctions.select_encomp,
     ),
     FunctionItem(
         "Submit AIMAll to compute nodes",
-        SubmitAIMALLFunctions.points_directory_to_aimall_on_compute,
+        FileConversionFunctions.points_directory_to_aimall_on_compute,
     ),
 ]
 
 # initialize menu
-submit_aimall_menu = ConsoleMenu(
-    this_menu_options=submit_aimall_menu_options,
-    title=SUBMIT_AIMALL_MENU_DESCRIPTION.title,
-    subtitle=SUBMIT_AIMALL_MENU_DESCRIPTION.subtitle,
-    prologue_text=SUBMIT_AIMALL_MENU_DESCRIPTION.prologue_description_text,
-    epilogue_text=SUBMIT_AIMALL_MENU_DESCRIPTION.epilogue_description_text,
-    show_exit_option=SUBMIT_AIMALL_MENU_DESCRIPTION.show_exit_option,
+file_conversion_menu = ConsoleMenu(
+    this_menu_options=file_conversion_menu_options,
+    title=FILE_CONVERSION_MENU_DESCRIPTION.title,
+    subtitle=FILE_CONVERSION_MENU_DESCRIPTION.subtitle,
+    prologue_text=FILE_CONVERSION_MENU_DESCRIPTION.prologue_description_text,
+    epilogue_text=FILE_CONVERSION_MENU_DESCRIPTION.epilogue_description_text,
+    show_exit_option=FILE_CONVERSION_MENU_DESCRIPTION.show_exit_option,
 )
 
-add_items_to_menu(submit_aimall_menu, submit_aimall_menu_items)
+add_items_to_menu(file_conversion_menu, file_conversion_menu_items)
