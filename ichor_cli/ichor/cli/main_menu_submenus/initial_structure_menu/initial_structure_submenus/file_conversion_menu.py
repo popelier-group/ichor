@@ -12,7 +12,7 @@ from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main import submit_points_directory_to_aimall
 
 FILE_CONVERSION_MENU_DESCRIPTION = MenuDescription(
-    "File Conversiom Menu",
+    "File Conversion Menu",
     subtitle="Use this menu to to convert between common file types.\n",
 )
 

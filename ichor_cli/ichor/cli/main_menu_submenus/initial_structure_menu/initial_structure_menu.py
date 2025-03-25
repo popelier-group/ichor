@@ -15,7 +15,6 @@ from ichor.cli.main_menu_submenus.initial_structure_menu.initial_structure_subme
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import user_input_path
-from ichor.core.files import PointsDirectory, PointsDirectoryParent
 
 INITIAL_STRUCTURE_MENU_DESCRIPTION = MenuDescription(
     "Initial Structure Menu",
@@ -23,52 +22,42 @@ INITIAL_STRUCTURE_MENU_DESCRIPTION = MenuDescription(
 )
 
 
-# dataclass used to store values for PointsDirectoryMenu
 @dataclass
-class PointsDirectoryMenuOptions(MenuOptions):
-    # defaults to the current working directory
-    selected_points_directory_path: Path
+class InitialStructureMenuOptions(MenuOptions):
 
-    def check_path(self):
+    selected_xyz_path: Path = ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
 
-        pd_path = Path(self.selected_points_directory_path)
-        if not pd_path.is_dir():
-            return "Current path is not a directory."
-
-    def check_selected_points_directory_path(self) -> Union[str, None]:
-        """Checks whether the given PointsDirectory exists or if it is a directory."""
-        pd_path = Path(self.selected_points_directory_path)
-        if (pd_path.suffix != PointsDirectory._suffix) and (
-            pd_path.suffix != PointsDirectoryParent._suffix
-        ):
-            return f"Current path: {pd_path} might not be PointsDirectory-like)."
+    def check_selected_xyz_path(self) -> Union[str, None]:
+        """Checks whether the given Trjectory exists or if it is a file."""
+        xyz_path = Path(self.selected_xyz_path)
+        if not xyz_path.exists():
+            return f"Current path: {xyz_path} does not exist."
+        elif not xyz_path.is_file():
+            return f"Current path: {xyz_path} is not a file."
+        elif not xyz_path.suffix == ".xyz":
+            return f"Current path: {xyz_path} might not be a .xyz file."
 
 
 # initialize dataclass for storing information for menu
-points_directory_menu_options = PointsDirectoryMenuOptions(
-    ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-)
+initial_structure_menu_options = InitialStructureMenuOptions()
 
 
-# class with static methods for each menu item that calls a function.
-class PointsDirectoryFunctions:
+class InitialStructureMenuFunctions:
     """Functions that run when menu items are selected"""
 
     @staticmethod
-    def select_points_directory():
-        """Asks user to update points directory and then updates PointsDirectoryMenuOptions instance."""
-        pd_path = user_input_path("Change PointsDirectory Path: ")
-        ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH = Path(
-            pd_path
-        ).absolute()
-        points_directory_menu_options.selected_points_directory_path = (
-            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+    def select_xyz():
+        """Asks user to update the .xyz file and then updates the MolecularDynamicsMenuOptions instance."""
+        xyz_path = user_input_path("Enter .xyz Path: ")
+        ichor.cli.global_menu_variables.SELECTED_XYZ_PATH = Path(xyz_path).absolute()
+        initial_structure_menu_options.selected_xyz_path = (
+            ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
         )
 
 
 # initialize menu
 initial_structure_menu = ConsoleMenu(
-    this_menu_options=points_directory_menu_options,
+    this_menu_options=initial_structure_menu_options,
     title=INITIAL_STRUCTURE_MENU_DESCRIPTION.title,
     subtitle=INITIAL_STRUCTURE_MENU_DESCRIPTION.subtitle,
     prologue_text=INITIAL_STRUCTURE_MENU_DESCRIPTION.prologue_description_text,
@@ -78,7 +67,7 @@ initial_structure_menu = ConsoleMenu(
 
 # make menu items
 # can use lambda functions to change text of options as well :)
-point_directory_menu_items = [
+initial_structure_menu_items = [
     SubmenuItem(
         FILE_CONVERSION_MENU_DESCRIPTION.title,
         file_conversion_menu,
@@ -89,8 +78,8 @@ point_directory_menu_items = [
     ),
     FunctionItem(
         "Set path to geometry for checking.",
-        PointsDirectoryFunctions.select_points_directory,
+        InitialStructureMenuFunctions.select_xyz,
     ),
 ]
 
-add_items_to_menu(initial_structure_menu, point_directory_menu_items)
+add_items_to_menu(initial_structure_menu, initial_structure_menu_items)
