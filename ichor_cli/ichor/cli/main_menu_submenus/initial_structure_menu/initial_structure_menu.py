@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from consolemenu.items import SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.initial_structure_menu.initial_structure_submenus import (
@@ -7,11 +9,22 @@ from ichor.cli.main_menu_submenus.initial_structure_menu.initial_structure_subme
     OPTIMISATION_MENU_DESCRIPTION,
 )
 from ichor.cli.menu_description import MenuDescription
+from ichor.cli.menu_options import MenuOptions
 
 INITIAL_STRUCTURE_MENU_DESCRIPTION = MenuDescription(
     "Initial Structure Menu",
     subtitle="Hello hello hello.\n",
 )
+
+
+@dataclass
+class InitialStructureMenuOptions(MenuOptions):
+    pass
+
+
+# initialize dataclass for storing information for menu
+initial_structure_menu_options = InitialStructureMenuOptions()
+
 
 # initialize menu
 initial_structure_menu = ConsoleMenu(
