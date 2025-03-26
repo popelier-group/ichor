@@ -16,3 +16,6 @@ SELECTED_XYZ_PATH: Path = Path("").absolute()
 
 # SubmitCSVSMenu options
 SELECTED_DATABASE_PATH: Path = Path("").absolute()
+
+# FileConversion options
+SELECTED_INPUT_FILE_PATH: Path = Path("").absolute()

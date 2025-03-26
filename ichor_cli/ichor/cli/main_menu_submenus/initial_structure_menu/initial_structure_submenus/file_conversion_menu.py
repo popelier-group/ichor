@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Union
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
@@ -6,76 +8,65 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_free_flow, user_input_int
+from ichor.cli.useful_functions import user_input_path, user_input_restricted
 from ichor.core.files import PointsDirectory
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main import submit_points_directory_to_aimall
+from ichor.hpc.main.database import AVAILABLE_DATABASE_FORMATS
 
 FILE_CONVERSION_MENU_DESCRIPTION = MenuDescription(
     "File Conversion Menu",
     subtitle="Use this menu to to convert between common file types.\n",
 )
 
-# TODO: possibly make this be read from a file
 FILE_CONVERSION_MENU_DEFAULTS = {
-    "default_method": "b3lyp",
-    "default_ncores": 2,
-    "default_naat": 1,
-    "default_encomp": 3,
+    "default_output_file": ".xyz",
 }
 
-
 # dataclass used to store values for FileConversionMenu
+
+
 @dataclass
 class FileConversionMenuOptions(MenuOptions):
+    selected_input_file_path: Path
+    selected_output_file_format: str
 
-    selected_method: str
-    selected_number_of_cores: str
-    selected_naat: int
-    selected_encomp: bool
+    def check_selected_file_path(self) -> Union[str, None]:
+        """Checks whether the given file exists."""
+        db_path = Path(self.selected_input_file_path)
+        if not db_path.exists():
+            return f"Current file path: {db_path} does not exist."
 
 
 # initialize dataclass for storing information for menu
 file_conversion_menu_options = FileConversionMenuOptions(
-    *FILE_CONVERSION_MENU_DEFAULTS.values()
+    ichor.cli.global_menu_variables.SELECTED_INPUT_FILE_PATH,
+    *FILE_CONVERSION_MENU_DEFAULTS.values(),
 )
 
 
 # class with static methods for each menu item that calls a function.
 class FileConversionFunctions:
     @staticmethod
-    def select_method():
-        """Asks user to update the ethod for AIMALL. The method
-        needs to be added to the WFN file so that AIMALL does the correct
-        calculation."""
+    def select_input_file_path():
+        """Asks user to select path to input file"""
 
-        file_conversion_menu_options.selected_method = user_input_free_flow(
-            "Enter method: ", file_conversion_menu_options.selected_method
+        db_path = user_input_path("Change database path: ")
+        ichor.cli.global_menu_variables.SELECTED_INPUT_FILE_PATH = Path(
+            db_path
+        ).absolute()
+        file_conversion_menu_options.selected_input_file_path = (
+            ichor.cli.global_menu_variables.SELECTED_INPUT_FILE_PATH
         )
 
     @staticmethod
-    def select_number_of_cores():
-        """Asks user to select number of cores."""
-        file_conversion_menu_options.selected_number_of_cores = user_input_int(
-            "Enter number of cores: ",
-            file_conversion_menu_options.selected_number_of_cores,
-        )
+    def select_output_file_format():
+        """Asks user to select the output file format eg .mol, .xyz."""
 
-    @staticmethod
-    def select_naat():
-        """Asks user to select AIMAll -naat setting"""
-        file_conversion_menu_options.selected_naat = user_input_int(
-            "Select 'naat' setting: ",
-            file_conversion_menu_options.selected_naat,
-        )
-
-    @staticmethod
-    def select_encomp():
-        """Asks user to select AIMAll -encomp setting"""
-
-        file_conversion_menu_options.selected_encomp = user_input_int(
-            "Select 'encomp' setting: ",
-            file_conversion_menu_options.selected_encomp,
+        file_conversion_menu_options.selected_database_format = user_input_restricted(
+            AVAILABLE_DATABASE_FORMATS.keys(),
+            "Choose an output file format: ",
+            file_conversion_menu_options.selected_database_format,
         )
 
     @staticmethod
@@ -145,23 +136,15 @@ class FileConversionFunctions:
 # can use lambda functions to change text of options as well :)
 file_conversion_menu_items = [
     FunctionItem(
-        "Change method",
-        FileConversionFunctions.select_method,
+        "Change input file path",
+        FileConversionFunctions.select_input_file_path,
     ),
     FunctionItem(
-        "Change number of cores",
-        FileConversionFunctions.select_number_of_cores,
+        "Change output file format",
+        FileConversionFunctions.select_output_file_format,
     ),
     FunctionItem(
-        "Change 'naat' setting",
-        FileConversionFunctions.select_naat,
-    ),
-    FunctionItem(
-        "Change 'encomp' setting",
-        FileConversionFunctions.select_encomp,
-    ),
-    FunctionItem(
-        "Submit AIMAll to compute nodes",
+        "Converrt file format",
         FileConversionFunctions.points_directory_to_aimall_on_compute,
     ),
 ]
