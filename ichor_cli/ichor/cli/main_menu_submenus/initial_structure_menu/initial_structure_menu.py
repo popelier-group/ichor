@@ -28,6 +28,7 @@ initial_structure_menu_options = InitialStructureMenuOptions()
 
 # initialize menu
 initial_structure_menu = ConsoleMenu(
+    this_menu_options=initial_structure_menu_options,
     title=INITIAL_STRUCTURE_MENU_DESCRIPTION.title,
     subtitle=INITIAL_STRUCTURE_MENU_DESCRIPTION.subtitle,
     prologue_text=INITIAL_STRUCTURE_MENU_DESCRIPTION.prologue_description_text,
