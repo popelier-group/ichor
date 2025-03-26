@@ -63,10 +63,12 @@ class FileConversionFunctions:
     def select_output_file_format():
         """Asks user to select the output file format eg .mol, .xyz."""
 
-        file_conversion_menu_options.selected_database_format = user_input_restricted(
-            AVAILABLE_DATABASE_FORMATS.keys(),
-            "Choose an output file format: ",
-            file_conversion_menu_options.selected_database_format,
+        file_conversion_menu_options.selected_output_file_format = (
+            user_input_restricted(
+                AVAILABLE_DATABASE_FORMATS.keys(),
+                "Choose an output file format: ",
+                file_conversion_menu_options.selected_output_file_format,
+            )
         )
 
     @staticmethod
@@ -144,7 +146,7 @@ file_conversion_menu_items = [
         FileConversionFunctions.select_output_file_format,
     ),
     FunctionItem(
-        "Converrt file format",
+        "Convert file format",
         FileConversionFunctions.points_directory_to_aimall_on_compute,
     ),
 ]
