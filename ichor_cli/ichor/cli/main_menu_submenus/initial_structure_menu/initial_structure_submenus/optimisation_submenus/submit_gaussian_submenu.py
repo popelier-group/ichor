@@ -12,8 +12,8 @@ from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main import submit_points_directory_to_aimall
 
 SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
-    "Submit GAUSSIAN Menu",
-    subtitle="Use this menu to optimise a geometry with GAUSSIAN.\n",
+    "Submit Gaussian Menu",
+    subtitle="Use this menu to optimise a geometry with Gaussian.\n",
 )
 
 # TODO: possibly make this be read from a file
