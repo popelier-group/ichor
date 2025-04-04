@@ -1,6 +1,9 @@
-from ichor.cli.main_menu_submenus.initial_structure_menu.initial_structure_submenus.optimisation_submenus import (
+from ichor.cli.main_menu_submenus.initial_structure_menu.initial_structure_submenus.optimisation_submenus.submit_gaussian_menu import (
     submit_gaussian_menu,
     SUBMIT_GAUSSIAN_MENU_DESCRIPTION,
+)
+
+from ichor.cli.main_menu_submenus.initial_structure_menu.initial_structure_submenus.optimisation_submenus.submit_plumed_menu import (
     submit_plumed_menu,
     SUBMIT_PLUMED_MENU_DESCRIPTION,
 )
