@@ -3,7 +3,8 @@ csf3:
   hpc:
 
     parallel_environments:
-      amd.pe: [2, 32]
+      serial: [1, 1]
+      multicore: [2, 32]
 
   software:
 
