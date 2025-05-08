@@ -351,6 +351,8 @@ class SubmissionScript:
             with open(self.path, "w") as f:
 
                 f.write("#!/bin/bash -l\n")
+                # have to write time limit for new csf3
+                f.write("#SBATCH -t 7-0\n")
                 # write any options to be given to the batch system,
                 # such as working directory, where to write outputs/errors, etc.
                 for option in self.options:
