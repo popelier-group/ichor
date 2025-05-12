@@ -4,14 +4,12 @@ from typing import Union
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
+from ase import io
 from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import user_input_path, user_input_restricted
-from ichor.core.files import PointsDirectory
-from ichor.core.useful_functions import single_or_many_points_directories
-from ichor.hpc.main import submit_points_directory_to_aimall
 
 AVAILABLE_READ_FILE_FORMATS = [
     "abinit-gsr",
@@ -216,73 +214,23 @@ class FileConversionFunctions:
 
         file_conversion_menu_options.selected_output_file_format = (
             user_input_restricted(
-                AVAILABLE_WRITE_FILE_FORMATS.keys(),
+                AVAILABLE_WRITE_FILE_FORMATS,
                 "Choose an output file format: ",
                 file_conversion_menu_options.selected_output_file_format,
             )
         )
 
     @staticmethod
-    def points_directory_to_aimall_on_compute():
-        """Submits a single PointsDirectory or many PointsDirectory-ies to AIMAll on compute."""
+    def convert_file():
+        """Converts file from input to selected output format."""
 
-        method, ncores, naat, encomp = (
-            file_conversion_menu_options.selected_method,
-            file_conversion_menu_options.selected_number_of_cores,
-            file_conversion_menu_options.selected_naat,
-            file_conversion_menu_options.selected_encomp,
+        loaded_atoms = io.read(ichor.cli.global_menu_variables.SELECTED_INPUT_FILE_PATH)
+        append_path = file_conversion_menu_options.selected_output_file_format[:-4]
+        io.write(
+            filename=append_path,
+            images=loaded_atoms,
+            format=file_conversion_menu_options.selected_output_file_format,
         )
-
-        is_parent_directory_to_many_points_directories = (
-            single_or_many_points_directories(
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-            )
-        )
-
-        # if containing many PointsDirectory
-        if is_parent_directory_to_many_points_directories:
-
-            for (
-                d
-            ) in (
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.iterdir()
-            ):
-
-                pd = PointsDirectory(d)
-                submit_points_directory_to_aimall(
-                    points_directory=pd,
-                    method=method,
-                    ncores=ncores,
-                    naat=naat,
-                    encomp=encomp,
-                    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
-                        "outputs"
-                    ]
-                    / pd.path.name
-                    / "AIMALL",
-                    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-                    / pd.path.name
-                    / "AIMALL",
-                )
-
-        else:
-            pd = PointsDirectory(
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-            )
-
-            submit_points_directory_to_aimall(
-                points_directory=pd,
-                method=method,
-                ncores=ncores,
-                naat=naat,
-                encomp=encomp,
-                outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
-                / pd.path.name
-                / "AIMALL",
-                errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-                / pd.path.name
-                / "AIMALL",
-            )
 
 
 # make menu items
