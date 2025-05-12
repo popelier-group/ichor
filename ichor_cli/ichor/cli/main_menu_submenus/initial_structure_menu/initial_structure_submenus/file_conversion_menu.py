@@ -6,13 +6,15 @@ import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
 from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
+from ichor.cli.main_menu_submenus.initial_structure_menu import (
+    AVAILABLE_WRITE_FILE_FORMATS,
+)
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import user_input_path, user_input_restricted
 from ichor.core.files import PointsDirectory
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main import submit_points_directory_to_aimall
-from ichor.hpc.main.database import AVAILABLE_DATABASE_FORMATS
 
 FILE_CONVERSION_MENU_DESCRIPTION = MenuDescription(
     "File Conversion Menu",
@@ -65,7 +67,7 @@ class FileConversionFunctions:
 
         file_conversion_menu_options.selected_output_file_format = (
             user_input_restricted(
-                AVAILABLE_DATABASE_FORMATS.keys(),
+                AVAILABLE_WRITE_FILE_FORMATS.keys(),
                 "Choose an output file format: ",
                 file_conversion_menu_options.selected_output_file_format,
             )
