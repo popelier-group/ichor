@@ -87,7 +87,7 @@ def add_point_to_database(
     # These are intermediate data files that indicate AIMALL hasn't completed.
     # If found then do not append this point to the database.
     for _f in point.ints.path.iterdir():
-        if _f.suffix == ".mog" or ".mog2":
+        if _f.suffix == ".mog" or _f.suffix == ".mog2":
             if print_missing_data:
                 print(
                     f"{point.path.absolute()}: A '.mog' was found so AIMAll likely crashed. Not added to db."
