@@ -225,9 +225,12 @@ class FileConversionFunctions:
         """Converts file from input to selected output format."""
 
         loaded_atoms = io.read(ichor.cli.global_menu_variables.SELECTED_INPUT_FILE_PATH)
-        append_path = file_conversion_menu_options.selected_output_file_format[:-4]
+        input_path = file_conversion_menu_options.selected_input_file_path
+        output_suffix = file_conversion_menu_options.selected_output_file_format
+        append_path = input_path.with_suffix(f".{output_suffix}")
+        output_name = append_path.name
         io.write(
-            filename=append_path,
+            filename=output_name,
             images=loaded_atoms,
             format=file_conversion_menu_options.selected_output_file_format,
         )
@@ -246,7 +249,7 @@ file_conversion_menu_items = [
     ),
     FunctionItem(
         "Convert file format",
-        FileConversionFunctions.points_directory_to_aimall_on_compute,
+        FileConversionFunctions.convert_file,
     ),
 ]
 
