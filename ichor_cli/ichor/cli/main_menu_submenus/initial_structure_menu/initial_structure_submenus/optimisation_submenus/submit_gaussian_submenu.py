@@ -6,87 +6,98 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_free_flow, user_input_int
+from ichor.cli.useful_functions import (
+    user_input_bool,
+    user_input_free_flow,
+    user_input_int,
+)
 from ichor.core.files import PointsDirectory
 from ichor.core.useful_functions import single_or_many_points_directories
-from ichor.hpc.main import submit_points_directory_to_aimall
+from ichor.hpc.main import submit_points_directory_to_gaussian
 
 SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
     "Submit Gaussian Menu",
     subtitle="Use this menu to optimise a geometry with Gaussian.\n",
 )
 
-# TODO: possibly make this be read from a file
 SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
     "default_method": "b3lyp",
+    "default_basis_set": "6-31+g(d,p)",
     "default_ncores": 2,
-    "default_naat": 1,
-    "default_encomp": 3,
+    "default_overwrite_existing_gjfs": False,
+    "default_force_calculate_wfn": False,
 }
 
 
-# dataclass used to store values for SubmitAIMALLMenu
+# dataclass used to store values for SubmitGaussianMenu
 @dataclass
-class SubmitGAUSSIANMenuOptions(MenuOptions):
+class SubmitGaussianMenuOptions(MenuOptions):
 
     selected_method: str
-    selected_number_of_cores: str
-    selected_naat: int
-    selected_encomp: bool
+    selected_basis_set: str
+    selected_number_of_cores: int
+    selected_overwrite_existing_gjfs: bool
+    selected_force_calculate_wfn: bool
+
 
 
 # initialize dataclass for storing information for menu
-submit_gaussian_menu_options = SubmitGAUSSIANMenuOptions(
+submit_gaussian_menu_options = SubmitGaussianMenuOptions(
     *SUBMIT_GAUSSIAN_MENU_DEFAULTS.values()
 )
 
 
 # class with static methods for each menu item that calls a function.
-class SubmitGAUSSIANFunctions:
+class SubmitGaussianFunctions:
     @staticmethod
     def select_method():
-        """Asks user to update the ethod for AIMALL. The method
-        needs to be added to the WFN file so that AIMALL does the correct
-        calculation."""
-
+        """Asks user to update the method for Gaussian"""
         submit_gaussian_menu_options.selected_method = user_input_free_flow(
             "Enter method: ", submit_gaussian_menu_options.selected_method
         )
 
     @staticmethod
+    def select_basis_set():
+        """Asks user to update the basis set."""
+        submit_gaussian_menu_options.selected_basis_set = user_input_free_flow(
+            "Enter basis set: ", submit_gaussian_menu_options.selected_basis_set
+        )
+
+    @staticmethod
     def select_number_of_cores():
-        """Asks user to select number of cores."""
+        """Asks user to update the basis set."""
         submit_gaussian_menu_options.selected_number_of_cores = user_input_int(
             "Enter number of cores: ",
             submit_gaussian_menu_options.selected_number_of_cores,
         )
 
     @staticmethod
-    def select_naat():
-        """Asks user to select AIMAll -naat setting"""
-        submit_gaussian_menu_options.selected_naat = user_input_int(
-            "Select 'naat' setting: ",
-            submit_gaussian_menu_options.selected_naat,
+    def select_overwrite_existing_gjfs():
+        """Asks user whether or not to overwrite existing gjfs"""
+        submit_gaussian_menu_options.selected_overwrite_existing_gjfs = user_input_bool(
+            "Overwrite existing gjfs (yes/no): ",
+            submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
         )
 
     @staticmethod
-    def select_encomp():
-        """Asks user to select AIMAll -encomp setting"""
+    def select_force_calculate_wfns():
+        """Whether or not to recalculate wfns if they are already present"""
 
-        submit_gaussian_menu_options.selected_encomp = user_input_int(
-            "Select 'encomp' setting: ",
-            submit_gaussian_menu_options.selected_encomp,
+        submit_gaussian_menu_options.selected_force_calculate_wfn = user_input_bool(
+            "Recalculate present wfns (yes/no): ",
+            submit_gaussian_menu_options.selected_force_calculate_wfn,
         )
 
     @staticmethod
-    def points_directory_to_aimall_on_compute():
-        """Submits a single PointsDirectory or many PointsDirectory-ies to AIMAll on compute."""
+    def points_directory_to_gaussian_on_compute():
+        """Submits a single PointsDirectory to Gaussian on compute."""
 
-        method, ncores, naat, encomp = (
+        (method, basis_set, ncores, overwrite_existing, force_calculate_wfn,) = (
             submit_gaussian_menu_options.selected_method,
+            submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
-            submit_gaussian_menu_options.selected_naat,
-            submit_gaussian_menu_options.selected_encomp,
+            submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
+            submit_gaussian_menu_options.selected_force_calculate_wfn,
         )
 
         is_parent_directory_to_many_points_directories = (
@@ -105,39 +116,43 @@ class SubmitGAUSSIANFunctions:
             ):
 
                 pd = PointsDirectory(d)
-                submit_points_directory_to_aimall(
+
+                submit_points_directory_to_gaussian(
                     points_directory=pd,
-                    method=method,
+                    overwrite_existing=overwrite_existing,
+                    force_calculate_wfn=force_calculate_wfn,
                     ncores=ncores,
-                    naat=naat,
-                    encomp=encomp,
+                    method=method,
+                    basis_set=basis_set,
                     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
                         "outputs"
                     ]
                     / pd.path.name
-                    / "AIMALL",
+                    / "GAUSSIAN",
                     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
                     / pd.path.name
-                    / "AIMALL",
+                    / "GAUSSIAN",
                 )
 
+        # if containing one PointsDirectory
         else:
             pd = PointsDirectory(
                 ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
             )
 
-            submit_points_directory_to_aimall(
+            submit_points_directory_to_gaussian(
                 points_directory=pd,
-                method=method,
+                overwrite_existing=overwrite_existing,
+                force_calculate_wfn=force_calculate_wfn,
                 ncores=ncores,
-                naat=naat,
-                encomp=encomp,
+                method=method,
+                basis_set=basis_set,
                 outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
                 / pd.path.name
-                / "AIMALL",
+                / "GAUSSIAN",
                 errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
                 / pd.path.name
-                / "AIMALL",
+                / "GAUSSIAN",
             )
 
 
@@ -146,23 +161,27 @@ class SubmitGAUSSIANFunctions:
 submit_gaussian_menu_items = [
     FunctionItem(
         "Change method",
-        SubmitGAUSSIANFunctions.select_method,
+        SubmitGaussianFunctions.select_method,
+    ),
+    FunctionItem(
+        "Change basis set",
+        SubmitGaussianFunctions.select_basis_set,
     ),
     FunctionItem(
         "Change number of cores",
-        SubmitGAUSSIANFunctions.select_number_of_cores,
+        SubmitGaussianFunctions.select_number_of_cores,
     ),
     FunctionItem(
-        "Change 'naat' setting",
-        SubmitGAUSSIANFunctions.select_naat,
+        "Overwrite GJF files (if any are already present)",
+        SubmitGaussianFunctions.select_overwrite_existing_gjfs,
     ),
     FunctionItem(
-        "Change 'encomp' setting",
-        SubmitGAUSSIANFunctions.select_encomp,
+        "Recalculate all WFNs (if any are already present)",
+        SubmitGaussianFunctions.select_force_calculate_wfns,
     ),
     FunctionItem(
-        "Submit AIMAll to compute nodes",
-        SubmitGAUSSIANFunctions.points_directory_to_aimall_on_compute,
+        "Submit to Gaussian",
+        SubmitGaussianFunctions.points_directory_to_gaussian_on_compute,
     ),
 ]
 
