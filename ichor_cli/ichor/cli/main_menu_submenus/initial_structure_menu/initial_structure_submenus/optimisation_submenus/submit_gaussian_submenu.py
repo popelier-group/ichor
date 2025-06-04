@@ -33,6 +33,7 @@ SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
 @dataclass
 class SubmitGaussianMenuOptions(MenuOptions):
 
+    selected_keywords: str
     selected_method: str
     selected_basis_set: str
     selected_number_of_cores: int
@@ -46,9 +47,11 @@ submit_gaussian_menu_options = SubmitGaussianMenuOptions(
     *SUBMIT_GAUSSIAN_MENU_DEFAULTS.values()
 )
 
+# set keywords to opt as default
+submit_gaussian_menu_options.selected_keywords = "opt"
 
 # class with static methods for each menu item that calls a function.
-class SubmitGaussianFunctions:
+class SubmitGaussianFunctions:   
     @staticmethod
     def select_method():
         """Asks user to update the method for Gaussian"""
@@ -92,7 +95,8 @@ class SubmitGaussianFunctions:
     def points_directory_to_gaussian_on_compute():
         """Submits a single PointsDirectory to Gaussian on compute."""
 
-        (method, basis_set, ncores, overwrite_existing, force_calculate_wfn,) = (
+        (keywords, method, basis_set, ncores, overwrite_existing, force_calculate_wfn,) = (
+            submit_gaussian_menu_options.selected_keywords,
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
@@ -122,6 +126,7 @@ class SubmitGaussianFunctions:
                     overwrite_existing=overwrite_existing,
                     force_calculate_wfn=force_calculate_wfn,
                     ncores=ncores,
+                    keywords=keywords,
                     method=method,
                     basis_set=basis_set,
                     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
@@ -145,6 +150,7 @@ class SubmitGaussianFunctions:
                 overwrite_existing=overwrite_existing,
                 force_calculate_wfn=force_calculate_wfn,
                 ncores=ncores,
+                keywords=keywords,
                 method=method,
                 basis_set=basis_set,
                 outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
