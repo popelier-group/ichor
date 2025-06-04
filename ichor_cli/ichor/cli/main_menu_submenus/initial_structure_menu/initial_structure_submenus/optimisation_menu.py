@@ -10,7 +10,7 @@ from ichor.cli.main_menu_submenus.initial_structure_menu.initial_structure_subme
     SUBMIT_GAUSSIAN_MENU_DESCRIPTION,
     submit_gaussian_menu,
     SUBMIT_PLUMED_MENU_DESCRIPTION,
-    submit_plumed_submenu,
+    submit_plumed_menu,
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
@@ -81,7 +81,7 @@ optimisation_menu_items = [
     ),
     SubmenuItem(
         SUBMIT_PLUMED_MENU_DESCRIPTION.title, 
-        submit_plumed_submenu, 
+        submit_plumed_menu, 
         optimisation_menu
     ),
 ]
