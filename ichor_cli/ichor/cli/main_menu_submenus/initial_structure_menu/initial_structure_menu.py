@@ -13,7 +13,7 @@ from ichor.cli.menu_options import MenuOptions
 
 INITIAL_STRUCTURE_MENU_DESCRIPTION = MenuDescription(
     "Initial Structure Menu",
-    subtitle="Hello hello hello.\n",
+    subtitle="This menu is designed for generating your initial xyz file for building ML models.\n",
 )
 
 
@@ -47,10 +47,6 @@ initial_structure_menu_items = [
     SubmenuItem(
         OPTIMISATION_MENU_DESCRIPTION.title, optimisation_menu, initial_structure_menu
     ),
-    # SubmenuItem(
-    #    "Set path to geometry for checking.",
-    #    InitialStructureMenuFunctions.select_xyz,
-    # ),
 ]
 
 add_items_to_menu(initial_structure_menu, initial_structure_menu_items)

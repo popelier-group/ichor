@@ -233,7 +233,7 @@ class FileConversionFunctions:
         # invoke function to choose file
         chosen_format = user_input_restricted(
             combined_list,
-            "Choose an output file format: ",
+            "Choose an output file format from these supported types: ",
             file_conversion_menu_options.selected_output_file_format,
         )
         # code to find which output suffix to append
