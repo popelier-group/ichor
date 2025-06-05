@@ -512,6 +512,6 @@ class Mol2(HasAtoms, WriteFile):
         str_to_write += "@<TRIPOS>BOND\n"
         for i, (bi, bj) in enumerate(b):
             bond_type = get_bond_type(self.atoms[bi - 1], self.atoms[bj - 1]).value
-            str_to_write += f"{i+1:7d} {bi:4d} {bj:4d} {bond_type:>4}\n"
+            str_to_write += f"{i + 1:7d} {bi:4d} {bj:4d} {bond_type:>4}\n"
 
         return str_to_write

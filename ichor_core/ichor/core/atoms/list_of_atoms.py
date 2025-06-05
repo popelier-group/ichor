@@ -122,7 +122,7 @@ class ListOfAtoms(list, ABC):
         )  # each feature has r, theta, phi component
 
         for feat in range(remaining_features):
-            headings += [f"r{feat+3}", f"theta{feat+3}", f"phi{feat+3}"]
+            headings += [f"r{feat + 3}", f"theta{feat + 3}", f"phi{feat + 3}"]
 
         return headings
 

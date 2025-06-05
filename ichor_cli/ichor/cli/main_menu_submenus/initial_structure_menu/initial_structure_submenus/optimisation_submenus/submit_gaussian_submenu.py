@@ -42,7 +42,6 @@ class SubmitGaussianMenuOptions(MenuOptions):
     selected_force_calculate_wfn: bool
 
 
-
 # initialize dataclass for storing information for menu
 submit_gaussian_menu_options = SubmitGaussianMenuOptions(
     *SUBMIT_GAUSSIAN_MENU_DEFAULTS.values()
@@ -51,8 +50,9 @@ submit_gaussian_menu_options = SubmitGaussianMenuOptions(
 # set keywords to opt as default
 submit_gaussian_menu_options.selected_keywords = "opt"
 
+
 # class with static methods for each menu item that calls a function.
-class SubmitGaussianFunctions:   
+class SubmitGaussianFunctions:
     @staticmethod
     def select_method():
         """Asks user to update the method for Gaussian"""
@@ -96,7 +96,14 @@ class SubmitGaussianFunctions:
     def points_directory_to_gaussian_on_compute():
         """Submits a single PointsDirectory to Gaussian on compute."""
 
-        (keywords, method, basis_set, ncores, overwrite_existing, force_calculate_wfn,) = (
+        (
+            keywords,
+            method,
+            basis_set,
+            ncores,
+            overwrite_existing,
+            force_calculate_wfn,
+        ) = (
             submit_gaussian_menu_options.selected_keywords,
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,

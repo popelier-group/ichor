@@ -27,8 +27,6 @@ repos:
 -   repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 3.0.0
     hooks:
-    -   id: require-ascii
-        exclude: ^(examples/*)|(.github/ISSUE_TEMPLATE/*)|(docs/source/_static/*)|(docs/build)
     -   id: script-must-have-extension
     -   id: forbid-binary
         exclude: ^(examples/*)|(example_files/*)|(docs/build)|(docs/source/extra_files/*)
@@ -39,3 +37,11 @@ repos:
         exclude: (docs/build)
     -   id: forbid-tabs
         exclude: ^(docs/source/_static/*)|(docs/Makefile)|(docs/build)
+-   repo: local
+    hooks:
+      - id: ascii-check
+        name: ASCII Compliance Check
+        entry: python check_ascii.py
+        language: system
+        types: [text]
+        exclude: ^(examples/*)|(.github/ISSUE_TEMPLATE/*)|(docs/source/_static/*)|(docs/build)

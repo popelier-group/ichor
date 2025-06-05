@@ -170,6 +170,7 @@ FILE_CONVERSION_MENU_DESCRIPTION = MenuDescription(
 
 FILE_CONVERSION_MENU_DEFAULTS = {
     "default_output_file": "xyz",
+    "default_output_extension": "xyz",
 }
 
 # dataclass used to store values for FileConversionMenu
@@ -179,6 +180,7 @@ FILE_CONVERSION_MENU_DEFAULTS = {
 class FileConversionMenuOptions(MenuOptions):
     selected_input_file_path: Path
     selected_output_file_format: str
+    selected_output_file_extension: str
 
     def check_selected_file_path(self) -> Union[str, None]:
         """Checks whether the given file exists."""
@@ -200,7 +202,7 @@ class FileConversionFunctions:
     def select_input_file_path():
         """Asks user to select path to input file"""
 
-        db_path = user_input_path("Change database path: ")
+        db_path = user_input_path("Change input file path: ")
         ichor.cli.global_menu_variables.SELECTED_INPUT_FILE_PATH = Path(
             db_path
         ).absolute()
@@ -210,15 +212,45 @@ class FileConversionFunctions:
 
     @staticmethod
     def select_output_file_format():
-        """Asks user to select the output file format eg .mol, .xyz."""
+        """Asks user to select the output file format eg mol, xyz."""
+        # build expanded list to also include file extensions
+        file_extensions = []
+        for i in AVAILABLE_WRITE_FILE_FORMATS:
+            if len(io.formats.ioformats[i].extensions) > 0:
+                file_extensions.append(str(io.formats.ioformats[i].extensions[0]))
+            else:
+                file_extensions.append(" ")
 
-        file_conversion_menu_options.selected_output_file_format = (
-            user_input_restricted(
-                AVAILABLE_WRITE_FILE_FORMATS,
-                "Choose an output file format: ",
-                file_conversion_menu_options.selected_output_file_format,
-            )
+        # combine the lists to have both extensions and filetypes from ASE
+        # Allows users to select by name or extension
+        combined_list = AVAILABLE_WRITE_FILE_FORMATS + file_extensions
+
+        # invoke function to choose file
+        chosen_format = user_input_restricted(
+            combined_list,
+            "Choose an output file format: ",
+            file_conversion_menu_options.selected_output_file_format,
         )
+        # code to find which output suffix to append
+        # check if file was chosen from file type
+        if chosen_format in AVAILABLE_WRITE_FILE_FORMATS:
+            # find file index that corresponds to chosen file type
+            file_index = AVAILABLE_WRITE_FILE_FORMATS.index(chosen_format)
+            # save file format extension
+            format_ext = file_extensions[file_index]
+
+        # check if file is in file extension list instead
+        elif chosen_format in file_extensions:
+            # save file format
+            format_ext = file_conversion_menu_options.selected_output_file_format
+            # find index that corresponds to matching file extension
+            file_index = file_extensions.index(chosen_format)
+            chosen_format = AVAILABLE_WRITE_FILE_FORMATS[file_index]
+
+        # update file format name for required for ASE function
+        file_conversion_menu_options.selected_output_file_format = chosen_format
+        # update file extension required for naming file correctly
+        file_conversion_menu_options.selected_output_file_extension = format_ext
 
     @staticmethod
     def convert_file():
@@ -226,7 +258,7 @@ class FileConversionFunctions:
 
         loaded_atoms = io.read(ichor.cli.global_menu_variables.SELECTED_INPUT_FILE_PATH)
         input_path = file_conversion_menu_options.selected_input_file_path
-        output_suffix = file_conversion_menu_options.selected_output_file_format
+        output_suffix = file_conversion_menu_options.selected_output_file_extension
         append_path = input_path.with_suffix(f".{output_suffix}")
         output_name = append_path.name
         io.write(

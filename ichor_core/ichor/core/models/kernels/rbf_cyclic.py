@@ -49,7 +49,6 @@ class RBFCyclic(Kernel):
         thetas: np.ndarray,
         active_dims: Optional[np.ndarray] = None,
     ):
-
         """
         Args:
             :param: `lengthscale` np.ndarray of shape ndimensions (1D array):
@@ -96,7 +95,9 @@ class RBFCyclic(Kernel):
         str_to_write += f"[kernel.{self.name}]\n"
         str_to_write += "type rbf-cyclic\n"
         str_to_write += f"number_of_dimensions {len(self.active_dims)}\n"
-        str_to_write += f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n"
+        str_to_write += (
+            f"active_dimensions {' '.join(map(str, self.active_dims + 1))}\n"
+        )
         str_to_write += f"thetas {' '.join(map(str, self._thetas))}\n"
 
         return str_to_write

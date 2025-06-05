@@ -14,7 +14,7 @@ def format_number_with_comma(n: Scalar) -> str:
     -------
 
     """
-    return f"{n,}"
+    return f"{n, }"
 
 
 def temperature_formatter(

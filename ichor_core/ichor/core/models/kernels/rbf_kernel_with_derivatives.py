@@ -148,7 +148,9 @@ class RBFKernelWithDerivatives(Kernel):
         str_to_write += f"[kernel.{self.name}]\n"
         str_to_write += "type constant\n"
         str_to_write += f"number_of_dimensions {len(self.active_dims)}\n"
-        str_to_write += f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n"
+        str_to_write += (
+            f"active_dimensions {' '.join(map(str, self.active_dims + 1))}\n"
+        )
         str_to_write += f"thetas {' '.join(map(str, self._rbf_thetas))}\n"
 
         return str_to_write

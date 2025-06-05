@@ -6,7 +6,8 @@ from ichor.hpc.batch_system.node import NodeType
 
 class LocalBatchSystem:
     """LocalBatchSystem is to only be used for debugging purposes
-    (Unless one wants to implement a batch system to run on a local machine... would be a nice addition)"""
+    (Unless one wants to implement a batch system to run on a local machine... would be a nice addition)
+    """
 
     @staticmethod
     def current_node() -> NodeType:
@@ -57,5 +58,5 @@ class LocalBatchSystem:
         50 separate jobs. Instead 1 array job can be submitted."""
         array_str = f"-a 1-{njobs}"
         if max_running_tasks is not None:
-            array_str += f"{min(njobs-1, max_running_tasks)}"
+            array_str += f"{min(njobs - 1, max_running_tasks)}"
         return array_str

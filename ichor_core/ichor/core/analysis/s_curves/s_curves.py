@@ -266,8 +266,8 @@ def write_to_excel(
             atomic_s_curve.set_style(excel_style)
 
             writer.sheets[sheet_name].insert_chart(
-                f"{num2col(len(atom_names)+5)}2", total_s_curve
+                f"{num2col(len(atom_names) + 5)}2", total_s_curve
             )
             writer.sheets[sheet_name].insert_chart(
-                f"{num2col(len(atom_names)+5)}18", atomic_s_curve
+                f"{num2col(len(atom_names) + 5)}18", atomic_s_curve
             )

@@ -557,7 +557,7 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
                 ]
                 training_data.append([*features[i], *properties])
 
-            input_headers = [f"f{i+1}" for i in range(features.shape[-1])]
+            input_headers = [f"f{i + 1}" for i in range(features.shape[-1])]
             output_headers = [f"{output}" for output in property_types]
 
             fname = atom_name + str_to_append_to_fname
@@ -613,8 +613,10 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
             )
             training_data.append([*features, wfn_energy, *dE_df])
 
-            input_headers = [f"f{i+1}" for i in range(nfeatures)]
-            output_headers = ["wfn_energy"] + [f"-dEdf{i+1}" for i in range(nfeatures)]
+            input_headers = [f"f{i + 1}" for i in range(nfeatures)]
+            output_headers = ["wfn_energy"] + [
+                f"-dEdf{i + 1}" for i in range(nfeatures)
+            ]
 
             fname = atoms[central_atom_idx].name + str_to_append_to_fname
 

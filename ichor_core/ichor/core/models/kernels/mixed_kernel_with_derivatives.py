@@ -59,7 +59,8 @@ class MixedKernelWithDerivatives(Kernel):
     @property
     def periodic_lengthscales(self):
         """Note that the lengthscales are already squared for the periodic kernel. But still,
-        thetas are defined to be 1/(2l). (where l here is the already squared true lengthscale)"""
+        thetas are defined to be 1/(2l). (where l here is the already squared true lengthscale)
+        """
         return 1.0 / (2.0 * self._periodic_thetas)
 
     @property
@@ -310,7 +311,9 @@ class MixedKernelWithDerivatives(Kernel):
         str_to_write += f"[kernel.{self.name}]\n"
         str_to_write += "type constant\n"
         str_to_write += f"number_of_dimensions {len(self.active_dims)}\n"
-        str_to_write += f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n"
+        str_to_write += (
+            f"active_dimensions {' '.join(map(str, self.active_dims + 1))}\n"
+        )
         str_to_write += f"thetas {' '.join(map(str, self._thetas))}\n"
 
         return str_to_write

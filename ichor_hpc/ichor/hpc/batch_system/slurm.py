@@ -197,7 +197,7 @@ class SLURM(BatchSystem):
         50 separate jobs. Instead 1 array job can be submitted."""
         array_str = f"-a 1-{njobs}"
         if max_running_tasks is not None:
-            array_str += f"{min(njobs-1, max_running_tasks)}"
+            array_str += f"{min(njobs - 1, max_running_tasks)}"
         return array_str
 
     @classmethod
