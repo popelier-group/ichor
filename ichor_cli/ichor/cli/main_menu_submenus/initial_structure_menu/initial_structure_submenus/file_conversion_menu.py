@@ -215,15 +215,20 @@ class FileConversionFunctions:
         """Asks user to select the output file format eg mol, xyz."""
         # build expanded list to also include file extensions
         file_extensions = []
+        extension_options = []
+        # construct a list of file extensions for all files where they differ from file types
+        # append an empty string for those without extensions to keep track of corresponding file type index
         for i in AVAILABLE_WRITE_FILE_FORMATS:
             if len(io.formats.ioformats[i].extensions) > 0:
                 file_extensions.append(str(io.formats.ioformats[i].extensions[0]))
+                extension_options.append(str(io.formats.ioformats[i].extensions[0]))
             else:
                 file_extensions.append(" ")
 
         # combine the lists to have both extensions and filetypes from ASE
         # Allows users to select by name or extension
-        combined_list = AVAILABLE_WRITE_FILE_FORMATS + file_extensions
+        # Skips empty extensions in full extension list
+        combined_list = AVAILABLE_WRITE_FILE_FORMATS + extension_options
 
         # invoke function to choose file
         chosen_format = user_input_restricted(
@@ -242,7 +247,7 @@ class FileConversionFunctions:
         # check if file is in file extension list instead
         elif chosen_format in file_extensions:
             # save file format
-            format_ext = file_conversion_menu_options.selected_output_file_format
+            format_ext = chosen_format
             # find index that corresponds to matching file extension
             file_index = file_extensions.index(chosen_format)
             chosen_format = AVAILABLE_WRITE_FILE_FORMATS[file_index]
