@@ -184,9 +184,9 @@ class FileConversionMenuOptions(MenuOptions):
 
     def check_selected_file_path(self) -> Union[str, None]:
         """Checks whether the given file exists."""
-        db_path = Path(self.selected_input_file_path)
-        if not db_path.exists():
-            return f"Current file path: {db_path} does not exist."
+        inp_path = Path(self.selected_input_file_path)
+        if not inp_path.exists():
+            return f"Current file path: {inp_path} does not exist."
 
 
 # initialize dataclass for storing information for menu
@@ -202,13 +202,13 @@ class FileConversionFunctions:
     def select_input_file_path():
         """Asks user to select path to input file"""
 
-        db_path = user_input_path("Change input file path: ")
+        inp_path = user_input_path("Change input file path: ")
         ichor.cli.global_menu_variables.SELECTED_INPUT_FILE_PATH = Path(
-            db_path
+            inp_path
         ).absolute()
-        file_conversion_menu_options.selected_input_file_path = (
-            ichor.cli.global_menu_variables.SELECTED_INPUT_FILE_PATH
-        )
+        file_conversion_menu_options.selected_input_file_path = Path(
+            inp_path
+        ).absolute()
 
     @staticmethod
     def select_output_file_format():
@@ -223,7 +223,7 @@ class FileConversionFunctions:
                 file_extensions.append(str(io.formats.ioformats[i].extensions[0]))
                 extension_options.append(str(io.formats.ioformats[i].extensions[0]))
             else:
-                file_extensions.append(" ")
+                file_extensions.append(i)
 
         # combine the lists to have both extensions and filetypes from ASE
         # Allows users to select by name or extension
