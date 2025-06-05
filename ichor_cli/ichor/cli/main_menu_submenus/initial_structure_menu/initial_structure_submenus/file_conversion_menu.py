@@ -262,12 +262,14 @@ class FileConversionFunctions:
         """Converts file from input to selected output format."""
         # read in data to ase from file
         loaded_atoms = io.read(ichor.cli.global_menu_variables.SELECTED_INPUT_FILE_PATH)
-        # finds path to input file minus extension
-        input_path = file_conversion_menu_options.selected_input_file_path.stem
-        # take extension from user selection
-        output_suffix = file_conversion_menu_options.selected_output_file_extension
+        # finds path to input file
+        input_path = file_conversion_menu_options.selected_input_file_path
+        # append extension to .
+        output_suffix = (
+            "." + file_conversion_menu_options.selected_output_file_extension
+        )
         # append the suffix to path
-        output_path = input_path + "." + output_suffix
+        output_path = input_path.with_suffix(output_suffix)
         # write file to location with new format and new suffix
         io.write(
             filename=output_path,
