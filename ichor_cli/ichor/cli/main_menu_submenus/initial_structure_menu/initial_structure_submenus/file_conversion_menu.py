@@ -260,14 +260,17 @@ class FileConversionFunctions:
     @staticmethod
     def convert_file():
         """Converts file from input to selected output format."""
-
+        # read in data to ase from file
         loaded_atoms = io.read(ichor.cli.global_menu_variables.SELECTED_INPUT_FILE_PATH)
-        input_path = file_conversion_menu_options.selected_input_file_path
+        # finds path to input file minus extension
+        input_path = file_conversion_menu_options.selected_input_file_path.stem
+        # take extension from user selection
         output_suffix = file_conversion_menu_options.selected_output_file_extension
-        append_path = input_path.with_suffix(f".{output_suffix}")
-        output_name = append_path.name
+        # append the suffix to path
+        output_path = input_path + "." + output_suffix
+        # write file to location with new format and new suffix
         io.write(
-            filename=output_name,
+            filename=output_path,
             images=loaded_atoms,
             format=file_conversion_menu_options.selected_output_file_format,
         )
