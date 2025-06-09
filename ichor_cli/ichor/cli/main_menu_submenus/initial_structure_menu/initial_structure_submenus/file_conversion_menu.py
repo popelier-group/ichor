@@ -187,6 +187,8 @@ class FileConversionMenuOptions(MenuOptions):
         inp_path = Path(self.selected_input_file_path)
         if not inp_path.exists():
             return f"Current file path: {inp_path} does not exist."
+        if not inp_path.isfile():
+            return f"Current path: {inp_path} is not a file)."
 
 
 # initialize dataclass for storing information for menu
