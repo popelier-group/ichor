@@ -14,6 +14,9 @@ SELECTED_TRAJECTORY_PATH: Path = Path("").absolute()
 # MolecularDynamicsMenu options
 SELECTED_XYZ_PATH: Path = Path("").absolute()
 
+# GaussianGJF menu
+SELECTED_GJF_PATH: Path = Path("").absolute()
+
 # SubmitCSVSMenu options
 SELECTED_DATABASE_PATH: Path = Path("").absolute()
 
