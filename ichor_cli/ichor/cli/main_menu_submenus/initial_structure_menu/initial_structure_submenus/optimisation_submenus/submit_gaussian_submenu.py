@@ -84,6 +84,7 @@ class SubmitGaussianFunctions:
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
+            submit_gaussian_menu_options.selected_gjf_path,
         )
 
         xyz_geom_for_opt = ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
