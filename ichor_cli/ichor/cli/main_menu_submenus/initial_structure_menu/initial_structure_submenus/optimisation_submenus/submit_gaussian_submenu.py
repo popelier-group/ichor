@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
@@ -9,6 +10,7 @@ from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     user_input_free_flow,
     user_input_int,
+    user_input_path,
 )
 from ichor.core.files import PointsDirectory
 from ichor.hpc.main import submit_single_gaussian_xyz
@@ -33,6 +35,7 @@ class SubmitGaussianMenuOptions(MenuOptions):
     selected_method: str
     selected_basis_set: str
     selected_number_of_cores: int
+    selected_gjf_path: str
 
 
 # initialize dataclass for storing information for menu
@@ -96,6 +99,15 @@ class SubmitGaussianFunctions:
             errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
             / xyz_geom_for_opt.path.name
             / "GAUSSIAN",
+        )
+
+    @staticmethod
+    def select_existing_gjf():
+        """Asks user to input existing gjf file as input."""
+        gjf_path = user_input_path("Enter .gjf path to submit existing Gaussian job: ")
+        ichor.cli.global_menu_variables.SELECTED_GJF_PATH = Path(gjf_path).absolute()
+        submit_gaussian_menu_options.selected_gjf_path = (
+            ichor.cli.global_menu_variables.SELECTED_GJF_PATH
         )
 
 
