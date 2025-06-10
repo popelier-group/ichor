@@ -7,39 +7,32 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
-    user_input_bool,
     user_input_free_flow,
     user_input_int,
 )
 from ichor.core.files import PointsDirectory
-from ichor.core.useful_functions import single_or_many_points_directories
-from ichor.hpc.main import submit_points_directory_to_gaussian
+from ichor.hpc.main import submit_single_gaussian_xyz
 
 SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
     "Submit Gaussian Menu",
-    subtitle="Use this menu to optimise a geometry with Gaussian.\n",
+    subtitle="Use this menu to optimise a single geometry with Gaussian.\n",
 )
 
 SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
-    "defaul_keywords": "opt",
+    "default_keywords": "opt",
     "default_method": "b3lyp",
     "default_basis_set": "6-31+g(d,p)",
     "default_ncores": 2,
-    "default_overwrite_existing_gjfs": False,
-    "default_force_calculate_wfn": False,
 }
 
 
 # dataclass used to store values for SubmitGaussianMenu
 @dataclass
 class SubmitGaussianMenuOptions(MenuOptions):
-
     selected_keywords: str
     selected_method: str
     selected_basis_set: str
     selected_number_of_cores: int
-    selected_overwrite_existing_gjfs: bool
-    selected_force_calculate_wfn: bool
 
 
 # initialize dataclass for storing information for menu
@@ -76,98 +69,34 @@ class SubmitGaussianFunctions:
         )
 
     @staticmethod
-    def select_overwrite_existing_gjfs():
-        """Asks user whether or not to overwrite existing gjfs"""
-        submit_gaussian_menu_options.selected_overwrite_existing_gjfs = user_input_bool(
-            "Overwrite existing gjfs (yes/no): ",
-            submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
-        )
-
-    @staticmethod
-    def select_force_calculate_wfns():
-        """Whether or not to recalculate wfns if they are already present"""
-
-        submit_gaussian_menu_options.selected_force_calculate_wfn = user_input_bool(
-            "Recalculate present wfns (yes/no): ",
-            submit_gaussian_menu_options.selected_force_calculate_wfn,
-        )
-
-    @staticmethod
-    def points_directory_to_gaussian_on_compute():
-        """Submits a single PointsDirectory to Gaussian on compute."""
-
+    def xyz_to_gaussian_on_compute():
+        """Converts a single xyz to gjf and submit to Gaussian on compute."""
         (
             keywords,
             method,
             basis_set,
             ncores,
-            overwrite_existing,
-            force_calculate_wfn,
         ) = (
             submit_gaussian_menu_options.selected_keywords,
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
-            submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
-            submit_gaussian_menu_options.selected_force_calculate_wfn,
         )
 
-        is_parent_directory_to_many_points_directories = (
-            single_or_many_points_directories(
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-            )
+        xyz_geom_for_opt = ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
+        submit_single_gaussian_xyz(
+            input_file_path=xyz_geom_for_opt,
+            ncores=ncores,
+            keywords=keywords,
+            method=method,
+            basis_set=basis_set,
+            outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
+            / xyz_geom_for_opt.path.name
+            / "GAUSSIAN",
+            errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
+            / xyz_geom_for_opt.path.name
+            / "GAUSSIAN",
         )
-
-        # if containing many PointsDirectory
-        if is_parent_directory_to_many_points_directories:
-
-            for (
-                d
-            ) in (
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.iterdir()
-            ):
-
-                pd = PointsDirectory(d)
-
-                submit_points_directory_to_gaussian(
-                    points_directory=pd,
-                    overwrite_existing=overwrite_existing,
-                    force_calculate_wfn=force_calculate_wfn,
-                    ncores=ncores,
-                    keywords=keywords,
-                    method=method,
-                    basis_set=basis_set,
-                    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
-                        "outputs"
-                    ]
-                    / pd.path.name
-                    / "GAUSSIAN",
-                    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-                    / pd.path.name
-                    / "GAUSSIAN",
-                )
-
-        # if containing one PointsDirectory
-        else:
-            pd = PointsDirectory(
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-            )
-
-            submit_points_directory_to_gaussian(
-                points_directory=pd,
-                overwrite_existing=overwrite_existing,
-                force_calculate_wfn=force_calculate_wfn,
-                ncores=ncores,
-                keywords=keywords,
-                method=method,
-                basis_set=basis_set,
-                outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
-                / pd.path.name
-                / "GAUSSIAN",
-                errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-                / pd.path.name
-                / "GAUSSIAN",
-            )
 
 
 # make menu items
@@ -186,16 +115,8 @@ submit_gaussian_menu_items = [
         SubmitGaussianFunctions.select_number_of_cores,
     ),
     FunctionItem(
-        "Overwrite GJF files (if any are already present)",
-        SubmitGaussianFunctions.select_overwrite_existing_gjfs,
-    ),
-    FunctionItem(
-        "Recalculate all WFNs (if any are already present)",
-        SubmitGaussianFunctions.select_force_calculate_wfns,
-    ),
-    FunctionItem(
         "Submit to Gaussian",
-        SubmitGaussianFunctions.points_directory_to_gaussian_on_compute,
+        SubmitGaussianFunctions.xyz_to_gaussian_on_compute,
     ),
 ]
 

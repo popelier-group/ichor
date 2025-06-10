@@ -7,6 +7,23 @@ from ichor.core.files import GJF, PointsDirectory, WFN
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import GaussianCommand
 from ichor.hpc.submission_script import SubmissionScript
+from ichor.core.common.io import mkdir
+
+
+def submit_single_gaussian_xyz(
+    input_file_path: Union[str, Path],
+    ncores=2,
+    hold: JobID = None,
+    script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["gaussian_opt"],
+    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
+    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
+    **kwargs,
+) -> Optional[JobID]:
+
+    input_file_path = Path(input_file_path)
+    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["gaussian_opt"])
+    # write .gjf into folder
+    # write submission script to submit job within folder
 
 
 def submit_points_directory_to_gaussian(

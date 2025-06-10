@@ -18,7 +18,7 @@ from ichor.cli.useful_functions import user_input_path
 
 OPTIMISATION_MENU_DESCRIPTION = MenuDescription(
     "Optimisation Menu",
-    subtitle="Use this menu to optimise an xyz file.\n",
+    subtitle="Use this menu to optimise an xyz file before generating trajectories for sampling.\n",
 )
 
 
@@ -71,7 +71,7 @@ optimisation_menu = ConsoleMenu(
 # can use lambda functions to change text of options as well :)
 optimisation_menu_items = [
     FunctionItem(
-        "Select xyz file containing MD starting geometry",
+        "Select xyz file containing a single unoptimised geometry",
         OptimisationFunctions.select_xyz,
     ),
     SubmenuItem(
