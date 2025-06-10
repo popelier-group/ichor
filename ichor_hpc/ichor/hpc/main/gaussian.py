@@ -21,7 +21,7 @@ def submit_single_gaussian_xyz(
 ) -> Optional[JobID]:
 
     input_file_path = Path(input_file_path)
-    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["gaussian_opt"])
+    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
     # write .gjf into folder
     # write submission script to submit job within folder
 
