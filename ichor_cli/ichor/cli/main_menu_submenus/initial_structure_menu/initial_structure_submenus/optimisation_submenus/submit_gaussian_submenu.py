@@ -132,6 +132,10 @@ submit_gaussian_menu_items = [
         "Submit to Gaussian",
         SubmitGaussianFunctions.xyz_to_gaussian_on_compute,
     ),
+    FunctionItem(
+        "Select exisiting .gjf file",
+        SubmitGaussianFunctions.select_existing_gjf,
+    ),
 ]
 
 # initialize menu
