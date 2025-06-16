@@ -55,6 +55,7 @@ class OptimisationFunctions:
         optimisation_menu_options.selected_xyz_path = (
             ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
         )
+        ichor.hpc.global_variables.LOGGER.info("XYZ file selected")
 
 
 # initialize menu

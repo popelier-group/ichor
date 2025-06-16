@@ -88,9 +88,17 @@ class SubmitGaussianFunctions:
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
         )
-        try:
-            # if len(ichor.cli.global_menu_variables.SELECTED_GJF_PATH) == 0:
+
+        ichor.hpc.global_variables.LOGGER.info(
+            "Setting up folder for single Gaussian job"
+        )
+
+        if len(ichor.cli.global_menu_variables.SELECTED_GJF_PATH) == 0:
             xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
+
+            ichor.hpc.global_variables.LOGGER.info(
+                "XYZ path selected for single Gaussian job"
+            )
             submit_single_gaussian_xyz(
                 input_xyz_path=xyz_path,
                 ncores=ncores,
@@ -104,12 +112,11 @@ class SubmitGaussianFunctions:
                 / xyz_path.path.name
                 / "GAUSSIAN",
             )
-            # else:
-            #    print("SOME FUNCTION FOR SUBMITTING GJF FILE AS IS")
-        except:
-            with open("~/exceptions.log", "a") as logfile:
-                traceback.print_exc(file=logfile)
-            raise
+            ichor.hpc.global_variables.LOGGER.info(
+                "Finished setting up folder for single Gaussian job"
+            )
+        else:
+            print("SOME FUNCTION FOR SUBMITTING GJF FILE AS IS")
 
     @staticmethod
     def select_existing_gjf():
