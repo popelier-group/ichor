@@ -105,6 +105,7 @@ class SubmitGaussianFunctions:
             )
         else:
             print("SOME FUNCTION FOR SUBMITTING GJF FILE AS IS")
+        pause = input("PAUSE")
 
     @staticmethod
     def select_existing_gjf():
