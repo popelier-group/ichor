@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+import traceback
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
@@ -14,6 +15,7 @@ from ichor.cli.useful_functions import (
 )
 from ichor.core.files import PointsDirectory
 from ichor.hpc.main import submit_single_gaussian_xyz
+
 
 SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
     "Submit Gaussian Menu",
@@ -88,24 +90,29 @@ class SubmitGaussianFunctions:
         )
 
         if len(ichor.cli.global_menu_variables.SELECTED_GJF_PATH) == 0:
-            print("ALTERNATIVE FUNCTION FOR BUILDING NEW GJF FROM AN XYZ")
-            xyz_geom_for_opt = ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
-            submit_single_gaussian_xyz(
-                input_file_path=xyz_geom_for_opt,
-                ncores=ncores,
-                keywords=keywords,
-                method=method,
-                basis_set=basis_set,
-                outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
-                / xyz_geom_for_opt.path.name
-                / "GAUSSIAN",
-                errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-                / xyz_geom_for_opt.path.name
-                / "GAUSSIAN",
-            )
+            try:
+                xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
+                submit_single_gaussian_xyz(
+                    input_xyz_path=xyz_path,
+                    ncores=ncores,
+                    keywords=keywords,
+                    method=method,
+                    basis_set=basis_set,
+                    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
+                        "outputs"
+                    ]
+                    / xyz_path.path.name
+                    / "GAUSSIAN",
+                    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
+                    / xyz_path.path.name
+                    / "GAUSSIAN",
+                )
+            except:
+                with open("exceptions.log", "a") as logfile:
+                    traceback.print_exc(file=logfile)
+                raise
         else:
             print("SOME FUNCTION FOR SUBMITTING GJF FILE AS IS")
-        pause = input("PAUSE")
 
     @staticmethod
     def select_existing_gjf():

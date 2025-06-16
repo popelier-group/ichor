@@ -22,7 +22,8 @@ def submit_single_gaussian_xyz(
 ) -> Optional[JobID]:
 
     input_file_path = Path(input_file_path)
-    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
+    parent_dir = input_file_path.parent()
+    mkdir("optimised_geoms")
     opt_dir = ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"]
 
     shutil.copy(input_file_path, opt_dir)
