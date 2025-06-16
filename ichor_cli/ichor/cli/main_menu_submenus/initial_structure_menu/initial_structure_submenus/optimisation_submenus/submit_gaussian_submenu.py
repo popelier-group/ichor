@@ -89,25 +89,23 @@ class SubmitGaussianFunctions:
             submit_gaussian_menu_options.selected_number_of_cores,
         )
         try:
-            if len(ichor.cli.global_menu_variables.SELECTED_GJF_PATH) == 0:
-                xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
-                submit_single_gaussian_xyz(
-                    input_xyz_path=xyz_path,
-                    ncores=ncores,
-                    keywords=keywords,
-                    method=method,
-                    basis_set=basis_set,
-                    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
-                        "outputs"
-                    ]
-                    / xyz_path.path.name
-                    / "GAUSSIAN",
-                    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-                    / xyz_path.path.name
-                    / "GAUSSIAN",
-                )
-            else:
-                print("SOME FUNCTION FOR SUBMITTING GJF FILE AS IS")
+            # if len(ichor.cli.global_menu_variables.SELECTED_GJF_PATH) == 0:
+            xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
+            submit_single_gaussian_xyz(
+                input_xyz_path=xyz_path,
+                ncores=ncores,
+                keywords=keywords,
+                method=method,
+                basis_set=basis_set,
+                outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
+                / xyz_path.path.name
+                / "GAUSSIAN",
+                errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
+                / xyz_path.path.name
+                / "GAUSSIAN",
+            )
+            # else:
+            #    print("SOME FUNCTION FOR SUBMITTING GJF FILE AS IS")
         except:
             with open("~/exceptions.log", "a") as logfile:
                 traceback.print_exc(file=logfile)
