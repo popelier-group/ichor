@@ -14,6 +14,9 @@ from ichor.core.common.io import mkdir
 def submit_single_gaussian_xyz(
     input_file_path: Union[str, Path],
     ncores=2,
+    keywords="opt",
+    method="b3lyp",
+    basis_set="6-31+g(d,p)",
     hold: JobID = None,
     script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["gaussian"],
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
