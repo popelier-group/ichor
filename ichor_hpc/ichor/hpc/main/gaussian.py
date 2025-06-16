@@ -21,12 +21,17 @@ def submit_single_gaussian_xyz(
     **kwargs,
 ) -> Optional[JobID]:
 
+    ichor.hpc.global_variables.LOGGER.info("Called fn for single gaussian job")
     input_file_path = Path(input_file_path)
     parent_dir = input_file_path.parent()
-    mkdir("optimised_geoms")
+
+    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
+    ichor.hpc.global_variables.LOGGER.info("made folder for calc")
+
     opt_dir = ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"]
 
     shutil.copy(input_file_path, opt_dir)
+    ichor.hpc.global_variables.LOGGER.info("copied file to dir")
 
     # write .gjf into folder
     # write submission script to submit job within folder

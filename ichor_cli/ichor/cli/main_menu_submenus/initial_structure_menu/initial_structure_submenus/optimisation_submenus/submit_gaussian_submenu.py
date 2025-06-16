@@ -93,30 +93,27 @@ class SubmitGaussianFunctions:
             "Setting up folder for single Gaussian job"
         )
 
-        if len(ichor.cli.global_menu_variables.SELECTED_GJF_PATH) == 0:
-            xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
+        xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
 
-            ichor.hpc.global_variables.LOGGER.info(
-                "XYZ path selected for single Gaussian job"
-            )
-            submit_single_gaussian_xyz(
-                input_xyz_path=xyz_path,
-                ncores=ncores,
-                keywords=keywords,
-                method=method,
-                basis_set=basis_set,
-                outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
-                / xyz_path.path.name
-                / "GAUSSIAN",
-                errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-                / xyz_path.path.name
-                / "GAUSSIAN",
-            )
-            ichor.hpc.global_variables.LOGGER.info(
-                "Finished setting up folder for single Gaussian job"
-            )
-        else:
-            print("SOME FUNCTION FOR SUBMITTING GJF FILE AS IS")
+        ichor.hpc.global_variables.LOGGER.info(
+            "XYZ path selected for single Gaussian job"
+        )
+        submit_single_gaussian_xyz(
+            input_xyz_path=xyz_path,
+            ncores=ncores,
+            keywords=keywords,
+            method=method,
+            basis_set=basis_set,
+            outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
+            / xyz_path.path.name
+            / "GAUSSIAN",
+            errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
+            / xyz_path.path.name
+            / "GAUSSIAN",
+        )
+        ichor.hpc.global_variables.LOGGER.info(
+            "Finished setting up folder for single Gaussian job"
+        )
 
     @staticmethod
     def select_existing_gjf():
