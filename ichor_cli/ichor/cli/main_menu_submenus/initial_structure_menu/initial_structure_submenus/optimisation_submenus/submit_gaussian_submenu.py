@@ -88,9 +88,8 @@ class SubmitGaussianFunctions:
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
         )
-
-        if len(ichor.cli.global_menu_variables.SELECTED_GJF_PATH) == 0:
-            try:
+        try:
+            if len(ichor.cli.global_menu_variables.SELECTED_GJF_PATH) == 0:
                 xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
                 submit_single_gaussian_xyz(
                     input_xyz_path=xyz_path,
@@ -107,12 +106,12 @@ class SubmitGaussianFunctions:
                     / xyz_path.path.name
                     / "GAUSSIAN",
                 )
-            except:
-                with open("exceptions.log", "a") as logfile:
-                    traceback.print_exc(file=logfile)
-                raise
-        else:
-            print("SOME FUNCTION FOR SUBMITTING GJF FILE AS IS")
+            else:
+                print("SOME FUNCTION FOR SUBMITTING GJF FILE AS IS")
+        except:
+            with open("~/exceptions.log", "a") as logfile:
+                traceback.print_exc(file=logfile)
+            raise
 
     @staticmethod
     def select_existing_gjf():
