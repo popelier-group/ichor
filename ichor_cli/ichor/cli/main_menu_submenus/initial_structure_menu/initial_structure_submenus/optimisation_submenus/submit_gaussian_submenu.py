@@ -87,7 +87,7 @@ class SubmitGaussianFunctions:
             submit_gaussian_menu_options.selected_number_of_cores,
         )
 
-        if len(ichor.cli.global_menu_variables.SELECTED_GJF_PATH):
+        if len(ichor.cli.global_menu_variables.SELECTED_GJF_PATH) == 0:
             print("ALTERNATIVE FUNCTION FOR BUILDING NEW GJF FROM AN XYZ")
             xyz_geom_for_opt = ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
             submit_single_gaussian_xyz(

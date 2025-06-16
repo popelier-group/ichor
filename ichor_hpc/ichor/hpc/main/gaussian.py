@@ -1,4 +1,5 @@
 from pathlib import Path
+import shutil
 from typing import List, Optional, Union
 
 import ichor.hpc.global_variables
@@ -22,6 +23,10 @@ def submit_single_gaussian_xyz(
 
     input_file_path = Path(input_file_path)
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
+    opt_dir = ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"]
+
+    shutil.copy(input_file_path, opt_dir)
+
     # write .gjf into folder
     # write submission script to submit job within folder
 
