@@ -14,7 +14,7 @@ import traceback
 
 
 def submit_single_gaussian_xyz(
-    input_file_path: Union[str, Path],
+    input_xyz_path: Union[str, Path],
     ncores=2,
     keywords="opt",
     method="b3lyp",
@@ -24,14 +24,14 @@ def submit_single_gaussian_xyz(
 ) -> Optional[JobID]:
 
     ichor.hpc.global_variables.LOGGER.info("Called fn for single gaussian job")
-    input_file_path = Path(input_file_path)
+    input_xyz_path = Path(input_xyz_path)
 
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
     ichor.hpc.global_variables.LOGGER.info("made folder for calc")
 
     opt_dir = ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"]
 
-    shutil.copy(input_file_path, opt_dir)
+    shutil.copy(input_xyz_path, opt_dir)
     ichor.hpc.global_variables.LOGGER.info("copied file to dir")
 
     try:
@@ -43,10 +43,10 @@ def submit_single_gaussian_xyz(
             method=method,
             basis_set=basis_set,
             outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
-            / input_file_path.name
+            / input_xyz_path.name
             / "GAUSSIAN",
             errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-            / input_file_path.name
+            / input_xyz_path.name
             / "GAUSSIAN",
         )
     except:
