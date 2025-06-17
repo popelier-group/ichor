@@ -45,7 +45,7 @@ submit_aimall_menu_options = SubmitAIMALLMenuOptions(
 class SubmitAIMALLFunctions:
     @staticmethod
     def select_method():
-        """Asks user to update the ethod for AIMALL. The method
+        """Asks user to update the method for AIMALL. The method
         needs to be added to the WFN file so that AIMALL does the correct
         calculation."""
 

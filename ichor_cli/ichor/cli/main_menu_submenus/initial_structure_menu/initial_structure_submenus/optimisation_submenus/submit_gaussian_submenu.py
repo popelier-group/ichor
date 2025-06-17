@@ -13,8 +13,8 @@ from ichor.cli.useful_functions import (
     user_input_int,
     user_input_path,
 )
-from ichor.core.files import PointsDirectory
-from ichor.hpc.main import submit_single_gaussian_xyz
+from ichor.hpc.main.gaussian import submit_single_gaussian_xyz
+from ichor.hpc.main.gaussian import submit_gjfs
 
 
 SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
@@ -103,18 +103,22 @@ class SubmitGaussianFunctions:
             with open("tb.txt", "w+") as f:
                 traceback.print_exc(file=f)
 
-        ichor.hpc.global_variables.LOGGER.info(
-            "Finished setting up folder for single Gaussian job"
-        )
-
     @staticmethod
-    def select_existing_gjf():
+    def submit_existing_gjf():
         """Asks user to input existing gjf file as input."""
         gjf_path = user_input_path("Enter .gjf path to submit existing Gaussian job: ")
         ichor.cli.global_menu_variables.SELECTED_GJF_PATH = Path(gjf_path).absolute()
         submit_gaussian_menu_options.selected_gjf_path = (
             ichor.cli.global_menu_variables.SELECTED_GJF_PATH
         )
+        gjf_list = []
+        gjf_list.append(submit_gaussian_menu_options.selected_gjf_path)
+        ncores = submit_gaussian_menu_options.selected_number_of_cores
+        try:
+            submit_gjfs(gjf_list, force_calculate_wfn=False, ncores=ncores)
+        except:
+            with open("tb.txt", "w+") as f:
+                traceback.print_exc(file=f)
 
 
 # make menu items
@@ -137,8 +141,8 @@ submit_gaussian_menu_items = [
         SubmitGaussianFunctions.xyz_to_gaussian_on_compute,
     ),
     FunctionItem(
-        "Select exisiting .gjf file",
-        SubmitGaussianFunctions.select_existing_gjf,
+        "Submit exisiting .gjf file",
+        SubmitGaussianFunctions.submit_existing_gjf,
     ),
 ]
 
