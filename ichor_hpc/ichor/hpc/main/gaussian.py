@@ -10,6 +10,8 @@ from ichor.hpc.submission_commands import GaussianCommand
 from ichor.hpc.submission_script import SubmissionScript
 from ichor.core.common.io import mkdir
 
+import traceback
+
 
 def submit_single_gaussian_xyz(
     input_file_path: Union[str, Path],
@@ -18,15 +20,11 @@ def submit_single_gaussian_xyz(
     method="b3lyp",
     basis_set="6-31+g(d,p)",
     hold: JobID = None,
-    script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["gaussian"],
-    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
-    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
     **kwargs,
 ) -> Optional[JobID]:
 
     ichor.hpc.global_variables.LOGGER.info("Called fn for single gaussian job")
     input_file_path = Path(input_file_path)
-    parent_dir = input_file_path.parent()
 
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
     ichor.hpc.global_variables.LOGGER.info("made folder for calc")
@@ -35,6 +33,25 @@ def submit_single_gaussian_xyz(
 
     shutil.copy(input_file_path, opt_dir)
     ichor.hpc.global_variables.LOGGER.info("copied file to dir")
+
+    try:
+        submit_points_directory_to_gaussian(
+            points_directory=opt_dir,
+            overwrite_existing=True,
+            force_calculate_wfn=False,
+            ncores=ncores,
+            method=method,
+            basis_set=basis_set,
+            outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
+            / input_file_path.name
+            / "GAUSSIAN",
+            errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
+            / input_file_path.name
+            / "GAUSSIAN",
+        )
+    except:
+        with open("tb.txt", "w+") as f:
+            traceback.print_exc(file=f)
 
     # write .gjf into folder
     # write submission script to submit job within folder

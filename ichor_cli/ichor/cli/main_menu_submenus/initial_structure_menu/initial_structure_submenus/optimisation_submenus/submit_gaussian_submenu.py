@@ -89,15 +89,8 @@ class SubmitGaussianFunctions:
             submit_gaussian_menu_options.selected_number_of_cores,
         )
 
-        ichor.hpc.global_variables.LOGGER.info(
-            "Setting up folder for single Gaussian job"
-        )
-
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
 
-        ichor.hpc.global_variables.LOGGER.info(
-            "XYZ path selected for single Gaussian job"
-        )
         try:
             submit_single_gaussian_xyz(
                 input_xyz_path=xyz_path,
@@ -105,12 +98,6 @@ class SubmitGaussianFunctions:
                 keywords=keywords,
                 method=method,
                 basis_set=basis_set,
-                outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
-                / xyz_path.path.name
-                / "GAUSSIAN",
-                errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-                / xyz_path.path.name
-                / "GAUSSIAN",
             )
         except:
             with open("tb.txt", "w+") as f:
