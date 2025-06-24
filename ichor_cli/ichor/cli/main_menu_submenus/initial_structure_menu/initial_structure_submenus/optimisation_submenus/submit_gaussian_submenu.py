@@ -23,7 +23,7 @@ SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
 )
 
 SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
-    "default_keywords": "opt",
+    "default_keywords": ["opt"],
     "default_method": "b3lyp",
     "default_basis_set": "6-31+g(d,p)",
     "default_ncores": 2,
