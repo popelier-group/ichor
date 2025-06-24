@@ -58,12 +58,20 @@ class SubmitGaussianFunctions:
         submit_gaussian_menu_options.selected_method = user_input_free_flow(
             "Enter method: ", submit_gaussian_menu_options.selected_method
         )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Optimisation method selected {submit_gaussian_menu_options.selected_method}"
+        )
 
     @staticmethod
     def select_basis_set():
         """Asks user to update the basis set."""
         submit_gaussian_menu_options.selected_basis_set = user_input_free_flow(
             "Enter basis set: ", submit_gaussian_menu_options.selected_basis_set
+        )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Optimisation basis set selected {submit_gaussian_menu_options.selected_basis_set}"
         )
 
     @staticmethod
@@ -72,6 +80,10 @@ class SubmitGaussianFunctions:
         submit_gaussian_menu_options.selected_number_of_cores = user_input_int(
             "Enter number of cores: ",
             submit_gaussian_menu_options.selected_number_of_cores,
+        )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Optimisation number of cores selected {submit_gaussian_menu_options.selected_number_of_cores}"
         )
 
     @staticmethod
@@ -91,17 +103,21 @@ class SubmitGaussianFunctions:
 
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
 
-        try:
-            submit_single_gaussian_xyz(
-                input_xyz_path=xyz_path,
-                ncores=ncores,
-                keywords=keywords,
-                method=method,
-                basis_set=basis_set,
-            )
-        except:
-            with open("tb.txt", "w+") as f:
-                traceback.print_exc(file=f)
+        submit_single_gaussian_xyz(
+            input_xyz_path=xyz_path,
+            ncores=ncores,
+            keywords=keywords,
+            method=method,
+            basis_set=basis_set,
+        )
+
+        SUBMIT_GAUSSIAN_MENU_DESCRIPTION.prologue_description_text = (
+            "XYZ optimisation submitted successfully \n"
+        )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Optimisation job submitted for {xyz_path}"
+        )
 
     @staticmethod
     def submit_existing_gjf():
@@ -114,11 +130,15 @@ class SubmitGaussianFunctions:
         gjf_list = []
         gjf_list.append(submit_gaussian_menu_options.selected_gjf_path)
         ncores = submit_gaussian_menu_options.selected_number_of_cores
-        try:
-            submit_gjfs(gjf_list, force_calculate_wfn=False, ncores=ncores)
-        except:
-            with open("tb.txt", "w+") as f:
-                traceback.print_exc(file=f)
+        submit_gjfs(gjf_list, force_calculate_wfn=False, ncores=ncores)
+
+        SUBMIT_GAUSSIAN_MENU_DESCRIPTION.prologue_description_text = (
+            "GJF optimisation submitted successfully \n"
+        )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Optimisation job submitted for {submit_gaussian_menu_options.selected_gjf_path}"
+        )
 
 
 # make menu items

@@ -211,6 +211,10 @@ class FileConversionFunctions:
         file_conversion_menu_options.selected_input_file_path = Path(
             inp_path
         ).absolute()
+        # update log file
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Input file selected {file_conversion_menu_options.selected_input_file_path}"
+        )
 
     @staticmethod
     def select_output_file_format():
@@ -258,6 +262,10 @@ class FileConversionFunctions:
         file_conversion_menu_options.selected_output_file_format = chosen_format
         # update file extension required for naming file correctly
         file_conversion_menu_options.selected_output_file_extension = format_ext
+        # update log file
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Output file type selected {file_conversion_menu_options.selected_output_file_format} with extension {file_conversion_menu_options.selected_output_file_extension}"
+        )
 
     @staticmethod
     def convert_file():
@@ -280,6 +288,7 @@ class FileConversionFunctions:
             images=loaded_atoms,
             format=file_conversion_menu_options.selected_output_file_format,
         )
+        ichor.hpc.global_variables.LOGGER.info(f"Output file written to {output_path}")
 
 
 # make menu items
