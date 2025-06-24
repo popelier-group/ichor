@@ -47,7 +47,7 @@ submit_gaussian_menu_options = SubmitGaussianMenuOptions(
 )
 
 # set keywords to opt as default
-submit_gaussian_menu_options.selected_keywords = "opt"
+submit_gaussian_menu_options.selected_keywords = ["opt"]
 
 
 # class with static methods for each menu item that calls a function.

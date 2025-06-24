@@ -16,7 +16,7 @@ import traceback
 def submit_single_gaussian_xyz(
     input_xyz_path: Union[str, Path],
     ncores=2,
-    keywords="opt",
+    keywords=["opt"],
     method="b3lyp",
     basis_set="6-31+g(d,p)",
     hold: JobID = None,
