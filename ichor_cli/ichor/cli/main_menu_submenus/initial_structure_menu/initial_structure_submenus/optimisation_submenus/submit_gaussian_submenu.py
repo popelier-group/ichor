@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from pathlib import Path
-import traceback
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
@@ -116,7 +115,7 @@ class SubmitGaussianFunctions:
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"Optimisation job submitted for {xyz_path}"
+            f"Gaussian optimisation job submitted for {xyz_path}"
         )
 
     @staticmethod
@@ -137,7 +136,7 @@ class SubmitGaussianFunctions:
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"Optimisation job submitted for {submit_gaussian_menu_options.selected_gjf_path}"
+            f"Gaussian optimisation job submitted for {submit_gaussian_menu_options.selected_gjf_path}"
         )
 
 

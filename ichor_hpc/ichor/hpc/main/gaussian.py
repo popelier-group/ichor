@@ -10,8 +10,6 @@ from ichor.hpc.submission_commands import GaussianCommand
 from ichor.hpc.submission_script import SubmissionScript
 from ichor.core.common.io import mkdir
 
-import traceback
-
 
 def submit_single_gaussian_xyz(
     input_xyz_path: Union[str, Path],
@@ -28,25 +26,21 @@ def submit_single_gaussian_xyz(
     opt_dir = ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"]
     shutil.copy(input_xyz_path, opt_dir)
 
-    try:
-        submit_points_directory_to_gaussian(
-            points_directory=opt_dir,
-            overwrite_existing=True,
-            force_calculate_wfn=False,
-            ncores=ncores,
-            method=method,
-            basis_set=basis_set,
-            outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
-            / input_xyz_path.name
-            / "GAUSSIAN",
-            errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-            / input_xyz_path.name
-            / "GAUSSIAN",
-            keywords=keywords,
-        )
-    except:
-        with open("tb.txt", "w+") as f:
-            traceback.print_exc(file=f)
+    submit_points_directory_to_gaussian(
+        points_directory=opt_dir,
+        overwrite_existing=True,
+        force_calculate_wfn=False,
+        ncores=ncores,
+        method=method,
+        basis_set=basis_set,
+        outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
+        / input_xyz_path.name
+        / "GAUSSIAN",
+        errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
+        / input_xyz_path.name
+        / "GAUSSIAN",
+        keywords=keywords,
+    )
 
 
 def submit_points_directory_to_gaussian(
