@@ -12,5 +12,5 @@ __all__ = [
     "submit_gaussian_menu",
     "submit_ase_menu",
     "SUBMIT_GAUSSIAN_MENU_DESCRIPTION",
-    "SUBMIT_PLUMED_MENU_DESCRIPTION",
+    "SUBMIT_ASE_MENU_DESCRIPTION",
 ]
