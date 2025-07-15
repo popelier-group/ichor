@@ -133,7 +133,7 @@ submit_ase_menu_items = [
         SubmitGaussianFunctions.select_number_of_cores,
     ),
     FunctionItem(
-        "Submit to ase",
+        "Submit to ASE",
         SubmitGaussianFunctions.xyz_to_ase_on_compute,
     ),
 ]
