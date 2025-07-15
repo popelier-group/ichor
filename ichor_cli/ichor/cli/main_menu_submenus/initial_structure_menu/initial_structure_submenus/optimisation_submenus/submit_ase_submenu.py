@@ -48,10 +48,10 @@ submit_ase_menu_options.selected_keywords = ["opt"]
 
 
 # class with static methods for each menu item that calls a function.
-class SubmitGaussianFunctions:
+class SubmitAseFunctions:
     @staticmethod
     def select_method():
-        """Asks user to update the method for Gaussian"""
+        """Asks user to update the method for ASE"""
         submit_ase_menu_options.selected_method = user_input_free_flow(
             "Enter method: ", submit_ase_menu_options.selected_method
         )
@@ -122,19 +122,19 @@ class SubmitGaussianFunctions:
 submit_ase_menu_items = [
     FunctionItem(
         "Change method",
-        SubmitGaussianFunctions.select_method,
+        SubmitAseFunctions.select_method,
     ),
     FunctionItem(
         "Change basis set",
-        SubmitGaussianFunctions.select_basis_set,
+        SubmitAseFunctions.select_basis_set,
     ),
     FunctionItem(
         "Change number of cores",
-        SubmitGaussianFunctions.select_number_of_cores,
+        SubmitAseFunctions.select_number_of_cores,
     ),
     FunctionItem(
         "Submit to ASE",
-        SubmitGaussianFunctions.xyz_to_ase_on_compute,
+        SubmitAseFunctions.xyz_to_ase_on_compute,
     ),
 ]
 
