@@ -1,6 +1,9 @@
 # aimall files
 from ichor.core.files.aimall import AbInt, Aim, Int, IntDirectory
 
+# ase files
+from ichor.core.files.ase.opt import XTB
+
 # dlpoly files
 from ichor.core.files.dl_poly import (
     DlPolyConfig,
