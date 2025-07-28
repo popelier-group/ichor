@@ -64,6 +64,7 @@ __all__ = [
     "PointDirectory",
     "PointsDirectory",
     "PointsDirectoryParent",
+    "XTB"
     "XYZ",
     "Mol2",
     "PySCFDirectory",
