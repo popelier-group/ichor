@@ -39,14 +39,10 @@ class SubmitAseMenuOptions(MenuOptions):
     selected_electronic_temperature: int
     selected_max_iterations: int
     selected_fmax: float
-    selected_xyz_path: str
 
 
 # initialize dataclass for storing information for menu
 submit_ase_menu_options = SubmitAseMenuOptions(*SUBMIT_ASE_MENU_DEFAULTS.values())
-
-# set keywords to opt as default
-# submit_ase_menu_options.selected_keywords = ["opt"]
 
 
 # class with static methods for each menu item that calls a function.

@@ -36,7 +36,6 @@ class SubmitGaussianMenuOptions(MenuOptions):
     selected_basis_set: str
     selected_number_of_cores: int
     selected_gjf_path: str
-    selected_xyz_path: str
 
 
 # initialize dataclass for storing information for menu
