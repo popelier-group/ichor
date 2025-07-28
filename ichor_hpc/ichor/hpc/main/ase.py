@@ -94,40 +94,23 @@ def write_xtb_input(
         PointDirectory that is contained in the PointsDirectory.
     """
 
-    gjfs = []
+    xtbs = []
 
     for point_directory in points_directory:
 
         # remove the .pointdirectory suffix
-        gjf_fle_name = point_directory.path.with_suffix("").name + GJF.get_filetype()
+        xtb_file_name = point_directory.path.with_suffix("").name + XTB.get_filetype()
 
-        # if overwriting, then delete current gjfs if they exist
-        if overwrite_existing:
-            # the gjf file object might not exist, so check for that first
-            if point_directory.gjf:
-                # if the object exists, then delete it
-                point_directory.gjf.path.unlink()
-
-            point_directory.gjf = GJF(
-                Path(point_directory.path / gjf_fle_name),
+        # write instance of xtb class
+        point_directory.xtb = XTB(
+                Path(point_directory.path / xtb_file_name),
                 **kwargs,
             )
-            point_directory.gjf.atoms = point_directory.xyz.atoms
-            point_directory.gjf.write()
+        point_directory.xtb.write()
 
-        # if gjf does not exist
-        elif not point_directory.gjf:
+        xtbs.append(point_directory.xtbs.path)
 
-            point_directory.gjf = GJF(
-                Path(point_directory.path / gjf_fle_name),
-                **kwargs,
-            )
-            point_directory.gjf.atoms = point_directory.xyz.atoms
-            point_directory.gjf.write()
-
-        gjfs.append(point_directory.gjf.path)
-
-    return gjfs
+    return xtbs
 
 
 def submit_xtb(
@@ -176,7 +159,7 @@ def submit_xtb(
             # (even if wfn file exits) or a wfn file does not exist
             if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():
                 # make a list of GaussianCommand instances.
-                submission_script.add_command(GaussianCommand(gjf))
+                submission_script.add_command(PythonCommand(gjf))
 
                 number_of_jobs += 1
 

@@ -4,6 +4,7 @@ from typing import Callable, Union
 from ichor.core.atoms import Atoms, AtomsNotFoundError
 from ichor.core.files import OrcaInput, OrcaOutput
 from ichor.core.files.aimall import Aim, IntDirectory
+from ichor.core.files.ase.opt import XTB
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file_data import HasAtoms, HasData
 from ichor.core.files.gaussian import GaussianOutput, GJF, WFN
@@ -21,6 +22,7 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
 
     contents = {
         "xyz": XYZ,
+        "xtb": XTB,
         "gjf": GJF,
         "gaussian_output": GaussianOutput,
         "orca_input": OrcaInput,
