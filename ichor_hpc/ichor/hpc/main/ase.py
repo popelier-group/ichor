@@ -114,10 +114,9 @@ def write_xtb_input(
 
 
 def submit_xtb(
-    gjfs: List[Path],
-    force_calculate_wfn: bool = False,
+    xtbs: List[Path],
     script_name: Optional[Union[str, Path]] = ichor.hpc.global_variables.SCRIPT_NAMES[
-        "gaussian"
+        "xtb_optimisation"
     ],
     hold: Optional[JobID] = None,
     ncores=2,
@@ -154,37 +153,18 @@ def submit_xtb(
 
         number_of_jobs = 0
 
-        for gjf in gjfs:
-
-            # (even if wfn file exits) or a wfn file does not exist
-            if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():
-                # make a list of GaussianCommand instances.
-                submission_script.add_command(PythonCommand(gjf))
-
-                number_of_jobs += 1
-
-            # case where the wfn file exists but does not have total energy
-            # or something else is wrong with the file
-            elif gjf.with_suffix(".wfn").exists():
-                # make a list of GaussianCommand instances.
-                try:
-                    wfn_file = WFN(gjf.with_suffix(".wfn"))
-                    wfn_file.read()  # file is being read here
-                # if file is empty, then stopiteration should be raised
-                # then add to list of files to run Gaussian on
-                except StopIteration:
-
-                    submission_script.add_command(GaussianCommand(gjf))
-                    number_of_jobs += 1
+        for xtb in xtbs:
+            submission_script.add_command(PythonCommand(xtb))
+            number_of_jobs += 1
 
         ichor.hpc.global_variables.LOGGER.info(
-            f"Added {number_of_jobs} / {len(gjfs)} Gaussian jobs to {submission_script.path}"
+            f"Added {number_of_jobs} / {len(xtbs)} ASE optimisation jobs to {submission_script.path}"
         )
 
     # submit on compute node if there are files to submit
     if len(submission_script.grouped_commands) > 0:
         ichor.hpc.global_variables.LOGGER.info(
-            f"Submitting {len(submission_script.grouped_commands)} GJF(s) to Gaussian"
+            f"Submitting {len(submission_script.grouped_commands)} optimisation(s) to ASE"
         )
         return submission_script.submit(hold=hold)
     else:
