@@ -38,6 +38,7 @@ from ichor.core.files.points_directory_parent import PointsDirectoryParent
 # xyz files
 from ichor.core.files.xyz import Trajectory, XYZ
 
+from ichor.core.files.ase import XTB
 
 __all__ = [
     "Int",
@@ -69,4 +70,5 @@ __all__ = [
     "PySCFDirectory",
     "MorfiDirectory",
     "PandoraDirectory",
+    "XTB",
 ]

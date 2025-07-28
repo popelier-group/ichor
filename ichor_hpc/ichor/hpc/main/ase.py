@@ -5,7 +5,7 @@ from typing import List, Optional, Union
 import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
 
-from ichor.core.files import PointsDirectory, XTB, XYZ
+from ichor.core.files import PointsDirectory, XTB
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import PythonCommand
 from ichor.hpc.submission_script import SubmissionScript
@@ -56,7 +56,7 @@ def submit_points_directory_to_ase(
     **kwargs,
 ) -> Optional[JobID]:
     """Function that writes out XTB input files from .xyz files that are in each directory and
-    calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
+    calls submit_gjfs which submits all .xyz files in a directory to ASE.
 
     :param directory: A Path object which is the path of the directory
         (commonly traning set path, sample pool path, etc.).
@@ -80,17 +80,15 @@ def submit_points_directory_to_ase(
     )
 
 
-def write_xtb_input(
-    points_directory: PointsDirectory, overwrite_existing: bool, **kwargs
-) -> List[Path]:
-    """Writes out .gjf files in every PointDirectory which is contained
+def write_xtb_input(points_directory: PointsDirectory, **kwargs) -> List[Path]:
+    """Writes out .py files in every PointDirectory which is contained
     in a PointsDirectory. Each PointDirectory should always have a `.xyz` file in it,
-    which contains only one molecular geometry. This `.xyz` file can be used to write out the `.gjf`
+    which contains only one molecular geometry. This `.xyz` file can be used to write out the `.py`
     file in the PointDirectory (if it does not exist already).
 
     :param points: A PointsDirectory instance which wraps around a
         whole directory containing points (such as TRAINING_SET).
-    :return: A list of Path objects which point to `.gjf` files in each
+    :return: A list of Path objects which point to `.py` files in each
         PointDirectory that is contained in the PointsDirectory.
     """
 
@@ -103,19 +101,18 @@ def write_xtb_input(
 
         # write instance of xtb class
         point_directory.xtb = XTB(
-                Path(point_directory.path / xtb_file_name),
-                **kwargs,
-            )
+            Path(point_directory.path / xtb_file_name),
+            **kwargs,
+        )
         point_directory.xtb.write()
 
-        xtbs.append(point_directory.xtbs.path)
+        xtbs.append(point_directory.xtb.path)
 
     return xtbs
 
 
 def submit_xtb(
-    gjfs: List[Path],
-    force_calculate_wfn: bool = False,
+    xtbs: List[Path],
     script_name: Optional[Union[str, Path]] = ichor.hpc.global_variables.SCRIPT_NAMES[
         "gaussian"
     ],
@@ -154,37 +151,18 @@ def submit_xtb(
 
         number_of_jobs = 0
 
-        for gjf in gjfs:
-
-            # (even if wfn file exits) or a wfn file does not exist
-            if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():
-                # make a list of GaussianCommand instances.
-                submission_script.add_command(PythonCommand(gjf))
-
-                number_of_jobs += 1
-
-            # case where the wfn file exists but does not have total energy
-            # or something else is wrong with the file
-            elif gjf.with_suffix(".wfn").exists():
-                # make a list of GaussianCommand instances.
-                try:
-                    wfn_file = WFN(gjf.with_suffix(".wfn"))
-                    wfn_file.read()  # file is being read here
-                # if file is empty, then stopiteration should be raised
-                # then add to list of files to run Gaussian on
-                except StopIteration:
-
-                    submission_script.add_command(GaussianCommand(gjf))
-                    number_of_jobs += 1
+        for xtb in xtbs:
+            submission_script.add_command(PythonCommand(xtb))
+            number_of_jobs += 1
 
         ichor.hpc.global_variables.LOGGER.info(
-            f"Added {number_of_jobs} / {len(gjfs)} Gaussian jobs to {submission_script.path}"
+            f"Added {number_of_jobs} / {len(xtbs)} XTB opt jobs to {submission_script.path}"
         )
 
     # submit on compute node if there are files to submit
     if len(submission_script.grouped_commands) > 0:
         ichor.hpc.global_variables.LOGGER.info(
-            f"Submitting {len(submission_script.grouped_commands)} GJF(s) to Gaussian"
+            f"Submitting {len(submission_script.grouped_commands)} XTB opts(s) to Python"
         )
         return submission_script.submit(hold=hold)
     else:
