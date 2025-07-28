@@ -14,7 +14,7 @@ class XTB(WriteFile, File):
         solvent: Optional[str] = None,
         electronic_temperature: Optional[int] = None,
         max_iterations: Optional[int] = None,
-        fmax: Optional[int] = None,
+        fmax: Optional[float] = None,
     ):
         File.__init__(self,path)
         
@@ -23,7 +23,7 @@ class XTB(WriteFile, File):
         self.solvent: str = solvent 
         self.electronic_temperature: int = electronic_temperature 
         self.max_iterations: int = max_iterations 
-        self.fmax: int = fmax 
+        self.fmax: float = fmax 
 
        
     def set_write_defaults_if_needed(self):      # Used Bienfait's script inputs for defaults for now

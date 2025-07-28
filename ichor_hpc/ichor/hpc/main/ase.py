@@ -116,7 +116,7 @@ def write_xtb_input(
 def submit_xtb(
     xtbs: List[Path],
     script_name: Optional[Union[str, Path]] = ichor.hpc.global_variables.SCRIPT_NAMES[
-        "xtb_optimisation"
+        "xtb"
     ],
     hold: Optional[JobID] = None,
     ncores=2,
