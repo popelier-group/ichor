@@ -7,10 +7,10 @@ import ichor.hpc.global_variables
 from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.initial_structure_menu.initial_structure_submenus.optimisation_submenus import (
-    submit_gaussian_menu,
-    SUBMIT_GAUSSIAN_MENU_DESCRIPTION,
     submit_ase_menu,
     SUBMIT_ASE_MENU_DESCRIPTION,
+    submit_gaussian_menu,
+    SUBMIT_GAUSSIAN_MENU_DESCRIPTION,
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
@@ -82,13 +82,8 @@ optimisation_menu_items = [
         SUBMIT_GAUSSIAN_MENU_DESCRIPTION.title,
         submit_gaussian_menu,
         optimisation_menu,
-
     ),
-    SubmenuItem(
-        SUBMIT_ASE_MENU_DESCRIPTION.title,
-        submit_ase_menu, 
-        optimisation_menu
-    ),
+    SubmenuItem(SUBMIT_ASE_MENU_DESCRIPTION.title, submit_ase_menu, optimisation_menu),
 ]
 
 add_items_to_menu(optimisation_menu, optimisation_menu_items)

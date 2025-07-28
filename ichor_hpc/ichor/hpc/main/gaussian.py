@@ -1,14 +1,14 @@
-from pathlib import Path
 import shutil
+from pathlib import Path
 from typing import List, Optional, Union
 
 import ichor.hpc.global_variables
+from ichor.core.common.io import mkdir
 
 from ichor.core.files import GJF, PointsDirectory, WFN
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import GaussianCommand
 from ichor.hpc.submission_script import SubmissionScript
-from ichor.core.common.io import mkdir
 
 
 def submit_single_gaussian_xyz(

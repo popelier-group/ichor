@@ -12,8 +12,7 @@ from ichor.cli.useful_functions import (
     user_input_int,
     user_input_path,
 )
-from ichor.hpc.main.gaussian import submit_single_gaussian_xyz
-from ichor.hpc.main.gaussian import submit_gjfs
+from ichor.hpc.main.gaussian import submit_gjfs, submit_single_gaussian_xyz
 
 
 SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
@@ -22,7 +21,6 @@ SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
 )
 
 SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
-    "default_keywords": ["opt"],
     "default_method": "b3lyp",
     "default_basis_set": "6-31+g(d,p)",
     "default_ncores": 2,
@@ -88,12 +86,7 @@ class SubmitGaussianFunctions:
     @staticmethod
     def xyz_to_gaussian_on_compute():
         """Converts a single xyz to gjf and submit to Gaussian on compute."""
-        (
-            keywords,
-            method,
-            basis_set,
-            ncores,
-        ) = (
+        (keywords, method, basis_set, ncores,) = (
             submit_gaussian_menu_options.selected_keywords,
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
