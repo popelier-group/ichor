@@ -219,6 +219,7 @@ SCRIPT_NAMES = ScriptNames(
         "orca": "ORCA.sh",
         "aimall": "AIMALL.sh",
         "ferebus": "FEREBUS.sh",
+        "xtb": "ase_xtb.sh",
         "ichor": ScriptNames(
             {
                 "gaussian": "ICHOR_GAUSSIAN.sh",

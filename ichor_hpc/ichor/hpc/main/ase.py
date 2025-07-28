@@ -114,7 +114,7 @@ def write_xtb_input(points_directory: PointsDirectory, **kwargs) -> List[Path]:
 def submit_xtb(
     xtbs: List[Path],
     script_name: Optional[Union[str, Path]] = ichor.hpc.global_variables.SCRIPT_NAMES[
-        "gaussian"
+        "xtb"
     ],
     hold: Optional[JobID] = None,
     ncores=2,
@@ -156,13 +156,13 @@ def submit_xtb(
             number_of_jobs += 1
 
         ichor.hpc.global_variables.LOGGER.info(
-            f"Added {number_of_jobs} / {len(xtbs)} XTB opt jobs to {submission_script.path}"
+            f"Added {number_of_jobs} / {len(xtbs)} ASE optimisation jobs to {submission_script.path}"
         )
 
     # submit on compute node if there are files to submit
     if len(submission_script.grouped_commands) > 0:
         ichor.hpc.global_variables.LOGGER.info(
-            f"Submitting {len(submission_script.grouped_commands)} XTB opts(s) to Python"
+            f"Submitting {len(submission_script.grouped_commands)} optimisation(s) to ASE"
         )
         return submission_script.submit(hold=hold)
     else:
