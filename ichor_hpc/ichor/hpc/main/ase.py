@@ -51,7 +51,7 @@ def submit_points_directory_to_ase(
     points_directory: Union[Path, PointsDirectory],
     ncores=2,
     hold: JobID = None,
-    script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["gaussian"],
+    script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["xtb"],
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
     **kwargs,

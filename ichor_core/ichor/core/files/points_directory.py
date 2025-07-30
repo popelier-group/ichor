@@ -20,13 +20,13 @@ from ichor.core.database.sql import (
     create_database_session,
 )
 from ichor.core.files import GJF
+
+from ichor.core.files.ase import XTB
 from ichor.core.files.directory import Directory
 
 from ichor.core.files.file_data import HasData
 from ichor.core.files.point_directory import PointDirectory
 from ichor.core.files.xyz import Trajectory, XYZ
-
-from ichor.core.files.ase import XTB
 
 
 class PointsDirectory(ListOfAtoms, Directory, HasData):

@@ -8,9 +8,9 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    user_input_float,
     user_input_free_flow,
     user_input_int,
-    user_input_float,
 )
 from ichor.hpc.main.ase import submit_single_ase_xyz
 
@@ -117,14 +117,7 @@ class SubmitAseFunctions:
     @staticmethod
     def xyz_to_ase_on_compute():
         """Creates and submits an optimisation using ase calculator."""
-        (
-            method,
-            ncores,
-            solvent,
-            electronic_temperature,
-            max_iterations,
-            fmax,
-        ) = (
+        (method, ncores, solvent, electronic_temperature, max_iterations, fmax,) = (
             submit_ase_menu_options.selected_method,
             submit_ase_menu_options.selected_ncores,
             submit_ase_menu_options.selected_solvent,
