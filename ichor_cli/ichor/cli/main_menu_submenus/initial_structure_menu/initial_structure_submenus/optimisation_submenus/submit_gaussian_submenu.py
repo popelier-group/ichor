@@ -23,7 +23,7 @@ SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
 SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
     "default_method": "b3lyp",
     "default_basis_set": "6-31+g(d,p)",
-    "default_ncores": 2,
+    "default_number_of_cores": 2,
     "default_gjf": "",
 }
 
@@ -31,19 +31,16 @@ SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
 # dataclass used to store values for SubmitGaussianMenu
 @dataclass
 class SubmitGaussianMenuOptions(MenuOptions):
-    selected_keywords: str
     selected_method: str
     selected_basis_set: str
     selected_number_of_cores: int
+    selected_gjf: str
 
 
 # initialize dataclass for storing information for menu
 submit_gaussian_menu_options = SubmitGaussianMenuOptions(
     *SUBMIT_GAUSSIAN_MENU_DEFAULTS.values()
 )
-
-# set keywords to opt as default
-submit_gaussian_menu_options.selected_keywords = ["opt"]
 
 
 # class with static methods for each menu item that calls a function.
@@ -85,8 +82,13 @@ class SubmitGaussianFunctions:
     @staticmethod
     def xyz_to_gaussian_on_compute():
         """Converts a single xyz to gjf and submit to Gaussian on compute."""
-        (keywords, method, basis_set, ncores,) = (
-            submit_gaussian_menu_options.selected_keywords,
+        (
+            keywords,
+            method,
+            basis_set,
+            ncores,
+        ) = (
+            ["opt"],
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
