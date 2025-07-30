@@ -35,7 +35,6 @@ class SubmitGaussianMenuOptions(MenuOptions):
     selected_method: str
     selected_basis_set: str
     selected_number_of_cores: int
-    selected_gjf_path: str
 
 
 # initialize dataclass for storing information for menu
@@ -86,12 +85,7 @@ class SubmitGaussianFunctions:
     @staticmethod
     def xyz_to_gaussian_on_compute():
         """Converts a single xyz to gjf and submit to Gaussian on compute."""
-        (
-            keywords,
-            method,
-            basis_set,
-            ncores,
-        ) = (
+        (keywords, method, basis_set, ncores,) = (
             submit_gaussian_menu_options.selected_keywords,
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,

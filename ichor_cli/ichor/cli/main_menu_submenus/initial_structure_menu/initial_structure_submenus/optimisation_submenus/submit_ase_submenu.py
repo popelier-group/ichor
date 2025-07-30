@@ -146,11 +146,11 @@ class SubmitAseFunctions:
         )
 
         SUBMIT_ASE_MENU_DESCRIPTION.prologue_description_text = (
-            "XYZ optimisation submitted successfully to ase \n"
+            "XYZ optimisation submitted successfully to ASE \n"
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"ase optimisation job submitted for {xyz_path}"
+            f"ASE optimisation job submitted for {xyz_path}"
         )
 
 

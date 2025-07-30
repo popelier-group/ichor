@@ -30,6 +30,7 @@ def submit_single_ase_xyz(
 
     submit_points_directory_to_ase(
         points_directory=opt_dir,
+        input_xyz_path=input_xyz_path,
         ncores=ncores,
         method=method,
         solvent=solvent,
