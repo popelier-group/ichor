@@ -104,9 +104,6 @@ class SubmitGaussianFunctions:
             basis_set=basis_set,
         )
 
-        SUBMIT_GAUSSIAN_MENU_DESCRIPTION.prologue_description_text = (
-            "XYZ optimisation submitted successfully \n"
-        )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             f"Gaussian optimisation job submitted for {xyz_path}"

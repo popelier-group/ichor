@@ -98,7 +98,9 @@ def write_xtb_input(points_directory: PointsDirectory, **kwargs) -> List[Path]:
     for point_directory in points_directory:
 
         # remove the .pointdirectory suffix
-        xtb_file_name = point_directory.path.with_suffix("").name + XTB.get_filetype()
+        xtb_file_name = (
+            point_directory.path.with_suffix("").name + "opt" + XTB.get_filetype()
+        )
 
         # write instance of xtb class
         point_directory.xtb = XTB(
