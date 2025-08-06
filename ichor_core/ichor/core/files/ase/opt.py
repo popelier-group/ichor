@@ -14,6 +14,7 @@ class XTB(WriteFile, File):
         output_xyz_path: Union[Path, str],
         traj_path: Union[Path, str],
         log_path: Union[Path, str],
+        input_xtb_path: Union[Path, str],
         method: Optional[str] = None,
         solvent: Optional[str] = None,
         electronic_temperature: Optional[int] = None,
@@ -26,6 +27,7 @@ class XTB(WriteFile, File):
         self.output_xyz_path = str(output_xyz_path)
         self.traj_path = str(traj_path)
         self.log_path = str(log_path)
+        self.input_xtb_path = str(input_xtb_path)
         self.method: str = method
         self.solvent: str = solvent
         self.electronic_temperature: int = electronic_temperature
@@ -49,7 +51,7 @@ class XTB(WriteFile, File):
         write_str += f"from ase.io import write\n"
         write_str += f"from xtb.ase.calculator import XTB\n\n"
 
-        write_str += f'atoms=read("{self.input_xyz_path}")\n\n'  # ADD INPUT FILE
+        write_str += f'atoms=read("{self.input_xtb_path}")\n\n'  # ADD INPUT FILE
 
         write_str += (
             f'xtb_calc = XTB(method="{self.method}",'

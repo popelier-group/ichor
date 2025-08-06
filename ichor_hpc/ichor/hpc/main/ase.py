@@ -108,7 +108,7 @@ def write_xtb_input(points_directory: PointsDirectory, **kwargs) -> List[Path]:
         # write instance of xtb class
         point_directory.xtb = XTB(
             Path(point_directory.path / xtb_file_name),
-            input_xyz_path=xtb_xyz,
+            input_xtb_path=xtb_xyz,
             output_xyz_path=str(xtb_xyz).replace(".xyz", "_optimised.xyz"),
             traj_path=str(xtb_xyz).replace(".xyz", ".traj"),
             log_path=str(xtb_xyz).replace(".xyz", ".log"),
