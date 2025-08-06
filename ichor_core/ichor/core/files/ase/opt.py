@@ -12,6 +12,8 @@ class XTB(WriteFile, File):
         path: Union[Path, str],
         input_xyz_path: Union[Path, str],
         output_xyz_path: Union[Path, str],
+        traj_path: Union[Path, str],
+        log_path: Union[Path, str],
         method: Optional[str] = None,
         solvent: Optional[str] = None,
         electronic_temperature: Optional[int] = None,
@@ -22,6 +24,8 @@ class XTB(WriteFile, File):
 
         self.input_xyz_path = str(input_xyz_path)
         self.output_xyz_path = str(output_xyz_path)
+        self.traj_path = str(traj_path)
+        self.log_path = str(log_path)
         self.method: str = method
         self.solvent: str = solvent
         self.electronic_temperature: int = electronic_temperature
@@ -56,9 +60,7 @@ class XTB(WriteFile, File):
 
         write_str += f"atoms.calc = xtb_calc\n\n"
 
-        write_str += (
-            f'optimizer = BFGS(atoms, trajectory="opt.traj", logfile="opt.log")\n'
-        )
+        write_str += f'optimizer = BFGS(atoms, trajectory="{self.traj_path}", logfile="{self.log_path}")\n'
         write_str += f"optimizer.run(fmax={self.fmax})\n\n"
 
         write_str += f'write("{self.output_xyz_path}", atoms)\n\n'

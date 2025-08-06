@@ -102,12 +102,16 @@ def write_xtb_input(points_directory: PointsDirectory, **kwargs) -> List[Path]:
             point_directory.path.with_suffix("").name + "_opt" + XTB.get_filetype()
         )
 
-        xtb_input_xyz = point_directory.path.with_suffix("").name + ".xyz"
+        # set to run xtb calc in opt geometry folder
+        xtb_xyz = point_directory.path.with_suffix("").name + ".xyz"
 
         # write instance of xtb class
         point_directory.xtb = XTB(
             Path(point_directory.path / xtb_file_name),
-            output_xyz_path=str(xtb_input_xyz).replace(".xyz", "_optimised.xyz"),
+            input_xyz_path=xtb_xyz,
+            output_xyz_path=str(xtb_xyz).replace(".xyz", "_optimised.xyz"),
+            traj_path=str(xtb_xyz).replace(".xyz", ".traj"),
+            log_path=str(xtb_xyz).replace(".xyz", ".log"),
             **kwargs,
         )
         point_directory.xtb.write()
