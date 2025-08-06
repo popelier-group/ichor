@@ -103,7 +103,8 @@ def write_xtb_input(points_directory: PointsDirectory, **kwargs) -> List[Path]:
         )
 
         # set to run xtb calc in opt geometry folder
-        xtb_xyz = point_directory.path.with_suffix(".xyz")
+        xtb_xyz_abs = point_directory.path.absolute()
+        xtb_xyz = xtb_xyz_abs.with_suffix(".xyz")
 
         # write instance of xtb class
         point_directory.xtb = XTB(
