@@ -205,6 +205,10 @@ def submit_gjfs(
         ichor.hpc.global_variables.LOGGER.info(
             f"Submitting {len(submission_script.grouped_commands)} GJF(s) to Gaussian"
         )
+        for i in range(len(gjfs)):
+            ichor.hpc.global_variables.LOGGER.info(
+                f"Submitting {str(gjfs[i])} to Gaussian"
+            )
         return submission_script.submit(hold=hold)
     else:
         raise ValueError("There are no jobs to submit in the submission script.")

@@ -11,6 +11,7 @@ class XTB(WriteFile, File):
         self,
         path: Union[Path, str],
         input_xyz_path: Union[Path, str],
+        output_xyz_path: Union[Path, str],
         method: Optional[str] = None,
         solvent: Optional[str] = None,
         electronic_temperature: Optional[int] = None,
@@ -20,6 +21,7 @@ class XTB(WriteFile, File):
         File.__init__(self, path)
 
         self.input_xyz_path = str(input_xyz_path)
+        self.output_xyz_path = str(output_xyz_path)
         self.method: str = method
         self.solvent: str = solvent
         self.electronic_temperature: int = electronic_temperature
@@ -59,7 +61,7 @@ class XTB(WriteFile, File):
         )
         write_str += f"optimizer.run(fmax={self.fmax})\n\n"
 
-        write_str += f'write("optimized.xyz", atoms)\n\n'
+        write_str += f'write("{self.output_xyz_path}", atoms)\n\n'
 
         # Is it necessary to print these & where will they print?
         #        write_str += f'print("Final energy:", atoms.get_potential_energy())\n'

@@ -69,7 +69,7 @@ class SubmitGaussianFunctions:
 
     @staticmethod
     def select_number_of_cores():
-        """Asks user to update the basis set."""
+        """Asks user to update the number of cores for submission."""
         submit_gaussian_menu_options.selected_number_of_cores = user_input_int(
             "Enter number of cores: ",
             submit_gaussian_menu_options.selected_number_of_cores,
@@ -122,9 +122,6 @@ class SubmitGaussianFunctions:
         ncores = submit_gaussian_menu_options.selected_number_of_cores
         submit_gjfs(gjf_list, force_calculate_wfn=False, ncores=ncores)
 
-        SUBMIT_GAUSSIAN_MENU_DESCRIPTION.prologue_description_text = (
-            "GJF optimisation submitted successfully \n"
-        )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             f"Gaussian optimisation job submitted for {submit_gaussian_menu_options.selected_gjf_path}"
