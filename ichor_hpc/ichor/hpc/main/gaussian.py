@@ -99,6 +99,9 @@ def write_gjfs(
     gjfs = []
 
     for point_directory in points_directory:
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Added {points_directory} / {point_directory} Gaussian jobs"
+        )
 
         # remove the .pointdirectory suffix
         gjf_fle_name = point_directory.path.with_suffix("").name + GJF.get_filetype()
