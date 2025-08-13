@@ -38,26 +38,29 @@ def submit_single_gaussian_xyz(
             try:
                 rm_path = opt_path
                 shutil.rmtree(rm_path)
+                opt_path = Path(opt_dir / traj_dir.name)
+
+                submit_points_directory_to_gaussian(
+                    points_directory=opt_path,
+                    overwrite_existing=False,
+                    force_calculate_wfn=False,
+                    ncores=ncores,
+                    method=method,
+                    basis_set=basis_set,
+                    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
+                        "outputs"
+                    ]
+                    / input_xyz_path.name
+                    / "GAUSSIAN",
+                    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
+                    / input_xyz_path.name
+                    / "GAUSSIAN",
+                    keywords=keywords,
+                )
+
             except:
-                pass
-
-    opt_path = Path(opt_dir / traj_dir.name)
-
-    submit_points_directory_to_gaussian(
-        points_directory=opt_path,
-        overwrite_existing=False,
-        force_calculate_wfn=False,
-        ncores=ncores,
-        method=method,
-        basis_set=basis_set,
-        outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
-        / input_xyz_path.name
-        / "GAUSSIAN",
-        errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-        / input_xyz_path.name
-        / "GAUSSIAN",
-        keywords=keywords,
-    )
+                shutil.rmtree(traj_dir)
+                print("ERROR, FILE EXISTS AND OVERWRITE WAS NOT SELECTED. ABORTING")
 
 
 def submit_points_directory_to_gaussian(
