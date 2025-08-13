@@ -18,7 +18,7 @@ def submit_single_gaussian_xyz(
     keywords=["opt"],
     method="b3lyp",
     basis_set="6-31+g(d,p)",
-    overwite_exisiting=False,
+    overwrite_existing=False,
     hold: JobID = None,
     **kwargs,
 ) -> Optional[JobID]:
@@ -34,7 +34,7 @@ def submit_single_gaussian_xyz(
     try:
         shutil.move(traj_dir, opt_dir)
     except:
-        if overwite_exisiting:
+        if overwrite_existing:
             try:
                 rm_path = opt_path
                 shutil.rmtree(rm_path)
