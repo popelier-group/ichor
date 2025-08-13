@@ -25,10 +25,10 @@ def submit_single_gaussian_xyz(
     input_xyz_traj = Trajectory(input_xyz_path)
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
     opt_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
-    system_name = input_xyz_traj.stem
+    system_name = input_xyz_path.stem
 
     input_xyz_traj.to_dir(system_name, every=1, center=False)
-    traj_dir = Path(input_xyz_traj).with_suffix("pointsdir")
+    traj_dir = input_xyz_path.with_suffix("pointsdir")
 
     shutil.move(traj_dir, opt_dir)
     opt_path = Path(opt_dir / traj_dir.name)
