@@ -38,6 +38,7 @@ def submit_single_gaussian_xyz(
             try:
                 rm_path = opt_path
                 shutil.rmtree(rm_path)
+                shutil.move(traj_dir, opt_dir)
             except:
                 print("FILE DOES NOT EXIST FOR OVERWRITE. RUNNING AS NORMAL")
                 pass
