@@ -4,6 +4,7 @@ from typing import List, Optional, Union
 
 import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
+from ichor.core.files import Trajectory
 
 from ichor.core.files import GJF, PointsDirectory, WFN
 from ichor.hpc.batch_system import JobID
@@ -23,11 +24,20 @@ def submit_single_gaussian_xyz(
 
     input_xyz_path = Path(input_xyz_path)
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
-    opt_dir = ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"]
+    opt_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
     shutil.copy(input_xyz_path, opt_dir)
 
+    xyz_name = input_xyz_path.name
+    traj_path = Path(opt_dir / xyz_name)
+
+    traj = Trajectory(traj_path)
+    system_name = traj_path.stem
+
+    traj.to_dir(system_name, every=1, to_center=False)
+    traj_dir = traj_path.with_suffix("pointsdir")
+
     submit_points_directory_to_gaussian(
-        points_directory=opt_dir,
+        points_directory=traj_dir,
         overwrite_existing=True,
         force_calculate_wfn=False,
         ncores=ncores,
@@ -99,9 +109,6 @@ def write_gjfs(
     gjfs = []
 
     for point_directory in points_directory:
-        ichor.hpc.global_variables.LOGGER.info(
-            f"Added {points_directory} / {point_directory} Gaussian jobs"
-        )
 
         # remove the .pointdirectory suffix
         gjf_fle_name = point_directory.path.with_suffix("").name + GJF.get_filetype()
@@ -182,9 +189,6 @@ def submit_gjfs(
             if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():
                 # make a list of GaussianCommand instances.
                 submission_script.add_command(GaussianCommand(gjf))
-                ichor.hpc.global_variables.LOGGER.info(
-                    f"Added WFN Gaussian jobs to {submission_script.path}"
-                )
                 number_of_jobs += 1
 
             # case where the wfn file exists but does not have total energy
@@ -199,9 +203,6 @@ def submit_gjfs(
                 except StopIteration:
 
                     submission_script.add_command(GaussianCommand(gjf))
-                    ichor.hpc.global_variables.LOGGER.info(
-                        f"Added existing wfn Gaussian jobs to {submission_script.path}"
-                    )
                     number_of_jobs += 1
 
         ichor.hpc.global_variables.LOGGER.info(
