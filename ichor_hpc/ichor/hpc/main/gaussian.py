@@ -30,7 +30,7 @@ def submit_single_gaussian_xyz(
     xyz_name = input_xyz_path.name
     traj_path = Path(opt_dir / xyz_name)
     traj = Trajectory(traj_path)
-    system_path = traj_path.with_suffix()
+    system_path = traj_path.with_suffix("")
 
     traj.to_dir(system_path, every=1, center=False)
     traj_dir = traj_path.with_suffix("pointsdir")
