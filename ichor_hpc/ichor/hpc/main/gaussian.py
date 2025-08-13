@@ -22,21 +22,19 @@ def submit_single_gaussian_xyz(
     **kwargs,
 ) -> Optional[JobID]:
 
-    input_xyz_path = Path(input_xyz_path)
+    input_xyz_traj = Trajectory(input_xyz_path)
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
     opt_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
-    shutil.copy(input_xyz_path, opt_dir)
+    system_name = input_xyz_traj.stem
 
-    xyz_name = input_xyz_path.name
-    traj_path = Path(opt_dir / xyz_name)
-    traj = Trajectory(traj_path)
-    system_path = traj_path.with_suffix("")
+    input_xyz_traj.to_dir(system_name, every=1, center=False)
+    traj_dir = input_xyz_traj.with_suffix("pointsdir")
 
-    traj.to_dir(system_path, every=1, center=False)
-    traj_dir = traj_path.with_suffix("pointsdir")
+    shutil.move(traj_dir, opt_dir)
+    opt_path = Path(opt_dir / traj_dir.name)
 
     submit_points_directory_to_gaussian(
-        points_directory=traj_dir,
+        points_directory=opt_path,
         overwrite_existing=True,
         force_calculate_wfn=False,
         ncores=ncores,
