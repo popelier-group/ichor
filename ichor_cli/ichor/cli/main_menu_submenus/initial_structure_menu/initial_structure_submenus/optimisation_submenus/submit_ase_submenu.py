@@ -11,6 +11,7 @@ from ichor.cli.useful_functions import (
     user_input_float,
     user_input_free_flow,
     user_input_int,
+    user_input_bool,
 )
 from ichor.hpc.main.ase import submit_single_ase_xyz
 
@@ -27,6 +28,7 @@ SUBMIT_ASE_MENU_DEFAULTS = {
     "default_electronic_temperature": 300,
     "default_max_iterations": 2048,
     "default_fmax": 0.01,
+    "overwite_existing": False,
 }
 
 
@@ -39,6 +41,7 @@ class SubmitAseMenuOptions(MenuOptions):
     selected_electronic_temperature: int
     selected_max_iterations: int
     selected_fmax: float
+    selected_overwrite: bool
 
 
 # initialize dataclass for storing information for menu
@@ -115,15 +118,32 @@ class SubmitAseFunctions:
         )
 
     @staticmethod
+    def select_overwrite_existing_calc():
+        """Asks user whether or not to overwrite existing calculation"""
+        submit_ase_menu_options.selected_overwrite = user_input_bool(
+            "Overwrite existing calculation (yes/no): ",
+            submit_ase_menu_options.selected_overwrite,
+        )
+
+    @staticmethod
     def xyz_to_ase_on_compute():
         """Creates and submits an optimisation using ase calculator."""
-        (method, ncores, solvent, electronic_temperature, max_iterations, fmax,) = (
+        (
+            method,
+            ncores,
+            solvent,
+            electronic_temperature,
+            max_iterations,
+            fmax,
+            overwrite,
+        ) = (
             submit_ase_menu_options.selected_method,
             submit_ase_menu_options.selected_ncores,
             submit_ase_menu_options.selected_solvent,
             submit_ase_menu_options.selected_electronic_temperature,
             submit_ase_menu_options.selected_max_iterations,
             submit_ase_menu_options.selected_fmax,
+            submit_ase_menu_options.selected_overwrite,
         )
 
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
@@ -136,6 +156,7 @@ class SubmitAseFunctions:
             electronic_temperature=electronic_temperature,
             max_iterations=max_iterations,
             fmax=fmax,
+            overwrite=overwrite,
         )
 
         SUBMIT_ASE_MENU_DESCRIPTION.prologue_description_text = (
@@ -173,6 +194,10 @@ submit_ase_menu_items = [
     FunctionItem(
         "Change max force",
         SubmitAseFunctions.select_fmax,
+    ),
+    FunctionItem(
+        "Overwrite existing calculation",
+        SubmitAseFunctions.select_overwrite_existing_calc,
     ),
     FunctionItem(
         "Submit to ASE",

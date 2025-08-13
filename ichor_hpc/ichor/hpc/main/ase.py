@@ -4,6 +4,7 @@ from typing import List, Optional, Union
 
 import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
+from ichor.core.files import Trajectory
 
 from ichor.core.files import PointsDirectory, XTB
 from ichor.hpc.batch_system import JobID
@@ -19,17 +20,38 @@ def submit_single_ase_xyz(
     electronic_temperature=300,
     max_iterations=2048,
     fmax=0.01,
+    overwrite=False,
     hold: JobID = None,
     **kwargs,
 ) -> Optional[JobID]:
 
-    input_xyz_path = Path(input_xyz_path)
+    input_xyz_traj = Trajectory(input_xyz_path)
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
-    opt_dir = ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"]
-    shutil.copy(input_xyz_path, opt_dir)
+    opt_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
+    system_name = input_xyz_path.stem
+    traj_dir = input_xyz_traj.to_dir(system_name, every=1, center=False)
+    opt_path = Path(opt_dir / traj_dir.name)
+
+    try:
+        shutil.move(traj_dir, opt_dir)
+    except:
+        if overwrite:
+            try:
+                rm_path = opt_path
+                shutil.rmtree(rm_path)
+                shutil.move(traj_dir, opt_dir)
+            except:
+                print("FILE DOES NOT EXIST FOR OVERWRITE. RUNNING AS NORMAL")
+                pass
+        else:
+            shutil.rmtree(traj_dir)
+            print("ERROR, FILE EXISTS AND OVERWRITE WAS NOT SELECTED. ABORTING")
+            return
+
+    opt_path = Path(opt_dir / traj_dir.name)
 
     submit_points_directory_to_ase(
-        points_directory=opt_dir,
+        points_directory=opt_path,
         input_xyz_path=input_xyz_path,
         ncores=ncores,
         method=method,
