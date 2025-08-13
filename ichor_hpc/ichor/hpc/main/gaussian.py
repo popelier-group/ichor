@@ -28,7 +28,7 @@ def submit_single_gaussian_xyz(
     system_name = input_xyz_traj.stem
 
     input_xyz_traj.to_dir(system_name, every=1, center=False)
-    traj_dir = input_xyz_traj.with_suffix("pointsdir")
+    traj_dir = Path(input_xyz_traj).with_suffix("pointsdir")
 
     shutil.move(traj_dir, opt_dir)
     opt_path = Path(opt_dir / traj_dir.name)
