@@ -18,6 +18,7 @@ def submit_single_gaussian_xyz(
     keywords=["opt"],
     method="b3lyp",
     basis_set="6-31+g(d,p)",
+    overwite_exisiting=False,
     hold: JobID = None,
     **kwargs,
 ) -> Optional[JobID]:
@@ -28,13 +29,23 @@ def submit_single_gaussian_xyz(
     system_name = input_xyz_path.stem
 
     traj_dir = input_xyz_traj.to_dir(system_name, every=1, center=False)
+    opt_path = Path(opt_dir / traj_dir.name)
 
-    shutil.move(traj_dir, opt_dir)
+    try:
+        shutil.move(traj_dir, opt_dir)
+    except:
+        if overwite_exisiting:
+            try:
+                rm_path = opt_path
+                shutil.rmtree(rm_path)
+            except:
+                pass
+
     opt_path = Path(opt_dir / traj_dir.name)
 
     submit_points_directory_to_gaussian(
         points_directory=opt_path,
-        overwrite_existing=True,
+        overwrite_existing=False,
         force_calculate_wfn=False,
         ncores=ncores,
         method=method,

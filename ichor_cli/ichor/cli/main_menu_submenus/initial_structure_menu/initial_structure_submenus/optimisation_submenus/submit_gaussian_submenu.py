@@ -9,6 +9,7 @@ from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     user_input_free_flow,
+    user_input_bool,
     user_input_int,
     user_input_path,
 )
@@ -24,6 +25,7 @@ SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
     "default_method": "b3lyp",
     "default_basis_set": "6-31+g(d,p)",
     "default_number_of_cores": 2,
+    "default_overwrite_existing_gjfs": False,
     "default_gjf": "",
 }
 
@@ -34,6 +36,7 @@ class SubmitGaussianMenuOptions(MenuOptions):
     selected_method: str
     selected_basis_set: str
     selected_number_of_cores: int
+    selected_overwrite_existing_gjfs: bool
     selected_gjf: str
 
 
@@ -80,18 +83,22 @@ class SubmitGaussianFunctions:
         )
 
     @staticmethod
+    def select_overwrite_existing_gjfs():
+        """Asks user whether or not to overwrite existing gjfs"""
+        submit_gaussian_menu_options.selected_overwrite_existing_gjfs = user_input_bool(
+            "Overwrite existing gjfs (yes/no): ",
+            submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
+        )
+
+    @staticmethod
     def xyz_to_gaussian_on_compute():
         """Converts a single xyz to gjf and submit to Gaussian on compute."""
-        (
-            keywords,
-            method,
-            basis_set,
-            ncores,
-        ) = (
+        (keywords, method, basis_set, ncores, overwrite_existing) = (
             ["opt"],
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
+            submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
         )
 
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
@@ -102,6 +109,7 @@ class SubmitGaussianFunctions:
             keywords=keywords,
             method=method,
             basis_set=basis_set,
+            overwrite_existing=overwrite_existing,
         )
 
         # update logger
@@ -142,6 +150,10 @@ submit_gaussian_menu_items = [
     FunctionItem(
         "Change number of cores",
         SubmitGaussianFunctions.select_number_of_cores,
+    ),
+    FunctionItem(
+        "Overwrite GJF files (if any are already present)",
+        SubmitGaussianFunctions.select_overwrite_existing_gjfs,
     ),
     FunctionItem(
         "Submit to Gaussian",
