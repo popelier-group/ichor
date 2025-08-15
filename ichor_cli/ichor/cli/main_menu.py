@@ -85,18 +85,18 @@ main_menu = ConsoleMenu(
 # make submenus
 main_menu_items = [
     SubmenuItem(
-        POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu
+        INITIAL_STRUCTURE_MENU_DESCRIPTION.title, initial_structure_menu, main_menu
     ),
-    SubmenuItem(SUBMIT_CSVS_MENU_DESCRIPTION.title, submit_csvs_menu, main_menu),
-    SubmenuItem(TRAJECTORY_MENU_DESCRIPTION.title, trajectory_menu, main_menu),
-    SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
     SubmenuItem(
         MOLECULAR_DYNAMICS_MENU_DESCRIPTION.title, molecular_dynamics_menu, main_menu
     ),
-    SubmenuItem(TOOLS_MENU_DESCRIPTION.title, tools_menu, main_menu),
+    SubmenuItem(TRAJECTORY_MENU_DESCRIPTION.title, trajectory_menu, main_menu),
     SubmenuItem(
-        INITIAL_STRUCTURE_MENU_DESCRIPTION.title, initial_structure_menu, main_menu
+        POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu
     ),
+    SubmenuItem(SUBMIT_CSVS_MENU_DESCRIPTION.title, submit_csvs_menu, main_menu),
+    SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
+    SubmenuItem(TOOLS_MENU_DESCRIPTION.title, tools_menu, main_menu),
 ]
 
 # add items to menu
