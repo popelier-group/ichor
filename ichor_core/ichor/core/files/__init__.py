@@ -13,6 +13,9 @@ from ichor.core.files.dl_poly import (
     FFLUXDirectory,
 )
 
+# fflux files
+from ichor.core.files.fflux import FFLUXIn
+
 # gaussian files
 from ichor.core.files.gaussian import GaussianOutput, GJF, WFN, WFX
 
@@ -60,6 +63,7 @@ __all__ = [
     "DlPolyIQAEnergies",
     "DlPolyIQAForces",
     "FFLUXDirectory",
+    "FFLUXIn",
     "PandoraInput",
     "PointDirectory",
     "PointsDirectory",
