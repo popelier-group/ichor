@@ -1,4 +1,5 @@
 import os
+import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Union
@@ -32,7 +33,7 @@ class SLURM(BatchSystem):
     @staticmethod
     def is_present() -> bool:
         """Check if SLURM is present on the current machine ICHOR is running on."""
-        return "SLURMDIR" in os.environ.keys()
+        return shutil.which("sbatch") is not None
 
     @staticmethod
     def current_node() -> NodeType:

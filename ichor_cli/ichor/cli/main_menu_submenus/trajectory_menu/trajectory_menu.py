@@ -56,7 +56,7 @@ class TrajectoryFunctions:
     @staticmethod
     def split_trajectory_into_points_directory():
         """functions that splits a trajectory into a PointsDirectory."""
-        default_to_center = False
+        default_to_center = True
         default_every = 1
 
         to_center = user_input_bool(
