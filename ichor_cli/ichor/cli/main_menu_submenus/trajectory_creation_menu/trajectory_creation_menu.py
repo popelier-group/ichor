@@ -19,7 +19,7 @@ from ichor.cli.useful_functions import user_input_path
 
 TRAJECTORY_CREATION_MENU_DESCRIPTION = MenuDescription(
     "Trajectory Creation Menu",
-    subtitle="Use this to submit molecular dynamics or metadynamics simulations with ichor to create geometry sample pool.",
+    subtitle="Use this menu to create a sample pool of conformers with molecular dynamics or metadynamics.",
 )
 
 
@@ -29,7 +29,7 @@ class TrajectoryCreationMenuOptions(MenuOptions):
     selected_xyz_path: Path = ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
 
     def check_selected_xyz_path(self) -> Union[str, None]:
-        """Checks whether the given Trjectory exists or if it is a file."""
+        """Checks whether the given Trajectory exists or if it is a file."""
         xyz_path = Path(self.selected_xyz_path)
         if not xyz_path.exists():
             return f"Current path: {xyz_path} does not exist."
@@ -70,7 +70,7 @@ trajectory_creation_menu = ConsoleMenu(
 # can use lambda functions to change text of options as well :)
 trajectory_creation_menu_items = [
     FunctionItem(
-        "Select xyz file containing Molecular Dynamics or Metadynamics starting geometry",
+        "Select xyz file containing a starting geometry",
         TrajectoryCreationMenuFunctions.select_xyz,
     ),
     SubmenuItem(

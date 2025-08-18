@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import ichor.cli.global_menu_variables
-from consolemenu.items import FunctionItem
+from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
@@ -10,6 +10,10 @@ from ichor.cli.useful_functions import (
     user_input_float,
     user_input_free_flow,
     user_input_int,
+)
+from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus import (
+    col_var_menu,
+    COL_VAR_MENU_DESCRIPTION,
 )
 from ichor.hpc.molecular_dynamics import submit_metadynamics
 
@@ -45,6 +49,7 @@ metadynamics_menu_options = MetadynamicsMenuOptions(
 
 # class with static methods for each menu item that calls a function.
 class MetadynamicsMenuFunctions:
+
     @staticmethod
     def select_timestep():
         """
@@ -60,7 +65,7 @@ class MetadynamicsMenuFunctions:
         Selects bias factor for collective variables in a metadynamics simulation.
         """
         metadynamics_menu_options.selected_bias = user_input_float(
-            "Select bias factor:",
+            "Select bias factor: ",
             metadynamics_menu_options.selected_bias,
         )
 
@@ -70,7 +75,7 @@ class MetadynamicsMenuFunctions:
         Select how many iterations to run for in metadynamics simulation.
         """
         metadynamics_menu_options.selected_number_of_iterations = user_input_int(
-            "Set number of simulation iterations:",
+            "Set number of simulation iterations: ",
             metadynamics_menu_options.selected_number_of_iterations,
         )
 
@@ -126,8 +131,9 @@ metadynamics_menu = ConsoleMenu(
 # make menu items
 # can use lambda functions to change text of options as well :)
 metadynamics_menu_items = [
+    SubmenuItem(COL_VAR_MENU_DESCRIPTION.title, col_var_menu, metadynamics_menu),
     FunctionItem(
-        "Select timestep in fs",
+        "Select timestep (fs)",
         MetadynamicsMenuFunctions.select_timestep,
     ),
     FunctionItem(
@@ -139,7 +145,7 @@ metadynamics_menu_items = [
         MetadynamicsMenuFunctions.select_number_of_iterations,
     ),
     FunctionItem(
-        "Select simulation temperature",
+        "Select simulation temperature (K)",
         MetadynamicsMenuFunctions.select_temperature,
     ),
     FunctionItem(

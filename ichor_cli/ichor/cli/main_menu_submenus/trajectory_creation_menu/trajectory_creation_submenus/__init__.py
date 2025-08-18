@@ -10,6 +10,10 @@ from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_s
     cp2k_menu,
     CP2K_MENU_DESCRIPTION,
 )
+from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenu import (
+    col_var_menu,
+    COL_VAR_MENU_DESCRIPTION,
+)
 
 __all__ = [
     "METADYNAMICS_MENU_DESCRIPTION",
@@ -18,4 +22,6 @@ __all__ = [
     "cp2k_menu",
     "AMBER_MENU_DESCRIPTION",
     "amber_menu",
+    "COL_VAR_MENU_DESCRIPTION",
+    "col_var_menu",
 ]
