@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import ichor.cli.global_menu_variables
-from consolemenu.items import FunctionItem, SubmenuItem
+from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
