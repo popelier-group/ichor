@@ -18,9 +18,9 @@ from ichor.cli.main_menu_submenus.initial_structure_menu import (
     initial_structure_menu,
     INITIAL_STRUCTURE_MENU_DESCRIPTION,
 )
-from ichor.cli.main_menu_submenus.molecular_dynamics_menu.molecular_dynamics_menu import (
-    molecular_dynamics_menu,
-    MOLECULAR_DYNAMICS_MENU_DESCRIPTION,
+from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_menu import (
+    trajectory_creation_menu,
+    TRAJECTORY_CREATION_MENU_DESCRIPTION,
 )
 from ichor.cli.main_menu_submenus.points_directory_menu import (
     points_directory_menu,
@@ -88,7 +88,7 @@ main_menu_items = [
         INITIAL_STRUCTURE_MENU_DESCRIPTION.title, initial_structure_menu, main_menu
     ),
     SubmenuItem(
-        MOLECULAR_DYNAMICS_MENU_DESCRIPTION.title, molecular_dynamics_menu, main_menu
+        TRAJECTORY_CREATION_MENU_DESCRIPTION.title, trajectory_creation_menu, main_menu
     ),
     SubmenuItem(TRAJECTORY_MENU_DESCRIPTION.title, trajectory_menu, main_menu),
     SubmenuItem(
