@@ -1,4 +1,4 @@
-from ichor_cli.ichor.cli.main_menu_submenus.sampling_menu.sampling_menu import (
+from ichor.cli.main_menu_submenus.sampling_menu.sampling_menu import (
     sampling_menu,
     SAMPLING_MENU_DESCRIPTION,
 )
