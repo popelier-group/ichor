@@ -14,7 +14,6 @@ from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions.user_input import (
     user_input_path,
 )
-from ichor.core.files import Trajectory
 
 
 SAMPLING_MENU_DESCRIPTION = MenuDescription(
@@ -37,20 +36,20 @@ class SamplingMenuOptions(MenuOptions):
         elif not traj_path.is_file():
             return f"Current trajectory path: {traj_path} is not a file."
         elif not traj_path.suffix == ".xyz":
-            return f"Current path: {traj_path} might not be a trajectory."
+            return f"Current trajectory path: {traj_path} might not be a trajectory."
 
     selected_xyz_path: Path = ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
 
     def check_selected_xyz_path(self) -> Union[str, None]:
-        """Checks whether the given Trjectory exists or if it is a file."""
+        """Checks whether the given opt xyz path exists or if it is a file."""
 
         xyz_path = Path(self.selected_xyz_path)
         if not xyz_path.exists():
-            return f"Current path: {xyz_path} does not exist."
+            return f"Current opt path: {xyz_path} does not exist."
         elif not xyz_path.is_file():
-            return f"Current path: {xyz_path} is not a file."
+            return f"Current opt path: {xyz_path} is not a file."
         elif not xyz_path.suffix == ".xyz":
-            return f"Current path: {xyz_path} might not be a .xyz file."
+            return f"Current opt path: {xyz_path} might not be a .xyz file."
 
 
 # initialize dataclass for storing information for menu
@@ -98,7 +97,7 @@ sampling_menu_items = [
         SamplingFunctions.select_trajectory
     ),
     FunctionItem(
-        "Select xyz file containing a single unoptimised geometry",
+        "Select xyz file containing a single optimised geometry",
         SamplingFunctions.select_xyz,
     ),
     SubmenuItem(
