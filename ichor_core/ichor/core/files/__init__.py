@@ -39,7 +39,7 @@ from ichor.core.files.points_directory import PointsDirectory
 from ichor.core.files.points_directory_parent import PointsDirectoryParent
 
 # xyz files
-from ichor.core.files.xyz import Trajectory
+from ichor.core.files.xyz import Trajectory, XYZ
 
 __all__ = [
     "Int",
@@ -66,7 +66,8 @@ __all__ = [
     "PointDirectory",
     "PointsDirectory",
     "PointsDirectoryParent",
-    "XTB" "XYZ",
+    "XTB",
+    "XYZ",
     "Mol2",
     "PySCFDirectory",
     "MorfiDirectory",
