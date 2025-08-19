@@ -4,7 +4,7 @@ from typing import List, Union
 import pandas as pd
 from ichor.core.atoms import ALF, Atom, Atoms
 from ichor.core.calculators import (
-    calculate_alf_atom_sequence,
+    calculate_alf_cahn_ingold_prelog,
     calculate_alf_features,
     get_atom_alf,
 )
@@ -121,7 +121,7 @@ def get_database_info_from_db_type(db_path: Union[str, Path], db_type: str, echo
 def get_alf_from_first_db_geometry(
     db_path: Union[str, Path],
     db_type: str,
-    alf_calc_func=calculate_alf_atom_sequence,
+    alf_calc_func=calculate_alf_cahn_ingold_prelog,
     echo=False,
 ) -> List[ALF]:
     """

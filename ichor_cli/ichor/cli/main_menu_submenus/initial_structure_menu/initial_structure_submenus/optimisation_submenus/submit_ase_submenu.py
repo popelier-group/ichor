@@ -8,10 +8,10 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    user_input_bool,
     user_input_float,
     user_input_free_flow,
     user_input_int,
-    user_input_bool,
 )
 from ichor.hpc.main.ase import submit_single_ase_xyz
 

@@ -70,7 +70,7 @@ def mae_forces(
 
     # colorbar for difference in energies
     cbar.set_label(
-        "Mean Absolute Error / kcal mol$^{-1}$ Å$^{-1}$",
+        r"Mean Absolute Error / kcal mol$^{-1}$ A$^{-1}$",
         fontsize=20,
         fontweight="bold",
         labelpad=15,
