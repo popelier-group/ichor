@@ -4,9 +4,8 @@ from typing import List, Optional, Union
 
 import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
-from ichor.core.files import Trajectory
 
-from ichor.core.files import GJF, PointsDirectory, WFN
+from ichor.core.files import GJF, PointsDirectory, Trajectory, WFN
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import GaussianCommand
 from ichor.hpc.submission_script import SubmissionScript
@@ -33,13 +32,13 @@ def submit_single_gaussian_xyz(
 
     try:
         shutil.move(traj_dir, opt_dir)
-    except:
+    except FileExistsError:
         if overwrite_existing:
             try:
                 rm_path = opt_path
                 shutil.rmtree(rm_path)
                 shutil.move(traj_dir, opt_dir)
-            except:
+            except FileNotFoundError:
                 print("FILE DOES NOT EXIST FOR OVERWRITE. RUNNING AS NORMAL")
                 pass
 
