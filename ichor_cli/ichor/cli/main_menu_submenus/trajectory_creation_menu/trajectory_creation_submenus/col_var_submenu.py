@@ -78,6 +78,10 @@ col_var_menu_items = [
         "Select number of collective variables",
         ColVarMenuFunctions.select_num_vars,
     ),
+    FunctionItem(
+        "Display system information",
+        ColVarMenuFunctions.show_mol_info,
+    ),
 ]
 
 add_items_to_menu(col_var_menu, col_var_menu_items)
