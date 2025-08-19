@@ -44,4 +44,4 @@ repos:
         entry: python check_ascii.py
         language: system
         types: [text]
-        exclude: ^(examples/*)|(.github/ISSUE_TEMPLATE/*)|(docs/source/_static/*)|(docs/build)
+        exclude: ^(examples/*)|(.github/ISSUE_TEMPLATE/*)|(docs/source)|(docs/build)
