@@ -12,7 +12,8 @@ from ichor.cli.useful_functions import (
     user_input_int,
 )
 
-# TODO: possibly make this be read from a file
+from ase import io
+
 COL_VAR_MENU_DEFAULTS = {
     "default_num_vars": 1,
 }
@@ -44,6 +45,20 @@ class ColVarMenuFunctions:
             "Select number of collective variables: ",
             col_var_menu_options.selected_num_vars,
         )
+
+    @staticmethod
+    def show_mol_info():
+        """
+        Display information on atoms in molecule / system.
+        """
+        if len(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH) > 0:
+            loaded_atoms = io.read(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
+            atom_positions = loaded_atoms.get_positions()
+            print(atom_positions)
+        else:
+            print("NO XYZ FILE LOADED")
+        answer = ""
+        user_input_free_flow("Press enter to continue: ", answer)
 
 
 # initialize menu
