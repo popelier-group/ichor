@@ -11,7 +11,7 @@ from ichor.cli.useful_functions import (
     user_input_free_flow,
     user_input_int,
 )
-from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenu import (
+from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus import (
     col_var_menu,
     COL_VAR_MENU_DESCRIPTION,
 )

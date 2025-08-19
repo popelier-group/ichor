@@ -14,11 +14,7 @@ from ichor.cli.useful_functions import (
 
 # TODO: possibly make this be read from a file
 COL_VAR_MENU_DEFAULTS = {
-    "default_timestep": 0.005,
-    "default_bias_factor": 5,
-    "default_number_of_iterations": 1024,
-    "default_temperature": 300,
-    "default_calculator": "GFN2-xTB",
+    "default_num_vars": 1,
 }
 
 COL_VAR_MENU_DESCRIPTION = MenuDescription(
@@ -30,11 +26,7 @@ COL_VAR_MENU_DESCRIPTION = MenuDescription(
 @dataclass
 class ColVarMenuOptions(MenuOptions):
 
-    selected_timestep: float
-    selected_bias: float
-    selected_number_of_iterations: int
-    selected_temperature: float
-    selected_calculator: str
+    selected_num_vars: int
 
 
 col_var_menu_options = ColVarMenuOptions(*COL_VAR_MENU_DEFAULTS.values())
@@ -44,50 +36,13 @@ col_var_menu_options = ColVarMenuOptions(*COL_VAR_MENU_DEFAULTS.values())
 class ColVarMenuFunctions:
 
     @staticmethod
-    def select_timestep():
+    def select_num_vars():
         """
-        Select timestep for metadynamics simulation.
+        Select number of CVs for metadynamics simulation.
         """
-        col_var_menu_options.selected_timestep = user_input_float(
-            "Select timestep (fs): ", col_var_menu_options.selected_timestep
-        )
-
-    @staticmethod
-    def select_bias_factor():
-        """
-        Selects bias factor for collective variables in a metadynamics simulation.
-        """
-        col_var_menu_options.selected_bias = user_input_float(
-            "Select bias factor: ",
-            col_var_menu_options.selected_bias,
-        )
-
-    @staticmethod
-    def select_number_of_iterations():
-        """
-        Select how many iterations to run for in metadynamics simulation.
-        """
-        col_var_menu_options.selected_number_of_iterations = user_input_int(
-            "Set number of simulation iterations: ",
-            col_var_menu_options.selected_number_of_iterations,
-        )
-
-    @staticmethod
-    def select_temperature():
-        """
-        Set the temperature for metadynamics calculation.
-        """
-        col_var_menu_options.selected_temperature = user_input_float(
-            "Selected temperature (K): ", col_var_menu_options.selected_temperature
-        )
-
-    @staticmethod
-    def select_calculator():
-        """
-        Select the calculator to use for metadynamics.
-        """
-        col_var_menu_options.selected_calculator = user_input_free_flow(
-            "Select calculator: ", col_var_menu_options.selected_calculator
+        col_var_menu_options.selected_num_vars = user_input_int(
+            "Select number of collective variables: ",
+            col_var_menu_options.selected_num_vars,
         )
 
 
@@ -105,24 +60,8 @@ col_var_menu = ConsoleMenu(
 # can use lambda functions to change text of options as well :)
 col_var_menu_items = [
     FunctionItem(
-        "Select timestep (fs)",
-        ColVarMenuFunctions.select_timestep,
-    ),
-    FunctionItem(
-        "Select bias factor for collective variables",
-        ColVarMenuFunctions.select_bias_factor,
-    ),
-    FunctionItem(
-        "Select number of iterations",
-        ColVarMenuFunctions.select_number_of_iterations,
-    ),
-    FunctionItem(
-        "Select simulation temperature (K)",
-        ColVarMenuFunctions.select_temperature,
-    ),
-    FunctionItem(
-        "Select calculator to use for metadynamics",
-        ColVarMenuFunctions.select_calculator,
+        "Select number of collective variables",
+        ColVarMenuFunctions.select_num_vars,
     ),
 ]
 
