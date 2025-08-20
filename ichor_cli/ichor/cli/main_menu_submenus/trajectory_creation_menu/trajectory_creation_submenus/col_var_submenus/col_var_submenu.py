@@ -74,7 +74,6 @@ def print_molecule_information(mol):
 
 def print_neighbour_information(mol):
     # sanitise and add hydrogens
-    Chem.SanitizeMol(mol)
     mol = Chem.AddHs(mol)
 
     ## list atoms and their neighbours
@@ -88,9 +87,6 @@ def print_neighbour_information(mol):
 
 
 def print_ring_information(mol):
-    # Ensure aromaticity perception and ring info is up to date
-    Chem.SanitizeMol(mol)
-
     # Get all rings (as tuples of atom indices)
     ring_info = mol.GetRingInfo()
     atom_rings = ring_info.AtomRings()
