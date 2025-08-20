@@ -30,7 +30,6 @@ functional_groups = {
     "amide": "[NX3][CX3](=O)[#6]",  # RCONR2
     "halide": "[F,Cl,Br,I]",  # Halogens
     "epoxide": "C1OC1",  # Epoxide
-    "cyanate": "[O-][C#N]",  # Cyanate
     "Imine": "C=N",  # Imine
     "Nitrile": "C#N",  # Nitrile
     "Nitro": "[NX3](=O)[O-]",  # Nitro
@@ -73,7 +72,8 @@ def print_molecule_information(mol):
 
 
 def print_neighbour_information(mol):
-    # add hydrogens
+    # sanitise and add hydrogens
+    Chem.SanitizeMol(mol)
     mol = Chem.AddHs(mol)
 
     ## list atoms and their neighbours
