@@ -57,9 +57,12 @@ def convert_xyz_to_mol(xyz_file):
             # read atoms with ase
             loaded_atoms = io.read(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
             # convert to mol
+            print("LOADING MOLECULE")
             io.write(xyz_path.with_suffix(".mol"), loaded_atoms)
+            print("WRITING MOLECULE")
             # load molecule
             loaded_mol = Chem.MolFromMolFile(xyz_path.with_suffix(".mol"))
+            print("LOADING MOLECULE INTO RDKIT")
             return loaded_mol
         except:
             print("ERROR WITH XYZ FILE")
