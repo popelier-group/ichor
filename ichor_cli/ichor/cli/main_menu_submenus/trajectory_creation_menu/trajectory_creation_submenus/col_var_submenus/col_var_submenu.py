@@ -12,7 +12,6 @@ from ichor.cli.useful_functions import (
     user_input_int,
 )
 
-from ase import io
 from rdkit import Chem
 from rdkit.Chem import inchi, AllChem, Draw
 from rdkit.Chem.Draw import rdMolDraw2D
@@ -53,14 +52,8 @@ def convert_xyz_to_mol(xyz_file):
 
     xyz_path = Path(xyz_file)
     if xyz_path.exists() and xyz_path.is_file() and xyz_path.suffix == ".xyz":
-        # read atoms with ase
-        loaded_atoms = io.read(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
         # convert to mol
-        print("LOADING MOLECULE")
-        io.write(xyz_path.with_suffix(".mol"), loaded_atoms)
-        print("WRITING MOLECULE")
-        # load molecule
-        loaded_mol = Chem.MolFromMolFile(xyz_path.with_suffix(".mol"))
+        loaded_mol = Chem.rdmolfiles.MolFromXYZFile(str(xyz_path))
         print("LOADING MOLECULE INTO RDKIT")
         return loaded_mol
     else:
