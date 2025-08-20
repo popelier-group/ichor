@@ -53,6 +53,7 @@ def convert_xyz_to_mol(xyz_file):
     if xyz_path.exists() and xyz_path.is_file() and xyz_path.suffix == ".xyz":
         # convert to mol
         loaded_mol = Chem.rdmolfiles.MolFromXYZFile(str(xyz_path))
+        Chem.SanitizeMol(loaded_mol)
         print("LOADING MOLECULE INTO RDKIT")
         return loaded_mol
     else:
@@ -72,8 +73,7 @@ def print_molecule_information(mol):
 
 
 def print_neighbour_information(mol):
-    # sanitise and add hydrogens
-    Chem.SanitizeMol(mol)
+    # add hydrogens
     mol = Chem.AddHs(mol)
 
     ## list atoms and their neighbours
