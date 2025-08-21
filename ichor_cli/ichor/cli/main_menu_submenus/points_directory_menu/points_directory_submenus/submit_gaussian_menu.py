@@ -146,6 +146,7 @@ class SubmitGaussianFunctions:
                 overwrite_existing=overwrite_existing,
                 force_calculate_wfn=force_calculate_wfn,
                 ncores=ncores,
+                link0=link0,
                 method=method,
                 basis_set=basis_set,
                 outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]

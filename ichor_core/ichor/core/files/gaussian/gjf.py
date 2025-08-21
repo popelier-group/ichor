@@ -262,7 +262,7 @@ class GJF(ReadFile, WriteFile, HasAtoms):
         So if an attribute is still FileContents, an empty string, an empty list, etc.,
         then default values will be used."""
 
-        self.link0 = self.link0 or []
+        self.link0 = self.link0 or ["NProcShared"]
         if self._output_chk and any("chk" in l0 for l0 in self.link0):
             self.link0.append(f"chk={self.path.with_suffix('.chk')}")
 
@@ -296,7 +296,8 @@ class GJF(ReadFile, WriteFile, HasAtoms):
         if self.spin_multiplicity < 1:
             raise ValueError(f"Spin multiplicity cannot be {self.spin_multiplicity}.")
         if len(self.atoms) == 0:
-            raise ValueError("There are no atoms to write to gjf file.")
+            raise ValueError("There are no atoms to " \
+            " to gjf file.")
 
     def _write_file(self, path: Path, *args, **kwargs):
         fmtstr = "12.8f"
