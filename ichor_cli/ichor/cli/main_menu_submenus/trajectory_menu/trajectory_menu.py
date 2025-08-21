@@ -80,7 +80,7 @@ class TrajectoryFunctions:
     def split_trajectory_into_many_points_directories():
         """function that splits a given trajectory into many PointsDirectory-like directories."""
         default_split_size = 5000
-        default_to_center = False
+        default_to_center = True
         default_every = 1
 
         nsplit = user_input_int(
