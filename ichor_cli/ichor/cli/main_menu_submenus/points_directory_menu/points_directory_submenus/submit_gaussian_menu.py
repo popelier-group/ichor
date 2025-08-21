@@ -96,7 +96,7 @@ class SubmitGaussianFunctions:
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
             submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
-            submit_gaussian_menu_options.selected_force_calculate_wfn,          
+            submit_gaussian_menu_options.selected_force_calculate_wfn,
         )
 
         is_parent_directory_to_many_points_directories = (

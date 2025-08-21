@@ -296,8 +296,7 @@ class GJF(ReadFile, WriteFile, HasAtoms):
         if self.spin_multiplicity < 1:
             raise ValueError(f"Spin multiplicity cannot be {self.spin_multiplicity}.")
         if len(self.atoms) == 0:
-            raise ValueError("There are no atoms to " \
-            " to gjf file.")
+            raise ValueError("There are no atoms to " " to gjf file.")
 
     def _write_file(self, path: Path, *args, **kwargs):
         fmtstr = "12.8f"

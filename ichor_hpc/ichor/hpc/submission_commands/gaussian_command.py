@@ -27,7 +27,7 @@ class GaussianCommand(SubmissionCommand):
 
     def __init__(
         self,
-        ncores: int, 
+        ncores: int,
         gjf_file: Path,
         gjf_output: Optional[Path] = None,
     ):
@@ -69,14 +69,14 @@ class GaussianCommand(SubmissionCommand):
             ichor.hpc.global_variables.ICHOR_CONFIG,
             ichor.hpc.global_variables.MACHINE,
             "hpc",
-            "memory_per_core_gb"
+            "memory_per_core_gb",
         )
 
     def total_gaussian_memory(self) -> str:
         """Calculates the total memory to tell Gaussian to use
         Calculated as (memory_per_core - 1) * number_of_cores"""
 
-        mem = (GaussianCommand.memory_per_core-1)*self.ncores
+        mem = (GaussianCommand.memory_per_core - 1) * self.ncores
 
         return f"export GAUSS_MDEF={mem}GB"
 
