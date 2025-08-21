@@ -91,14 +91,15 @@ class SubmitGaussianFunctions:
     def points_directory_to_gaussian_on_compute():
         """Submits a single PointsDirectory to Gaussian on compute."""
 
-        (method, basis_set, ncores, overwrite_existing, force_calculate_wfn, link0) = (
+        (method, basis_set, ncores, overwrite_existing, force_calculate_wfn) = (
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
             submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
-            submit_gaussian_menu_options.selected_force_calculate_wfn,
-            ["NProcShared={ncores}"],
+            submit_gaussian_menu_options.selected_force_calculate_wfn,          
         )
+
+        link0 = [f"NProcShared={ncores}"]
 
         is_parent_directory_to_many_points_directories = (
             single_or_many_points_directories(
