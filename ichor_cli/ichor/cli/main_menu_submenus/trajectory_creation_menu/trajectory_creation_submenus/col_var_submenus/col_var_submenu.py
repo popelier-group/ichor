@@ -124,14 +124,53 @@ def print_functional_groups(mol):
 
 
 def print_rotatable_bonds(mol):
-    # Get number of rotatable bonds
-    num_rot_bonds = rdMolDescriptors.CalcNumRotatableBonds(mol)
-    print(f"Number of rotatable bonds: {num_rot_bonds}")
+    rotatable_bonds = []
+    for bond in mol.GetBonds():
+        # Criteria: single bond, not in ring, between non-terminal heavy atoms
+        if bond.GetBondType() == Chem.rdchem.BondType.SINGLE and not bond.IsInRing():
+            a1 = bond.GetBeginAtom()
+            a2 = bond.GetEndAtom()
+            if a1.GetDegree() > 1 and a2.GetDegree() > 1:
+                rotatable_bonds.append((a1.GetIdx(), a2.GetIdx()))
 
-    # Get atom indices for each rotatable bond
-    rot_bond_atoms = rdMolDescriptors.CalcRotatableBondAtoms(mol)
-    for i, (a1, a2) in enumerate(rot_bond_atoms):
+    print(f"Number of rotatable bonds: {len(rotatable_bonds)}")
+    for i, (a1, a2) in enumerate(rotatable_bonds):
         print(f"Rotatable bond {i+1}: atoms {a1} - {a2}")
+
+
+def print_dihedrals(mol):
+    dihedrals = []
+    for bond in mol.GetBonds():
+        if bond.GetBondType() != Chem.rdchem.BondType.SINGLE or bond.IsInRing():
+            continue
+        a1 = bond.GetBeginAtom()
+        a2 = bond.GetEndAtom()
+        if a1.GetDegree() <= 1 or a2.GetDegree() <= 1:
+            continue
+        # Find neighbor of a1 that's not a2
+        a0 = next(
+            (
+                nbr
+                for nbr in a1.GetNeighbors()
+                if nbr.GetIdx() != a2.GetIdx() and nbr.GetAtomicNum() > 1
+            ),
+            None,
+        )
+        # Find neighbor of a2 that's not a1
+        a3 = next(
+            (
+                nbr
+                for nbr in a2.GetNeighbors()
+                if nbr.GetIdx() != a1.GetIdx() and nbr.GetAtomicNum() > 1
+            ),
+            None,
+        )
+        if a0 and a3:
+            dihedrals.append((a0.GetIdx(), a1.GetIdx(), a2.GetIdx(), a3.GetIdx()))
+
+    print(f"Number of rotatable dihedrals: {len(dihedrals)}")
+    for i, (a0, a1, a2, a3) in enumerate(dihedrals):
+        print(f"Dihedral {i+1}: atoms {a0} - {a1} - {a2} - {a3}")
 
 
 def print_hbond_info(mol):
@@ -186,6 +225,7 @@ class ColVarMenuFunctions:
         print_functional_groups(mol)
         print_rotatable_bonds(mol)
         print_hbond_info(mol)
+        print_dihedrals(mol)
 
         answer = ""
         user_input_free_flow("Press enter to continue: ", answer)
