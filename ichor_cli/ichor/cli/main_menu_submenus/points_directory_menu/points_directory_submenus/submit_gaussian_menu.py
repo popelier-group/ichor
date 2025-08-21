@@ -91,7 +91,8 @@ class SubmitGaussianFunctions:
     def points_directory_to_gaussian_on_compute():
         """Submits a single PointsDirectory to Gaussian on compute."""
 
-        (method, basis_set, ncores, overwrite_existing, force_calculate_wfn,) = (
+        (link0, method, basis_set, ncores, overwrite_existing, force_calculate_wfn,) = (
+            ["NProcShared={nproc}",],
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
@@ -121,6 +122,7 @@ class SubmitGaussianFunctions:
                     overwrite_existing=overwrite_existing,
                     force_calculate_wfn=force_calculate_wfn,
                     ncores=ncores,
+                    link0=link0,
                     method=method,
                     basis_set=basis_set,
                     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[

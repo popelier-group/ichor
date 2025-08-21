@@ -129,8 +129,8 @@ class GJF(ReadFile, WriteFile, HasAtoms):
             No checks are done for CPU core count.
 
         """
-        nproc = f"nproc={nproc}"
-        n = self._find_in_link("nproc")
+        nproc = f"NProcShared={nproc}"
+        n = self._find_in_link("NProcShared")
         if n is None:
             self.link0.append(nproc)
         else:
@@ -147,8 +147,8 @@ class GJF(ReadFile, WriteFile, HasAtoms):
             This is not checked internally.
 
         """
-        mem = f"mem={mem}"
-        n = self._find_in_link("mem")
+        mem = f"Mem={mem}"
+        n = self._find_in_link("Mem")
         if n is None:
             self.link0.append(mem)
         else:
