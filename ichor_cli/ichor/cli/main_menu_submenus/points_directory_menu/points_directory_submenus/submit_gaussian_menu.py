@@ -92,7 +92,7 @@ class SubmitGaussianFunctions:
         """Submits a single PointsDirectory to Gaussian on compute."""
 
         (link0, method, basis_set, ncores, overwrite_existing, force_calculate_wfn,) = (
-            ["NProcShared={nproc}",],
+            ["NProcShared={nproc}"],
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
