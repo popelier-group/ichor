@@ -16,6 +16,8 @@ from rdkit import Chem
 from rdkit.Chem import inchi, AllChem, Draw
 from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.Chem import rdDetermineBonds
+from rdkit.Chem import rdMolDescriptors
+
 
 # Define SMARTS patterns for common functional groups
 functional_groups = {
@@ -121,6 +123,35 @@ def print_functional_groups(mol):
             print("  " + ", ".join(atoms))
 
 
+def print_rotatable_bonds(mol):
+    # Get number of rotatable bonds
+    num_rot_bonds = rdMolDescriptors.CalcNumRotatableBonds(mol)
+    print(f"Number of rotatable bonds: {num_rot_bonds}")
+
+    # Get atom indices for each rotatable bond
+    rot_bond_atoms = rdMolDescriptors.CalcRotatableBondAtoms(mol)
+    for i, (a1, a2) in enumerate(rot_bond_atoms):
+        print(f"Rotatable bond {i+1}: atoms {a1} - {a2}")
+
+
+def print_hbond_info(mol):
+    donors = rdMolDescriptors.CalcNumHBD(mol)
+    acceptors = rdMolDescriptors.CalcNumHBA(mol)
+
+    print(f"H-bond donors: {donors}")
+    print(f"H-bond acceptors: {acceptors}")
+    # Donor: [!H0;#7,#8] — N or O with at least one hydrogen
+    donor_smarts = Chem.MolFromSmarts("[!H0;#7,#8]")
+    donor_matches = mol.GetSubstructMatches(donor_smarts)
+
+    # Acceptor: [#8,#7] — O or N atoms
+    acceptor_smarts = Chem.MolFromSmarts("[#8,#7]")
+    acceptor_matches = mol.GetSubstructMatches(acceptor_smarts)
+
+    print("Donor atom indices:", donor_matches)
+    print("Acceptor atom indices:", acceptor_matches)
+
+
 COL_VAR_MENU_DEFAULTS = {
     "default_num_vars": 1,
 }
@@ -153,6 +184,8 @@ class ColVarMenuFunctions:
         print_neighbour_information(mol)
         print_ring_information(mol)
         print_functional_groups(mol)
+        print_rotatable_bonds(mol)
+        print_hbond_info(mol)
 
         answer = ""
         user_input_free_flow("Press enter to continue: ", answer)
