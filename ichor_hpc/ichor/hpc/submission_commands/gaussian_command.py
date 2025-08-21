@@ -99,6 +99,6 @@ class GaussianCommand(SubmissionCommand):
 
         # variables[0] ${arr1[$SGE_TASK_ID-1]}, variables[1] ${arr2[$SGE_TASK_ID-1]}
         cmd = f"export GAUSS_SCRDIR=$(dirname {variables[0]})\n{GaussianCommand.command} {variables[0]} {variables[1]}"
-        cmd += f"\n{GaussianCommand.total_gaussian_memory()}"
+        cmd += f"\n{self.total_gaussian_memory()}"
 
         return cmd
