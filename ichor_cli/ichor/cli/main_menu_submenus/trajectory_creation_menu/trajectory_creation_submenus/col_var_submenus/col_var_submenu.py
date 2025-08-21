@@ -15,6 +15,7 @@ from ichor.cli.useful_functions import (
 from rdkit import Chem
 from rdkit.Chem import inchi, AllChem, Draw
 from rdkit.Chem.Draw import rdMolDraw2D
+from rdkit.Chem import rdDetermineBonds
 
 # Define SMARTS patterns for common functional groups
 functional_groups = {
@@ -52,8 +53,9 @@ def convert_xyz_to_mol(xyz_file):
     xyz_path = Path(xyz_file)
     if xyz_path.exists() and xyz_path.is_file() and xyz_path.suffix == ".xyz":
         # convert to mol
-        loaded_mol = Chem.rdmolfiles.MolFromXYZFile(str(xyz_path))
-        Chem.SanitizeMol(loaded_mol)
+        mol = Chem.rdmolfiles.MolFromXYZFile(str(xyz_path))
+        loaded_mol = Chem.Mol(mol)
+        rdDetermineBonds.DetermineBonds(loaded_mol)
         print("LOADING MOLECULE INTO RDKIT")
         return loaded_mol
     else:
