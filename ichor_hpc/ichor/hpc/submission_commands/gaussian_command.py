@@ -72,14 +72,13 @@ class GaussianCommand(SubmissionCommand):
             "memory_per_core_gb"
         )
 
-    @classmethod
     def total_gaussian_memory(self) -> str:
         """Calculates the total memory to tell Gaussian to use
         Calculated as (memory_per_core - 1) * number_of_cores"""
 
         mem = (GaussianCommand.memory_per_core-1)*self.ncores
 
-        return mem
+        return f"export GAUSS_MDEF={mem}GB"
 
     @classproperty
     def group(self) -> bool:
@@ -100,6 +99,6 @@ class GaussianCommand(SubmissionCommand):
 
         # variables[0] ${arr1[$SGE_TASK_ID-1]}, variables[1] ${arr2[$SGE_TASK_ID-1]}
         cmd = f"export GAUSS_SCRDIR=$(dirname {variables[0]})\n{GaussianCommand.command} {variables[0]} {variables[1]}"
-        cmd += f"{GaussianCommand.total_gaussian_memory}"
+        cmd += f"\n{GaussianCommand.total_gaussian_memory()}"
 
         return cmd

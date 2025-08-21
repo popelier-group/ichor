@@ -99,8 +99,6 @@ class SubmitGaussianFunctions:
             submit_gaussian_menu_options.selected_force_calculate_wfn,          
         )
 
-        link0 = [f"NProcShared={ncores}"]
-
         is_parent_directory_to_many_points_directories = (
             single_or_many_points_directories(
                 ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
@@ -123,7 +121,6 @@ class SubmitGaussianFunctions:
                     overwrite_existing=overwrite_existing,
                     force_calculate_wfn=force_calculate_wfn,
                     ncores=ncores,
-                    link0=link0,
                     method=method,
                     basis_set=basis_set,
                     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
@@ -147,7 +144,6 @@ class SubmitGaussianFunctions:
                 overwrite_existing=overwrite_existing,
                 force_calculate_wfn=force_calculate_wfn,
                 ncores=ncores,
-                link0=link0,
                 method=method,
                 basis_set=basis_set,
                 outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]

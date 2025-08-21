@@ -262,7 +262,7 @@ class GJF(ReadFile, WriteFile, HasAtoms):
         So if an attribute is still FileContents, an empty string, an empty list, etc.,
         then default values will be used."""
 
-        self.link0 = self.link0 or ["NProcShared"]
+        self.link0 = self.link0 or []
         if self._output_chk and any("chk" in l0 for l0 in self.link0):
             self.link0.append(f"chk={self.path.with_suffix('.chk')}")
 
