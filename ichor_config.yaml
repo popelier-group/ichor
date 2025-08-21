@@ -1,7 +1,8 @@
 csf3:
 
   hpc:
-
+  
+    memory_per_core_gb: 8
     parallel_environments:
       serial: [1, 1]
       multicore: [2, 32]
@@ -45,6 +46,7 @@ csf4:
 
   hpc:
 
+    memory_per_core_gb: 4
     parallel_environments:
       serial: [1, 1]
       multicore: [2, 32]
