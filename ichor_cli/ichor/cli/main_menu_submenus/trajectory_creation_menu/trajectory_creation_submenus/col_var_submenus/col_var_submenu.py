@@ -65,6 +65,7 @@ def convert_xyz_to_mol(xyz_file):
 
 
 def print_molecule_information(mol):
+    print("MOLECULE DESCRIPTORS\n")
     ## molecule descriptors
     # smiles
     smiles = Chem.MolToSmiles(mol, canonical=True)
@@ -77,11 +78,12 @@ def print_molecule_information(mol):
 
 
 def print_neighbour_information(mol):
+    print("NEIGHBOUR INFORMATION\n")
     # sanitise and add hydrogens
     mol = Chem.AddHs(mol)
 
     ## list atoms and their neighbours
-    print("Neighbour list: \n")
+    print("Neighbour list: ")
     for atom in mol.GetAtoms():
         idx = atom.GetIdx()
         symbol = atom.GetSymbol()
@@ -91,6 +93,7 @@ def print_neighbour_information(mol):
 
 
 def print_ring_information(mol):
+    print("RING INFORMATION\n")
     # Get all rings (as tuples of atom indices)
     ring_info = mol.GetRingInfo()
     atom_rings = ring_info.AtomRings()
@@ -105,6 +108,7 @@ def print_ring_information(mol):
 
 
 def print_functional_groups(mol):
+    print("FUNCTIONAL GROUP INFORMATION\n")
     groups = {}
     for name, smarts in functional_groups.items():
         patt = Chem.MolFromSmarts(smarts)
@@ -124,6 +128,7 @@ def print_functional_groups(mol):
 
 
 def print_rotatable_bonds(mol):
+    print("ROTATABLE BOND INFORMATION\n")
     rotatable_bonds = []
     for bond in mol.GetBonds():
         # Criteria: single bond, not in ring, between non-terminal heavy atoms
@@ -139,6 +144,7 @@ def print_rotatable_bonds(mol):
 
 
 def print_dihedrals(mol):
+    print("ROTATABLE DIHEDRAL INFORMATION\n")
     dihedrals = []
     for bond in mol.GetBonds():
         if bond.GetBondType() != Chem.rdchem.BondType.SINGLE or bond.IsInRing():
@@ -174,6 +180,7 @@ def print_dihedrals(mol):
 
 
 def print_hbond_info(mol):
+    print("HYDROGEN BOND INFORMATION\n")
     donors = rdMolDescriptors.CalcNumHBD(mol)
     acceptors = rdMolDescriptors.CalcNumHBA(mol)
 
