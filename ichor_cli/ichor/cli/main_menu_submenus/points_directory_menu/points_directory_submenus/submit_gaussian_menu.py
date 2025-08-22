@@ -100,9 +100,11 @@ class SubmitGaussianFunctions:
             submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
             submit_gaussian_menu_options.selected_force_calculate_wfn,
         )
+
+        # add memory link0 to GJF
         mem_per_core = GaussianCommand.memory_per_core
         mem = (mem_per_core-1)*ncores
-        link0=[f"%NProcShared={ncores}", f"%Mem={mem}"]
+        link0=[f"NProcShared={ncores}", f"Mem={mem}"]
 
         is_parent_directory_to_many_points_directories = (
             single_or_many_points_directories(
