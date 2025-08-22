@@ -88,7 +88,6 @@ class SubmitGaussianFunctions:
             submit_gaussian_menu_options.selected_force_calculate_wfn,
         )
 
-
     @staticmethod
     def points_directory_to_gaussian_on_compute():
         """Submits a single PointsDirectory to Gaussian on compute."""
@@ -103,8 +102,8 @@ class SubmitGaussianFunctions:
 
         # add memory link0 to GJF
         mem_per_core = GaussianCommand.memory_per_core
-        mem = (mem_per_core-1)*ncores
-        link0=[f"NProcShared={ncores}", f"Mem={mem}"]
+        mem = (mem_per_core - 1) * ncores
+        link0 = [f"NProcShared={ncores}", f"Mem={mem}"]
 
         is_parent_directory_to_many_points_directories = (
             single_or_many_points_directories(
