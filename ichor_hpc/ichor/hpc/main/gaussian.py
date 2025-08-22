@@ -200,7 +200,7 @@ def submit_gjfs(
             # (even if wfn file exits) or a wfn file does not exist
             if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():
                 # make a list of GaussianCommand instances.
-                submission_script.add_command(GaussianCommand(gjf))
+                submission_script.add_command(GaussianCommand(ncores, gjf))
                 number_of_jobs += 1
 
             # case where the wfn file exists but does not have total energy
@@ -214,7 +214,7 @@ def submit_gjfs(
                 # then add to list of files to run Gaussian on
                 except StopIteration:
 
-                    submission_script.add_command(GaussianCommand(gjf))
+                    submission_script.add_command(GaussianCommand(ncores, gjf))
                     number_of_jobs += 1
 
         ichor.hpc.global_variables.LOGGER.info(

@@ -27,9 +27,11 @@ class GaussianCommand(SubmissionCommand):
 
     def __init__(
         self,
+        ncores: int,
         gjf_file: Path,
         gjf_output: Optional[Path] = None,
     ):
+        self.ncores = ncores
         self.gjf_file = gjf_file
         # .gau file used to store the output from Gaussian
         self.gjf_output = gjf_output or gjf_file.with_suffix(
@@ -60,6 +62,25 @@ class GaussianCommand(SubmissionCommand):
         )
 
     @classproperty
+    def memory_per_core(self) -> int:
+        """Returns the memory per core user wants per Gaussian job"""
+
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "hpc",
+            "memory_per_core_gb",
+        )
+
+    def total_gaussian_memory(self) -> str:
+        """Calculates the total memory to tell Gaussian to use
+        Calculated as (memory_per_core - 1) * number_of_cores"""
+
+        mem = (GaussianCommand.memory_per_core - 1) * self.ncores
+
+        return f"export GAUSS_MDEF={mem}GB"
+
+    @classproperty
     def group(self) -> bool:
         """Group jobs into an array job."""
         return True
@@ -77,6 +98,8 @@ class GaussianCommand(SubmissionCommand):
         """
 
         # variables[0] ${arr1[$SGE_TASK_ID-1]}, variables[1] ${arr2[$SGE_TASK_ID-1]}
-        cmd = f"export GAUSS_SCRDIR=$(dirname {variables[0]})\n{GaussianCommand.command} {variables[0]} {variables[1]}"
+        cmd = f"export GAUSS_SCRDIR=$(dirname {variables[0]})"
+        cmd += f"\n{self.total_gaussian_memory()}"
+        cmd += f"\n{GaussianCommand.command} {variables[0]} {variables[1]}"
 
         return cmd
