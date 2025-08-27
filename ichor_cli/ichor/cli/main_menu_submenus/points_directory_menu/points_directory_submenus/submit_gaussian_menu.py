@@ -14,6 +14,7 @@ from ichor.cli.useful_functions import (
 from ichor.core.files import PointsDirectory
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main import submit_points_directory_to_gaussian
+from ichor.hpc.submission_commands import GaussianCommand
 
 SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
     "Submit Gaussian Menu",
@@ -91,13 +92,18 @@ class SubmitGaussianFunctions:
     def points_directory_to_gaussian_on_compute():
         """Submits a single PointsDirectory to Gaussian on compute."""
 
-        (method, basis_set, ncores, overwrite_existing, force_calculate_wfn,) = (
+        (method, basis_set, ncores, overwrite_existing, force_calculate_wfn) = (
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
             submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
             submit_gaussian_menu_options.selected_force_calculate_wfn,
         )
+
+        # add memory link0 to GJF
+        mem_per_core = GaussianCommand.memory_per_core
+        mem = (mem_per_core - 1) * ncores
+        link0 = [f"NProcShared={ncores}", f"Mem={mem}"]
 
         is_parent_directory_to_many_points_directories = (
             single_or_many_points_directories(
@@ -123,6 +129,7 @@ class SubmitGaussianFunctions:
                     ncores=ncores,
                     method=method,
                     basis_set=basis_set,
+                    link0=link0,
                     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
                         "outputs"
                     ]
@@ -146,6 +153,7 @@ class SubmitGaussianFunctions:
                 ncores=ncores,
                 method=method,
                 basis_set=basis_set,
+                link0=link0,
                 outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
                 / pd.path.name
                 / "GAUSSIAN",
