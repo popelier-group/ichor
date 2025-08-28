@@ -71,8 +71,8 @@ def calculate_alf_features(
 
     # return array if only 2 atoms, i.e. only 1 feature needed
     if len(atom.parent) == 2:
-        feature_array[0] = 1.0 / x_bond_norm
-        # feature_array[0] = x_bond_norm
+        # feature_array[0] = 1.0 / x_bond_norm
+        feature_array[0] = x_bond_norm
         return feature_array
 
     # this code is only needed if atom.parent is more than 2 atoms (so it has 3N-6 features)
@@ -90,8 +90,10 @@ def calculate_alf_features(
 
     cos_chi = np.dot(x_axis_vect, xy_plane_vect.T) / (x_bond_norm * xy_bond_norm)
 
-    feature_array[0] = 1.0 / x_bond_norm
-    feature_array[1] = 1.0 / xy_bond_norm
+    # feature_array[0] = 1.0 / x_bond_norm
+    # feature_array[1] = 1.0 / xy_bond_norm
+    feature_array[0] = x_bond_norm
+    feature_array[1] = xy_bond_norm
     feature_array[2] = cos_chi
 
     c_matrix = calculate_c_matrix(atom, alf)
@@ -112,8 +114,8 @@ def calculate_alf_features(
 
             r_vect = unit_conversion * (jatom.coordinates - atom.coordinates)
             r_vect_norm = np.linalg.norm(r_vect)
-            feature_array[i_feat] = 1.0 / r_vect_norm
-            # feature_array[i_feat] = r_vect_norm
+            # feature_array[i_feat] = 1.0 / r_vect_norm
+            feature_array[i_feat] = r_vect_norm
 
             i_feat += 1
 
