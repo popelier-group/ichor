@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from ase import io
+
 from rdkit import Chem
 from rdkit.Chem import inchi, AllChem, Draw
 from rdkit.Chem.Draw import rdMolDraw2D
@@ -58,9 +60,15 @@ class Metadynamics_In:
 
 
 def convert_xyz_to_mol(xyz_file):
-
     xyz_path = Path(xyz_file)
     if xyz_path.exists() and xyz_path.is_file() and xyz_path.suffix == ".xyz":
+        # ensure only xyz columns present
+        loaded_atoms = io.read(xyz_path)
+        io.write(
+            filename=str(xyz_path),
+            images=loaded_atoms,
+            format="xyz",
+        )
         # convert to mol
         mol = Chem.rdmolfiles.MolFromXYZFile(str(xyz_path))
         loaded_mol = Chem.Mol(mol)
