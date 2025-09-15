@@ -215,6 +215,7 @@ SCRIPT_NAMES = ScriptNames(
         "pd_to_database": "pd_to_database.sh",
         "calculate_features": "calculate_features.sh",
         "center_trajectory": "center_trajectory.sh",
+        "diversity_sampling": "diversity_sampling.sh",
         "gaussian": "GAUSSIAN.sh",
         "orca": "ORCA.sh",
         "aimall": "AIMALL.sh",

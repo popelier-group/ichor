@@ -101,6 +101,4 @@ class DiversityScript(WriteFile, File):
             sample_size = self.sample_size,
         )
 
-        print(script_text)
-
         return(script_text)
