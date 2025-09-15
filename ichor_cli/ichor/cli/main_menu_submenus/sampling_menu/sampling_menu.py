@@ -6,8 +6,8 @@ import ichor.cli.global_menu_variables
 from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.sampling_menu.sampling_submenus import (
-    submit_ase_menu,
-    SUBMIT_ASE_MENU_DESCRIPTION,
+    submit_diversity_submenu,
+    SUBMIT_DIVERSITY_MENU_DESCRIPTION,
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
@@ -101,8 +101,8 @@ sampling_menu_items = [
         SamplingFunctions.select_xyz,
     ),
     SubmenuItem(
-        SUBMIT_ASE_MENU_DESCRIPTION.title,
-        submit_ase_menu,
+        SUBMIT_DIVERSITY_MENU_DESCRIPTION.title,
+        submit_diversity_submenu,
         sampling_menu,
     ),
 ]

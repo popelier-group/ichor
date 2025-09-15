@@ -11,13 +11,14 @@ from ichor.hpc.submission_commands import PythonCommand
 from ichor.hpc.submission_script import SubmissionScript
 
 def write_diversity_sampling(
-        # trajectory_path: Union[str, Path],
-        # input_xyz_path: Union[str, Path],
-        # weights=False,
-        # sample_size=10000,
+        input_traj_path: Union[str, Path],
+        input_xyz_path: Union[str, Path],
         hold: JobID = None,
         **kwargs,
     ) -> Optional[JobID]:
+
+    input_traj_path
+    input_xyz_path
     
     diversity.write()
 

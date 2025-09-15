@@ -11,7 +11,7 @@ from ichor.cli.useful_functions import (
     user_input_bool,
     user_input_int,
 )
-from ichor.hpc.main.ase import submit_single_ase_xyz
+from ichor.hpc.main.polus import write_diversity_sampling
 
 
 SUBMIT_DIVERSITY_MENU_DESCRIPTION = MenuDescription(
@@ -88,7 +88,7 @@ class SubmitDiversityFunctions:
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
         trajectory_path=Path(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
 
-        submit_single_ase_xyz(
+        write_diversity_sampling(
             input_trajector=trajectory_path,
             input_xyz_path=xyz_path,
             ncores=ncores,
@@ -109,16 +109,16 @@ class SubmitDiversityFunctions:
 # can use lambda functions to change text of options as well :)
 submit_diversity_menu_items = [
     FunctionItem(
-        "Change method",
-        SubmitDiversityFunctions.select_method,
-    ),
-    FunctionItem(
         "Change cores",
         SubmitDiversityFunctions.select_number_of_cores,
     ),
     FunctionItem(
-        "Change solvent",
-        SubmitDiversityFunctions.select_solvent,
+        "Change weights",
+        SubmitDiversityFunctions.select_weights,
+    ),
+    FunctionItem(
+        "Change sample size",
+        SubmitDiversityFunctions.select_sample_size,
     ),
 
 ]
