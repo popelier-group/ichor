@@ -88,14 +88,19 @@ class SubmitDiversityFunctions:
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
         trajectory_path=Path(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
 
-        submit_polus(write_diversity_sampling(
+
+        div_script = write_diversity_sampling(
             input_traj_path=trajectory_path,
             input_xyz_path=xyz_path,
-            ncores=ncores,
             weights=weights,
             sample_size=sample_size,
         )
+
+        submit_polus(
+            div_input_script=div_script,
+            ncores=ncores,
         )
+
 
         SUBMIT_DIVERSITY_MENU_DESCRIPTION.prologue_description_text = (
             "Successfully submitted diversity sampling \n"
