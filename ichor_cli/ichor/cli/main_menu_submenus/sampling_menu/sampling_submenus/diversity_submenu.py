@@ -11,7 +11,7 @@ from ichor.cli.useful_functions import (
     user_input_bool,
     user_input_int,
 )
-from ichor.hpc.main.polus import submit_polus
+from ichor.hpc.main.polus import submit_polus, write_diversity_sampling
 
 
 SUBMIT_DIVERSITY_MENU_DESCRIPTION = MenuDescription(
@@ -88,12 +88,13 @@ class SubmitDiversityFunctions:
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
         trajectory_path=Path(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
 
-        submit_polus(
+        submit_polus(write_diversity_sampling(
             input_trajectory=trajectory_path,
             input_xyz_path=xyz_path,
             ncores=ncores,
             weights=weights,
             sample_size=sample_size,
+        )
         )
 
         SUBMIT_DIVERSITY_MENU_DESCRIPTION.prologue_description_text = (
