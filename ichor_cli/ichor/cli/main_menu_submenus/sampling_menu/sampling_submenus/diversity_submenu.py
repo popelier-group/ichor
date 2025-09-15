@@ -89,7 +89,7 @@ class SubmitDiversityFunctions:
         trajectory_path=Path(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
 
         submit_polus(write_diversity_sampling(
-            input_trajectory=trajectory_path,
+            input_traj_path=trajectory_path,
             input_xyz_path=xyz_path,
             ncores=ncores,
             weights=weights,
