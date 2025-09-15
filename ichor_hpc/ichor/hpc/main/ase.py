@@ -163,9 +163,7 @@ def submit_xtb(
     the datafile and will not submit any new jobs
     from the compute node (as you cannot submit jobs from compute nodes on CSF3.)
 
-    :param gjfs: A list of Path objects pointing to .gjf files
-    :param force_calculate_wfn: Run Gaussian calculations on given .gjf files,
-        even if .wfn files already exist. Defaults to False.
+    :param xtbs: A list of Path objects pointing to xtb input files
     :script_name: Path to write submission script out to defaults to ichor.hpc.global_variables.SCRIPT_NAMES["gaussian"]
     :param hold: An optional JobID for which this job to hold.
         This is used in auto-run to hold this job for the previous job to finish, defaults to None

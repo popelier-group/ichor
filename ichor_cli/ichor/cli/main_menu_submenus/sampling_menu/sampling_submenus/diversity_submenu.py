@@ -11,7 +11,7 @@ from ichor.cli.useful_functions import (
     user_input_bool,
     user_input_int,
 )
-from ichor.hpc.main.polus import write_diversity_sampling
+from ichor.hpc.main.polus import submit_polus
 
 
 SUBMIT_DIVERSITY_MENU_DESCRIPTION = MenuDescription(
@@ -73,7 +73,7 @@ class SubmitDiversityFunctions:
         )
 
     @staticmethod
-    def xyz_to_ase_on_compute():
+    def submit_diversity_on_compute():
         """Creates and submits an optimisation using ase calculator."""
         (
             ncores,
@@ -88,7 +88,7 @@ class SubmitDiversityFunctions:
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
         trajectory_path=Path(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
 
-        write_diversity_sampling(
+        submit_polus(
             input_trajector=trajectory_path,
             input_xyz_path=xyz_path,
             ncores=ncores,
@@ -97,7 +97,7 @@ class SubmitDiversityFunctions:
         )
 
         SUBMIT_DIVERSITY_MENU_DESCRIPTION.prologue_description_text = (
-            "XYZ optimisation submitted successfully to ASE \n"
+            "Successfully submitted diversity sampling \n"
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
@@ -120,7 +120,10 @@ submit_diversity_menu_items = [
         "Change sample size",
         SubmitDiversityFunctions.select_sample_size,
     ),
-
+    FunctionItem(
+        "Submit diversity sampler",
+        SubmitDiversityFunctions.submit_diversity_on_compute,
+    ),
 ]
 
 # initialize menu
