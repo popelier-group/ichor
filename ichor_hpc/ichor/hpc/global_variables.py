@@ -181,6 +181,12 @@ FILE_STRUCTURE.add(
         the inputs/outputs in the job script itself.""",
 )
 FILE_STRUCTURE.add(
+    "DIVERSITY_SAMPLING",
+    "diversity_sampling",
+    type_=FileType.Directory,
+    description="""Directory containing diversity sampled trajectory""",
+)
+FILE_STRUCTURE.add(
     "CP2K",
     "cp2k",
     type_=FileType.Directory,
@@ -215,6 +221,7 @@ SCRIPT_NAMES = ScriptNames(
         "pd_to_database": "pd_to_database.sh",
         "calculate_features": "calculate_features.sh",
         "center_trajectory": "center_trajectory.sh",
+        "diversity_sampling": "diversity_sampling.sh",
         "gaussian": "GAUSSIAN.sh",
         "orca": "ORCA.sh",
         "aimall": "AIMALL.sh",
