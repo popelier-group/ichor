@@ -91,7 +91,7 @@ class SubmitDiversityFunctions:
 
         div_script = write_diversity_sampling(
             filename=trajectory_path,
-            input_xyz_path=xyz_path,
+            seed_geom=xyz_path,
             weights_vector=weights,
             sample_size=sample_size,
         )
