@@ -22,7 +22,6 @@ def write_diversity_sampling(
     input_filename = (
         "diversity_input" + DiversityScript.get_filetype()
     )
-    shutil.move(input_filename,output_dir)
 
     div_input_script = DiversityScript(
         Path(input_filename),
@@ -31,6 +30,7 @@ def write_diversity_sampling(
         filename=filename,
         **kwargs)
     div_input_script.write()
+    shutil.move(input_filename,output_dir)
 
     return div_input_script.path
 
