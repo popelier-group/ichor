@@ -20,7 +20,7 @@ def write_diversity_sampling(
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
     output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
     input_filename = (
-        filename + "_input" + DiversityScript.get_filetype()
+        filename.stem + "_input" + DiversityScript.get_filetype()
     )
 
     div_input_script = DiversityScript(
