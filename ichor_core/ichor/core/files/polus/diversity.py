@@ -45,17 +45,26 @@ class DiversityScript(WriteFile, File):
     def set_write_defaults_if_needed(
         self,
     ):
+         # defaults for strings/paths that can use `or`
         self.system_name = self.system_name or self.seed_geom.stem
         self.output_dir = self.output_dir or Path.cwd()
         self.weights_vector = self.weights_vector or "HL1:1"
-        self.group_average = self.group_average or False
-        self.write_ferebus_inputs = self.write_ferebus_inputs or False
-        self.chunk_size = self.chunk_size or 500
-        self.rotate_traj = self.rotate_traj or True
         self.rot_method = self.rot_method or "KU"
-        self.parallel = self.parallel or True
-        self.auto_stop = self.auto_stop or False
-        self.sample_size = self.sample_size or 10000
+
+        # defaults for booleans and numbers
+        defaults = {
+            "group_average": False,
+            "write_ferebus_inputs": False,
+            "rotate_traj": True,
+            "parallel": True,
+            "auto_stop": False,
+            "chunk_size": 500,
+            "sample_size": 10000,
+        }
+
+        for attr, default in defaults.items():
+            if getattr(self, attr) is None:
+                setattr(self, attr, default)
 
     # write file from a template
     def _write_file(self, path: Path, *args, **kwargs):
