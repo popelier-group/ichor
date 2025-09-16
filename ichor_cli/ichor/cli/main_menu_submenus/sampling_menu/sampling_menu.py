@@ -11,9 +11,7 @@ from ichor.cli.main_menu_submenus.sampling_menu.sampling_submenus import (
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions.user_input import (
-    user_input_path,
-)
+from ichor.cli.useful_functions.user_input import user_input_path
 
 
 SAMPLING_MENU_DESCRIPTION = MenuDescription(
@@ -70,6 +68,7 @@ class SamplingFunctions:
         sampling_menu_options.selected_trajectory_path = (
             ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH
         )
+
     @staticmethod
     def select_xyz():
         """Asks user to update the .xyz file and then updates the MolecularDynamicsMenuOptions instance."""
@@ -78,6 +77,7 @@ class SamplingFunctions:
         sampling_menu_options.selected_xyz_path = (
             ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
         )
+
 
 # initialize menu
 sampling_menu = ConsoleMenu(
@@ -92,10 +92,7 @@ sampling_menu = ConsoleMenu(
 # make menu items
 # can use lambda functions to change text of options as well :)
 sampling_menu_items = [
-    FunctionItem(
-        "Select path of trajectory", 
-        SamplingFunctions.select_trajectory
-    ),
+    FunctionItem("Select path of trajectory", SamplingFunctions.select_trajectory),
     FunctionItem(
         "Select xyz file containing a single optimised geometry",
         SamplingFunctions.select_xyz,

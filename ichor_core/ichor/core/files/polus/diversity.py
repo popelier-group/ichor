@@ -1,6 +1,6 @@
 import textwrap
 from pathlib import Path
-from string import Template 
+from string import Template
 from typing import Optional, Union
 
 from ichor.core.files.file import File, WriteFile
@@ -36,16 +36,15 @@ class DiversityScript(WriteFile, File):
         self.group_average: bool = group_average
         self.write_ferebus_inputs: bool = write_ferebus_inputs
         self.chunk_size: int = chunk_size
-        self.rotate_traj: bool= rotate_traj
+        self.rotate_traj: bool = rotate_traj
         self.rot_method: str = rot_method
         self.parallel: bool = parallel
         self.auto_stop: bool = auto_stop
         self.sample_size: int = sample_size
 
-
     def set_write_defaults_if_needed(
         self,
-    ):  
+    ):
         self.system_name = self.system_name or self.seed_geom.stem
         self.output_dir = self.output_dir or Path.cwd()
         self.weights_vector = self.weights_vector or "HL1:1"
@@ -63,45 +62,49 @@ class DiversityScript(WriteFile, File):
         self.set_write_defaults_if_needed()
 
         # set up template for polus script
-        polus_script_template = Template(textwrap.dedent("""
+        polus_script_template = Template(
+            textwrap.dedent(
+                """
         from polus.trajectories.commons import File
         from polus.trajectories.diversity import DIVSampler
         import numpy as np
 
         job = DIVSampler(
             systemName="$system_name",
-            weightsVector="$weights_vector",   
-            groupAverage=$group_average,  
+            weightsVector="$weights_vector",
+            groupAverage=$group_average,
             writeFerebusInputs=$write_ferebus_inputs,
             chunkSize=$chunk_size,
             rotateTraj=$rotate_traj,
-            rotMethod="$rot_method",                                 
+            rotMethod="$rot_method",
             parallel=$parallel,
             autoStop=$auto_stop,
             seedGeom="$seed_geom",
-            outputDir="$output_dir",                                                                                                                                                                     
+            outputDir="$output_dir",
             filename="$filename",
-            sampleSize= "[$sample_size]",                                
+            sampleSize= "[$sample_size]",
         )
 
-        job.Execute()                                                                   
-        """))
+        job.Execute()
+        """
+            )
+        )
 
         # subsitute template values into script
         script_text = polus_script_template.substitute(
-            system_name = self.system_name,
-            weights_vector = self.weights_vector,
-            group_average = self.group_average,
-            write_ferebus_inputs = self.write_ferebus_inputs,
-            chunk_size = self.chunk_size,
-            rotate_traj = self.rotate_traj,
-            rot_method = self.rot_method,
-            parallel = self.parallel,
-            auto_stop = self.auto_stop,
-            seed_geom = self.seed_geom,
-            output_dir = self.output_dir,
-            filename = self.filename,
-            sample_size = self.sample_size,
+            system_name=self.system_name,
+            weights_vector=self.weights_vector,
+            group_average=self.group_average,
+            write_ferebus_inputs=self.write_ferebus_inputs,
+            chunk_size=self.chunk_size,
+            rotate_traj=self.rotate_traj,
+            rot_method=self.rot_method,
+            parallel=self.parallel,
+            auto_stop=self.auto_stop,
+            seed_geom=self.seed_geom,
+            output_dir=self.output_dir,
+            filename=self.filename,
+            sample_size=self.sample_size,
         )
 
-        return(script_text)
+        return script_text

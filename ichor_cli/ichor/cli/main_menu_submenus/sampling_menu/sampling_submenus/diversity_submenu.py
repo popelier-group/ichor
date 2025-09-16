@@ -7,10 +7,7 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import (
-    user_input_bool,
-    user_input_int,
-)
+from ichor.cli.useful_functions import user_input_bool, user_input_int
 from ichor.hpc.main.polus import submit_polus, write_diversity_sampling
 
 
@@ -35,7 +32,9 @@ class SubmitDiversityMenuOptions(MenuOptions):
 
 
 # initialize dataclass for storing information for menu
-submit_diversity_menu_options = SubmitDiversityMenuOptions(*SUBMIT_DIVERSITY_MENU_DEFAULTS.values())
+submit_diversity_menu_options = SubmitDiversityMenuOptions(
+    *SUBMIT_DIVERSITY_MENU_DEFAULTS.values()
+)
 
 
 # class with static methods for each menu item that calls a function.
@@ -52,7 +51,8 @@ class SubmitDiversityFunctions:
     def select_weights():
         """Asks user to select weights for either all atoms or only heavy atoms"""
         submit_diversity_menu_options.selected_weights = user_input_bool(
-            "Restrict to heavy atoms (yes/no): ", submit_diversity_menu_options.selected_weights
+            "Restrict to heavy atoms (yes/no): ",
+            submit_diversity_menu_options.selected_weights,
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
@@ -75,11 +75,7 @@ class SubmitDiversityFunctions:
     @staticmethod
     def submit_diversity_on_compute():
         """Creates and submits an optimisation using ase calculator."""
-        (
-            ncores,
-            weights,
-            sample_size,
-        ) = (
+        (ncores, weights, sample_size,) = (
             submit_diversity_menu_options.selected_ncores,
             submit_diversity_menu_options.selected_weights,
             submit_diversity_menu_options.selected_sample_size,
@@ -91,8 +87,7 @@ class SubmitDiversityFunctions:
             weights_vector = "HL1:0"
 
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
-        trajectory_path=Path(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
-
+        trajectory_path = Path(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
 
         div_script = write_diversity_sampling(
             filename=trajectory_path,
@@ -105,7 +100,6 @@ class SubmitDiversityFunctions:
             div_input_script=div_script,
             ncores=ncores,
         )
-
 
         SUBMIT_DIVERSITY_MENU_DESCRIPTION.prologue_description_text = (
             "Successfully submitted diversity sampling \n"

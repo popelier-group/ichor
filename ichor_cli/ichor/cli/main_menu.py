@@ -91,9 +91,7 @@ main_menu_items = [
     SubmenuItem(
         INITIAL_STRUCTURE_MENU_DESCRIPTION.title, initial_structure_menu, main_menu
     ),
-    SubmenuItem(
-        SAMPLING_MENU_DESCRIPTION.title, sampling_menu, main_menu
-    ),
+    SubmenuItem(SAMPLING_MENU_DESCRIPTION.title, sampling_menu, main_menu),
     SubmenuItem(
         MOLECULAR_DYNAMICS_MENU_DESCRIPTION.title, molecular_dynamics_menu, main_menu
     ),

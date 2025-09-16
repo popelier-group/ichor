@@ -1,6 +1,6 @@
 import shutil
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
@@ -10,27 +10,27 @@ from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import PythonCommand
 from ichor.hpc.submission_script import SubmissionScript
 
+
 def write_diversity_sampling(
-        filename: Union[str, Path],
-        seed_geom: Union[str, Path],
-        hold: JobID = None,
-        **kwargs,
-    ) -> Optional[JobID]:
- 
+    filename: Union[str, Path],
+    seed_geom: Union[str, Path],
+    hold: JobID = None,
+    **kwargs,
+) -> Optional[JobID]:
+
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
     output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
-    input_filename = (
-        "diversity_input" + DiversityScript.get_filetype()
-    )
+    input_filename = "diversity_input" + DiversityScript.get_filetype()
 
     div_input_script = DiversityScript(
         Path(input_filename),
-        seed_geom=seed_geom, 
-        output_dir=output_dir,                           
+        seed_geom=seed_geom,
+        output_dir=output_dir,
         filename=filename,
-        **kwargs)
+        **kwargs,
+    )
     div_input_script.write()
-    shutil.move(input_filename,output_dir)
+    shutil.move(input_filename, output_dir)
 
     return div_input_script.path
 
@@ -44,7 +44,7 @@ def submit_polus(
     ncores=2,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
-    **kwargs
+    **kwargs,
 ) -> JobID:
     """Function that writes out a submission script which contains an array of
     Gaussian jobs to be ran on compute nodes. If calling this function from
@@ -74,17 +74,11 @@ def submit_polus(
         errors_dir_path=errors_dir_path,
     ) as submission_script:
 
-
         submission_script.add_command(PythonCommand(div_input_script))
 
-    # submit on compute node 
+    # submit on compute node
     if len(submission_script.grouped_commands) > 0:
-        ichor.hpc.global_variables.LOGGER.info(
-            f"Submitting diversity sampling job"
-        )
+        ichor.hpc.global_variables.LOGGER.info("Submitting diversity sampling job")
         return submission_script.submit(hold=hold)
     else:
         raise ValueError("There are no jobs to submit in the submission script.")
-
-
- 
