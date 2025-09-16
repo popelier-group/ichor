@@ -85,6 +85,11 @@ class SubmitDiversityFunctions:
             submit_diversity_menu_options.selected_sample_size,
         )
 
+        if not weights:
+            weights_vector = "HL1:1"
+        else:
+            weights_vector = "HL1:0"
+
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
         trajectory_path=Path(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
 
@@ -92,7 +97,7 @@ class SubmitDiversityFunctions:
         div_script = write_diversity_sampling(
             filename=trajectory_path,
             seed_geom=xyz_path,
-            weights_vector=weights,
+            weights_vector=weights_vector,
             sample_size=sample_size,
         )
 

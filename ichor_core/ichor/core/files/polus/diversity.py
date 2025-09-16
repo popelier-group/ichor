@@ -60,10 +60,11 @@ class DiversityScript(WriteFile, File):
 
     # write file from a template
     def _write_file(self, path: Path, *args, **kwargs):
-
+        self.set_write_defaults_if_needed()
+        
         # set up template for polus script
-        polus_script_template = Template(textwrap.dedent("""
-        from polus.trajectories.commons import File
+        polus_script_template = Template(textwrap.dedent(
+        """from polus.trajectories.commons import File
         from polus.trajectories.diversity import DIVSampler
         import numpy as np
 
@@ -82,6 +83,7 @@ class DiversityScript(WriteFile, File):
             filename="$filename",
             sampleSize= "[$sample_size]",                                
         )
+
         job.Execute()                                                                   
         """))
 
