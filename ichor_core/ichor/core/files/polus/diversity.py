@@ -28,9 +28,9 @@ class DiversityScript(WriteFile, File):
     ):
         File.__init__(self, path)
 
-        self.seed_geom = str(seed_geom)
-        self.output_dir = str(output_dir)
-        self.filename = str(filename)
+        self.seed_geom = Path(seed_geom)
+        self.output_dir = Path(output_dir)
+        self.filename = Path(filename)
         self.system_name: str = system_name
         self.weights_vector: str = weights_vector
         self.group_average: bool = group_average
@@ -46,7 +46,8 @@ class DiversityScript(WriteFile, File):
     def set_write_defaults_if_needed(
         self,
     ):  
-        self.system_name = self.system_name
+        self.system_name = self.system_name or self.seed_geom.stem
+        self.output_dir = self.output_dir or Path.cwd()
         self.weights_vector = self.weights_vector or "HL1:1"
         self.group_average = self.group_average or False
         self.write_ferebus_inputs = self.write_ferebus_inputs or False

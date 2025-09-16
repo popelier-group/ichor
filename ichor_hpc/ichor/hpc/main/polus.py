@@ -11,15 +11,21 @@ from ichor.hpc.submission_commands import PythonCommand
 from ichor.hpc.submission_script import SubmissionScript
 
 def write_diversity_sampling(
-        input_traj_path: Union[str, Path],
-        input_xyz_path: Union[str, Path],
+        filename: Union[str, Path],
+        seed_geom: Union[str, Path],
         hold: JobID = None,
         **kwargs,
     ) -> Optional[JobID]:
  
-    div_input_script = DiversityScript(input_xyz_path, input_traj_path, **kwargs)
+    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
+    output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
+
+    div_input_script = DiversityScript(seed_geom=seed_geom, 
+        output_dir=output_dir,                           
+        filename=filename,
+        **kwargs)
     div_input_script.write()
-    
+
     return div_input_script.path
 
 
@@ -32,6 +38,7 @@ def submit_polus(
     ncores=2,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
+    **kwargs
 ) -> JobID:
     """Function that writes out a submission script which contains an array of
     Gaussian jobs to be ran on compute nodes. If calling this function from
