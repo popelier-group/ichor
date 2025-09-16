@@ -11,7 +11,7 @@ class DiversityScript(WriteFile, File):
 
     def __init__(
         self,
-        path: Union[Path, str],
+       # path: Union[Path, str],
         seed_geom: Union[Path, str],
         output_dir: Union[Path, str],
         filename: Union[Path, str],
