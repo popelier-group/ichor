@@ -181,6 +181,12 @@ FILE_STRUCTURE.add(
         the inputs/outputs in the job script itself.""",
 )
 FILE_STRUCTURE.add(
+    "DIVERSITY_SAMPLING",
+    "diversity_sampling",
+    type_=FileType.Directory,
+    description="""Directory containing diversity sampled trajectory""",
+)
+FILE_STRUCTURE.add(
     "CP2K",
     "cp2k",
     type_=FileType.Directory,
