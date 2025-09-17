@@ -35,7 +35,7 @@ def write_diversity_sampling(
     return div_input_script.path
 
 def write_dataset_prep(
-     filename: Union[str, Path],
+    filename: Union[str, Path],
     seed_geom: Union[str, Path],
     hold: JobID = None,
     **kwargs,

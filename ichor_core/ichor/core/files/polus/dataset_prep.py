@@ -6,23 +6,19 @@ from typing import Optional, Union
 from ichor.core.files.file import File, WriteFile
 
 
-class DiversityScript(WriteFile, File):
+class DatasetPrepScript(WriteFile, File):
     _filetype = ".py"
 
     def __init__(
         self,
         path: Union[Path, str],
         outlier_input_dir: Union[Path, str,],
-        outlier_output_dir: Union[Path, str,],
-        iqa_input_dir: Union[Path, str],
         q00_input_dir: Union[Path, str],        
         train_size: Optional[list[int]] = None,
         outlier_prop: Optional[str] = None,
         outlier_method: Optional[str] = None,
         iqa_all_props: bool = True,
         system_name: Optional[str] = None,
-        iqa_output_dir: Optional[Union[Path, str]] = None,
-        iqa_working_dir: Optional[Union[Path, str]] = None,
         geom_ids: Optional[str] = None,
         q00_threshold: Optional[int] = None,
         val_test: bool = False,
@@ -38,16 +34,12 @@ class DiversityScript(WriteFile, File):
         File.__init__(self, path)
 
         self.outlier_input_dir = Path(outlier_input_dir)
-        self.outlier_output_dir = Path(outlier_output_dir)
-        self.iqa_input_dir = Path(iqa_input_dir)
         self.q00_input_dir = Path(q00_input_dir)
         self.train_size: Optional[list[int]] = train_size 
         self.outlier_prop: Optional[str] = outlier_prop
         self.outlier_method: Optional[str] = outlier_method
         self.iqa_all_props: bool = iqa_all_props
         self.system_name: Optional[str] = system_name
-        self.iqa_output_dir = Path(iqa_output_dir) if iqa_output_dir else None
-        self.iqa_working_dir = Path(iqa_working_dir) if iqa_working_dir else None
         self.geom_ids: Optional[str] = geom_ids
         self.q00_threshold: Optional[int] = q00_threshold
         self.val_test: bool = val_test
@@ -75,10 +67,6 @@ class DiversityScript(WriteFile, File):
     def _write_file(self, path: Path, *args, **kwargs):
         self.set_write_defaults_if_needed()
 
-        # Set temp iqa dirs so will be inputted with strings formatting in template if not None. 
-        temp_iqa_working_dir = f'"{self.iqa_working_dir}"' if self.iqa_working_dir else None
-        temp_iqa_output_dir = f'"{self.iqa_output_dir}"' if self.iqa_output_dir else None
-
 
         # set up template for polus script
         dataset_prep_script_template = Template(
@@ -98,18 +86,18 @@ class DiversityScript(WriteFile, File):
             # Outlier removal
             outlier_job = Odd(
             inputDir="$outlier_input_dir",
-            outputDir="$outlier_output_dir",
+            outputDir="OUTLIER_CHECK",
             prop="$outlier_prop",
             method = "$outlier_method"
             )
 
             # IQA correction 
             iqa_corr_job = iqa_correct(
-            inputDir="$iqa_input_dir",
+            inputDir="OUTLIER_CHECK",
             allProps=$iqa_all_props,
             system_name="$system_name",
-            outputDir=$iqa_output_dir, 
-            working_directory=$iqa_working_dir,
+            outputDir=None, 
+            working_directory=None,
             geom_IDs=$geom_ids,
             )
             iqa_corr_job.write_raw_and_corrected_atomic_iqa_energies()
@@ -119,7 +107,8 @@ class DiversityScript(WriteFile, File):
             q00_job = Q00Filter(
             threshold=$q00_threshold,
             systemName="$system_name",
-            inputDir="$q00_input_dir")
+            inputDir="corr_ref_data"
+            )
             q00_job.Execute()
 
             # Sampling
@@ -151,17 +140,12 @@ class DiversityScript(WriteFile, File):
         script_text = dataset_prep_script_template.substitute(
             train_size=self.train_size,
             outlier_input_dir=self.outlier_input_dir,
-            outlier_output_dir=self.outlier_output_dir,
             outlier_prop=self.outlier_prop,
             outlier_method=self.outlier_method,
-            iqa_input_dir=self.iqa_input_dir,
             iqa_all_props=self.iqa_all_props,
             system_name=self.system_name,
-            iqa_output_dir=temp_iqa_output_dir,
-            iqa_working_dir=temp_iqa_working_dir,
             geom_ids=self.geom_ids,
             q00_threshold=self.q00_threshold,
-            q00_input_dir=self.q00_input_dir,
             val_test=self.val_test,
             all_props=self.all_props,
             random_select=self.random_select,

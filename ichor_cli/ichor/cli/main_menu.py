@@ -34,6 +34,10 @@ from ichor.cli.main_menu_submenus.tools_menu.tools_menu import (
     tools_menu,
     TOOLS_MENU_DESCRIPTION,
 )
+from ichor.cli.main_menu_submenus.training_menu.training_menu import (
+    training_menu,
+    TRAINING_MENU_DESCRIPTION,
+)
 from ichor.cli.main_menu_submenus.trajectory_menu.trajectory_menu import (
     trajectory_menu,
     TRAJECTORY_MENU_DESCRIPTION,
@@ -98,6 +102,9 @@ main_menu_items = [
     SubmenuItem(TRAJECTORY_MENU_DESCRIPTION.title, trajectory_menu, main_menu),
     SubmenuItem(
         POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu
+    ),
+    SubmenuItem(
+        TRAINING_MENU_DESCRIPTION.title, training_menu, main_menu
     ),
     SubmenuItem(SUBMIT_CSVS_MENU_DESCRIPTION.title, submit_csvs_menu, main_menu),
     SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),

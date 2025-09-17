@@ -1,4 +1,4 @@
-from ichor.core.files.polus.diversity import DiversityScript
+from ichor.core.files.polus import DiversityScript, DatasetPrepScript
 
 
-__all__ = ["DiversityScript"]
+__all__ = ["DiversityScript", "DatasetPrepScript"]
