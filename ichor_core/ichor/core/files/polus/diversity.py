@@ -17,13 +17,13 @@ class DiversityScript(WriteFile, File):
         filename: Union[Path, str],
         system_name: Optional[str] = None,
         weights_vector: Optional[str] = None,
-        group_average: Optional[str] = None,
-        write_ferebus_inputs: Optional[bool] = None,
+        group_average: bool = False,
+        write_ferebus_inputs: bool = False,
         chunk_size: Optional[int] = None,
-        rotate_traj: Optional[bool] = None,
+        rotate_traj: bool = True,
         rot_method: Optional[str] = None,
-        parallel: Optional[bool] = None,
-        auto_stop: Optional[bool] = None,
+        parallel: bool = True,
+        auto_stop: bool = False,
         sample_size: Optional[int] = None,
     ):
         File.__init__(self, path)
@@ -45,33 +45,20 @@ class DiversityScript(WriteFile, File):
     def set_write_defaults_if_needed(
         self,
     ):
-         # defaults for strings/paths that can use `or`
-        self.system_name = self.system_name or self.seed_geom.stem
+        # TODO: ADD OPTION FOR USER TO CHANGE DEFAULT SYSTEM NAME 
+        self.system_name = self.system_name or "molecule" 
         self.output_dir = self.output_dir or Path.cwd()
         self.weights_vector = self.weights_vector or "HL1:1"
+        self.chunk_size = self.chunk_size or 500
         self.rot_method = self.rot_method or "KU"
-
-        # defaults for booleans and numbers
-        defaults = {
-            "group_average": False,
-            "write_ferebus_inputs": False,
-            "rotate_traj": True,
-            "parallel": True,
-            "auto_stop": False,
-            "chunk_size": 500,
-            "sample_size": 10000,
-        }
-
-        for attr, default in defaults.items():
-            if getattr(self, attr) is None:
-                setattr(self, attr, default)
+        self.sample_size = self.sample_size or 10000
 
     # write file from a template
     def _write_file(self, path: Path, *args, **kwargs):
         self.set_write_defaults_if_needed()
 
         # set up template for polus script
-        polus_script_template = Template(
+        diversity_script_template = Template(
             textwrap.dedent(
                 """
         from polus.trajectories.commons import File
@@ -100,7 +87,7 @@ class DiversityScript(WriteFile, File):
         )
 
         # subsitute template values into script
-        script_text = polus_script_template.substitute(
+        script_text = diversity_script_template.substitute(
             system_name=self.system_name,
             weights_vector=self.weights_vector,
             group_average=self.group_average,

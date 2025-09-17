@@ -97,7 +97,9 @@ class SubmitDiversityFunctions:
         )
 
         submit_polus(
-            div_input_script=div_script,
+            input_script=div_script,
+            script_name=ichor.hpc.global_variables.SCRIPT_NAMES[
+            "diversity_sampling"],
             ncores=ncores,
         )
 

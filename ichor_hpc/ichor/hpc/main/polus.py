@@ -34,12 +34,34 @@ def write_diversity_sampling(
 
     return div_input_script.path
 
+def write_dataset_prep(
+     filename: Union[str, Path],
+    seed_geom: Union[str, Path],
+    hold: JobID = None,
+    **kwargs,
+) -> Optional[JobID]:
+
+    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
+    output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
+    input_filename = "diversity_input" + DiversityScript.get_filetype()
+
+    div_input_script = DiversityScript(
+        Path(input_filename),
+        seed_geom=seed_geom,
+        output_dir=output_dir,
+        filename=filename,
+        **kwargs,
+    )
+    div_input_script.write()
+    shutil.move(input_filename, output_dir)
+
+    return div_input_script.path      
+
+
 
 def submit_polus(
-    div_input_script: Path,
-    script_name: Optional[Union[str, Path]] = ichor.hpc.global_variables.SCRIPT_NAMES[
-        "diversity_sampling"
-    ],
+    input_script: Path,
+    script_name: Optional[Union[str, Path]],
     hold: Optional[JobID] = None,
     ncores=2,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
@@ -74,11 +96,4 @@ def submit_polus(
         errors_dir_path=errors_dir_path,
     ) as submission_script:
 
-        submission_script.add_command(PythonCommand(div_input_script))
-
-    # submit on compute node
-    if len(submission_script.grouped_commands) > 0:
-        ichor.hpc.global_variables.LOGGER.info("Submitting diversity sampling job")
-        return submission_script.submit(hold=hold)
-    else:
-        raise ValueError("There are no jobs to submit in the submission script.")
+        submission_script.add_command(PythonCommand(input_script))
