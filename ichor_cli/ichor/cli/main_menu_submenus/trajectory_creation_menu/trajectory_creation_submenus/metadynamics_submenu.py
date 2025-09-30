@@ -118,6 +118,7 @@ class MetadynamicsMenuFunctions:
         iterations = metadynamics_menu_options.selected_number_of_iterations
         temperature = metadynamics_menu_options.selected_temperature
         calculator = metadynamics_menu_options.selected_calculator
+        overwrite = metadynamics_menu_options.overwrite
 
         submit_single_mtd_xyz(
             input_xyz_path=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
@@ -127,6 +128,7 @@ class MetadynamicsMenuFunctions:
             temperature=temperature,
             system_name=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH.stem,
             calculator=calculator,
+            overwrite=overwrite,
         )
 
 
