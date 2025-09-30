@@ -32,21 +32,22 @@ def submit_single_mtd_xyz(
     mkdir(mtd_dir)
     
     # copy xyz trajectory into mtd folder (copy to make sure opt xyz not overwritten)
-    try:
-        shutil.copy(input_xyz_traj, mtd_dir)
-    except:
-        if overwrite:
-            try:
-                rm_path = mtd_dir
-                shutil.rmtree(rm_path)
-                mkdir(mtd_dir)
-                shutil.copy(input_xyz_traj, mtd_dir)
-            except:
-                print("FILE DOES NOT EXIST FOR OVERWRITE. RUNNING AS NORMAL")
-                pass
-        else:
-            print("ERROR, FILE EXISTS AND OVERWRITE WAS NOT SELECTED. ABORTING")
-            return
+    shutil.copy(input_xyz_traj, mtd_dir)
+    #try:
+    #    shutil.copy(input_xyz_traj, mtd_dir)
+    #except:
+    #    if overwrite:
+    #        try:
+    #            rm_path = mtd_dir
+    #            shutil.rmtree(rm_path)
+    #            mkdir(mtd_dir)
+    #            shutil.copy(input_xyz_traj, mtd_dir)
+    #        except:
+    #            print("FILE DOES NOT EXIST FOR OVERWRITE. RUNNING AS NORMAL")
+    #            pass
+    #    else:
+    #        print("ERROR, FILE EXISTS AND OVERWRITE WAS NOT SELECTED. ABORTING")
+    #        return
         
     #submit_mtd_calc_to_plumed(
     #    mtd_directory=mtd_dir,
