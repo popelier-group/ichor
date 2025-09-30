@@ -10,6 +10,7 @@ from ichor.cli.useful_functions import (
     user_input_float,
     user_input_free_flow,
     user_input_int,
+    user_input_bool,
 )
 from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenus import (
     col_var_menu,
@@ -24,6 +25,7 @@ METADYNAMICS_MENU_DEFAULTS = {
     "default_number_of_iterations": 1024,
     "default_temperature": 300,
     "default_calculator": "GFN2-xTB",
+    "overwrite": False,
 }
 
 METADYNAMICS_MENU_DESCRIPTION = MenuDescription(
@@ -34,12 +36,12 @@ METADYNAMICS_MENU_DESCRIPTION = MenuDescription(
 
 @dataclass
 class MetadynamicsMenuOptions(MenuOptions):
-
     selected_timestep: float
     selected_bias: float
     selected_number_of_iterations: int
     selected_temperature: float
     selected_calculator: str
+    overwrite: bool
 
 
 metadynamics_menu_options = MetadynamicsMenuOptions(
@@ -98,9 +100,19 @@ class MetadynamicsMenuFunctions:
         )
 
     @staticmethod
+    def select_overwrite():
+        """
+        Select the to overwrite existing calculation on current structure.
+        """
+        metadynamics_menu_options.overwrite = user_input_bool(
+            "Overwrite existing calc: ", metadynamics_menu_options.overwrite
+        )
+
+    @staticmethod
     def submit_metadynamics_to_compute():
         """Asks for user input and submits metadynamics job to compute node."""
-
+        
+        ## HOW TO PASS CVs FROM SUBMENU TO HERE???
         timestep = metadynamics_menu_options.selected_timestep
         bias = metadynamics_menu_options.selected_bias
         iterations = metadynamics_menu_options.selected_number_of_iterations
@@ -151,6 +163,10 @@ metadynamics_menu_items = [
     FunctionItem(
         "Select calculator to use for metadynamics",
         MetadynamicsMenuFunctions.select_calculator,
+    ),
+    FunctionItem(
+        "Select to overwrite existing calculation",
+        MetadynamicsMenuFunctions.select_overwrite,
     ),
     FunctionItem(
         "Submit metadynamics simulation",

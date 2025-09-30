@@ -26,8 +26,8 @@ def submit_single_ase_xyz(
 ) -> Optional[JobID]:
 
     input_xyz_traj = Trajectory(input_xyz_path)
-    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
     opt_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
+    mkdir(opt_dir)
     system_name = input_xyz_path.stem
     traj_dir = input_xyz_traj.to_dir(system_name, every=1, center=False)
     opt_path = Path(opt_dir / traj_dir.name)
