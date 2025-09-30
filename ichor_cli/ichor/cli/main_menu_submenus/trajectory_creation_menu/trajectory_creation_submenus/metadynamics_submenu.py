@@ -120,7 +120,7 @@ class MetadynamicsMenuFunctions:
         calculator = metadynamics_menu_options.selected_calculator
 
         submit_single_mtd_xyz(
-            input_file_path=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
+            input_xyz_path=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
             timestep=timestep,
             bias=bias,
             nsteps=iterations,
