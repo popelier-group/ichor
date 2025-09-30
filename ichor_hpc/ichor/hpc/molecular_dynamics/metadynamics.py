@@ -29,25 +29,24 @@ def submit_single_mtd_xyz(
 
     # subfolder for running calc
     mtd_dir = Path(mtd_parent / system_name)
-    mkdir(mtd_dir)
+    dest_name = Path(mtd_dir / input_xyz_path.name)
     
-    # copy xyz trajectory into mtd folder (copy to make sure opt xyz not overwritten)
-    shutil.copy(input_xyz_traj, mtd_dir)
-    #try:
-    #    shutil.copy(input_xyz_traj, mtd_dir)
-    #except:
-    #    if overwrite:
-    #        try:
-    #            rm_path = mtd_dir
-    #            shutil.rmtree(rm_path)
-    #            mkdir(mtd_dir)
-    #            shutil.copy(input_xyz_traj, mtd_dir)
-    #        except:
-    #            print("FILE DOES NOT EXIST FOR OVERWRITE. RUNNING AS NORMAL")
-    #            pass
-    #    else:
-    #        print("ERROR, FILE EXISTS AND OVERWRITE WAS NOT SELECTED. ABORTING")
-    #        return
+    if overwrite:
+        try:
+            rm_path = mtd_dir
+            shutil.rmtree(rm_path)
+            mkdir(mtd_dir)
+            shutil.copy(input_xyz_path, mtd_dir)
+        except:
+            print("FILE DOES NOT EXIST FOR OVERWRITE. RUNNING AS NORMAL")
+            pass
+    # if not set to overwrite and file exits
+    elif not overwrite and dest_name.exists():
+        print("ERROR, FILE EXISTS AND OVERWRITE WAS NOT SELECTED. ABORTING")
+        return
+    # copy normally
+    else:
+        shutil.copy(input_xyz_path, mtd_dir)
         
     #submit_mtd_calc_to_plumed(
     #    mtd_directory=mtd_dir,
