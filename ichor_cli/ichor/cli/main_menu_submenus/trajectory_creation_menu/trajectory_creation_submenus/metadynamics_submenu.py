@@ -16,7 +16,7 @@ from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_s
     col_var_menu,
     COL_VAR_MENU_DESCRIPTION,
 )
-from ichor.hpc.molecular_dynamics import submit_metadynamics
+from ichor.hpc.molecular_dynamics import submit_single_mtd_xyz
 
 # TODO: possibly make this be read from a file
 METADYNAMICS_MENU_DEFAULTS = {
@@ -119,7 +119,7 @@ class MetadynamicsMenuFunctions:
         temperature = metadynamics_menu_options.selected_temperature
         calculator = metadynamics_menu_options.selected_calculator
 
-        submit_metadynamics(
+        submit_single_mtd_xyz(
             input_file_path=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
             timestep=timestep,
             bias=bias,
@@ -165,7 +165,7 @@ metadynamics_menu_items = [
         MetadynamicsMenuFunctions.select_calculator,
     ),
     FunctionItem(
-        "Select to overwrite existing calculation",
+        "Select whether to overwrite existing calculation",
         MetadynamicsMenuFunctions.select_overwrite,
     ),
     FunctionItem(
