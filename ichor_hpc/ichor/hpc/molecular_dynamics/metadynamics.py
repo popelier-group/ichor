@@ -24,7 +24,7 @@ def submit_single_mtd_xyz(
     system_name = input_xyz_path.stem
 
     # metadynamics parent folder
-    mtd_parent = Path(ichor.hpc.global_variables.FILE_STRUCTURE["mtd_traj"])
+    mtd_parent = Path(ichor.hpc.global_variables.FILE_STRUCTURE["metadynamics_traj"])
     mkdir(mtd_parent)
 
     # subfolder for running calc
