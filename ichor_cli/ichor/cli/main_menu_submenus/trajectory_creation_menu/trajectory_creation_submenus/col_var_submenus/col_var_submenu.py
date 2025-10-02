@@ -57,10 +57,13 @@ class ColVarMenuFunctions:
         """
         Select number of CVs for metadynamics simulation.
         """
+        # print info first for reference
+        mtd.print_molecule_data(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
+        print("\n\n")
         atom_count = mtd.count_atoms(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
 
         # Define range for atoms - 0 index with rdkit
-        max_val = atom_count
+        max_val = atom_count - 1
 
         # Master list to hold all collective variable sequences
         all_col_vars = []
@@ -72,7 +75,7 @@ class ColVarMenuFunctions:
             print(f"\nStarting defining a new collective variable (you've entered {len(all_col_vars)} so far):")
 
             while len(col_var) < 4:
-                user_input = input(f"  Enter number {len(col_var)+1}: ").strip()
+                user_input = input(f"  Enter atom ID {len(col_var)+1}: ").strip()
 
                 if user_input == '' or user_input.lower() == 'q':
                     print("  Ending this sequence early.")
@@ -93,11 +96,11 @@ class ColVarMenuFunctions:
                 
                 col_var.append(num)
 
-            if len(col_var) > 2:
+            if len(col_var) >= 2:
                 all_col_vars.append(col_var)
                 print(f"  Collective variable saved: {col_var}")
             else:
-                print("  Not enough atoms entered. Ending input.")
+                print("  Not enough atoms entered. Skipping CV.")
                 break
             
             # Ask if user wants to enter another CV
@@ -108,7 +111,7 @@ class ColVarMenuFunctions:
         print("\nAll collective variables collected:")
         print(all_col_vars)
         wait = ""
-        input("Press enter to continue.", wait)
+        wait = input("Press enter to continue.")
 
 
 
