@@ -7,7 +7,6 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
-    user_input_float,
     user_input_free_flow,
     user_input_int,
 )
@@ -17,7 +16,7 @@ import ichor.core.molecular_dynamics.metadynamics as mtd
 collective_variables_list = []
 
 COL_VAR_MENU_DEFAULTS = {
-    "default_num_vars": 1,
+    "default_col_vars": [],
 }
 
 COL_VAR_MENU_DESCRIPTION = MenuDescription(
@@ -29,7 +28,7 @@ COL_VAR_MENU_DESCRIPTION = MenuDescription(
 @dataclass
 class ColVarMenuOptions(MenuOptions):
 
-    selected_num_vars: int
+    collective_variables_list: list
 
 
 col_var_menu_options = ColVarMenuOptions(*COL_VAR_MENU_DEFAULTS.values())
@@ -53,7 +52,7 @@ class ColVarMenuFunctions:
         mtd.draw_labeled_molecule(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
 
     @staticmethod
-    def select_num_vars():
+    def select_col_vars():
         """
         Select number of CVs for metadynamics simulation.
         """
@@ -116,8 +115,10 @@ class ColVarMenuFunctions:
             
         print("\nAll collective variables collected:")
         print(all_col_vars)
-        collective_variables_list = all_col_vars
-        wait = input("Press enter to continue.")
+        col_var_menu_options.collective_variables_list = all_col_vars
+        
+        answer = ""
+        user_input_free_flow("Press enter to continue: ", answer)
 
 
 
@@ -143,8 +144,8 @@ col_var_menu_items = [
         ColVarMenuFunctions.draw_labeled_molecule,
     ),
     FunctionItem(
-        "Select number of collective variables",
-        ColVarMenuFunctions.select_num_vars,
+        "Define collective variables for metadynamics",
+        ColVarMenuFunctions.select_col_vars,
     ),
 ]
 
