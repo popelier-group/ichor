@@ -59,7 +59,7 @@ class ColVarMenuFunctions:
         """
         # print info first for reference
         mtd.print_molecule_data(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
-        print("\n\n")
+        print("\n")
         atom_count = mtd.count_atoms(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
 
         # Define range for atoms - 0 index with rdkit
@@ -68,7 +68,7 @@ class ColVarMenuFunctions:
         # Master list to hold all collective variable sequences
         all_col_vars = []
 
-        print("Input collective variables (max 4 atoms per CV).\n2 = Distance, 3 = Angle, 4 = Dihedral \nPress Enter or 'q' to finish a CV.")
+        print("\n\nInput collective variables (max 4 atoms per CV).\n2 = Distance, 3 = Angle, 4 = Dihedral \nPress Enter or 'q' to finish a CV.")
 
         while True:
             col_var = []
@@ -98,7 +98,12 @@ class ColVarMenuFunctions:
 
             if len(col_var) >= 2:
                 all_col_vars.append(col_var)
-                print(f"  Collective variable saved: {col_var}")
+                if len(col_var) == 2:
+                    print(f"  DISTANCE collective variable saved: {col_var}")
+                elif len(col_var) == 3:
+                    print(f"  ANGLE collective variable saved: {col_var}")
+                elif len(col_var) == 4:
+                    print(f"  DIHEDRAL collective variable saved: {col_var}")
             else:
                 print("  Not enough atoms entered. Skipping CV.")
                 break
@@ -110,7 +115,7 @@ class ColVarMenuFunctions:
             
         print("\nAll collective variables collected:")
         print(all_col_vars)
-        wait = ""
+        collective_variables_list = all_col_vars
         wait = input("Press enter to continue.")
 
 
