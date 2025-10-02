@@ -46,7 +46,7 @@ class SubmitDataPrepMenuOptions(MenuOptions):
 
 # initialize dataclass for storing information for menu
 submit_data_prep_menu_options = SubmitDataPrepMenuOptions(
-    ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH
+    ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH,
     *SUBMIT_DATA_PREP_MENU_DEFAULTS.values()
 )
 
