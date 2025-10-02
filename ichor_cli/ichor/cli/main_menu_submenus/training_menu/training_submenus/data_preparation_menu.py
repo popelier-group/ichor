@@ -30,8 +30,7 @@ SUBMIT_DATA_PREP_MENU_DEFAULTS = {
 @dataclass
 class SubmitDataPrepMenuOptions(MenuOptions):
 
-    selected_points_directory_path: Path
-    selected_points_directory_path: Path
+    selected_input_directory_path: Path
     selected_ncores: int
     selected_outlier_method:str
     selected_q00_threshold: int
@@ -41,12 +40,13 @@ class SubmitDataPrepMenuOptions(MenuOptions):
 
     def check_path(self):
 
-        input_data_path = Path(self.selected_points_directory_path)
-        if not input_data_path.is_dir():
+        input_directory_path = Path(self.selected_input_directory_path)
+        if not input_directory_path.is_dir():
             return "Current path is not a directory."
 
 # initialize dataclass for storing information for menu
 submit_data_prep_menu_options = SubmitDataPrepMenuOptions(
+    ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH
     *SUBMIT_DATA_PREP_MENU_DEFAULTS.values()
 )
 
@@ -55,14 +55,14 @@ submit_data_prep_menu_options = SubmitDataPrepMenuOptions(
 class SubmitDataPrepFunctions:
     
     @staticmethod
-    def select_points_directory():
+    def select_input_directory():
         """Asks user to update points directory and then updates PointsDirectoryMenuOptions instance."""
-        pd_path = user_input_path("Change PointsDirectory Path: ")
-        ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH = Path(
+        pd_path = user_input_path("Change Directory Path: ")
+        ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH = Path(
             pd_path
         ).absolute()
-        submit_data_prep_menu_options.selected_points_directory_path = (
-            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+        submit_data_prep_menu_options.selected_input_directory_path = (
+            ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH
         )
 
     @staticmethod
