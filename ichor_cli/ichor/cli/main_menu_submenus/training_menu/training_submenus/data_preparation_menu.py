@@ -7,7 +7,7 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_restricted, user_input_int
+from ichor.cli.useful_functions import user_input_restricted, user_input_int, user_input_path
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
 
@@ -29,16 +29,9 @@ SUBMIT_DATA_PREP_MENU_DEFAULTS = {
 # dataclass used to store values for submit dataset preparation menu
 @dataclass
 class SubmitDataPrepMenuOptions(MenuOptions):
-        # defaults to the current working directory
+
     selected_points_directory_path: Path
-
-    def check_path(self):
-
-        input_data_path = Path(self.selected_points_directory_path)
-        if not input_data_path.is_dir():
-            return "Current path is not a directory."
-
-
+    selected_points_directory_path: Path
     selected_ncores: int
     selected_outlier_method:str
     selected_q00_threshold: int
@@ -46,6 +39,11 @@ class SubmitDataPrepMenuOptions(MenuOptions):
     selected_val_size: int
     selected_test_size: int
 
+    def check_path(self):
+
+        input_data_path = Path(self.selected_points_directory_path)
+        if not input_data_path.is_dir():
+            return "Current path is not a directory."
 
 # initialize dataclass for storing information for menu
 submit_data_prep_menu_options = SubmitDataPrepMenuOptions(
@@ -55,6 +53,18 @@ submit_data_prep_menu_options = SubmitDataPrepMenuOptions(
 
 # class with static methods for each menu item that calls a function.
 class SubmitDataPrepFunctions:
+    
+    @staticmethod
+    def select_points_directory():
+        """Asks user to update points directory and then updates PointsDirectoryMenuOptions instance."""
+        pd_path = user_input_path("Change PointsDirectory Path: ")
+        ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH = Path(
+            pd_path
+        ).absolute()
+        submit_data_prep_menu_options.selected_points_directory_path = (
+            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+        )
+
     @staticmethod
     def select_number_of_cores():
         """Asks user to select the number of cores."""
