@@ -5,10 +5,11 @@ from typing import Union
 import ichor.cli.global_menu_variables
 from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
-from ichor.cli.main_menu_submenus.sampling_menu.sampling_submenus import (
-    submit_diversity_menu,
-    SUBMIT_DIVERSITY_MENU_DESCRIPTION,
+from ichor.cli.main_menu_submenus.training_menu.training_submenus.data_preparation_menu import(
+    submit_data_prep_menu,
+    SUBMIT_DATA_PREP_MENU_DESCRIPTION
 )
+
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions.user_input import user_input_path
@@ -33,8 +34,8 @@ training_menu = ConsoleMenu(
 # can use lambda functions to change text of options as well :)
 training_menu_items = [
     SubmenuItem(
-        SUBMIT_DIVERSITY_MENU_DESCRIPTION.title,
-        submit_diversity_menu,
+        SUBMIT_DATA_PREP_MENU_DESCRIPTION.title,
+        submit_data_prep_menu,
         training_menu,
     ),
 ]

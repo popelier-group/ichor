@@ -4,7 +4,7 @@ from typing import Optional, Union
 
 import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
-from ichor.core.files.polus.diversity import DiversityScript
+from ichor.core.files.polus import DiversityScript, DatasetPrepScript
 
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import PythonCommand
@@ -35,27 +35,23 @@ def write_diversity_sampling(
     return div_input_script.path
 
 def write_dataset_prep(
-    filename: Union[str, Path],
-    seed_geom: Union[str, Path],
+    outlier_input_dir: Union[Path,str],
     hold: JobID = None,
     **kwargs,
 ) -> Optional[JobID]:
 
-    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
-    output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
-    input_filename = "diversity_input" + DiversityScript.get_filetype()
+    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
+    output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
+    input_filename = "datasets" + DatasetPrepScript.get_filetype()
 
-    div_input_script = DiversityScript(
-        Path(input_filename),
-        seed_geom=seed_geom,
-        output_dir=output_dir,
-        filename=filename,
+    dataset_input_script = DatasetPrepScript(
+        Path(outlier_input_dir),
         **kwargs,
     )
-    div_input_script.write()
+    dataset_input_script.write()
     shutil.move(input_filename, output_dir)
 
-    return div_input_script.path      
+    return dataset_input_script.path      
 
 
 

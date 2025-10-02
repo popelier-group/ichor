@@ -12,8 +12,7 @@ class DatasetPrepScript(WriteFile, File):
     def __init__(
         self,
         path: Union[Path, str],
-        outlier_input_dir: Union[Path, str,],
-        q00_input_dir: Union[Path, str],        
+        outlier_input_dir: Union[Path, str,],      
         train_size: Optional[list[int]] = None,
         outlier_prop: Optional[str] = None,
         outlier_method: Optional[str] = None,
@@ -34,7 +33,6 @@ class DatasetPrepScript(WriteFile, File):
         File.__init__(self, path)
 
         self.outlier_input_dir = Path(outlier_input_dir)
-        self.q00_input_dir = Path(q00_input_dir)
         self.train_size: Optional[list[int]] = train_size 
         self.outlier_prop: Optional[str] = outlier_prop
         self.outlier_method: Optional[str] = outlier_method

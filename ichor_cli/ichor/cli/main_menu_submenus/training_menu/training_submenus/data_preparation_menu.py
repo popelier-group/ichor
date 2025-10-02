@@ -8,7 +8,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import user_input_restricted, user_input_int
-from ichor.hpc.main.polus import submit_polus, write_diversity_sampling
+from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
 
 SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
@@ -88,42 +88,83 @@ class SubmitDataPrepFunctions:
         )
 
     @staticmethod
+    def select_train_size():
+        """Asks user to select the size of the training set for machine learning."""
+        submit_data_prep_menu_options.selected_train_size = user_input_int(
+            "Enter training set size(s): ",
+            submit_data_prep_menu.selected_train_size,
+        )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Training set size(s) {submit_data_prep_menu_options.selected_q00_threshold}"
+        )
+    
+    @staticmethod
+    def select_val_size():
+        """Asks user to select the size of the validation set for testing."""
+        submit_data_prep_menu_options.selected_val_size = user_input_int(
+            "Enter valiation set size: ",
+            submit_data_prep_menu.selected_val_size,
+        )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Validation set size {submit_data_prep_menu_options.selected_q00_threshold}"
+        )
+
+    @staticmethod
+    def select_test_size():
+        """Asks user to select the size of the test set for machine learning."""
+        submit_data_prep_menu_options.selected_test_size = user_input_int(
+            "Enter test set size: ",
+            submit_data_prep_menu.selected_test_size,
+        )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Test set size {submit_data_prep_menu_options.selected_q00_threshold}"
+        )
+
+    @staticmethod
     def submit_data_prep_on_compute():
         """Submits polus job for data preparation."""
-        (ncores, weights, sample_size,) = (
+        (ncores,
+        outlier_method,
+        q00_threshold,
+        train_size,
+        val_size,
+        test_size) = (
             submit_data_prep_menu_options.selected_ncores,
             submit_data_prep_menu_options.selected_outlier_method,
             submit_data_prep_menu_options.selected_q00_threshold,
+            submit_data_prep_menu_options.selected_train_size,
+            submit_data_prep_menu_options.selected_val_size,
+            submit_data_prep_menu_options.selected_test_size,
         )
 
-        if not weights:
-            weights_vector = "HL1:1"
-        else:
-            weights_vector = "HL1:0"
 
-        xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
-        trajectory_path = Path(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
+        input_path = Path(ichor.cli.global_menu_variables.SELECTED_DATABASE_PATH)
 
-        div_script = write_diversity_sampling(
-            filename=trajectory_path,
-            seed_geom=xyz_path,
-            weights_vector=weights_vector,
-            sample_size=sample_size,
+        dataset_script = write_dataset_prep(
+            outlier_input_dir=input_path,
+            outlier_method=outlier_method,
+            q00_threshold=q00_threshold,
+            train_size=train_size,
+            val_size=val_size,
+            test_size=test_size,
         )
 
         submit_polus(
-            input_script=div_script,
+            input_script=dataset_script,
             script_name=ichor.hpc.global_variables.SCRIPT_NAMES[
             "data_prep_sampling"],
             ncores=ncores,
         )
 
         SUBMIT_DATA_PREP_MENU_DESCRIPTION.prologue_description_text = (
-            "Successfully submitted data_prep sampling \n"
+            "Successfully submitted data preparation \n"
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"data_prep sampling job submitted for {xyz_path}"
+            f"Data preparation for machine learning job submitted"
         )
 
 
@@ -135,12 +176,24 @@ submit_data_prep_menu_items = [
         SubmitDataPrepFunctions.select_number_of_cores,
     ),
     FunctionItem(
-        "Change weights",
-        SubmitDataPrepFunctions.select_weights,
+        "Change outlier method",
+        SubmitDataPrepFunctions.select_outlier_method,
     ),
     FunctionItem(
-        "Change sample size",
-        SubmitDataPrepFunctions.select_sample_size,
+        "Change q00 threshold",
+        SubmitDataPrepFunctions.select_q00_threshold,
+    ),
+        FunctionItem(
+        "Change train set size",
+        SubmitDataPrepFunctions.select_train_size,
+    ),
+        FunctionItem(
+        "Change val set size",
+        SubmitDataPrepFunctions.select_val_size,
+    ),
+        FunctionItem(
+        "Change test set size",
+        SubmitDataPrepFunctions.select_test_size,
     ),
     FunctionItem(
         "Submit data_prep sampler",
