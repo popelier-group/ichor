@@ -15,11 +15,13 @@ from ichor.cli.useful_functions import (
 from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenus import (
     col_var_menu,
     COL_VAR_MENU_DESCRIPTION,
+    collective_variables_list,
 )
 from ichor.hpc.molecular_dynamics import submit_single_mtd_xyz
 
 # TODO: possibly make this be read from a file
 METADYNAMICS_MENU_DEFAULTS = {
+    "default_collective_variables": [],
     "default_timestep": 0.005,
     "default_bias_factor": 5,
     "default_number_of_iterations": 1024,
@@ -36,6 +38,7 @@ METADYNAMICS_MENU_DESCRIPTION = MenuDescription(
 
 @dataclass
 class MetadynamicsMenuOptions(MenuOptions):
+    collective_variables: list
     selected_timestep: float
     selected_bias: float
     selected_number_of_iterations: int
@@ -112,24 +115,33 @@ class MetadynamicsMenuFunctions:
     def submit_metadynamics_to_compute():
         """Asks for user input and submits metadynamics job to compute node."""
         
-        ## HOW TO PASS CVs FROM SUBMENU TO HERE???
-        timestep = metadynamics_menu_options.selected_timestep
-        bias = metadynamics_menu_options.selected_bias
-        iterations = metadynamics_menu_options.selected_number_of_iterations
-        temperature = metadynamics_menu_options.selected_temperature
-        calculator = metadynamics_menu_options.selected_calculator
-        overwrite = metadynamics_menu_options.overwrite
+        # if no collective variables are defined then do nothing.
+        if len(collective_variables_list) == 0:
+            print("No collective variables loaded. At least one must be loaded for metadynamics.")
+            answer = ""
+            user_input_free_flow("Press enter to continue: ", answer)
+            return
+        # if they are present, then start the run for a metadynamics job
+        else:
+            col_vars = collective_variables_list
+            timestep = metadynamics_menu_options.selected_timestep
+            bias = metadynamics_menu_options.selected_bias
+            iterations = metadynamics_menu_options.selected_number_of_iterations
+            temperature = metadynamics_menu_options.selected_temperature
+            calculator = metadynamics_menu_options.selected_calculator
+            overwrite = metadynamics_menu_options.overwrite
 
-        submit_single_mtd_xyz(
-            input_xyz_path=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
-            timestep=timestep,
-            bias=bias,
-            nsteps=iterations,
-            temperature=temperature,
-            system_name=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH.stem,
-            calculator=calculator,
-            overwrite=overwrite,
-        )
+            submit_single_mtd_xyz(
+                input_xyz_path=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
+                collective_variables=col_vars,
+                timestep=timestep,
+                bias=bias,
+                nsteps=iterations,
+                temperature=temperature,
+                system_name=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH.stem,
+                calculator=calculator, 
+                overwrite=overwrite,
+            )
 
 
 # initialize menu

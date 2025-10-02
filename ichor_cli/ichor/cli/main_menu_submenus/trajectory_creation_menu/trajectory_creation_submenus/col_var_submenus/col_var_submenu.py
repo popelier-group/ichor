@@ -14,6 +14,7 @@ from ichor.cli.useful_functions import (
 
 import ichor.core.molecular_dynamics.metadynamics as mtd
 
+collective_variables_list = []
 
 COL_VAR_MENU_DEFAULTS = {
     "default_num_vars": 1,
@@ -56,13 +57,59 @@ class ColVarMenuFunctions:
         """
         Select number of CVs for metadynamics simulation.
         """
-        col_var_menu_options.selected_num_vars = user_input_int(
-            "Select number of collective variables: ",
-            col_var_menu_options.selected_num_vars,
-        )
-        ## some function for DISTANCE - 2 ATOMS
-        ## ANGLE - 3 ATOMS
-        ## DIHEDRAL - 4 ATOMS
+        atom_count = mtd.count_atoms(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
+
+        # Define range for atoms - 0 index with rdkit
+        max_val = atom_count
+
+        # Master list to hold all collective variable sequences
+        all_col_vars = []
+
+        print("Input collective variables (max 4 atoms per CV).\n2 = Distance, 3 = Angle, 4 = Dihedral \nPress Enter or 'q' to finish a CV.")
+
+        while True:
+            col_var = []
+            print(f"\nStarting defining a new collective variable (you've entered {len(all_col_vars)} so far):")
+
+            while len(col_var) < 4:
+                user_input = input(f"  Enter number {len(col_var)+1}: ").strip()
+
+                if user_input == '' or user_input.lower() == 'q':
+                    print("  Ending this sequence early.")
+                    break
+                
+                if not user_input.isdigit():
+                    print("  Please enter a valid number.")
+                    continue
+                
+                num = int(user_input)
+                if num < 0 or num > max_val:
+                    print(f"  Number must be between {0} and {max_val}.")
+                    continue
+                
+                if num in col_var:
+                    print("  You've already picked that number in this sequence.")
+                    continue
+                
+                col_var.append(num)
+
+            if len(col_var) > 2:
+                all_col_vars.append(col_var)
+                print(f"  Collective variable saved: {col_var}")
+            else:
+                print("  Not enough atoms entered. Ending input.")
+                break
+            
+            # Ask if user wants to enter another CV
+            next_CV = input("Do you want to define another variable? (y/n): ").strip().lower()
+            if next_CV != 'y':
+                break
+            
+        print("\nAll collective variables collected:")
+        print(all_col_vars)
+        wait = ""
+        input("Press enter to continue.", wait)
+
 
 
 # initialize menu

@@ -239,6 +239,12 @@ def draw_labeled_molecule(mol_path):
         f.write(drawer.GetDrawingText())
     print(f"Image saved to {filename}")
 
+def count_atoms(mol_path):
+    mol = convert_xyz_to_mol(mol_path)
+    # sanitise and add hydrogens
+    mol = Chem.AddHs(mol)
+    count = len(mol.GetAtoms())
+    return count
 
 def print_molecule_data(mol_path):
     mol = convert_xyz_to_mol(mol_path)
@@ -249,4 +255,5 @@ def print_molecule_data(mol_path):
     print_rotatable_bonds(mol)
     print_hbond_info(mol)
     print_dihedrals(mol)
+
 
