@@ -68,30 +68,31 @@ class ColVarMenuFunctions:
         # Master list to hold all collective variable sequences
         all_col_vars = []
 
-        print("\n\nInput collective variables (max 4 atoms per CV).\n2 = Distance, 3 = Angle, 4 = Dihedral \nPress Enter or 'q' to finish a CV.")
+        print("\n\n----END OF MOLECULE INFORMATION----")
+        print("Input collective variables (max 4 atoms per CV).\n2 = Distance, 3 = Angle, 4 = Dihedral \nPress Enter or 'q' to finish a CV.")
 
         while True:
             col_var = []
-            print(f"\nStarting defining a new collective variable (you've entered {len(all_col_vars)} so far):")
+            print(f"\nDefinine a new collective variable (you've entered {len(all_col_vars)} so far):")
 
             while len(col_var) < 4:
                 user_input = input(f"  Enter atom ID {len(col_var)+1}: ").strip()
 
                 if user_input == '' or user_input.lower() == 'q':
-                    print("  Ending this sequence early.")
+                    print("  Saving this collective variable.")
                     break
                 
                 if not user_input.isdigit():
-                    print("  Please enter a valid number.")
+                    print("  Please enter a valid integer.")
                     continue
                 
                 num = int(user_input)
                 if num < 0 or num > max_val:
-                    print(f"  Number must be between {0} and {max_val}.")
+                    print(f"  AtomID must be between {0} and {max_val}.")
                     continue
                 
                 if num in col_var:
-                    print("  You've already picked that number in this sequence.")
+                    print("  You've already picked that atom in this collective variable.")
                     continue
                 
                 col_var.append(num)
