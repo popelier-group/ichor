@@ -20,9 +20,15 @@ TRAINING_MENU_DESCRIPTION = MenuDescription(
     subtitle="Use this menu to prepare datasets, train and analyse GPR models.\n",
 )
 
+@dataclass
+class TrainingMenuOptions(MenuOptions):
+    placeholder: str
+
+training_menu_options = TrainingMenuOptions("TEST")
+
 # initialize menu
 training_menu = ConsoleMenu(
-    # this_menu_options=training_menu_options,
+    this_menu_options=training_menu_options,
     title=TRAINING_MENU_DESCRIPTION.title,
     subtitle=TRAINING_MENU_DESCRIPTION.subtitle,
     prologue_text=TRAINING_MENU_DESCRIPTION.prologue_description_text,
