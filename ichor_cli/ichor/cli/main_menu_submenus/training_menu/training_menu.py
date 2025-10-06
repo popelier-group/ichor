@@ -22,9 +22,9 @@ TRAINING_MENU_DESCRIPTION = MenuDescription(
 
 @dataclass
 class TrainingMenuOptions(MenuOptions):
-    placeholder: str
+    pass
 
-training_menu_options = TrainingMenuOptions("")
+training_menu_options = TrainingMenuOptions()
 
 # initialize menu
 training_menu = ConsoleMenu(
