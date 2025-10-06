@@ -21,7 +21,7 @@ TRAINING_MENU_DESCRIPTION = MenuDescription(
 )
 
 
-training_menu_options = ""
+training_menu_options = [""]
 
 # initialize menu
 training_menu = ConsoleMenu(
