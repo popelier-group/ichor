@@ -228,6 +228,7 @@ SCRIPT_NAMES = ScriptNames(
         "calculate_features": "calculate_features.sh",
         "center_trajectory": "center_trajectory.sh",
         "diversity_sampling": "diversity_sampling.sh",
+        "datasets": "datasets_prep.sh",
         "gaussian": "GAUSSIAN.sh",
         "orca": "ORCA.sh",
         "aimall": "AIMALL.sh",
