@@ -133,26 +133,3 @@ def user_input_restricted(
             return default
         elif user_input in available_options:
             return user_input.lower()
-
-
-def user_input_int_list(
-    s="Enter a list of integers: ", default=None
-) -> Union[int, None]:
-    """Returns an list of integers that the user has given
-
-    :param s: A string that is shown in the prompt (printed to standard output).
-    """
-
-    while True:
-        # if pressing ctrl + D, will return to previous menu
-        try:
-            user_input = input(s)
-        except EOFError:
-            return default
-        if user_input == "":
-            return default
-        try:
-            user_input = list(int(user_input))
-            return user_input
-        except ValueError:
-            pass

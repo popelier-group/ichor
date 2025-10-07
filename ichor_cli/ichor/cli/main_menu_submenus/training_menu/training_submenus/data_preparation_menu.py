@@ -25,9 +25,9 @@ SUBMIT_DATA_PREP_MENU_DEFAULTS = {
     "default_ncores": 2,
     "default_outlier_method": "extrZS",
     "default_q00_threshold": 0.005,
-    "default_train_size": [1000],
-    "default_val_size": [250],
-    "default_test_size": [1000],
+    "default_train_size": 1000,
+    "default_val_size": 250,
+    "default_test_size": 1000,
 }
 
 

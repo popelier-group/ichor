@@ -6,7 +6,6 @@ from ichor.cli.useful_functions.user_input import (
     user_input_int,
     user_input_path,
     user_input_restricted,
-    user_input_int_list,
 )
 
 __all__ = [
@@ -18,5 +17,4 @@ __all__ = [
     "bool_to_str",
     "user_input_restricted",
     "single_or_many_points_directories",
-    "user_input_int_list",
 ]
