@@ -11,7 +11,6 @@ from ichor.cli.useful_functions import (
     user_input_restricted,
     user_input_int,
     user_input_path,
-    user_input_int_list,
 )
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
