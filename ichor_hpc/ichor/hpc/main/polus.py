@@ -34,8 +34,9 @@ def write_diversity_sampling(
 
     return div_input_script.path
 
+
 def write_dataset_prep(
-    outlier_input_dir: Union[Path,str],
+    outlier_input_dir: Union[Path, str],
     hold: JobID = None,
     **kwargs,
 ) -> Optional[JobID]:
@@ -45,14 +46,13 @@ def write_dataset_prep(
     input_filename = "datasets" + DatasetPrepScript.get_filetype()
 
     dataset_input_script = DatasetPrepScript(
-        Path(outlier_input_dir),
+        Path(outlier_input_dir=Path(outlier_input_dir)),
         **kwargs,
     )
     dataset_input_script.write()
     shutil.move(input_filename, output_dir)
 
-    return dataset_input_script.path      
-
+    return dataset_input_script.path
 
 
 def submit_polus(
