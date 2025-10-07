@@ -35,7 +35,7 @@ SUBMIT_DATA_PREP_MENU_DEFAULTS = {
 class SubmitDataPrepMenuOptions(MenuOptions):
 
     selected_input_directory_path: Path
-    selected_ncores: int
+    selected_number_of_cores: int
     selected_outlier_method: str
     selected_q00_threshold: int
     selected_train_size: int
@@ -95,7 +95,7 @@ class SubmitDataPrepFunctions:
         """Asks user to select the recovery test filter threshold for q00."""
         submit_data_prep_menu_options.selected_q00_threshold = user_input_int(
             "Enter filter threshold: ",
-            submit_data_prep_menu.selected_q00_threshold,
+            submit_data_prep_menu_options.selected_q00_threshold,
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
@@ -107,11 +107,11 @@ class SubmitDataPrepFunctions:
         """Asks user to select the size of the training set for machine learning."""
         submit_data_prep_menu_options.selected_train_size = user_input_int(
             "Enter training set size(s): ",
-            submit_data_prep_menu.selected_train_size,
+            submit_data_prep_menu_options.selected_train_size,
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"Training set size(s) {submit_data_prep_menu_options.selected_q00_threshold}"
+            f"Training set size(s) {submit_data_prep_menu_options.selected_train_size}"
         )
 
     @staticmethod
@@ -119,11 +119,11 @@ class SubmitDataPrepFunctions:
         """Asks user to select the size of the validation set for testing."""
         submit_data_prep_menu_options.selected_val_size = user_input_int(
             "Enter valiation set size: ",
-            submit_data_prep_menu.selected_val_size,
+            submit_data_prep_menu_options.selected_val_size,
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"Validation set size {submit_data_prep_menu_options.selected_q00_threshold}"
+            f"Validation set size {submit_data_prep_menu_options.selected_val_size}"
         )
 
     @staticmethod
@@ -131,7 +131,7 @@ class SubmitDataPrepFunctions:
         """Asks user to select the size of the test set for machine learning."""
         submit_data_prep_menu_options.selected_test_size = user_input_int(
             "Enter test set size: ",
-            submit_data_prep_menu.selected_test_size,
+            submit_data_prep_menu_options.selected_test_size,
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
@@ -142,7 +142,7 @@ class SubmitDataPrepFunctions:
     def submit_data_prep_on_compute():
         """Submits polus job for data preparation."""
         (ncores, outlier_method, q00_threshold, train_size, val_size, test_size) = (
-            submit_data_prep_menu_options.selected_ncores,
+            submit_data_prep_menu_options.selected_number_of_cores,
             submit_data_prep_menu_options.selected_outlier_method,
             submit_data_prep_menu_options.selected_q00_threshold,
             submit_data_prep_menu_options.selected_train_size,
