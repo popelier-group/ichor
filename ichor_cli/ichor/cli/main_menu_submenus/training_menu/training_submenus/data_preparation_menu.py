@@ -106,10 +106,19 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_train_size():
         """Asks user to select the size of the training set for machine learning."""
-        submit_data_prep_menu_options.selected_train_size = user_input_int_list(
-            "Enter training set size(s): ",
-            submit_data_prep_menu_options.selected_train_size,
+        number_of_training_sets = user_input_int(
+            "Enter number of training sets: ",
         )
+
+        training_set_sizes = []
+
+        for train_set in number_of_training_sets:
+            training_set_sizes.append = user_input_int_list(
+                f"Enter training set size {train_set}: "
+            )
+
+        submit_data_prep_menu_options.selected_train_size = training_set_sizes
+
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             f"Training set size(s) {submit_data_prep_menu_options.selected_train_size}"
