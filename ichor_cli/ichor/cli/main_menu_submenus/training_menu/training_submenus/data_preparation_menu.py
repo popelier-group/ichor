@@ -111,7 +111,7 @@ class SubmitDataPrepFunctions:
 
         training_set_sizes = []
 
-        for train_set in range(number_of_training_sets):
+        for train_set in range(1, number_of_training_sets + 1):
             training_set_sizes.append = user_input_int(
                 f"Enter training set size {train_set}: "
             )
