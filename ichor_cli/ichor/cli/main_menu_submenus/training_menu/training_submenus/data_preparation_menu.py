@@ -11,6 +11,7 @@ from ichor.cli.useful_functions import (
     user_input_restricted,
     user_input_int,
     user_input_path,
+    user_input_int_list,
 )
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
@@ -105,7 +106,7 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_train_size():
         """Asks user to select the size of the training set for machine learning."""
-        submit_data_prep_menu_options.selected_train_size = user_input_int(
+        submit_data_prep_menu_options.selected_train_size = user_input_int_list(
             "Enter training set size(s): ",
             submit_data_prep_menu_options.selected_train_size,
         )
