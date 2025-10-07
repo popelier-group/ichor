@@ -172,7 +172,7 @@ class SubmitDataPrepFunctions:
 
         submit_polus(
             input_script=dataset_script,
-            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["data_prep_sampling"],
+            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["datasets"],
             ncores=ncores,
         )
 
