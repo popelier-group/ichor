@@ -22,9 +22,10 @@ def write_diversity_sampling(
     output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
     input_filename = "diversity_input" + DiversityScript.get_filetype()
     shutil.move(input_filename, output_dir)
+    input_file_path = Path(output_dir / input_filename)
 
     div_input_script = DiversityScript(
-        Path(input_filename),
+        Path(input_file_path),
         seed_geom=seed_geom,
         output_dir=output_dir,
         filename=filename,
@@ -45,9 +46,10 @@ def write_dataset_prep(
     output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
     input_filename = "datasets" + DatasetPrepScript.get_filetype()
     shutil.move(input_filename, output_dir)
+    input_file_path = Path(output_dir / input_filename)
 
     dataset_input_script = DatasetPrepScript(
-        Path(input_filename),
+        Path(input_file_path),
         outlier_input_dir=Path(outlier_input_dir),
         **kwargs,
     )
