@@ -21,6 +21,7 @@ def write_diversity_sampling(
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
     output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
     input_filename = "diversity_input" + DiversityScript.get_filetype()
+    shutil.move(input_filename, output_dir)
 
     div_input_script = DiversityScript(
         Path(input_filename),
@@ -30,7 +31,6 @@ def write_diversity_sampling(
         **kwargs,
     )
     div_input_script.write()
-    shutil.move(input_filename, output_dir)
 
     return div_input_script.path
 
@@ -44,6 +44,7 @@ def write_dataset_prep(
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
     output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
     input_filename = "datasets" + DatasetPrepScript.get_filetype()
+    shutil.move(input_filename, output_dir)
 
     dataset_input_script = DatasetPrepScript(
         Path(input_filename),
@@ -51,7 +52,6 @@ def write_dataset_prep(
         **kwargs,
     )
     dataset_input_script.write()
-    shutil.move(input_filename, output_dir)
 
     return dataset_input_script.path
 
