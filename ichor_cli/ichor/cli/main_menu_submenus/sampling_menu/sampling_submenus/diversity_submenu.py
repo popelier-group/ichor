@@ -19,7 +19,7 @@ SUBMIT_DIVERSITY_MENU_DESCRIPTION = MenuDescription(
 SUBMIT_DIVERSITY_MENU_DEFAULTS = {
     "default_ncores": 2,
     "default_weights": False,
-    "default_sample_size": 10000,
+    "default_sample_size": 1000,
 }
 
 
@@ -75,7 +75,11 @@ class SubmitDiversityFunctions:
     @staticmethod
     def submit_diversity_on_compute():
         """Creates and submits an optimisation using ase calculator."""
-        (ncores, weights, sample_size,) = (
+        (
+            ncores,
+            weights,
+            sample_size,
+        ) = (
             submit_diversity_menu_options.selected_ncores,
             submit_diversity_menu_options.selected_weights,
             submit_diversity_menu_options.selected_sample_size,
@@ -98,8 +102,7 @@ class SubmitDiversityFunctions:
 
         submit_polus(
             input_script=div_script,
-            script_name=ichor.hpc.global_variables.SCRIPT_NAMES[
-            "diversity_sampling"],
+            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["diversity_sampling"],
             ncores=ncores,
         )
 
