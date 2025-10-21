@@ -26,7 +26,7 @@ SUBMIT_DIVERSITY_MENU_DEFAULTS = {
 # dataclass used to store values for SubmitAseMenu
 @dataclass
 class SubmitDiversityMenuOptions(MenuOptions):
-    selected_ncores: int
+    selected_number_of_cores: int
     selected_weights: bool
     selected_sample_size: int
 
@@ -65,7 +65,7 @@ class SubmitDiversityFunctions:
         """Asks user to select the size of the sampled pool."""
         submit_diversity_menu_options.selected_sample_size = user_input_int(
             "Sample pool size: ",
-            submit_diversity_menu.selected_sample_size,
+            submit_diversity_menu_options.selected_sample_size,
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
@@ -80,7 +80,7 @@ class SubmitDiversityFunctions:
             weights,
             sample_size,
         ) = (
-            submit_diversity_menu_options.selected_ncores,
+            submit_diversity_menu_options.selected_number_of_cores,
             submit_diversity_menu_options.selected_weights,
             submit_diversity_menu_options.selected_sample_size,
         )
