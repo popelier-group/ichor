@@ -60,7 +60,7 @@ class DatasetPrepScript(WriteFile, File):
         self.q00_threshold = self.q00_threshold or 0.005
         self.props = (
             self.props
-            or f'["iqa","q00","q10","q11c","q11s","q20","q21s","q21c","q22s","q22c]"'
+            or f'["iqa","q00","q10","q11c","q11s","q20","q21s","q21c","q22s","q22c"]'
         )
         self.val_size = self.val_size or [250]
         self.test_size = self.test_size or [1000]
