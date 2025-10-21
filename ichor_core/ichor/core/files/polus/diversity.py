@@ -45,8 +45,8 @@ class DiversityScript(WriteFile, File):
     def set_write_defaults_if_needed(
         self,
     ):
-        # TODO: ADD OPTION FOR USER TO CHANGE DEFAULT SYSTEM NAME 
-        self.system_name = self.system_name or "molecule" 
+        # TODO: ADD OPTION FOR USER TO CHANGE DEFAULT SYSTEM NAME
+        self.system_name = self.system_name or "molecule"
         self.output_dir = self.output_dir or Path.cwd()
         self.weights_vector = self.weights_vector or "HL1:1"
         self.chunk_size = self.chunk_size or 500
@@ -78,7 +78,7 @@ class DiversityScript(WriteFile, File):
             seedGeom="$seed_geom",
             outputDir="$output_dir",
             filename="$filename",
-            sampleSize= "[$sample_size]",
+            sampleSize=[$sample_size],
         )
 
         job.Execute()
