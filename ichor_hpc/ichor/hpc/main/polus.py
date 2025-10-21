@@ -4,7 +4,7 @@ from typing import Optional, Union
 
 import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
-from ichor.core.files.polus import DiversityScript, DatasetPrepScript
+from ichor.core.files.polus import DatasetPrepScript, DiversityScript
 
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import PythonCommand
@@ -21,7 +21,6 @@ def write_diversity_sampling(
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
     output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
     input_filename = "diversity_input" + DiversityScript.get_filetype()
-    shutil.move(input_filename, output_dir)
     input_file_path = Path(output_dir / input_filename)
 
     div_input_script = DiversityScript(
@@ -60,7 +59,9 @@ def write_dataset_prep(
 
 def submit_polus(
     input_script: Path,
-    script_name: Optional[Union[str, Path]],
+    script_name: Optional[Union[str, Path]] = ichor.hpc.global_variables.SCRIPT_NAMES[
+        "diversity_sampling"
+    ],
     hold: Optional[JobID] = None,
     ncores=2,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
@@ -96,3 +97,5 @@ def submit_polus(
     ) as submission_script:
 
         submission_script.add_command(PythonCommand(input_script))
+
+    return submission_script.submit(hold=hold)
