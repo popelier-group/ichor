@@ -59,9 +59,7 @@ def write_dataset_prep(
 
 def submit_polus(
     input_script: Path,
-    script_name: Optional[Union[str, Path]] = ichor.hpc.global_variables.SCRIPT_NAMES[
-        "diversity_sampling"
-    ],
+    script_name: Optional[Union[str, Path]],
     hold: Optional[JobID] = None,
     ncores=2,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
