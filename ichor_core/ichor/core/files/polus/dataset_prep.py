@@ -117,8 +117,7 @@ class DatasetPrepScript(WriteFile, File):
             if not os.path.isdir(OUT):
                 os.mkdir(OUT)
             for train_size in TRAIN:
-                train_size_str = str(train_size).strip("[]'\ ")
-                outdir = os.path.join(OUT, f"TRAIN-{train_size_str}")
+                outdir = os.path.join(OUT,"TRAIN-"+str(train_size))
                 job4=SeqSampler(
                     inputDir=os.path.join(cwd,"filtered/FILTERED-BY-Q00"),
                     valTest=$val_test,
