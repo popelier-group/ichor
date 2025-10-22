@@ -41,9 +41,9 @@ def write_dataset_prep(
     **kwargs,
 ) -> Optional[JobID]:
 
-    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
-    output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
-    input_filename = "datasets" + DatasetPrepScript.get_filetype()
+    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["dataset_prep"])
+    output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["dataset_prep"])
+    input_filename = "dataset_prep" + DatasetPrepScript.get_filetype()
     input_file_path = Path(output_dir / input_filename)
 
     dataset_input_script = DatasetPrepScript(
