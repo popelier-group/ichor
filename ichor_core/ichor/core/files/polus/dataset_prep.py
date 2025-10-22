@@ -131,8 +131,8 @@ class DatasetPrepScript(WriteFile, File):
                     validSize=[$valid_size],
                     testSize=[$test_size]
                 )
-            print(job4.inputDir)
-            job4.Execute()
+                print(job4.inputDir)
+                job4.Execute()
 
         """
             )
