@@ -81,7 +81,7 @@ class DatasetPrepScript(WriteFile, File):
             import os
 
             cwd = os.getcwd()
-            TRAIN = $train_size
+            TRAIN = [$train_size]
             OUT = "DATASETS"
 
             # Outlier removal
