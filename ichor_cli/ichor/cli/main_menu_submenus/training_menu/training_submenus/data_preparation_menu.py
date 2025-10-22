@@ -159,7 +159,7 @@ class SubmitDataPrepFunctions:
             submit_data_prep_menu_options.selected_test_size,
         )
 
-        input_path = Path(ichor.cli.global_menu_variables.SELECTED_DATABASE_PATH)
+        input_path = Path(ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH)
 
         dataset_script = write_dataset_prep(
             outlier_input_dir=input_path,
