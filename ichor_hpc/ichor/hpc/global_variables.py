@@ -181,8 +181,8 @@ FILE_STRUCTURE.add(
         the inputs/outputs in the job script itself.""",
 )
 FILE_STRUCTURE.add(
-    "DATASET_PREP",
-    "dataset_prep",
+    "DATASETS",
+    "datasets",
     type_=FileType.Directory,
     description="""A directory containing test, train and validation sets for ML.""",
 )
