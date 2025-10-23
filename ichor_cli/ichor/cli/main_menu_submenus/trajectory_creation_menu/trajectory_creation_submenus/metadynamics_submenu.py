@@ -20,7 +20,7 @@ from ichor.hpc.molecular_dynamics import submit_single_mtd_xyz
 
 # TODO: possibly make this be read from a file
 METADYNAMICS_MENU_DEFAULTS = {
-    "default_collective_variables": [],
+    "default_collective_variables": collective_variables_list,
     "default_timestep": 0.005,
     "default_bias_factor": 5,
     "default_number_of_iterations": 1024,

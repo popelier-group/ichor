@@ -72,7 +72,7 @@ class ColVarMenuFunctions:
 
         while True:
             col_var = []
-            print(f"\nDefinine a new collective variable (you've entered {len(all_col_vars)} so far):")
+            print(f"\nDefine a new collective variable (you've entered {len(all_col_vars)} so far):")
 
             while len(col_var) < 4:
                 user_input = input(f"  Enter atom ID {len(col_var)+1}: ").strip()
