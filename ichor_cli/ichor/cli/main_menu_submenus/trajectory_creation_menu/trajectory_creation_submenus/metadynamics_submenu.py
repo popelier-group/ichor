@@ -18,7 +18,6 @@ from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_s
 )
 from ichor.hpc.molecular_dynamics import submit_single_mtd_xyz
 
-# TODO: possibly make this be read from a file
 METADYNAMICS_MENU_DEFAULTS = {
     "default_collective_variables": collective_variables_list,
     "default_timestep": 0.005,
@@ -37,7 +36,7 @@ METADYNAMICS_MENU_DESCRIPTION = MenuDescription(
 
 @dataclass
 class MetadynamicsMenuOptions(MenuOptions):
-    collective_variables: list
+    collective_variables = collective_variables_list
     selected_timestep: float
     selected_bias: float
     selected_number_of_iterations: int
