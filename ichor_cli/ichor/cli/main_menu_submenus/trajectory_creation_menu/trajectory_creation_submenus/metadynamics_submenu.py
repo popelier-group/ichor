@@ -46,7 +46,7 @@ metadynamics_menu_options = MetadynamicsMenuOptions(
     *METADYNAMICS_MENU_DEFAULTS.values()
 )
 
-from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenus import col_var_menu, ColVarMenuFunctions
+from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenus.col_var_submenu import col_var_menu, ColVarMenuFunctions
 
 # Inject shared options into submenu logic
 ColVarMenuFunctions.shared_options = metadynamics_menu_options
