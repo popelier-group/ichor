@@ -184,7 +184,7 @@ metadynamics_menu_items = [
         MetadynamicsMenuFunctions.select_overwrite,
     ),
     FunctionItem(
-        "Submit metadynamics simulation",
+        "SUBMIT metadynamics simulation",
         MetadynamicsMenuFunctions.submit_metadynamics_to_compute,
     ),
 ]

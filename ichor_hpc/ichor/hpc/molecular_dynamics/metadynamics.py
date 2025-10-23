@@ -46,6 +46,7 @@ def submit_single_mtd_xyz(
         return
     # copy normally
     else:
+        mkdir(mtd_dir)
         shutil.copy(input_xyz_path, mtd_dir)
         
     #submit_mtd_calc_to_plumed(

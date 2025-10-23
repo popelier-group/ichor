@@ -61,8 +61,8 @@ class ColVarMenuFunctions:
         # Master list to hold all collective variable sequences
         all_col_vars = []
 
-        print("\n\n----END OF MOLECULE INFORMATION----")
-        print("Input collective variables (max 4 atoms per CV).\n2 = Distance, 3 = Angle, 4 = Dihedral \nPress Enter or 'q' to finish a CV.")
+        print("\n\n----END OF MOLECULE INFORMATION----\n\n")
+        print("Input collective variables (max 4 atoms per CV).\n2 = Distance, 3 = Angle, 4 = Dihedral \nPress Enter or 'q' to finish a CV.\n")
 
         while True:
             col_var = []

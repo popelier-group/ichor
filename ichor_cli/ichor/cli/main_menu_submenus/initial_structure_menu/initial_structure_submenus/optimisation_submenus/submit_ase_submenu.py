@@ -200,7 +200,7 @@ submit_ase_menu_items = [
         SubmitAseFunctions.select_overwrite_existing_calc,
     ),
     FunctionItem(
-        "Submit to ASE",
+        "SUBMIT to ASE",
         SubmitAseFunctions.xyz_to_ase_on_compute,
     ),
 ]
