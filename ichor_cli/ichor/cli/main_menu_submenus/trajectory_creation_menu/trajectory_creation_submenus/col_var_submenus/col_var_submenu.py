@@ -8,12 +8,9 @@ from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     user_input_free_flow,
-    user_input_int,
 )
 
 import ichor.core.molecular_dynamics.metadynamics as mtd
-
-collective_variables_list = []
 
 COL_VAR_MENU_DEFAULTS = {
     "default_col_vars": [],
@@ -36,6 +33,8 @@ col_var_menu_options = ColVarMenuOptions(*COL_VAR_MENU_DEFAULTS.values())
 
 # class with static methods for each menu item that calls a function.
 class ColVarMenuFunctions:
+
+    shared_options=None
 
     @staticmethod
     def show_mol_info():
@@ -115,7 +114,8 @@ class ColVarMenuFunctions:
             
         print("\nAll collective variables collected:")
         print(all_col_vars)
-        col_var_menu_options.collective_variables_list = all_col_vars
+        if ColVarMenuFunctions.shared_options:
+            ColVarMenuFunctions.shared_options.collective_variables = all_col_vars
         
         answer = ""
         user_input_free_flow("Press enter to continue: ", answer)

@@ -12,14 +12,12 @@ from ichor.cli.useful_functions import (
     user_input_int,
     user_input_bool,
 )
-from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenus import (
-    col_var_menu,
-    collective_variables_list,
-)
+
 from ichor.hpc.molecular_dynamics import submit_single_mtd_xyz
 
+
 METADYNAMICS_MENU_DEFAULTS = {
-    "default_collective_variables": collective_variables_list,
+    "default_collective_variables": [],
     "default_timestep": 0.005,
     "default_bias_factor": 5,
     "default_number_of_iterations": 1024,
@@ -36,7 +34,7 @@ METADYNAMICS_MENU_DESCRIPTION = MenuDescription(
 
 @dataclass
 class MetadynamicsMenuOptions(MenuOptions):
-    collective_variables = collective_variables_list
+    collective_variables: list
     selected_timestep: float
     selected_bias: float
     selected_number_of_iterations: int
@@ -48,6 +46,12 @@ class MetadynamicsMenuOptions(MenuOptions):
 metadynamics_menu_options = MetadynamicsMenuOptions(
     *METADYNAMICS_MENU_DEFAULTS.values()
 )
+
+from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenus import col_var_menu, ColVarMenuFunctions
+
+# Inject shared options into submenu logic
+ColVarMenuFunctions.shared_options = metadynamics_menu_options
+
 
 
 # class with static methods for each menu item that calls a function.
@@ -114,14 +118,14 @@ class MetadynamicsMenuFunctions:
         """Asks for user input and submits metadynamics job to compute node."""
         
         # if no collective variables are defined then do nothing.
-        if len(collective_variables_list) == 0:
+        if len(metadynamics_menu_options.collective_variables) == 0:
             print("No collective variables loaded. At least one must be loaded for metadynamics.")
             answer = ""
             user_input_free_flow("Press enter to continue: ", answer)
             return
         # if they are present, then start the run for a metadynamics job
         else:
-            col_vars = collective_variables_list
+            col_vars = metadynamics_menu_options.collective_variables
             timestep = metadynamics_menu_options.selected_timestep
             bias = metadynamics_menu_options.selected_bias
             iterations = metadynamics_menu_options.selected_number_of_iterations
