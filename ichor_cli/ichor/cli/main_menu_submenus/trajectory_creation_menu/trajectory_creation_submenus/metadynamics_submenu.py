@@ -12,7 +12,7 @@ from ichor.cli.useful_functions import (
     user_input_int,
     user_input_bool,
 )
-from ichor.hpc.molecular_dynamics import submit_single_mtd_xyz
+from ichor.hpc.molecular_dynamics import prep_mtd, submit_mtd
 
 
 METADYNAMICS_MENU_DEFAULTS = {
@@ -23,6 +23,7 @@ METADYNAMICS_MENU_DEFAULTS = {
     "default_temperature": 300,
     "default_calculator": "GFN2-xTB",
     "overwrite": False,
+    "ncores" : 2,
 }
 
 METADYNAMICS_MENU_DESCRIPTION = MenuDescription(
@@ -40,6 +41,7 @@ class MetadynamicsMenuOptions(MenuOptions):
     selected_temperature: float
     selected_calculator: str
     overwrite: bool
+    ncores: int
 
 
 metadynamics_menu_options = MetadynamicsMenuOptions(
@@ -111,6 +113,13 @@ class MetadynamicsMenuFunctions:
         metadynamics_menu_options.overwrite = user_input_bool(
             "Overwrite existing calc: ", metadynamics_menu_options.overwrite
         )
+    def select_number_of_cores():
+        """
+        Select how many cores required to run job.
+        """
+        metadynamics_menu_options.ncores = user_input_int(
+            "Number of CPU cores: ", metadynamics_menu_options.ncores
+        )
 
     @staticmethod
     def submit_metadynamics_to_compute():
@@ -131,8 +140,9 @@ class MetadynamicsMenuFunctions:
             temperature = metadynamics_menu_options.selected_temperature
             calculator = metadynamics_menu_options.selected_calculator
             overwrite = metadynamics_menu_options.overwrite
+            ncores = metadynamics_menu_options.ncores
 
-            submit_single_mtd_xyz(
+            mtd_script = prep_mtd(
                 input_xyz_path=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
                 collective_variables=col_vars,
                 timestep=timestep,
@@ -143,6 +153,11 @@ class MetadynamicsMenuFunctions:
                 calculator=calculator, 
                 overwrite=overwrite,
             )
+            submit_mtd(
+            input_script=mtd_script,
+            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["mtd"],
+            ncores=ncores,
+        )
 
 
 # initialize menu
@@ -182,6 +197,10 @@ metadynamics_menu_items = [
     FunctionItem(
         "Select whether to overwrite existing calculation",
         MetadynamicsMenuFunctions.select_overwrite,
+    ),
+    FunctionItem(
+        "Select how many CPU cores to use",
+        MetadynamicsMenuFunctions.select_number_of_cores,
     ),
     FunctionItem(
         "SUBMIT metadynamics simulation",
