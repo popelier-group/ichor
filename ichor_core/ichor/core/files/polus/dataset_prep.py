@@ -79,6 +79,7 @@ class DatasetPrepScript(WriteFile, File):
             from polus.filters.iqa_correction import iqa_correct
             from polus.filters.iqa_correction import iqa_correct
             import os
+            import shutil
 
             cwd = os.getcwd()
             TRAIN = $train_size
@@ -133,6 +134,7 @@ class DatasetPrepScript(WriteFile, File):
                 )
                 print(job4.inputDir)
                 job4.Execute()
+
 
         """
             )

@@ -5,9 +5,9 @@ from typing import Union
 import ichor.cli.global_menu_variables
 from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
-from ichor.cli.main_menu_submenus.training_menu.training_submenus.data_preparation_menu import(
+from ichor.cli.main_menu_submenus.training_menu.training_submenus.data_preparation_menu import (
     submit_data_prep_menu,
-    SUBMIT_DATA_PREP_MENU_DESCRIPTION
+    SUBMIT_DATA_PREP_MENU_DESCRIPTION,
 )
 
 from ichor.cli.menu_description import MenuDescription
@@ -20,9 +20,11 @@ TRAINING_MENU_DESCRIPTION = MenuDescription(
     subtitle="Use this menu to prepare datasets, train and analyse GPR models.\n",
 )
 
+
 @dataclass
 class TrainingMenuOptions(MenuOptions):
     pass
+
 
 training_menu_options = TrainingMenuOptions()
 
@@ -44,6 +46,7 @@ training_menu_items = [
         submit_data_prep_menu,
         training_menu,
     ),
+    SubmenuItem(),
 ]
 
 add_items_to_menu(training_menu, training_menu_items)
