@@ -9,6 +9,10 @@ from ichor.cli.main_menu_submenus.training_menu.training_submenus.data_preparati
     submit_data_prep_menu,
     SUBMIT_DATA_PREP_MENU_DESCRIPTION,
 )
+from ichor.cli.main_menu_submenus.training_menu.training_submenus.training_models_menu import (
+    submit_training_menu,
+    SUBMIT_TRAINING_MENU_DESCRIPTION,
+)
 
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
@@ -46,7 +50,11 @@ training_menu_items = [
         submit_data_prep_menu,
         training_menu,
     ),
-    SubmenuItem(),
+    SubmenuItem(
+        SUBMIT_TRAINING_MENU_DESCRIPTION.title,
+        submit_training_menu,
+        training_menu,
+    ),
 ]
 
 add_items_to_menu(training_menu, training_menu_items)
