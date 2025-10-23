@@ -12,10 +12,6 @@ from ichor.cli.useful_functions import (
 
 import ichor.core.molecular_dynamics.metadynamics as mtd
 
-COL_VAR_MENU_DEFAULTS = {
-    "default_col_vars": [],
-}
-
 COL_VAR_MENU_DESCRIPTION = MenuDescription(
     "Collective Variable Menu",
     subtitle="Use this menu to define collective variables for metadynamics calculations with ASE/PLUMED.",
@@ -24,11 +20,10 @@ COL_VAR_MENU_DESCRIPTION = MenuDescription(
 
 @dataclass
 class ColVarMenuOptions(MenuOptions):
+    pass
 
-    collective_variables_list: list
 
-
-col_var_menu_options = ColVarMenuOptions(*COL_VAR_MENU_DEFAULTS.values())
+col_var_menu_options = ColVarMenuOptions()
 
 
 # class with static methods for each menu item that calls a function.
