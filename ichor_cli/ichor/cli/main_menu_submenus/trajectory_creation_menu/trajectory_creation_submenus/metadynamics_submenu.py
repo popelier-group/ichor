@@ -14,7 +14,6 @@ from ichor.cli.useful_functions import (
 )
 from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenus import (
     col_var_menu,
-    COL_VAR_MENU_DESCRIPTION,
     collective_variables_list,
 )
 from ichor.hpc.molecular_dynamics import submit_single_mtd_xyz
@@ -157,7 +156,7 @@ metadynamics_menu = ConsoleMenu(
 # make menu items
 # can use lambda functions to change text of options as well :)
 metadynamics_menu_items = [
-    SubmenuItem(COL_VAR_MENU_DESCRIPTION.title, col_var_menu, metadynamics_menu),
+    SubmenuItem("Set up collective variables for metadynamics", col_var_menu, metadynamics_menu),
     FunctionItem(
         "Select timestep (fs)",
         MetadynamicsMenuFunctions.select_timestep,
