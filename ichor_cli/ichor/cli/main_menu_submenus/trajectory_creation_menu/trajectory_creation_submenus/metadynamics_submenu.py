@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import ichor.cli.global_menu_variables
+import ichor.hpc.global_variables
+
 from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
@@ -23,7 +25,7 @@ METADYNAMICS_MENU_DEFAULTS = {
     "default_temperature": 300,
     "default_calculator": "GFN2-xTB",
     "overwrite": False,
-    "ncores" : 2,
+    "ncores": 2,
 }
 
 METADYNAMICS_MENU_DESCRIPTION = MenuDescription(
@@ -48,11 +50,13 @@ metadynamics_menu_options = MetadynamicsMenuOptions(
     *METADYNAMICS_MENU_DEFAULTS.values()
 )
 
-from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenus.col_var_submenu import col_var_menu, ColVarMenuFunctions
+from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenus.col_var_submenu import (
+    col_var_menu,
+    ColVarMenuFunctions,
+)
 
 # Inject shared options into submenu logic
 ColVarMenuFunctions.shared_options = metadynamics_menu_options
-
 
 
 # class with static methods for each menu item that calls a function.
@@ -113,6 +117,7 @@ class MetadynamicsMenuFunctions:
         metadynamics_menu_options.overwrite = user_input_bool(
             "Overwrite existing calc: ", metadynamics_menu_options.overwrite
         )
+
     def select_number_of_cores():
         """
         Select how many cores required to run job.
@@ -124,10 +129,12 @@ class MetadynamicsMenuFunctions:
     @staticmethod
     def submit_metadynamics_to_compute():
         """Asks for user input and submits metadynamics job to compute node."""
-        
+
         # if no collective variables are defined then do nothing.
         if len(metadynamics_menu_options.collective_variables) == 0:
-            print("No collective variables loaded. At least one must be loaded for metadynamics.")
+            print(
+                "No collective variables loaded. At least one must be loaded for metadynamics."
+            )
             answer = ""
             user_input_free_flow("Press enter to continue: ", answer)
             return
@@ -146,18 +153,25 @@ class MetadynamicsMenuFunctions:
                 input_xyz_path=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
                 collective_variables=col_vars,
                 timestep=timestep,
-                bias=bias,
-                nsteps=iterations,
+                bias_factor=bias,
+                iterations=iterations,
                 temperature=temperature,
                 system_name=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH.stem,
-                calculator=calculator, 
+                calculator=calculator,
                 overwrite=overwrite,
             )
             submit_mtd(
-            input_script=mtd_script,
-            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["mtd"],
-            ncores=ncores,
-        )
+                input_script=mtd_script,
+                script_name=ichor.hpc.global_variables.SCRIPT_NAMES["mtd"],
+                ncores=ncores,
+            )
+            METADYNAMICS_MENU_DESCRIPTION.prologue_description_text = (
+                "Successfully submitted metadynamics job \n"
+            )
+            # update logger
+            ichor.hpc.global_variables.LOGGER.info(
+                f"Metadynamics trajectory generation job submitted"
+            )
 
 
 # initialize menu
@@ -173,7 +187,9 @@ metadynamics_menu = ConsoleMenu(
 # make menu items
 # can use lambda functions to change text of options as well :)
 metadynamics_menu_items = [
-    SubmenuItem("Set up collective variables for metadynamics", col_var_menu, metadynamics_menu),
+    SubmenuItem(
+        "Set up collective variables for metadynamics", col_var_menu, metadynamics_menu
+    ),
     FunctionItem(
         "Select timestep (fs)",
         MetadynamicsMenuFunctions.select_timestep,

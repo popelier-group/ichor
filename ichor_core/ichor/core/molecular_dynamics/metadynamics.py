@@ -39,26 +39,6 @@ functional_groups = {
 }
 
 
-class Metadynamics_In:
-
-    xyz_path = "[data from file]"
-    collective_variables = "[]"
-    timestep = "float"
-    num_timesteps = "int"
-    time_units = "str"
-    dist_units = "str"
-    energy_units = "str"
-    height = "[]"
-    pace = "[]"
-    sigma = "[]"
-    grid_min = "[-pi]"
-    grid_max = "[pi]"
-    grid_bin = "[150]"
-    bias_factor = "[]"
-    file = "[HILLS...]"
-    temperature = "float"
-
-
 def convert_xyz_to_mol(xyz_file):
     xyz_path = Path(xyz_file)
     if xyz_path.exists() and xyz_path.is_file() and xyz_path.suffix == ".xyz":
@@ -239,12 +219,14 @@ def draw_labeled_molecule(mol_path):
         f.write(drawer.GetDrawingText())
     print(f"Image saved to {filename}")
 
+
 def count_atoms(mol_path):
     mol = convert_xyz_to_mol(mol_path)
     # sanitise and add hydrogens
     mol = Chem.AddHs(mol)
     count = len(mol.GetAtoms())
     return count
+
 
 def print_molecule_data(mol_path):
     mol = convert_xyz_to_mol(mol_path)
@@ -255,5 +237,3 @@ def print_molecule_data(mol_path):
     print_rotatable_bonds(mol)
     print_hbond_info(mol)
     print_dihedrals(mol)
-
-

@@ -4,7 +4,9 @@ from typing import List, Optional, Union
 
 import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
+from ichor.core.files.mtd import MtdTrajScript
 from ichor.core.files import Trajectory
+
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import PythonCommand
 from ichor.hpc.submission_script import SubmissionScript
@@ -13,14 +15,11 @@ from ichor.hpc.submission_script import SubmissionScript
 ## set up folder for running mtd calculation
 def prep_mtd(
     input_xyz_path: Union[str, Path],
-    ncores=2,
     overwrite=False,
-    hold: JobID = None,
     **kwargs,
-) -> Optional[JobID]:
-    
-    # input trajectory
-    input_xyz_traj = Trajectory(input_xyz_path)
+):
+
+    # extract system name
     system_name = input_xyz_path.stem
 
     # metadynamics parent folder
@@ -30,7 +29,7 @@ def prep_mtd(
     # subfolder for running calc
     mtd_dir = Path(mtd_parent / system_name)
     dest_name = Path(mtd_dir / input_xyz_path.name)
-    
+
     if overwrite:
         try:
             rm_path = mtd_dir
@@ -49,17 +48,20 @@ def prep_mtd(
         mkdir(mtd_dir)
         shutil.copy(input_xyz_path, mtd_dir)
 
-    # build mtd script here
-    #dataset_input_script = DatasetPrepScript(
-    #    Path(input_file_path),
-    #    outlier_input_dir=Path(outlier_input_dir),
-    #    **kwargs,
-    #)
-    #dataset_input_script.write()
-    #return dataset_input_script.path
-        
+    script_filename = "mtd" + MtdTrajScript.get_filetype()
+    input_file_path = Path(mtd_dir / script_filename)
 
-def submit_mtd(input_script: Path,
+    ## build mtd script here
+    mtd_input_script = MtdTrajScript(
+        Path(input_file_path),
+        **kwargs,
+    )
+    mtd_input_script.write()
+    return mtd_input_script.path
+
+
+def submit_mtd(
+    input_script: Path,
     script_name: Optional[Union[str, Path]],
     hold: Optional[JobID] = None,
     ncores=2,
