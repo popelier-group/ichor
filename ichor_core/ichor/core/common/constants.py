@@ -209,7 +209,7 @@ GAUSSIAN_METHODS: List[str] = [
 ]
 
 # HF technically not functional, but AIMALL does that by default
-AIMALL_FUNCTIONALS: List[str] = ["HF", "M062X", "B3LYP", "PBE"]
+AIMALL_FUNCTIONALS: List[str] = ["HF", "M062X", "B3LYP", "PBE", "PBE0"]
 
 FEREBUS_TYPES: List[str] = ["executable", "python"]
 
