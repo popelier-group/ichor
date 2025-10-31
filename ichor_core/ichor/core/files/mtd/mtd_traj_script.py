@@ -93,9 +93,9 @@ class MtdTrajScript(WriteFile, File):
         self.grid_min = self.grid_min or ["-pi"]
         self.grid_max = self.grid_max or ["pi"]
         self.grid_bin = self.grid_bin or [150]
-        self.solvent = self.solvent or '"none"'
+        self.solvent = self.solvent or "none"
         self.kT = self.kT or 0.025
-        self.properties = self.properties or ['"energy"', '"forces"']
+        self.properties = self.properties or ["energy", "forces"]
         self.md_timestep = self.md_timestep or 1.0
         self.md_friction = self.md_friction or 0.01
         self.md_communication = self.md_communication or "world"
@@ -107,11 +107,11 @@ class MtdTrajScript(WriteFile, File):
         print("MAKE SINGLE CV STRING")
         cv_to_str = ",".join(str(i) for i in cv)
         if len(cv) == 2:
-            cv_str = f'"m{num}: DISTANCE ATOMS={cv_to_str}",\n'
+            cv_str = f'\t\t"m{num}: DISTANCE ATOMS={cv_to_str}",\n'
         elif len(cv) == 3:
-            cv_str = f'"m{num}: ANGLE ATOMS={cv_to_str}",\n'
+            cv_str = f'\t\t"m{num}: ANGLE ATOMS={cv_to_str}",\n'
         elif len(cv) == 4:
-            cv_str = f'"m{num}: DIHEDRAL ATOMS={cv_to_str}",\n'
+            cv_str = f'\t\t"m{num}: TORSION ATOMS={cv_to_str}",\n'
         return cv_str
 
     def build_group_str(self, cv, num):
@@ -123,13 +123,15 @@ class MtdTrajScript(WriteFile, File):
     def build_mtd_setup_str(self):
 
         print("function to build mtd setup string")
-        header_line = f'[f "UNITS LENGTH={self.dist_units} TIME=1/ps ENERGY={self.energy_units}",\n'
+        header_line = f'[f"UNITS LENGTH={self.dist_units} TIME=1/ps ENERGY={self.energy_units}",\n'
         if len(self.collective_variables) == 1:
             print("BUILDING SETUP STRING FOR SINGLE VARIABLE")
             cv_line = self.build_cv_str(self.collective_variables[0], 1)
-            metad_line = f'"METAD ARG=m1 HEIGHT={self.height} PACE={self.pace} " +\n'
-            sigma_line = f'"SIGMA={self.sigma[0]} GRID_MIN={self.grid_min[0]} GRID_MAX={self.grid_max[0]}" +\n'
-            grid_bin_line = f'" GRID_BIN={self.grid_bin[0]} BIASFACTOR={self.bias_factor} FILE={self.hills_files[0]}"]\n'
+            metad_line = (
+                f'\t\t"METAD ARG=m1 HEIGHT={self.height} PACE={self.pace} " +\n'
+            )
+            sigma_line = f'\t\t"SIGMA={self.sigma[0]} GRID_MIN={self.grid_min[0]} GRID_MAX={self.grid_max[0]}" +\n'
+            grid_bin_line = f'\t\t" GRID_BIN={self.grid_bin[0]} BIASFACTOR={self.bias_factor} FILE={self.hills_files[0]}"]\n'
             setup_str = header_line + cv_line + metad_line + sigma_line + grid_bin_line
             return setup_str
         else:
@@ -211,7 +213,7 @@ class MtdTrajScript(WriteFile, File):
             time_units=self.time_units,
             system_str=system_str_built,
             mol_xyz=self.input_xyz_path,
-            traj_path="PLACEHOLDER",
+            traj_path=self.input_xyz_path.with_suffix(".traj"),
             properties=self.properties,
             calculator=self.calculator,
             solvent=self.solvent,
@@ -221,10 +223,12 @@ class MtdTrajScript(WriteFile, File):
             md_timestep=self.md_timestep,
             md_friction=self.md_friction,
             md_communicator=self.md_communication,
-            log_file_name="PLACEHOLDER",
+            log_file_name=self.input_xyz_path.with_suffix(".log"),
             md_interval=self.md_interval,
             md_runsteps=self.md_runsteps,
-            mtd_out_file="PLACEHOLDER",
+            mtd_out_file=self.input_xyz_path.with_name(
+                self.system_name + "mtd_out.xyz"
+            ),
         )
 
         return script_text

@@ -35,7 +35,7 @@ def prep_mtd(
             rm_path = mtd_dir
             shutil.rmtree(rm_path)
             mkdir(mtd_dir)
-            shutil.copy(input_xyz_path, mtd_dir)
+            shutil.copy(input_xyz_path, dest_name)
         except:
             print("FILE DOES NOT EXIST FOR OVERWRITE. RUNNING AS NORMAL")
             pass
@@ -46,7 +46,7 @@ def prep_mtd(
     # copy normally
     else:
         mkdir(mtd_dir)
-        shutil.copy(input_xyz_path, mtd_dir)
+        shutil.copy(input_xyz_path, dest_name)
 
     script_filename = "mtd" + MtdTrajScript.get_filetype()
     input_file_path = Path(mtd_dir / script_filename)
@@ -54,7 +54,7 @@ def prep_mtd(
     ## build mtd script here
     mtd_input_script = MtdTrajScript(
         Path(input_file_path),
-        input_xyz_path,
+        dest_name,
         **kwargs,
     )
     mtd_input_script.write()
