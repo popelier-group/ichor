@@ -54,6 +54,7 @@ def prep_mtd(
     ## build mtd script here
     mtd_input_script = MtdTrajScript(
         Path(input_file_path),
+        input_xyz_path,
         **kwargs,
     )
     mtd_input_script.write()
