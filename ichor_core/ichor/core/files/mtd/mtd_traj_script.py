@@ -105,7 +105,7 @@ class MtdTrajScript(WriteFile, File):
 
     def build_cv_str(self, cv, num):
         print("MAKE SINGLE CV STRING")
-        cv_to_str = ",".join(cv)
+        cv_to_str = ",".join(str(i) for i in cv)
         if len(cv) == 2:
             cv_str = f'"m{num}: DISTANCE ATOMS={cv_to_str}",\n'
         elif len(cv) == 3:
