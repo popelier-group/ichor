@@ -103,14 +103,18 @@ class MtdTrajScript(WriteFile, File):
         self.md_freq_out = self.md_freq_out or 10000
         self.md_interval = self.md_interval or self.md_runsteps / self.md_freq_out
 
-    def build_cv_str(cv, num):
+    def build_cv_str(self, cv, num):
         print("MAKE SINGLE CV STRING")
         cv_to_str = ",".join(cv)
         if len(cv) == 2:
-            cv_str = f'"m{num}: DISTANCE ATOMS={cv_to_str}",'
+            cv_str = f'"m{num}: DISTANCE ATOMS={cv_to_str}",\n'
+        elif len(cv) == 3:
+            cv_str = f'"m{num}: ANGLE ATOMS={cv_to_str}",\n'
+        elif len(cv) == 4:
+            cv_str = f'"m{num}: DIHEDRAL ATOMS={cv_to_str}",\n'
         return cv_str
 
-    def build_group_str(cv, num):
+    def build_group_str(self, cv, num):
         print("MAKE SINGLE GROUP STRING")
         group_str = ""
         return group_str
