@@ -77,9 +77,26 @@ class MtdTrajScript(WriteFile, File):
     def set_write_defaults_if_needed(
         self,
     ):
+        hills_list = []
+        sigma_list = []
+        grid_min_list = []
+        grid_max_list = []
+        grid_bin_list = []
+        # build lists of defaults for multi cv
+        for i in range(len(self.collective_variables)):
+            hills_list.append(f"HILLS{i+1}")
+            sigma_list.append(0.20)
+            grid_min_list.append("-pi")
+            grid_max_list.append("pi")
+            grid_bin_list.append(200)
+
+        self.hills_files = self.hills_files or hills_list
+        self.sigma = self.sigma or sigma_list
+        self.grid_min = self.grid_min or grid_min_list
+        self.grid_max = self.grid_max or grid_max_list
+        self.grid_bin = self.grid_bin or grid_bin_list
         self.timestep = self.timestep or 0.005
         self.bias_factor = self.bias_factor or 5
-        self.hills_files = self.hills_files or ["HILLS"]
         self.iterations = self.iterations or 1024
         self.temperature = self.temperature or 300
         self.system_name = self.system_name or "generic_molecule"
@@ -89,10 +106,6 @@ class MtdTrajScript(WriteFile, File):
         self.energy_units = self.energy_units or "{units.mol/units.kJ}"
         self.height = self.height or 0.25
         self.pace = self.pace or 200
-        self.sigma = self.sigma or [0.20]
-        self.grid_min = self.grid_min or ["-pi"]
-        self.grid_max = self.grid_max or ["pi"]
-        self.grid_bin = self.grid_bin or [150]
         self.solvent = self.solvent or "none"
         self.kT = self.kT or 0.025
         self.properties = self.properties or ["energy", "forces"]
@@ -103,20 +116,24 @@ class MtdTrajScript(WriteFile, File):
         self.md_freq_out = self.md_freq_out or 10000
         self.md_interval = self.md_interval or self.md_runsteps / self.md_freq_out
 
-    def build_cv_str(self, cv, num):
+    def build_cv_str(self, cv, num, group):
         print("MAKE SINGLE CV STRING")
-        cv_to_str = ",".join(str(i) for i in cv)
+        if group == "":
+            cv_to_str = ",".join(str(i) for i in cv)
+        else:
+            cv_to_str = group
         if len(cv) == 2:
-            cv_str = f'\t\t"m{num}: DISTANCE ATOMS={cv_to_str}",\n'
+            cv_str = f'\t"m{num}: DISTANCE ATOMS={cv_to_str}",\n'
         elif len(cv) == 3:
-            cv_str = f'\t\t"m{num}: ANGLE ATOMS={cv_to_str}",\n'
+            cv_str = f'\t"m{num}: ANGLE ATOMS={cv_to_str}",\n'
         elif len(cv) == 4:
-            cv_str = f'\t\t"m{num}: TORSION ATOMS={cv_to_str}",\n'
+            cv_str = f'\t"m{num}: TORSION ATOMS={cv_to_str}",\n'
         return cv_str
 
     def build_group_str(self, cv, num):
         print("MAKE SINGLE GROUP STRING")
-        group_str = ""
+        cv_to_str = ",".join(str(i) for i in cv)
+        group_str = f'\t"GROUP ATOMS={cv_to_str} LABEL=g{num}",\n'
         return group_str
 
     ## need some complex logic here to define MTD arguments etc.
@@ -126,21 +143,37 @@ class MtdTrajScript(WriteFile, File):
         header_line = f'[f"UNITS LENGTH={self.dist_units} TIME=1/ps ENERGY={self.energy_units}",\n'
         if len(self.collective_variables) == 1:
             print("BUILDING SETUP STRING FOR SINGLE VARIABLE")
-            cv_line = self.build_cv_str(self.collective_variables[0], 1)
-            metad_line = (
-                f'\t\t"METAD ARG=m1 HEIGHT={self.height} PACE={self.pace} " +\n'
-            )
-            sigma_line = f'\t\t"SIGMA={self.sigma[0]} GRID_MIN={self.grid_min[0]} GRID_MAX={self.grid_max[0]}" +\n'
-            grid_bin_line = f'\t\t" GRID_BIN={self.grid_bin[0]} BIASFACTOR={self.bias_factor} FILE={self.hills_files[0]}"]\n'
+            cv_line = self.build_cv_str(self.collective_variables[0], 1, "")
+            metad_line = f'\t"METAD ARG=m1 HEIGHT={self.height} PACE={self.pace} " +\n'
+            sigma_line = f'\t"SIGMA={self.sigma[0]} GRID_MIN={self.grid_min[0]} GRID_MAX={self.grid_max[0]}" +\n'
+            grid_bin_line = f'\t" GRID_BIN={self.grid_bin[0]} BIASFACTOR={self.bias_factor} FILE={self.hills_files[0]}"]\n'
             setup_str = header_line + cv_line + metad_line + sigma_line + grid_bin_line
             return setup_str
         else:
             print("BUILDING SETUP STRING FOR MULTIPLE VARIABLES")
             group_line = ""
             cv_line = ""
+            arg_list = []
             for i in range(len(self.collective_variables)):
-                group_line += ""
-                cv_line += self.build_cv_str(self.collective_variables[i], i + 1)
+                group_line += self.build_group_str(self.collective_variables[i], i + 1)
+                cv_line += self.build_cv_str(self.collective_variables[i], i + 1, "")
+                arg_list.append(f"m{i+1}")
+            arg_str = ",".join(str(i) for i in arg_list)
+            sigma_str = ",".join(str(i) for i in self.sigma)
+            pbmetad_line = f'\t"PBMETAD ARG={arg_str} SIGMA={sigma_str} PACE={self.pace} HEIGHT={self.height} " +\n'
+            grid_bin_line = f'\t""GRID_MIN={self.grid_min} GRID_MAX={self.grid_max} GRID_BIN={self.grid_bin} "+\n'
+            bias_factor_line = (
+                f'\t"BIASFACTOR={self.bias_factor} FILE={self.hills_files} "]\n'
+            )
+            setup_str = (
+                header_line
+                + group_line
+                + cv_line
+                + pbmetad_line
+                + grid_bin_line
+                + bias_factor_line
+            )
+            return setup_str
 
     # write file from a template
     def _write_file(self, path: Path, *args, **kwargs):
