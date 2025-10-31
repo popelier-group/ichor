@@ -114,7 +114,7 @@ class MtdTrajScript(WriteFile, File):
         self.md_communication = self.md_communication or "world"
         self.md_runsteps = self.md_runsteps or 100000
         self.md_freq_out = self.md_freq_out or 10000
-        self.md_interval = self.md_interval or self.md_runsteps / self.md_freq_out
+        self.md_interval = self.md_interval or int(self.md_runsteps / self.md_freq_out)
 
     def build_cv_str(self, cv, num, group):
         print("MAKE SINGLE CV STRING")
@@ -140,7 +140,7 @@ class MtdTrajScript(WriteFile, File):
     def build_mtd_setup_str(self):
 
         print("function to build mtd setup string")
-        header_line = f'[f"UNITS LENGTH={self.dist_units} TIME=1/ps ENERGY={self.energy_units}",\n'
+        header_line = f'[f"UNITS LENGTH={self.dist_units} TIME={{1/ps}} ENERGY={self.energy_units}",\n'
         if len(self.collective_variables) == 1:
             print("BUILDING SETUP STRING FOR SINGLE VARIABLE")
             cv_line = self.build_cv_str(self.collective_variables[0], 1, "")
@@ -160,10 +160,14 @@ class MtdTrajScript(WriteFile, File):
                 arg_list.append(f"m{i+1}")
             arg_str = ",".join(str(i) for i in arg_list)
             sigma_str = ",".join(str(i) for i in self.sigma)
+            grid_min_str = ",".join(str(i) for i in self.grid_min)
+            grid_max_str = ",".join(str(i) for i in self.grid_max)
+            grid_bin_str = ",".join(str(i) for i in self.grid_bin)
             pbmetad_line = f'\t"PBMETAD ARG={arg_str} SIGMA={sigma_str} PACE={self.pace} HEIGHT={self.height} " +\n'
-            grid_bin_line = f'\t""GRID_MIN={self.grid_min} GRID_MAX={self.grid_max} GRID_BIN={self.grid_bin} "+\n'
+            grid_bin_line = f'\t"GRID_MIN={grid_min_str} GRID_MAX={grid_max_str} GRID_BIN={grid_bin_str} "+\n'
+            hill_file_str = ",".join(str(i) for i in self.hills_files)
             bias_factor_line = (
-                f'\t"BIASFACTOR={self.bias_factor} FILE={self.hills_files} "]\n'
+                f'\t"BIASFACTOR={self.bias_factor} FILE={hill_file_str} "]\n'
             )
             setup_str = (
                 header_line
@@ -216,7 +220,7 @@ class MtdTrajScript(WriteFile, File):
                                 kT=$kT)
             # Define dynamic object
             dyn = Langevin(atoms=mol_mtd, 
-                          timestep=$md_timestep, 
+                          timestep=$md_timestep*units.fs, 
                           temperature_K=$temperature,
                           friction=$md_friction/units.fs,
                           communicator = $md_communicator,
