@@ -156,7 +156,9 @@ class MtdTrajScript(WriteFile, File):
             arg_list = []
             for i in range(len(self.collective_variables)):
                 group_line += self.build_group_str(self.collective_variables[i], i + 1)
-                cv_line += self.build_cv_str(self.collective_variables[i], i + 1, "")
+                cv_line += self.build_cv_str(
+                    self.collective_variables[i], i + 1, f"g{i+1}"
+                )
                 arg_list.append(f"m{i+1}")
             arg_str = ",".join(str(i) for i in arg_list)
             sigma_str = ",".join(str(i) for i in self.sigma)
