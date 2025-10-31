@@ -18,7 +18,8 @@ class MtdTrajScript(WriteFile, File):
         ],
         collective_variables: list[int] = None,
         timestep: Optional[float] = None,
-        bias_factor: Optional[list[float]] = None,
+        bias_factor: Optional[float] = None,
+        hills_files: Optional[list[str]] = None,
         iterations: Optional[int] = None,
         temperature: Optional[float] = None,
         system_name: Optional[str] = None,
@@ -26,8 +27,8 @@ class MtdTrajScript(WriteFile, File):
         time_units: Optional[str] = None,
         dist_units: Optional[str] = None,
         energy_units: Optional[str] = None,
-        height: Optional[list[float]] = None,
-        pace: Optional[list[float]] = None,
+        height: Optional[float] = None,
+        pace: Optional[float] = None,
         sigma: Optional[list[float]] = None,
         grid_min: Optional[list[str]] = None,
         grid_max: Optional[list[str]] = None,
@@ -48,7 +49,8 @@ class MtdTrajScript(WriteFile, File):
         self.input_xyz_path = Path(input_xyz_path)
         self.collective_variables: list[int] = collective_variables
         self.timestep: Optional[float] = timestep
-        self.bias_factor: Optional[list[float]] = bias_factor
+        self.bias_factor: Optional[float] = bias_factor
+        self.hills_files: Optional[list[str]] = hills_files
         self.iterations: Optional[int] = iterations
         self.temperature: Optional[float] = temperature
         self.system_name: Optional[str] = system_name
@@ -56,8 +58,8 @@ class MtdTrajScript(WriteFile, File):
         self.time_units: Optional[str] = time_units
         self.dist_units: Optional[str] = dist_units
         self.energy_units: Optional[str] = energy_units
-        self.height: Optional[list[float]] = height
-        self.pace: Optional[list[float]] = pace
+        self.height: Optional[float] = height
+        self.pace: Optional[float] = pace
         self.sigma: Optional[list[float]] = sigma
         self.grid_min: Optional[list[str]] = grid_min
         self.grid_max: Optional[list[str]] = grid_max
@@ -76,7 +78,8 @@ class MtdTrajScript(WriteFile, File):
         self,
     ):
         self.timestep = self.timestep or 0.005
-        self.bias_factor = self.bias_factor or []
+        self.bias_factor = self.bias_factor or 5
+        self.hills_files = self.bias_factor or []
         self.iterations = self.iterations or 1024
         self.temperature = self.temperature or 300
         self.system_name = self.system_name or "generic_molecule"
@@ -84,8 +87,8 @@ class MtdTrajScript(WriteFile, File):
         self.time_units = self.time_units or "1000 * units.fs"
         self.dist_units = self.dist_units or "A"
         self.energy_units = self.energy_units or "{units.mol/units.kJ}"
-        self.height = self.height or []
-        self.pace = self.pace or []
+        self.height = self.height or 0.25
+        self.pace = self.pace or 200
         self.sigma = self.sigma or []
         self.grid_min = self.grid_min or []
         self.grid_max = self.grid_max or []
@@ -100,29 +103,43 @@ class MtdTrajScript(WriteFile, File):
         self.md_freq_out = self.md_freq_out or 10000
         self.md_interval = self.md_interval or self.md_runsteps / self.md_freq_out
 
+    def build_cv_str(cv, num):
+        print("MAKE SINGLE CV STRING")
+        cv_to_str = ",".join(cv)
+        if len(cv) == 2:
+            cv_str = f'"m{num}: DISTANCE ATOMS={cv_to_str}",'
+        return cv_str
+
+    def build_group_str(cv, num):
+        print("MAKE SINGLE GROUP STRING")
+        group_str = ""
+        return group_str
+
     ## need some complex logic here to define MTD arguments etc.
     def build_mtd_setup_str(self):
-        print("function to build mtd setup string")
-        system_str = Template(
-            textwrap.dedent(
-                """
-            [f"UNITS LENGTH=$dist_units TIME=XXXX ENERGY=$energy_units",
-             "t1: TORSION ATOMS=6,4,9,2",
-             "METAD ARG=t1 HEIGHT=0.25 PACE=100 " +
-             "SIGMA=0.20 GRID_MIN=-pi GRID_MAX=pi" +
-             " GRID_BIN=150 BIASFACTOR=5 FILE=HILLS"]
 
-             """
-            )
-        )
-        # subsitute template values into script
-        script_text = system_str.substitute(
-            # train_size=self.train_size,
-        )
+        print("function to build mtd setup string")
+        header_line = f'[f "UNITS LENGTH={self.dist_units} TIME=1/ps ENERGY={self.energy_units}",\n'
+        if len(self.collective_variables) == 1:
+            print("BUILDING SETUP STRING FOR SINGLE VARIABLE")
+            cv_line = self.build_cv_str(self.collective_variables[0], 1)
+            metad_line = f'"METAD ARG=m1 HEIGHT={self.height} PACE={self.pace} " +\n'
+            sigma_line = f'"SIGMA={self.sigma[0]} GRID_MIN={self.grid_min[0]} GRID_MAX={self.grid_max[0]}" +\n'
+            grid_bin_line = f'" GRID_BIN={self.grid_bin[0]} BIASFACTOR={self.bias_factor} FILE={self.hills_files[0]}"]\n'
+            setup_str = header_line + cv_line + metad_line + sigma_line + grid_bin_line
+            return setup_str
+        else:
+            print("BUILDING SETUP STRING FOR MULTIPLE VARIABLES")
+            group_line = ""
+            cv_line = ""
+            for i in range(len(self.collective_variables)):
+                group_line += ""
+                cv_line += self.build_cv_str(self.collective_variables[i], i + 1)
 
     # write file from a template
     def _write_file(self, path: Path, *args, **kwargs):
         self.set_write_defaults_if_needed()
+        system_str_built = self.build_mtd_setup_str()
 
         # set up template for polus script
         mtd_traj_script_template = Template(
@@ -186,7 +203,24 @@ class MtdTrajScript(WriteFile, File):
 
         # subsitute template values into script
         script_text = mtd_traj_script_template.substitute(
-            train_size=self.train_size,
+            time_step=self.timestep,
+            time_units=self.time_units,
+            system_str=system_str_built,
+            mol_xyz=self.input_xyz_path,
+            traj_path="PLACEHOLDER",
+            properties=self.properties,
+            calculator=self.calculator,
+            solvent=self.solvent,
+            temperature=self.temperature,
+            iterations=self.iterations,
+            kT=self.kT,
+            md_timestep=self.md_timestep,
+            md_friction=self.md_friction,
+            md_communicator=self.md_communication,
+            log_file_name="PLACEHOLDER",
+            md_interval=self.md_interval,
+            md_runsteps=self.md_runsteps,
+            mtd_out_file="PLACEHOLDER",
         )
 
         return script_text
