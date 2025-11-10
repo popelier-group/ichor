@@ -19,7 +19,7 @@ class MtdTrajScript(WriteFile, File):
         collective_variables: list[int] = None,
         timestep: Optional[float] = None,
         bias_factor: Optional[float] = None,
-        hills_files: Optional[list[str]] = None,
+        hills_file: Optional[str] = None,
         iterations: Optional[int] = None,
         temperature: Optional[float] = None,
         system_name: Optional[str] = None,
@@ -50,7 +50,7 @@ class MtdTrajScript(WriteFile, File):
         self.collective_variables: list[int] = collective_variables
         self.timestep: Optional[float] = timestep
         self.bias_factor: Optional[float] = bias_factor
-        self.hills_files: Optional[list[str]] = hills_files
+        self.hills_file: Optional[str] = hills_file
         self.iterations: Optional[int] = iterations
         self.temperature: Optional[float] = temperature
         self.system_name: Optional[str] = system_name
@@ -77,20 +77,18 @@ class MtdTrajScript(WriteFile, File):
     def set_write_defaults_if_needed(
         self,
     ):
-        hills_list = []
         sigma_list = []
         grid_min_list = []
         grid_max_list = []
         grid_bin_list = []
         # build lists of defaults for multi cv
         for i in range(len(self.collective_variables)):
-            hills_list.append(f"HILLS{i+1}")
             sigma_list.append(0.20)
             grid_min_list.append("-pi")
             grid_max_list.append("pi")
             grid_bin_list.append(200)
 
-        self.hills_files = self.hills_files or hills_list
+        self.hills_file = self.hills_file or "HILLS"
         self.sigma = self.sigma or sigma_list
         self.grid_min = self.grid_min or grid_min_list
         self.grid_max = self.grid_max or grid_max_list
@@ -167,9 +165,9 @@ class MtdTrajScript(WriteFile, File):
             grid_bin_str = ",".join(str(i) for i in self.grid_bin)
             pbmetad_line = f'\t"PBMETAD ARG={arg_str} SIGMA={sigma_str} PACE={self.pace} HEIGHT={self.height} " +\n'
             grid_bin_line = f'\t"GRID_MIN={grid_min_str} GRID_MAX={grid_max_str} GRID_BIN={grid_bin_str} "+\n'
-            hill_file_str = ",".join(str(i) for i in self.hills_files)
+            hill_file_str = self.hills_file
             bias_factor_line = (
-                f'\t"BIASFACTOR={self.bias_factor} FILE={hill_file_str} "]\n'
+                f'\t"BIASFACTOR={self.bias_factor} FILE={hill_file_str}"]\n'
             )
             setup_str = (
                 header_line
@@ -225,7 +223,7 @@ class MtdTrajScript(WriteFile, File):
                           timestep=$md_timestep*units.fs, 
                           temperature_K=$temperature,
                           friction=$md_friction/units.fs,
-                          communicator = $md_communicator,
+                          #communicator = $md_communicator,
                           logfile = "$log_file_name")
             
             # Attach trajectory
