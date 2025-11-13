@@ -160,14 +160,13 @@ class MetadynamicsMenuFunctions:
                 calculator=calculator,
                 overwrite=overwrite,
             )
-            submit_mtd(
-                input_script=mtd_script,
-                script_name=ichor.hpc.global_variables.SCRIPT_NAMES["mtd"],
-                ncores=ncores,
-            )
-            METADYNAMICS_MENU_DESCRIPTION.prologue_description_text = (
-                "Successfully submitted metadynamics job \n"
-            )
+            # check if there is actually a mtd job to submit
+            if len(mtd_script > 0):
+                submit_mtd(
+                    input_script=mtd_script,
+                    script_name=ichor.hpc.global_variables.SCRIPT_NAMES["mtd"],
+                    ncores=ncores,
+                )
             # update logger
             ichor.hpc.global_variables.LOGGER.info(
                 f"Metadynamics trajectory generation job submitted"
