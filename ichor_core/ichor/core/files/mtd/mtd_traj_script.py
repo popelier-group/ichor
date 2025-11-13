@@ -144,7 +144,7 @@ class MtdTrajScript(WriteFile, File):
             cv_line = self.build_cv_str(self.collective_variables[0], 1, "")
             metad_line = f'\t"METAD ARG=m1 HEIGHT={self.height} PACE={self.pace} " +\n'
             sigma_line = f'\t"SIGMA={self.sigma[0]} GRID_MIN={self.grid_min[0]} GRID_MAX={self.grid_max[0]}" +\n'
-            grid_bin_line = f'\t" GRID_BIN={self.grid_bin[0]} BIASFACTOR={self.bias_factor} FILE={self.hills_files[0]}"]\n'
+            grid_bin_line = f'\t" GRID_BIN={self.grid_bin[0]} BIASFACTOR={self.bias_factor} FILE={self.hills_file}"]\n'
             setup_str = header_line + cv_line + metad_line + sigma_line + grid_bin_line
             return setup_str
         else:
