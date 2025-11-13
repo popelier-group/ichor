@@ -161,7 +161,7 @@ class MetadynamicsMenuFunctions:
                 overwrite=overwrite,
             )
             # check if there is actually a mtd job to submit
-            if len(mtd_script > 0):
+            if mtd_script is not None:
                 submit_mtd(
                     input_script=mtd_script,
                     script_name=ichor.hpc.global_variables.SCRIPT_NAMES["mtd"],
