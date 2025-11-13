@@ -88,7 +88,7 @@ class MtdTrajScript(WriteFile, File):
             grid_max_list.append("pi")
             grid_bin_list.append(200)
 
-        self.hills_file = self.hills_file or "HILLS"
+        self.hills_file = self.hills_file or self.input_xyz_path.with_suffix(".HILLS")
         self.sigma = self.sigma or sigma_list
         self.grid_min = self.grid_min or grid_min_list
         self.grid_max = self.grid_max or grid_max_list
