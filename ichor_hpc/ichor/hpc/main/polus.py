@@ -21,16 +21,17 @@ def write_diversity_sampling(
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
     output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
     input_filename = "diversity_input" + DiversityScript.get_filetype()
+    shutil.move(input_filename, output_dir)
+    input_file_path = Path(output_dir / input_filename)
 
     div_input_script = DiversityScript(
-        Path(input_filename),
+        Path(input_file_path),
         seed_geom=seed_geom,
         output_dir=output_dir,
         filename=filename,
         **kwargs,
     )
     div_input_script.write()
-    shutil.move(input_filename, output_dir)
 
     return div_input_script.path
 
