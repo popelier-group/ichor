@@ -78,8 +78,8 @@ csf4:
       modules: ["iomkl/2020.02"]
 
     python:
-      env_name: ["ase_plumed_env"]
-      python_path: ["~/.conda/envs/ase_plumed_env/bin/python"]
+      env_name: "ase_plumed_env"
+      python_path: "~/.conda/envs/ase_plumed_env/bin/python"
       modules: ["anaconda3/2024.02"]
 
     tyche:
