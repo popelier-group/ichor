@@ -129,13 +129,12 @@ class MetadynamicsMenuFunctions:
     @staticmethod
     def submit_metadynamics_to_compute():
         """Asks for user input and submits metadynamics job to compute node."""
-
+        answer = ""
         # if no collective variables are defined then do nothing.
         if len(metadynamics_menu_options.collective_variables) == 0:
             print(
                 "No collective variables loaded. At least one must be loaded for metadynamics."
             )
-            answer = ""
             user_input_free_flow("Press enter to continue: ", answer)
             return
         # if they are present, then start the run for a metadynamics job
