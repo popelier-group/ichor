@@ -276,5 +276,3 @@ SCRIPT_NAMES = ScriptNames(
 
 # set up current python environment
 CURRENT_PYTHON_ENVIRONMENT_PATH = get_current_python_environment_path()
-PLUMED_ENVIRONMENT_NAME = Path("ase_plumed_env")
-PLUMED_PYTHON_PATH = Path("~/.conda/envs/ase_plumed_env/bin/python")

@@ -43,7 +43,13 @@ class AnacondaCommand(SubmissionCommand):
         """For a Python command, this loads in the virtual environment. The same python environment is going to be used
         as the one that is used for ichor."""
         # load in environment
-        anaconda_env = ichor.hpc.global_variables.PLUMED_ENVIRONMENT_NAME
+        anaconda_env = get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "python",
+            "env_name",
+        )
         ## here is where we can set plumed anaconda environment
         try:
             return f"source activate {str(anaconda_env)}"
@@ -55,7 +61,13 @@ class AnacondaCommand(SubmissionCommand):
     def repr(self, variables: Optional[List[str]] = None) -> str:
         """Returns a string which is then written into the submission script in order to run a python job."""
         activate_env = AnacondaCommand.command + "\n"
-        anaconda_python_path = ichor.hpc.global_variables.PLUMED_PYTHON_PATH
+        anaconda_python_path = get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "python",
+            "python_path",
+        )
         python_script_to_run = (
             f"{anaconda_python_path} {self.script} {' '.join(self.args)}"
         )

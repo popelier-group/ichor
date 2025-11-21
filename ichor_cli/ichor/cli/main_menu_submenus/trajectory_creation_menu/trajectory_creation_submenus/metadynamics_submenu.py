@@ -166,7 +166,7 @@ class MetadynamicsMenuFunctions:
                     script_name=ichor.hpc.global_variables.SCRIPT_NAMES["mtd"],
                     ncores=ncores,
                 )
-            user_input_free_flow("Press enter to continue: ", answer)
+            user_input_free_flow("MTD SUBBED. Press enter to continue: ", answer)
             # update logger
             ichor.hpc.global_variables.LOGGER.info(
                 f"Metadynamics trajectory generation job submitted"

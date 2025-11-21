@@ -89,7 +89,7 @@ class MtdTrajScript(WriteFile, File):
             grid_max_list.append("pi")
             grid_bin_list.append(200)
             suffix = f".HILLS{i+1}"
-            self.input_xyz_path.with_suffix(suffix)
+            hills_file_list.append(self.input_xyz_path.with_suffix(suffix))
 
         self.hills_file = self.hills_file or hills_file_list
         self.sigma = self.sigma or sigma_list
@@ -118,7 +118,6 @@ class MtdTrajScript(WriteFile, File):
         self.md_interval = self.md_interval or int(self.md_runsteps / self.md_freq_out)
 
     def build_cv_str(self, cv, num, group):
-        print("MAKE SINGLE CV STRING")
         if group == "":
             cv_to_str = ",".join(str(i) for i in cv)
         else:
@@ -132,7 +131,6 @@ class MtdTrajScript(WriteFile, File):
         return cv_str
 
     def build_group_str(self, cv, num):
-        print("MAKE SINGLE GROUP STRING")
         cv_to_str = ",".join(str(i) for i in cv)
         group_str = f'\t"GROUP ATOMS={cv_to_str} LABEL=g{num}",\n'
         return group_str
