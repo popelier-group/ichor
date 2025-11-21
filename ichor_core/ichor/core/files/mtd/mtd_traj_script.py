@@ -19,7 +19,7 @@ class MtdTrajScript(WriteFile, File):
         collective_variables: list[int] = None,
         timestep: Optional[float] = None,
         bias_factor: Optional[float] = None,
-        hills_file: Optional[str] = None,
+        hills_file: Optional[list[str]] = None,
         iterations: Optional[int] = None,
         temperature: Optional[float] = None,
         system_name: Optional[str] = None,
@@ -50,7 +50,7 @@ class MtdTrajScript(WriteFile, File):
         self.collective_variables: list[int] = collective_variables
         self.timestep: Optional[float] = timestep
         self.bias_factor: Optional[float] = bias_factor
-        self.hills_file: Optional[str] = hills_file
+        self.hills_file: Optional[list[str]] = hills_file
         self.iterations: Optional[int] = iterations
         self.temperature: Optional[float] = temperature
         self.system_name: Optional[str] = system_name
@@ -81,6 +81,7 @@ class MtdTrajScript(WriteFile, File):
         grid_min_list = []
         grid_max_list = []
         grid_bin_list = []
+        hills_file_list = []
         # build lists of defaults for multi cv
         for i in range(len(self.collective_variables)):
             sigma_list.append(0.20)
@@ -88,7 +89,11 @@ class MtdTrajScript(WriteFile, File):
             grid_max_list.append("pi")
             grid_bin_list.append(200)
 
-        self.hills_file = self.hills_file or self.input_xyz_path.with_suffix(".HILLS")
+        for i in range(len(self.hills_file)):
+            suffix = f".HILLS{i+1}"
+            self.input_xyz_path.with_suffix(suffix)
+
+        self.hills_file = self.hills_file or hills_file_list
         self.sigma = self.sigma or sigma_list
         self.grid_min = self.grid_min or grid_min_list
         self.grid_max = self.grid_max or grid_max_list
@@ -137,10 +142,8 @@ class MtdTrajScript(WriteFile, File):
     ## need some complex logic here to define MTD arguments etc.
     def build_mtd_setup_str(self):
 
-        print("function to build mtd setup string")
         header_line = f'[f"UNITS LENGTH={self.dist_units} TIME={{1/ps}} ENERGY={self.energy_units}",\n'
         if len(self.collective_variables) == 1:
-            print("BUILDING SETUP STRING FOR SINGLE VARIABLE")
             cv_line = self.build_cv_str(self.collective_variables[0], 1, "")
             metad_line = f'\t"METAD ARG=m1 HEIGHT={self.height} PACE={self.pace} " +\n'
             sigma_line = f'\t"SIGMA={self.sigma[0]} GRID_MIN={self.grid_min[0]} GRID_MAX={self.grid_max[0]}" +\n'
@@ -148,7 +151,6 @@ class MtdTrajScript(WriteFile, File):
             setup_str = header_line + cv_line + metad_line + sigma_line + grid_bin_line
             return setup_str
         else:
-            print("BUILDING SETUP STRING FOR MULTIPLE VARIABLES")
             group_line = ""
             cv_line = ""
             arg_list = []
@@ -165,9 +167,9 @@ class MtdTrajScript(WriteFile, File):
             grid_bin_str = ",".join(str(i) for i in self.grid_bin)
             pbmetad_line = f'\t"PBMETAD ARG={arg_str} SIGMA={sigma_str} PACE={self.pace} HEIGHT={self.height} " +\n'
             grid_bin_line = f'\t"GRID_MIN={grid_min_str} GRID_MAX={grid_max_str} GRID_BIN={grid_bin_str} "+\n'
-            hill_file_str = self.hills_file
+            hills_file_str = ",".join(str(i) for i in self.hills_file)
             bias_factor_line = (
-                f'\t"BIASFACTOR={self.bias_factor} FILE={hill_file_str}"]\n'
+                f'\t"BIASFACTOR={self.bias_factor} FILE={hills_file_str}"]\n'
             )
             setup_str = (
                 header_line
