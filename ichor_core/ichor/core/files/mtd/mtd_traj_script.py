@@ -88,8 +88,6 @@ class MtdTrajScript(WriteFile, File):
             grid_min_list.append("-pi")
             grid_max_list.append("pi")
             grid_bin_list.append(200)
-
-        for i in range(len(self.hills_file)):
             suffix = f".HILLS{i+1}"
             self.input_xyz_path.with_suffix(suffix)
 
