@@ -4,6 +4,7 @@ from typing import List, Optional
 import ichor.hpc.global_variables
 
 from ichor.core.common.functools import classproperty
+from ichor.hpc.global_variables import get_param_from_config
 from ichor.hpc.submission_command import SubmissionCommand
 
 
@@ -25,7 +26,13 @@ class AnacondaCommand(SubmissionCommand):
     @classproperty
     def modules(self) -> list:
         """Returns the python executable that the current ichor program is running from."""
-        return ""
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "python",
+            "modules",
+        )
 
     @property
     def data(self) -> None:
