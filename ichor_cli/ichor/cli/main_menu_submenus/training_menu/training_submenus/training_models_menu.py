@@ -6,10 +6,18 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_free_flow, user_input_int
+from ichor.cli.useful_functions import user_input_int, user_input_restricted, user_input_float
 from ichor.core.files import PointsDirectory
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main import submit_points_directory_to_aimall
+
+AVAILABLE_MEAN_TYPES = {
+    "Physical": 15
+}
+
+AVAILABLE_KERNEL_TYPES = [
+    "rbfc_per"
+]
 
 SUBMIT_TRAINING_MENU_DESCRIPTION = MenuDescription(
     "Model Training Menu",
@@ -18,10 +26,12 @@ SUBMIT_TRAINING_MENU_DESCRIPTION = MenuDescription(
 
 # TODO: possibly make this be read from a file
 SUBMIT_TRAINING_MENU_DEFAULTS = {
-    "default_method": "b3lyp",
     "default_ncores": 2,
-    "default_naat": 1,
-    "default_encomp": 3,
+    "default_kernel": "rbfc_per",
+    "default_max_iter": 100,
+    "default_huber_delta": 0.05,
+    "default_mean_type": "Physical",
+    "default_gwo_cycles": 1.0,
 }
 
 
@@ -29,10 +39,12 @@ SUBMIT_TRAINING_MENU_DEFAULTS = {
 @dataclass
 class SubmitTrainingMenuOptions(MenuOptions):
 
-    selected_method: str
     selected_number_of_cores: str
-    selected_naat: int
-    selected_encomp: bool
+    selected_kernel: str
+    selected_max_iter: int
+    selected_huber_delta: float
+    selected_mean_type: str
+    selected_gwo_cycles: float
 
 
 # initialize dataclass for storing information for menu
@@ -50,7 +62,48 @@ class SubmitTrainingFunctions:
             "Enter number of cores: ",
             submit_training_menu_options.selected_number_of_cores,
         )
+    
+    @staticmethod
+    def select_kernel():
+        """Asks user to select kernel."""
+        submit_training_menu_options.selected_kernel = user_input_restricted(
+            AVAILABLE_KERNEL_TYPES.keys()
+            "Enter kernel type: ",
+            submit_training_menu_options.selected_kernel,
+        )
 
+    @staticmethod
+    def select_max_iter():
+        """Asks user to select max iterations."""
+        submit_training_menu_options.selected_max_iter = user_input_int(
+            "Enter number of max iterations: ",
+            submit_training_menu_options.selected_max_iter,
+        )
+    
+    @staticmethod
+    def select_huber_delta():
+        """Asks user to select huber delta."""
+        submit_training_menu_options.selected_huber_delta = user_input_float(
+            "Enter huber delta: ",
+            submit_training_menu_options.selected_huber_delta,
+        )
+    
+    @staticmethod
+    def select_mean_type():
+        """Asks user to select mean type."""
+        submit_training_menu_options.selected_mean_type = user_input_restricted(
+            AVAILABLE_MEAN_TYPES.keys()
+            "Enter mean type: ",
+            submit_training_menu_options.selected_mean_types,
+        )
+
+   @staticmethod
+    def select_gwo_cycles():
+        """Asks user to select gwo cycles."""
+        submit_training_menu_options.selected_gwo_cycles = user_input_float(
+            "Enter gwo cycles: ",
+            submit_training_menu_options.gwo_cycles,
+        )
 
 # make menu items
 # can use lambda functions to change text of options as well :)
@@ -58,6 +111,26 @@ submit_training_menu_items = [
     FunctionItem(
         "Change number of cores",
         SubmitTrainingFunctions.select_number_of_cores,
+    ),
+    FunctionItem(
+        "Change kernel type",
+        SubmitTrainingFunctions.select_kernel,
+    ),
+        FunctionItem(
+        "Change max iterations",
+        SubmitTrainingFunctions.select_max_iter,
+    ),
+        FunctionItem(
+        "Change huber delta",
+        SubmitTrainingFunctions.select_huber_delta,
+    ),
+        FunctionItem(
+        "Change mean type",
+        SubmitTrainingFunctions.select_mean_type,
+    ),
+        FunctionItem(
+        "Change gwo cycles",
+        SubmitTrainingFunctions.select_mean_type,
     ),
 ]
 
