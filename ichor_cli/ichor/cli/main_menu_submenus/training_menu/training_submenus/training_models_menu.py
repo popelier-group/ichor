@@ -15,9 +15,9 @@ AVAILABLE_MEAN_TYPES = {
     "Physical": 15
 }
 
-AVAILABLE_KERNEL_TYPES = [
-    "rbfc_per"
-]
+AVAILABLE_KERNEL_TYPES = {
+    "RBF Perodic": "rbfc_per"
+}
 
 SUBMIT_TRAINING_MENU_DESCRIPTION = MenuDescription(
     "Model Training Menu",
@@ -27,7 +27,7 @@ SUBMIT_TRAINING_MENU_DESCRIPTION = MenuDescription(
 # TODO: possibly make this be read from a file
 SUBMIT_TRAINING_MENU_DEFAULTS = {
     "default_ncores": 2,
-    "default_kernel": "rbfc_per",
+    "default_kernel": "RBF Perodic",
     "default_max_iter": 100,
     "default_huber_delta": 0.05,
     "default_mean_type": "Physical",
@@ -67,7 +67,7 @@ class SubmitTrainingFunctions:
     def select_kernel():
         """Asks user to select kernel."""
         submit_training_menu_options.selected_kernel = user_input_restricted(
-            AVAILABLE_KERNEL_TYPES.keys()
+            AVAILABLE_KERNEL_TYPES.keys(),
             "Enter kernel type: ",
             submit_training_menu_options.selected_kernel,
         )
@@ -92,12 +92,12 @@ class SubmitTrainingFunctions:
     def select_mean_type():
         """Asks user to select mean type."""
         submit_training_menu_options.selected_mean_type = user_input_restricted(
-            AVAILABLE_MEAN_TYPES.keys()
+            AVAILABLE_MEAN_TYPES.keys(),
             "Enter mean type: ",
             submit_training_menu_options.selected_mean_types,
         )
 
-   @staticmethod
+    @staticmethod
     def select_gwo_cycles():
         """Asks user to select gwo cycles."""
         submit_training_menu_options.selected_gwo_cycles = user_input_float(
