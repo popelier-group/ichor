@@ -10,7 +10,9 @@ from ichor.cli.useful_functions import user_input_int, user_input_restricted, us
 
 from ichor.hpc.main import submit_pyferebus, write_pyferebus_input_script
 
-
+AVAILABLE_MEAN_TYPES = {
+    "physical": 15,
+}
 
 AVAILABLE_KERNEL_TYPES = {
     "rbfc_per": "rbfc_per",
@@ -63,11 +65,10 @@ class SubmitTrainingFunctions:
     @staticmethod
     def select_kernel():
         """Asks user to select kernel."""
-        key = submit_training_menu_options.selected_kernel = user_input_restricted(
+        submit_training_menu_options.selected_kernel = user_input_restricted(
             AVAILABLE_KERNEL_TYPES.keys(),
             "Enter kernel type: ",
         )
-        submit_training_menu_options.selected_kernel = AVAILABLE_KERNEL_TYPES[key]
 
     @staticmethod
     def select_max_iter():
@@ -88,14 +89,11 @@ class SubmitTrainingFunctions:
     @staticmethod
     def select_mean_type():
         """Asks user to select mean type."""
-        AVAILABLE_MEAN_TYPES = {
-        "physical": 15,
-    }
-        key = submit_training_menu_options.selected_mean_type = user_input_restricted(
+        submit_training_menu_options.selected_mean_type = user_input_restricted(
             AVAILABLE_MEAN_TYPES.keys(),
             "Enter mean type: ",
         )
-        submit_training_menu_options.selected_mean_type = AVAILABLE_MEAN_TYPES[key]
+        mean_type_key = submit_training_menu_options.selected_mean_type
 
     @staticmethod
     def select_gwo_cycles():
@@ -120,7 +118,7 @@ class SubmitTrainingFunctions:
             submit_training_menu_options.selected_kernel,
             submit_training_menu_options.selected_max_iter,
             submit_training_menu_options.selected_huber_delta,
-            submit_training_menu_options.selected_mean_type,
+            AVAILABLE_MEAN_TYPES[mean_type_key],
             submit_training_menu_options.selected_gwo_cycles,
         )
 
