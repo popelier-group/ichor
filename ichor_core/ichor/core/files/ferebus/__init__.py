@@ -1,4 +1,4 @@
-from ichor.core.files.ferebus.pyferebus import PyFerebusScript
+from ichor.core.files.ferebus.pyferebus_input import PyFerebusScript
 
 
 __all__ = [
