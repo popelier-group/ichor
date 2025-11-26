@@ -93,7 +93,6 @@ class SubmitTrainingFunctions:
         key = submit_training_menu_options.selected_mean_type = user_input_restricted(
             AVAILABLE_MEAN_TYPES.keys(),
             "Enter mean type: ",
-            submit_training_menu_options.selected_mean_type,
         )
         submit_training_menu_options.selected_kernel = AVAILABLE_MEAN_TYPES[key]
 
