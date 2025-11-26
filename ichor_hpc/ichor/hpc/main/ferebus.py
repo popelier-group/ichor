@@ -19,7 +19,7 @@ def write_pyferebus_input_script(
 
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
     output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
-    input_filename = "pyferebus" + PyFerebusScript.get_filetype()
+    input_filename = "pyferebus_input" + PyFerebusScript.get_filetype()
     input_file_path = Path(output_dir / input_filename)
 
     pyferebus_input_script = PyFerebusScript(
