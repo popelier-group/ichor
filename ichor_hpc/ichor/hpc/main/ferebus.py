@@ -4,7 +4,7 @@ from typing import Optional, Union
 
 import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
-from ichor.core.files.polus import DatasetPrepScript, DiversityScript
+from ichor.core.files.ferebus import PyFerebusScript
 
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.global_variables import get_param_from_config
