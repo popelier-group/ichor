@@ -69,7 +69,7 @@ class SubmitTrainingFunctions:
             AVAILABLE_KERNEL_TYPES.keys(),
             "Enter kernel type: ",
         )
-        submit_training_menu_options.selected_kernel = AVAILABLE_MEAN_TYPES[key]
+        submit_training_menu_options.selected_kernel = AVAILABLE_KERNEL_TYPES[key]
 
     @staticmethod
     def select_max_iter():
