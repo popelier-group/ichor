@@ -14,7 +14,7 @@ AVAILABLE_MEAN_TYPES = {
 }
 
 AVAILABLE_KERNEL_TYPES = {
-    "rbfc per": "rbfc_per",
+    "rbfc_per": "rbfc_per",
 }
 
 SUBMIT_TRAINING_MENU_DESCRIPTION = MenuDescription(
@@ -25,7 +25,7 @@ SUBMIT_TRAINING_MENU_DESCRIPTION = MenuDescription(
 # TODO: possibly make this be read from a file
 SUBMIT_TRAINING_MENU_DEFAULTS = {
     "default_ncores": 2,
-    "default_kernel": "rbfc per",
+    "default_kernel": "rbfc_per",
     "default_max_iter": 100,
     "default_huber_delta": 0.05,
     "default_mean_type": "physical",
@@ -115,7 +115,7 @@ class SubmitTrainingFunctions:
             gwo_cycles,
         ) = (
             submit_training_menu_options.selected_number_of_cores,
-            submit_training_menu_options.selected_kernels,
+            submit_training_menu_options.selected_kernel,
             submit_training_menu_options.selected_max_iter,
             submit_training_menu_options.selected_huber_delta,
             submit_training_menu_options.selected_mean_type,
