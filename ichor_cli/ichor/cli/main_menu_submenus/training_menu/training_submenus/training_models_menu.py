@@ -29,7 +29,7 @@ SUBMIT_TRAINING_MENU_DEFAULTS = {
     "default_kernel": "rbfc_per",
     "default_max_iter": 100,
     "default_huber_delta": 0.05,
-    "default_mean_type": "physical",
+    "default_mean_type": AVAILABLE_MEAN_TYPES["physical"],
     "default_gwo_cycles": 1.0,
 }
 
