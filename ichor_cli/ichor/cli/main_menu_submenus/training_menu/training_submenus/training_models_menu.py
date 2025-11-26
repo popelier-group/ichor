@@ -7,6 +7,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import user_input_int, user_input_restricted, user_input_float
+
 from ichor.hpc.main import submit_pyferebus, write_pyferebus_input_script
 
 AVAILABLE_MEAN_TYPES = {
@@ -136,12 +137,12 @@ class SubmitTrainingFunctions:
             ncores=ncores,
         )
 
-        SUBMIT_DIVERSITY_MENU_DESCRIPTION.prologue_description_text = (
-            "Successfully submitted diversity sampling \n"
+        SUBMIT_TRAINING_MENU_DESCRIPTION.prologue_description_text = (
+            "Successfully submitted models for trianing \n"
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"Diversity sampling job submitted for {xyz_path}"
+            f"Training model job submitted"
         )
 
 
