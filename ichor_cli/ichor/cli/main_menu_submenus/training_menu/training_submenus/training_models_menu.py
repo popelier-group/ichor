@@ -7,9 +7,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import user_input_int, user_input_restricted, user_input_float
-from ichor.core.files import PointsDirectory
-from ichor.core.useful_functions import single_or_many_points_directories
-from ichor.hpc.main import submit_points_directory_to_aimall
+from ichor.hpc.main import submit_pyferebus, write_pyferebus_input_script
 
 AVAILABLE_MEAN_TYPES = {
     "physical": 15,
@@ -124,26 +122,17 @@ class SubmitTrainingFunctions:
             submit_training_menu_options.selected_gwo_cycles,
         )
 
-
-
-        if not weights:
-            weights_vector = "HL1:1"
-        else:
-            weights_vector = "HL1:0"
-
-        xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
-        trajectory_path = Path(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
-
-        div_script = write_diversity_sampling(
+        pyferebus_script = write_pyferebus_input_script(
+            
             filename=trajectory_path,
             seed_geom=xyz_path,
             weights_vector=weights_vector,
             sample_size=sample_size,
         )
 
-        submit_polus(
+        submit_pyferebus(
             input_script=div_script,
-            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["diversity_sampling"],
+            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["training_models"],
             ncores=ncores,
         )
 
@@ -187,7 +176,7 @@ submit_training_menu_items = [
     ),
     FunctionItem(
         "Submit for training",
-        SubmitTrainingFunctions.submit_pyferebus_on_compute,
+        SubmitTrainingFunctions.submit_training_on_compute,
     ),
 ]
 
