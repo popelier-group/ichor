@@ -236,6 +236,7 @@ SCRIPT_NAMES = ScriptNames(
         "diversity_sampling": "diversity_sampling.sh",
         "datasets": "datasets_prep.sh",
         "gaussian": "GAUSSIAN.sh",
+        "training_models": "training_models.sh",
         "orca": "ORCA.sh",
         "aimall": "AIMALL.sh",
         "ferebus": "FEREBUS.sh",
