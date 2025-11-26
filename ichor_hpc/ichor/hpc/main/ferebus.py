@@ -13,7 +13,6 @@ from ichor.hpc.submission_script import SubmissionScript
 
 
 def write_pyferebus_input_script(
-    filename: Union[str, Path],
     hold: JobID = None,
     **kwargs,
 ) -> Optional[JobID]:

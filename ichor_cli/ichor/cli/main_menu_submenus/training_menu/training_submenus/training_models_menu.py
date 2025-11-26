@@ -122,16 +122,16 @@ class SubmitTrainingFunctions:
             submit_training_menu_options.selected_gwo_cycles,
         )
 
-        pyferebus_script = write_pyferebus_input_script(
-            
-            filename=trajectory_path,
-            seed_geom=xyz_path,
-            weights_vector=weights_vector,
-            sample_size=sample_size,
+        pyferebus_input_script = write_pyferebus_input_script(           
+            kernel=kernel,
+            max_iter=max_iter,
+            huber_delta=huber_delta,
+            mean_type=mean_type,
+            gwo_cycles=gwo_cycles,
         )
 
         submit_pyferebus(
-            input_script=div_script,
+            input_script=pyferebus_input_script,
             script_name=ichor.hpc.global_variables.SCRIPT_NAMES["training_models"],
             ncores=ncores,
         )
