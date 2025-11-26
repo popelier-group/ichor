@@ -65,11 +65,11 @@ class SubmitTrainingFunctions:
     @staticmethod
     def select_kernel():
         """Asks user to select kernel."""
-        submit_training_menu_options.selected_kernel = user_input_restricted(
+        key = submit_training_menu_options.selected_kernel = user_input_restricted(
             AVAILABLE_KERNEL_TYPES.keys(),
             "Enter kernel type: ",
-            submit_training_menu_options.selected_kernel,
         )
+        submit_training_menu_options.selected_kernel = AVAILABLE_MEAN_TYPES[key]
 
     @staticmethod
     def select_max_iter():
