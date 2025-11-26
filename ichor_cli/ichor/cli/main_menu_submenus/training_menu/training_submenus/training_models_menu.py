@@ -10,9 +10,7 @@ from ichor.cli.useful_functions import user_input_int, user_input_restricted, us
 
 from ichor.hpc.main import submit_pyferebus, write_pyferebus_input_script
 
-AVAILABLE_MEAN_TYPES = {
-    "physical": 15,
-}
+
 
 AVAILABLE_KERNEL_TYPES = {
     "rbfc_per": "rbfc_per",
@@ -29,7 +27,7 @@ SUBMIT_TRAINING_MENU_DEFAULTS = {
     "default_kernel": "rbfc_per",
     "default_max_iter": 100,
     "default_huber_delta": 0.05,
-    "default_mean_type": AVAILABLE_MEAN_TYPES["physical"],
+    "default_mean_type": "physical",
     "default_gwo_cycles": 1.0,
 }
 
@@ -90,6 +88,9 @@ class SubmitTrainingFunctions:
     @staticmethod
     def select_mean_type():
         """Asks user to select mean type."""
+        AVAILABLE_MEAN_TYPES = {
+        "physical": 15,
+    }
         key = submit_training_menu_options.selected_mean_type = user_input_restricted(
             AVAILABLE_MEAN_TYPES.keys(),
             "Enter mean type: ",
