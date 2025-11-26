@@ -94,7 +94,7 @@ class SubmitTrainingFunctions:
             AVAILABLE_MEAN_TYPES.keys(),
             "Enter mean type: ",
         )
-        submit_training_menu_options.selected_kernel = AVAILABLE_MEAN_TYPES[key]
+        submit_training_menu_options.selected_mean_type = AVAILABLE_MEAN_TYPES[key]
 
     @staticmethod
     def select_gwo_cycles():
