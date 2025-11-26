@@ -206,6 +206,12 @@ FILE_STRUCTURE.add(
     description="""Directory with files relating to DLPOLY simulations.""",
 )
 FILE_STRUCTURE.add(
+    "TRAINING_MODELS",
+    "training_models",
+    type_=FileType.Directory,
+    description="""Directory containing training models.""",
+)
+FILE_STRUCTURE.add(
     "OPTIMISED_GEOMS",
     "optimised_geoms",
     type_=FileType.Directory,

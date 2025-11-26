@@ -116,6 +116,14 @@ class PyFerebusScript(WriteFile, File):
         self.seed_rng: bool = seed_rng
         self.path_to_executeable: Path = path_to_executeable
 
+    # def machine(self) -> str:
+    # """Returns the machine as set in config .yaml file"""
+
+    # return get_param_from_config(
+    #     ichor.hpc.global_variables.ICHOR_CONFIG,
+    #     ichor.hpc.global_variables.MACHINE,
+    # )
+
     def set_write_defaults_if_needed(
         self,
     ):
@@ -124,7 +132,7 @@ class PyFerebusScript(WriteFile, File):
         self.submit_to_compute_node = self.submit_to_compute_node or False
         self.working_directory = self.working_directory or None
         self.move_dataset_files = self.move_dataset_files or False
-        self.platform = self.platform or "CSF3"
+        self.platform = self.platform or "CSF4"
         self.overwrite_wd = self.overwrite_wd or True
         self.ncores = self.ncores or 20
         self.ntasks = self.ntasks or None

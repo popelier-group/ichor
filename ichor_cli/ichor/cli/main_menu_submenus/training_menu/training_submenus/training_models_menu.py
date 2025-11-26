@@ -12,11 +12,11 @@ from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main import submit_points_directory_to_aimall
 
 AVAILABLE_MEAN_TYPES = {
-    "Physical": 15
+    "physical": 15,
 }
 
 AVAILABLE_KERNEL_TYPES = {
-    "RBF Perodic": "rbfc_per"
+    "rbfc per": "rbfc_per",
 }
 
 SUBMIT_TRAINING_MENU_DESCRIPTION = MenuDescription(
@@ -27,10 +27,10 @@ SUBMIT_TRAINING_MENU_DESCRIPTION = MenuDescription(
 # TODO: possibly make this be read from a file
 SUBMIT_TRAINING_MENU_DEFAULTS = {
     "default_ncores": 2,
-    "default_kernel": "RBF Perodic",
+    "default_kernel": "rbfc per",
     "default_max_iter": 100,
     "default_huber_delta": 0.05,
-    "default_mean_type": "Physical",
+    "default_mean_type": "physical",
     "default_gwo_cycles": 1.0,
 }
 
@@ -94,7 +94,7 @@ class SubmitTrainingFunctions:
         submit_training_menu_options.selected_mean_type = user_input_restricted(
             AVAILABLE_MEAN_TYPES.keys(),
             "Enter mean type: ",
-            submit_training_menu_options.selected_mean_types,
+            submit_training_menu_options.selected_mean_type,
         )
 
     @staticmethod
@@ -104,6 +104,59 @@ class SubmitTrainingFunctions:
             "Enter gwo cycles: ",
             submit_training_menu_options.gwo_cycles,
         )
+
+    @staticmethod
+    def submit_training_on_compute():
+        """Creates and submits models for training."""
+        (
+            ncores,
+            kernel,
+            max_iter,
+            huber_delta,
+            mean_type,
+            gwo_cycles,
+        ) = (
+            submit_training_menu_options.selected_number_of_cores,
+            submit_training_menu_options.selected_kernels,
+            submit_training_menu_options.selected_max_iter,
+            submit_training_menu_options.selected_huber_delta,
+            submit_training_menu_options.selected_mean_type,
+            submit_training_menu_options.selected_gwo_cycles,
+        )
+
+
+
+        if not weights:
+            weights_vector = "HL1:1"
+        else:
+            weights_vector = "HL1:0"
+
+        xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
+        trajectory_path = Path(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
+
+        div_script = write_diversity_sampling(
+            filename=trajectory_path,
+            seed_geom=xyz_path,
+            weights_vector=weights_vector,
+            sample_size=sample_size,
+        )
+
+        submit_polus(
+            input_script=div_script,
+            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["diversity_sampling"],
+            ncores=ncores,
+        )
+
+        SUBMIT_DIVERSITY_MENU_DESCRIPTION.prologue_description_text = (
+            "Successfully submitted diversity sampling \n"
+        )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Diversity sampling job submitted for {xyz_path}"
+        )
+
+
+
 
 # make menu items
 # can use lambda functions to change text of options as well :)
@@ -116,21 +169,25 @@ submit_training_menu_items = [
         "Change kernel type",
         SubmitTrainingFunctions.select_kernel,
     ),
-        FunctionItem(
+    FunctionItem(
         "Change max iterations",
         SubmitTrainingFunctions.select_max_iter,
     ),
-        FunctionItem(
+    FunctionItem(
         "Change huber delta",
         SubmitTrainingFunctions.select_huber_delta,
     ),
-        FunctionItem(
+    FunctionItem(
         "Change mean type",
         SubmitTrainingFunctions.select_mean_type,
     ),
-        FunctionItem(
+    FunctionItem(
         "Change gwo cycles",
-        SubmitTrainingFunctions.select_mean_type,
+        SubmitTrainingFunctions.select_gwo_cycles,
+    ),
+    FunctionItem(
+        "Submit for training",
+        SubmitTrainingFunctions.submit_pyferebus_on_compute,
     ),
 ]
 
