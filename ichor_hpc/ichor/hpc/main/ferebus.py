@@ -23,7 +23,7 @@ def write_pyferebus_input_script(
     #input_file_path = Path(output_dir / input_filename)
 
     pyferebus_input_script = PyFerebusScript(
-        Path(input_filename)
+        Path(input_filename),
         #Path(input_file_path),
         **kwargs,
     )
