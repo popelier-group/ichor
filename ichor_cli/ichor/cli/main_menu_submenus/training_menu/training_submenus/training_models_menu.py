@@ -31,7 +31,7 @@ SUBMIT_TRAINING_MENU_DEFAULTS = {
     "default_max_iter": 100,
     "default_huber_delta": 0.05,
     "default_mean_type": "physical",
-    "default_gwo_cycles": 1.0,
+    "default_gwo_cycles": 1,
 }
 
 
@@ -44,7 +44,7 @@ class SubmitTrainingMenuOptions(MenuOptions):
     selected_max_iter: int
     selected_huber_delta: float
     selected_mean_type: str
-    selected_gwo_cycles: float
+    selected_gwo_cycles: int
 
 
 # initialize dataclass for storing information for menu
