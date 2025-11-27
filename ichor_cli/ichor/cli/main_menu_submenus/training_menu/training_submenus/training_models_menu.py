@@ -98,7 +98,7 @@ class SubmitTrainingFunctions:
     @staticmethod
     def select_gwo_cycles():
         """Asks user to select gwo cycles."""
-        submit_training_menu_options.selected_gwo_cycles = user_input_float(
+        submit_training_menu_options.selected_gwo_cycles = user_input_int(
             "Enter gwo cycles: ",
             submit_training_menu_options.gwo_cycles,
         )
@@ -135,7 +135,7 @@ class SubmitTrainingFunctions:
             gwo_cycles=gwo_cycles,
         )
 
-        subprocess.run(["python3", "pyferebus.py"], check=True)
+        subprocess.run(["python3", "pyferebus_input.py"], check=True)
 
 
 
