@@ -129,7 +129,7 @@ class PyFerebusScript(WriteFile, File):
     ):
 
         self.jd_file = self.jd_file or "job-details"
-        self.submit_to_compute_node = self.submit_to_compute_node or False
+        self.submit_to_compute_node = self.submit_to_compute_node or True
         self.working_directory = self.working_directory or None
         self.move_dataset_files = self.move_dataset_files or False
         self.platform = self.platform or "CSF4"

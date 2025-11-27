@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import subprocess
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
@@ -25,7 +26,7 @@ SUBMIT_TRAINING_MENU_DESCRIPTION = MenuDescription(
 
 # TODO: possibly make this be read from a file
 SUBMIT_TRAINING_MENU_DEFAULTS = {
-    "default_ncores": 2,
+    "default_ncores": 20,
     "default_kernel": "rbfc_per",
     "default_max_iter": 100,
     "default_huber_delta": 0.05,
@@ -93,7 +94,6 @@ class SubmitTrainingFunctions:
             AVAILABLE_MEAN_TYPES.keys(),
             "Enter mean type: ",
         )
-        mean_type_key = submit_training_menu_options.selected_mean_type
 
     @staticmethod
     def select_gwo_cycles():
@@ -106,6 +106,10 @@ class SubmitTrainingFunctions:
     @staticmethod
     def submit_training_on_compute():
         """Creates and submits models for training."""
+        # key:values from dictionaries 
+        kernel_type_key = submit_training_menu_options.selected_kernel
+        mean_type_key = submit_training_menu_options.selected_mean_type
+
         (
             ncores,
             kernel,
@@ -115,7 +119,7 @@ class SubmitTrainingFunctions:
             gwo_cycles,
         ) = (
             submit_training_menu_options.selected_number_of_cores,
-            submit_training_menu_options.selected_kernel,
+            AVAILABLE_KERNEL_TYPES[kernel_type_key],
             submit_training_menu_options.selected_max_iter,
             submit_training_menu_options.selected_huber_delta,
             AVAILABLE_MEAN_TYPES[mean_type_key],
@@ -123,6 +127,7 @@ class SubmitTrainingFunctions:
         )
 
         pyferebus_input_script = write_pyferebus_input_script(           
+            ncores=ncores,
             kernel=kernel,
             max_iter=max_iter,
             huber_delta=huber_delta,
@@ -130,14 +135,12 @@ class SubmitTrainingFunctions:
             gwo_cycles=gwo_cycles,
         )
 
-        submit_pyferebus(
-            input_script=pyferebus_input_script,
-            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["training_models"],
-            ncores=ncores,
-        )
+        subprocess.run(["python3", "pyferebus.py"], check=True)
+
+
 
         SUBMIT_TRAINING_MENU_DESCRIPTION.prologue_description_text = (
-            "Successfully submitted models for trianing \n"
+            "Successfully submitted models for training \n"
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
