@@ -2,8 +2,6 @@
 from ichor.core.files.aimall import AbInt, Aim, Int, IntDirectory
 
 # ase files
-from ichor.core.files.ase.opt import XTB
-
 from ichor.core.files.ase import XTB
 
 # dlpoly files
@@ -68,7 +66,8 @@ __all__ = [
     "PointDirectory",
     "PointsDirectory",
     "PointsDirectoryParent",
-    "XTB" "XYZ",
+    "XTB",
+    "XYZ",
     "Mol2",
     "PySCFDirectory",
     "MorfiDirectory",

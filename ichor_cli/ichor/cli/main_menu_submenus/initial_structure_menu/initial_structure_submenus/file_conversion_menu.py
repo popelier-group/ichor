@@ -264,7 +264,8 @@ class FileConversionFunctions:
         file_conversion_menu_options.selected_output_file_extension = format_ext
         # update log file
         ichor.hpc.global_variables.LOGGER.info(
-            f"Output file type selected {file_conversion_menu_options.selected_output_file_format} with extension {file_conversion_menu_options.selected_output_file_extension}"
+            f"Output file type selected {file_conversion_menu_options.selected_output_file_format} "
+            f"with extension {file_conversion_menu_options.selected_output_file_extension}"
         )
 
     @staticmethod

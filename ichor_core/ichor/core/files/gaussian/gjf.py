@@ -129,8 +129,8 @@ class GJF(ReadFile, WriteFile, HasAtoms):
             No checks are done for CPU core count.
 
         """
-        nproc = f"nproc={nproc}"
-        n = self._find_in_link("nproc")
+        nproc = f"NProcShared={nproc}"
+        n = self._find_in_link("NProcShared")
         if n is None:
             self.link0.append(nproc)
         else:
@@ -147,8 +147,8 @@ class GJF(ReadFile, WriteFile, HasAtoms):
             This is not checked internally.
 
         """
-        mem = f"mem={mem}"
-        n = self._find_in_link("mem")
+        mem = f"Mem={mem}"
+        n = self._find_in_link("Mem")
         if n is None:
             self.link0.append(mem)
         else:
@@ -296,7 +296,7 @@ class GJF(ReadFile, WriteFile, HasAtoms):
         if self.spin_multiplicity < 1:
             raise ValueError(f"Spin multiplicity cannot be {self.spin_multiplicity}.")
         if len(self.atoms) == 0:
-            raise ValueError("There are no atoms to write to gjf file.")
+            raise ValueError("There are no atoms to " " to gjf file.")
 
     def _write_file(self, path: Path, *args, **kwargs):
         fmtstr = "12.8f"

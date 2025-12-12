@@ -46,10 +46,10 @@ class XTB(WriteFile, File):
     def _write_file(self, path: Path, *args, **kwargs):
         write_str = ""
 
-        write_str += f"from ase.io import read\n"
-        write_str += f"from ase.optimize import BFGS\n"
-        write_str += f"from ase.io import write\n"
-        write_str += f"from xtb.ase.calculator import XTB\n\n"
+        write_str += "from ase.io import read\n"
+        write_str += "from ase.optimize import BFGS\n"
+        write_str += "from ase.io import write\n"
+        write_str += "from xtb.ase.calculator import XTB\n\n"
 
         write_str += f'atoms=read("{self.input_xtb_path}")\n\n'  # ADD INPUT FILE
 
@@ -60,7 +60,7 @@ class XTB(WriteFile, File):
             f"max_iterations={self.max_iterations})\n\n"
         )
 
-        write_str += f"atoms.calc = xtb_calc\n\n"
+        write_str += "atoms.calc = xtb_calc\n\n"
 
         write_str += f'optimizer = BFGS(atoms, trajectory="{self.traj_path}", logfile="{self.log_path}")\n'
         write_str += f"optimizer.run(fmax={self.fmax})\n\n"
