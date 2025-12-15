@@ -19,7 +19,7 @@ class ExtractModelsScript(WriteFile, File):
     def _write_file(self, path: Path, *args, **kwargs):
 
         # set up template for polus script
-        diversity_script_template = Template(
+        script_text = Template(
             textwrap.dedent(
                 """
             import os
