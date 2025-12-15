@@ -36,7 +36,7 @@ def write_extract_models_script(
     **kwargs,
 ) -> Optional[JobID]:
 
-    input_filename = "extract_models" + ExtractModelsScript.getfiletype()
+    input_filename = "extract_models" + ExtractModelsScript.get_filetype()
 
     extract_models_script = ExtractModelsScript(
         Path(input_filename),
