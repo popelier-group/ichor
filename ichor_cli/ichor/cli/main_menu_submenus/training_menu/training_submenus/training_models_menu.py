@@ -9,7 +9,7 @@ from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import user_input_int, user_input_restricted, user_input_float
 
-from ichor.hpc.main import write, extract_models_script, write_pyferebus_input_script
+from ichor.hpc.main import write_extract_models_script, write_pyferebus_input_script
 
 AVAILABLE_MEAN_TYPES = {
     "physical": 15,
