@@ -19,7 +19,7 @@ class ExtractModelsScript(WriteFile, File):
     def _write_file(self, path: Path, *args, **kwargs):
 
         # set up template for polus script
-        script_text = Template(
+        extract_models_script_template = Template(
             textwrap.dedent(
                 """
             import os
@@ -49,5 +49,7 @@ class ExtractModelsScript(WriteFile, File):
         """
             )
         )
+
+        script_text = extract_models_script_template.substitue()
 
         return script_text
