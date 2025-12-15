@@ -36,7 +36,7 @@ class ExtractModelsScript(WriteFile, File):
                 os.makedirs(models_dir, exist_ok=True)
 
                 # recursively find all .model files under current directory
-                model_files = glob.glob(os.path.join(workdir, "**", "*.model"), recursive=True)
+                model_files = glob.glob(os.path.join(current_dir, "**", "*.model"), recursive=True)
 
                 # copy all .model files into models_dir
                 for file_path in model_files:
