@@ -50,6 +50,6 @@ class ExtractModelsScript(WriteFile, File):
             )
         )
 
-        script_text = extract_models_script_template.substitue()
+        script_text = extract_models_script_template.substitute()
 
         return script_text
