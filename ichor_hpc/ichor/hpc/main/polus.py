@@ -43,8 +43,8 @@ def write_dataset_prep(
 
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
     output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
-    input_filename = "datasets" + DatasetPrepScript.get_filetype()
-    input_file_path = Path(output_dir / input_filename)
+    input_filename = "dataset_split" + DatasetPrepScript.get_filetype()
+    input_file_path = Path(input_filename)
 
     dataset_input_script = DatasetPrepScript(
         Path(input_file_path),
