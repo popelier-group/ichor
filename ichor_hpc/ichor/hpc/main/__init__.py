@@ -21,4 +21,5 @@ __all__ = [
     "submit_pyferebus",
     "submit_check_points_directory_for_missing_files",
     "write_pyferebus_input_script",
+    "write_extract_models_script",
 ]

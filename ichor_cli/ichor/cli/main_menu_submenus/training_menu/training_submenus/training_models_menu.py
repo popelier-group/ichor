@@ -9,7 +9,7 @@ from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import user_input_int, user_input_restricted, user_input_float
 
-from ichor.hpc.main import submit_pyferebus, write_pyferebus_input_script
+from ichor.hpc.main import write, extract_models_script, write_pyferebus_input_script
 
 AVAILABLE_MEAN_TYPES = {
     "physical": 15,
@@ -135,6 +135,11 @@ class SubmitTrainingFunctions:
             gwo_cycles=gwo_cycles,
         )
 
+        extract_models_script = write_extract_models_script()
+
+        # run the pyferebus input script. As submit on compute is hard coded to true
+        # pyferebus will handle the submission 
+
         subprocess.run(["python3", "pyferebus_input.py"], check=True)
 
 
@@ -144,7 +149,7 @@ class SubmitTrainingFunctions:
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"Training model job submitted"
+            f"Training models job submitted"
         )
 
 
