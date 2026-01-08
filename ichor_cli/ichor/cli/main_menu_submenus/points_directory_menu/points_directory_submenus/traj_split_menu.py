@@ -122,7 +122,9 @@ traj_split_menu = ConsoleMenu(
 # make menu items
 # can use lambda functions to change text of options as well :)
 traj_split_menu_items = [
-    FunctionItem("Select path of trajectory", TrajSplitFunctions.select_trajectory),
+    FunctionItem(
+        "Select path of trajectory (.xyz)", TrajSplitFunctions.select_trajectory
+    ),
     FunctionItem(
         "Split trajectory into single PointsDirectory-like dir",
         TrajSplitFunctions.split_trajectory_into_points_directory,

@@ -83,14 +83,14 @@ points_directory_menu = ConsoleMenu(
 # make menu items
 # can use lambda functions to change text of options as well :)
 point_directory_menu_items = [
-    FunctionItem(
-        "Select PointsDirectory Path or Parent to PointsDirectory",
-        PointsDirectoryFunctions.select_points_directory,
-    ),
     SubmenuItem(
         TRAJ_SPLIT_MENU_DESCRIPTION.title,
         traj_split_menu,
         points_directory_menu,
+    ),
+    FunctionItem(
+        "Select PointsDirectory Path or Parent to PointsDirectory",
+        PointsDirectoryFunctions.select_points_directory,
     ),
     SubmenuItem(
         SUBMIT_GAUSSIAN_MENU_DESCRIPTION.title,
@@ -100,11 +100,11 @@ point_directory_menu_items = [
     SubmenuItem(
         SUBMIT_AIMALL_MENU_DESCRIPTION.title, submit_aimall_menu, points_directory_menu
     ),
-    SubmenuItem(
-        SUBMIT_DATABASE_MENU_DESCRIPTION.title,
-        submit_database_menu,
-        points_directory_menu,
-    ),
+    # SubmenuItem(
+    #    SUBMIT_DATABASE_MENU_DESCRIPTION.title,
+    #    submit_database_menu,
+    #    points_directory_menu,
+    # ),
 ]
 
 add_items_to_menu(points_directory_menu, point_directory_menu_items)
