@@ -30,10 +30,6 @@ from ichor.cli.main_menu_submenus.tools_menu.tools_menu import (
     tools_menu,
     TOOLS_MENU_DESCRIPTION,
 )
-from ichor.cli.main_menu_submenus.trajectory_menu.trajectory_menu import (
-    trajectory_menu,
-    TRAJECTORY_MENU_DESCRIPTION,
-)
 
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
@@ -90,7 +86,6 @@ main_menu_items = [
     SubmenuItem(
         TRAJECTORY_CREATION_MENU_DESCRIPTION.title, trajectory_creation_menu, main_menu
     ),
-    SubmenuItem(TRAJECTORY_MENU_DESCRIPTION.title, trajectory_menu, main_menu),
     SubmenuItem(
         POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu
     ),
