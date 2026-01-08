@@ -15,7 +15,7 @@ from ichor.cli.useful_functions.user_input import (
 from ichor.core.files import Trajectory
 
 TRAJ_SPLIT_MENU_DESCRIPTION = MenuDescription(
-    "Trajectory Menu",
+    "Split trajectory into points",
     subtitle="Use this to split a trajectory into point directories with single geometries.\n",
 )
 
@@ -27,7 +27,7 @@ class TrajSplitMenuOptions(MenuOptions):
     )
 
     def check_selected_trajectory_path(self) -> Union[str, None]:
-        """Checks whether the given Trjectory exists or if it is a file."""
+        """Checks whether the given Trajectory exists or if it is a file."""
         traj_path = Path(self.selected_trajectory_path)
         if not traj_path.exists():
             return f"Current trajectory path: {traj_path} does not exist."
