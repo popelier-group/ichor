@@ -17,9 +17,7 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import user_input_path, user_input_bool, user_input_int
-from ichor.core.files import PointsDirectory, PointsDirectoryParent
-
-from ichor.core.files import Trajectory
+from ichor.core.files import PointsDirectory, PointsDirectoryParent, Trajectory
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
     "PointsDirectory Menu",
@@ -30,6 +28,9 @@ POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
 # dataclass used to store values for PointsDirectoryMenu
 @dataclass
 class PointsDirectoryMenuOptions(MenuOptions):
+    # defaults to the current working directory
+    selected_points_directory_path: Path
+
     selected_trajectory_path: Path = (
         ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH
     )
@@ -41,9 +42,6 @@ class PointsDirectoryMenuOptions(MenuOptions):
             return f"Current trajectory path: {traj_path} does not exist."
         elif not traj_path.is_file():
             return f"Current trajectory path: {traj_path} is not a file."
-
-    # defaults to the current working directory
-    selected_points_directory_path: Path
 
     def check_path(self):
 
