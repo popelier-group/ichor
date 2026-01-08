@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Union
 
@@ -29,7 +29,7 @@ POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
 @dataclass
 class PointsDirectoryMenuOptions(MenuOptions):
     # defaults to the current working directory
-    selected_points_directory_path: Path
+    selected_points_directory_path: Path = field(default_factory=lambda: Path.cwd())
 
     selected_trajectory_path: Path = (
         ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH
