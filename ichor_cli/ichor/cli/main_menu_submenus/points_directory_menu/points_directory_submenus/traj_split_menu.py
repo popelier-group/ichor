@@ -114,8 +114,8 @@ traj_split_menu = ConsoleMenu(
     this_menu_options=traj_split_menu_options,
     title=TRAJ_SPLIT_MENU_DESCRIPTION.title,
     subtitle=TRAJ_SPLIT_MENU_DESCRIPTION.subtitle,
-    prologue_text="",
-    epilogue_text="",
+    prologue_text=TRAJ_SPLIT_MENU_DESCRIPTION.prologue_description_text,
+    epilogue_text=TRAJ_SPLIT_MENU_DESCRIPTION.epilogue_description_text,
     show_exit_option=TRAJ_SPLIT_MENU_DESCRIPTION.show_exit_option,
 )
 

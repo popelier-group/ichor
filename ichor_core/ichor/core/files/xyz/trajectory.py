@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Union
-
+from tqdm import tqdm
 import numpy as np
 import pandas as pd
 from ichor.core.atoms import Atom, Atoms, ListOfAtoms
@@ -194,7 +194,9 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             root_path = Path(system_name).with_suffix(default_root_suffix)
 
         mkdir(root_path, empty=True)
-        for i, atoms_instance in enumerate(self):
+        for i, atoms_instance in tqdm(
+            enumerate(self), ascii=True, desc="Processing point dirs"
+        ):
 
             if (i % every) == 0:
                 if center:
@@ -258,7 +260,11 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         geom_counter = 0
 
         # loop over geometries and write to respective dir
-        for i, atoms_instance in enumerate(geometries_to_write):
+        for i, atoms_instance in tqdm(
+            enumerate(geometries_to_write),
+            ascii=True,
+            desc="Processing point dirs",
+        ):
 
             if center:
                 atoms_instance.centre()
@@ -339,7 +345,9 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         nsplits_counter = 0
 
         # loop over geometries and write to respective dir
-        for total_geom_counter, atoms_instance in enumerate(geometries_to_write):
+        for total_geom_counter, atoms_instance in tqdm(
+            enumerate(geometries_to_write), ascii=True, desc="Processing point dirs"
+        ):
 
             if center:
                 atoms_instance.centre()
@@ -425,7 +433,6 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         index_col=0,
         sheet_name=0,
     ) -> "Trajectory":
-
         """Takes in a csv or excel file containing features and convert it to a `Trajectory` object.
         It assumes that the features start from the very first column
         (column after the index column, if one exists). Feature files that are written out by ichor
