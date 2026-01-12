@@ -195,7 +195,10 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         mkdir(root_path, empty=True)
         for i, atoms_instance in tqdm(
-            enumerate(self), ascii=True, desc="Processing point dirs"
+            enumerate(self),
+            ascii=True,
+            desc="Processing point dirs",
+            ncols="70",
         ):
 
             if (i % every) == 0:
@@ -264,6 +267,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             enumerate(geometries_to_write),
             ascii=True,
             desc="Processing point dirs",
+            ncols="70",
         ):
 
             if center:
@@ -346,7 +350,10 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         # loop over geometries and write to respective dir
         for total_geom_counter, atoms_instance in tqdm(
-            enumerate(geometries_to_write), ascii=True, desc="Processing point dirs"
+            enumerate(geometries_to_write),
+            ascii=True,
+            desc="Processing point dirs",
+            ncols="70",
         ):
 
             if center:
