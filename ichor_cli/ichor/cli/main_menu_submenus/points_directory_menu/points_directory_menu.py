@@ -18,8 +18,8 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_path, user_input_bool, user_input_int
-from ichor.core.files import PointsDirectory, PointsDirectoryParent, Trajectory
+from ichor.cli.useful_functions import user_input_path
+from ichor.core.files import PointsDirectory, PointsDirectoryParent
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
     "PointsDirectory Menu",
@@ -100,11 +100,11 @@ point_directory_menu_items = [
     SubmenuItem(
         SUBMIT_AIMALL_MENU_DESCRIPTION.title, submit_aimall_menu, points_directory_menu
     ),
-    # SubmenuItem(
-    #    SUBMIT_DATABASE_MENU_DESCRIPTION.title,
-    #    submit_database_menu,
-    #    points_directory_menu,
-    # ),
+    SubmenuItem(
+        SUBMIT_DATABASE_MENU_DESCRIPTION.title,
+        submit_database_menu,
+        points_directory_menu,
+    ),
 ]
 
 add_items_to_menu(points_directory_menu, point_directory_menu_items)

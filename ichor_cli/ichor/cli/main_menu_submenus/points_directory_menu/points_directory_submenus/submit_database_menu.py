@@ -47,7 +47,7 @@ submit_database_menu_options = SubmitDatabaseMenuOptions(
 class SubmitDatabaseFunctions:
     @staticmethod
     def select_database():
-        """Asks user to update the ethod for AIMALL. The method
+        """Asks user to update the method for AIMALL. The method
         needs to be added to the WFN file so that AIMALL does the correct
         calculation."""
 
@@ -79,7 +79,8 @@ class SubmitDatabaseFunctions:
     @staticmethod
     def points_directory_to_database():
         """Converts the current given PointsDirectory to a SQLite3 database. Can be submitted on compute
-        and works for one `PointsDirectory` or parent directory containing many `PointsDirectory`-ies"""
+        and works for one `PointsDirectory` or parent directory containing many `PointsDirectory`-ies
+        """
 
         is_parent_directory_to_many_points_directories = (
             single_or_many_points_directories(
