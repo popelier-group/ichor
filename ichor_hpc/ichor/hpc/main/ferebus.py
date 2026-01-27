@@ -32,7 +32,7 @@ def write_pyferebus_input_script(
     return pyferebus_input_script.path
 
 def write_extract_models_script(
-        hold: JobID = None,
+    hold: JobID = None,
     **kwargs,
 ) -> Optional[JobID]:
 
