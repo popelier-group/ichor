@@ -10,10 +10,6 @@ from ichor.cli.main_menu_submenus.analysis_menu import (
     analysis_menu,
     ANALYSIS_MENU_DESCRIPTION,
 )
-from ichor.cli.main_menu_submenus.database_menu.submit_csvs_from_database import (
-    submit_csvs_menu,
-    SUBMIT_CSVS_MENU_DESCRIPTION,
-)
 from ichor.cli.main_menu_submenus.initial_structure_menu import (
     initial_structure_menu,
     INITIAL_STRUCTURE_MENU_DESCRIPTION,
@@ -89,7 +85,6 @@ main_menu_items = [
     SubmenuItem(
         POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu
     ),
-    SubmenuItem(SUBMIT_CSVS_MENU_DESCRIPTION.title, submit_csvs_menu, main_menu),
     SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
     SubmenuItem(TOOLS_MENU_DESCRIPTION.title, tools_menu, main_menu),
 ]

@@ -14,14 +14,20 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
     traj_split_menu,
     TRAJ_SPLIT_MENU_DESCRIPTION,
 )
+from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.submit_csvs_from_database import (
+    submit_csvs_menu,
+    SUBMIT_CSVS_MENU_DESCRIPTION,
+)
 
 __all__ = [
     "submit_aimall_menu",
     "submit_gaussian_menu",
     "submit_database_menu",
     "traj_split_menu",
+    "submit_csvs_menu",
     "SUBMIT_AIMALL_MENU_DESCRIPTION",
     "SUBMIT_GAUSSIAN_MENU_DESCRIPTION",
     "SUBMIT_DATABASE_MENU_DESCRIPTION",
     "TRAJ_SPLIT_MENU_DESCRIPTION",
+    "SUBMIT_CSVS_MENU_DESCRIPTION",
 ]

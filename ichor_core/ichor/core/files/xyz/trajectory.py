@@ -198,7 +198,6 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             enumerate(self),
             ascii=True,
             desc="Processing point dirs",
-            ncols="70",
         ):
 
             if (i % every) == 0:
@@ -267,7 +266,6 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             enumerate(geometries_to_write),
             ascii=True,
             desc="Processing point dirs",
-            ncols="70",
         ):
 
             if center:
@@ -353,7 +351,6 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             enumerate(geometries_to_write),
             ascii=True,
             desc="Processing point dirs",
-            ncols="70",
         ):
 
             if center:

@@ -4,14 +4,12 @@ from pathlib import Path
 from typing import Union
 
 import ichor.cli.global_menu_variables
-import ichor.hpc.global_variables
 from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     user_input_bool,
-    user_input_float,
     user_input_int,
     user_input_path,
     user_input_restricted,
@@ -35,11 +33,7 @@ SUBMIT_CSVS_MENU_DEFAULTS = {
     "default_database_format": "sqlite",
     "default_rotate_multipole_moments": True,
     "default_calculate_feature_forces": False,
-    "default_filter_by_energy": True,
-    "default_difference_iqa_wfn": 4.184,
-    "default_filter_by_integration_error": True,
-    "default_integration_error": 0.001,
-    "default_numer_of_cores": 4,
+    "default_number_of_cores": 4,
     "default_submit_on_compute": True,
 }
 
@@ -52,10 +46,6 @@ class SubmitCSVSMenuOptions(MenuOptions):
     selected_database_format: str
     selected_rotate_multipole_moments: bool
     selected_calculate_feature_forces: bool
-    selected_filter_by_energy: bool
-    selected_difference_iqa_and_wfn_kj_per_mol: float
-    selected_filter_by_integration_error: bool
-    selected_integration_error: float
     selected_number_of_cores: int
     selected_submit_on_compute: bool
 
@@ -125,87 +115,6 @@ class SubmitCSVSFunctions:
         )
 
     @staticmethod
-    def select_filter_by_energy():
-        """
-        Asks user whether or not to filter the database by energy. This will filter by the difference
-        of the WFN compared to sum of IQA energy. Note the difference is in kJ mol-1
-        """
-
-        submit_csvs_menu_options.selected_filter_by_energy = user_input_bool(
-            "Filter by energy (yes/no): ",
-            submit_csvs_menu_options.selected_filter_by_energy,
-        )
-
-        # set the energy threshold to infinity if not filtering
-        if not submit_csvs_menu_options.selected_filter_by_energy:
-            submit_csvs_menu_options.selected_difference_iqa_and_wfn_kj_per_mol = (
-                math.inf
-            )
-
-    @staticmethod
-    def select_difference_IQA_and_WFN_threshold():
-        """
-        Asks user to give a float for the maximum value of the energy difference between
-        the sum of IQA for atoms and the WFN energy.
-
-        If the absolute difference is greater than this, then the point will be
-        filtered out.
-
-        .. note::
-            The IQA energy for the atoms must be calculated in order for this
-            to take effect. Without IQA energy (encomp=3), we cannot do this
-            comparison
-        """
-
-        if submit_csvs_menu_options.selected_filter_by_energy:
-            submit_csvs_menu_options.selected_difference_iqa_and_wfn_kj_per_mol = (
-                user_input_float(
-                    "Absolute maximum energy difference threshold: ",
-                    submit_csvs_menu_options.selected_difference_iqa_and_wfn_kj_per_mol,
-                )
-            )
-        else:
-            print(
-                "Filtering by energy is turned off, turn filtering on to change threshold."
-            )
-            input("Press Enter to go back to menu.")
-
-    @staticmethod
-    def select_filter_by_integration_error():
-        """
-        Asks user whether or not to filter out database by integration error
-        """
-
-        submit_csvs_menu_options.selected_filter_by_integration_error = user_input_bool(
-            "Filter by integration errror (yes/no): ",
-            submit_csvs_menu_options.selected_filter_by_integration_error,
-        )
-
-        # if not filtering by integration error, set integration
-        # error threshold to infinity
-        if not submit_csvs_menu_options.selected_filter_by_integration_error:
-            submit_csvs_menu_options.selected_integration_error = math.inf
-
-    @staticmethod
-    def select_integration_error_threshold():
-        """
-        Asks user to select an integration error (float) above which to filter points.
-        """
-
-        if submit_csvs_menu_options.selected_filter_by_integration_error:
-            submit_csvs_menu_options.selected_integration_error = user_input_float(
-                "Integration error threshold: ",
-                submit_csvs_menu_options.selected_integration_error,
-            )
-        # if filtering by integration error is off, then
-        # do not make it possible to change the integration error threshold.
-        else:
-            print(
-                "Filtering by integration error is turned off, turn filtering on to change threshold."
-            )
-            input("Press Enter to go back to menu.")
-
-    @staticmethod
     def select_number_of_cores():
         """
         Asks user for the number of cores.
@@ -239,18 +148,12 @@ class SubmitCSVSFunctions:
         calculate_feature_forces = (
             submit_csvs_menu_options.selected_calculate_feature_forces
         )
-        float_difference_iqa_wfn = (
-            submit_csvs_menu_options.selected_difference_iqa_and_wfn_kj_per_mol
-        )
-        float_integration_error = submit_csvs_menu_options.selected_integration_error
         ncores = submit_csvs_menu_options.selected_number_of_cores
         submit_on_compute = submit_csvs_menu_options.selected_submit_on_compute
 
-        # make into a very large number
-        if float_integration_error == math.inf:
-            float_integration_error = 100000000.0
-        if float_difference_iqa_wfn == math.inf:
-            float_difference_iqa_wfn = 10000000.0
+        # make into a very large number to export full database to polus
+        float_integration_error = 100000000.0
+        float_difference_iqa_wfn = 10000000.0
 
         if not submit_on_compute:
             alf = get_alf_from_first_db_geometry(db_path, db_type)
@@ -298,22 +201,6 @@ submit_csvs_menu_items = [
     FunctionItem(
         "Change calculate feature forces",
         SubmitCSVSFunctions.select_calculate_feature_forces,
-    ),
-    FunctionItem(
-        "Change filter by energy (yes/no)",
-        SubmitCSVSFunctions.select_filter_by_energy,
-    ),
-    FunctionItem(
-        "Change energy threshold",
-        SubmitCSVSFunctions.select_difference_IQA_and_WFN_threshold,
-    ),
-    FunctionItem(
-        "Change filter by integration error",
-        SubmitCSVSFunctions.select_filter_by_integration_error,
-    ),
-    FunctionItem(
-        "Change integration error threshold",
-        SubmitCSVSFunctions.select_integration_error_threshold,
     ),
     FunctionItem(
         "Change number of cores, parallelized over number of atoms",

@@ -1,10 +1,5 @@
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Union
-
-import ichor.cli.global_menu_variables
-import ichor.hpc.global_variables
-from consolemenu.items import FunctionItem, SubmenuItem
+from dataclasses import dataclass
+from consolemenu.items import SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus import (
     submit_aimall_menu,
@@ -15,11 +10,12 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
     SUBMIT_GAUSSIAN_MENU_DESCRIPTION,
     traj_split_menu,
     TRAJ_SPLIT_MENU_DESCRIPTION,
+    submit_csvs_menu,
+    SUBMIT_CSVS_MENU_DESCRIPTION,
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_path
-from ichor.core.files import PointsDirectory, PointsDirectoryParent
+
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
     "PointsDirectory Menu",
@@ -27,47 +23,13 @@ POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
 )
 
 
-# dataclass used to store values for PointsDirectoryMenu
 @dataclass
 class PointsDirectoryMenuOptions(MenuOptions):
-    # defaults to the current working directory
-    selected_points_directory_path: Path = field(default_factory=lambda: Path.cwd())
-
-    def check_path(self):
-
-        pd_path = Path(self.selected_points_directory_path)
-        if not pd_path.is_dir():
-            return "Current path is not a directory."
-
-    def check_selected_points_directory_path(self) -> Union[str, None]:
-        """Checks whether the given PointsDirectory exists or if it is a directory."""
-        pd_path = Path(self.selected_points_directory_path)
-        if (pd_path.suffix != PointsDirectory._suffix) and (
-            pd_path.suffix != PointsDirectoryParent._suffix
-        ):
-            return f"Current path: {pd_path} might not be PointsDirectory-like)."
+    pass
 
 
 # initialize dataclass for storing information for menu
-points_directory_menu_options = PointsDirectoryMenuOptions(
-    ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-)
-
-
-# class with static methods for each menu item that calls a function.
-class PointsDirectoryFunctions:
-    """Functions that run when menu items are selected"""
-
-    @staticmethod
-    def select_points_directory():
-        """Asks user to update points directory and then updates PointsDirectoryMenuOptions instance."""
-        pd_path = user_input_path("Change PointsDirectory Path: ")
-        ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH = Path(
-            pd_path
-        ).absolute()
-        points_directory_menu_options.selected_points_directory_path = (
-            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-        )
+points_directory_menu_options = PointsDirectoryMenuOptions()
 
 
 # initialize menu
@@ -88,10 +50,6 @@ point_directory_menu_items = [
         traj_split_menu,
         points_directory_menu,
     ),
-    FunctionItem(
-        "Select PointsDirectory Path or Parent to PointsDirectory",
-        PointsDirectoryFunctions.select_points_directory,
-    ),
     SubmenuItem(
         SUBMIT_GAUSSIAN_MENU_DESCRIPTION.title,
         submit_gaussian_menu,
@@ -103,6 +61,11 @@ point_directory_menu_items = [
     SubmenuItem(
         SUBMIT_DATABASE_MENU_DESCRIPTION.title,
         submit_database_menu,
+        points_directory_menu,
+    ),
+    SubmenuItem(
+        SUBMIT_CSVS_MENU_DESCRIPTION.title,
+        submit_csvs_menu,
         points_directory_menu,
     ),
 ]
