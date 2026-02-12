@@ -16,8 +16,17 @@ from ichor.cli.useful_functions import (
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
 
-# AVAILABLE_OUTLIER_METHODS = [
-#     "extrZS"
+# AVAILABLE_PROPS = [
+#     "iqa",
+#     "q00",
+#     "q10",
+#     "q11c",
+#     "q11s",
+#     "q20",
+#     "q21s",
+#     "q21c",
+#     "q22s",
+#     "q22c"
 # ]
 
 SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
@@ -27,7 +36,7 @@ SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
 
 SUBMIT_DATA_PREP_MENU_DEFAULTS = {
     "default_ncores": 2,
-#    "default_outlier_method": "extrZS",
+    # "default_props": ["iqa"],
     "default_q00_threshold": 0.005,
     "default_train_size": [1000],
     "default_val_size": 250,
@@ -41,7 +50,7 @@ class SubmitDataPrepMenuOptions(MenuOptions):
 
     selected_input_directory_path: Path
     selected_number_of_cores: int
-#    selected_outlier_method: str
+    # selected_props: str
     selected_q00_threshold: float
     selected_train_size: int
     selected_val_size: int
@@ -84,16 +93,19 @@ class SubmitDataPrepFunctions:
         )
 
     # @staticmethod
-    # def select_outlier_method():
-    #     """Asks user to select method for outliers"""
-    #     submit_data_prep_menu_options.selected_outlier_method = user_input_restricted(
-
-    #         "Enter outlier removal method: ",
-    #         submit_data_prep_menu_options.selected_outlier_method,
+    # def select_props():
+    #     """Asks user to select the properties"""
+    #     submit_data_prep_menu_options.selected_props = user_input_restricted(
+    #         "Select properties for training: ",
+    #         submit_data_prep_menu_options.selected_props,
     #     )
+
+    #     props = []
+
+
     #     # update logger
     #     ichor.hpc.global_variables.LOGGER.info(
-    #         f"Dataset outliers removed using {submit_data_prep_menu_options.selected_outlier_method} method."
+    #         f"Properties for training: {submit_data_prep_menu_options.selected_props}."
     #     )
 
     @staticmethod
@@ -105,7 +117,7 @@ class SubmitDataPrepFunctions:
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"data_prep sample pool size {submit_data_prep_menu_options.selected_q00_threshold}"
+            f"Data prep sample pool size {submit_data_prep_menu_options.selected_q00_threshold}"
         )
 
     @staticmethod
