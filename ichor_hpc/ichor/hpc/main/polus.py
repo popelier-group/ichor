@@ -71,7 +71,7 @@ def submit_polus(
     ncores=2,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
-    cwd=cwd,
+    cwd: Path,
     **kwargs,
 ) -> JobID:
     """Function that writes out a submission script which contains an array of
