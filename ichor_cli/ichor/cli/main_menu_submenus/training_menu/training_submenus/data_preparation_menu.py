@@ -16,6 +16,10 @@ from ichor.cli.useful_functions import (
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
 
+# AVAILABLE_OUTLIER_METHODS = [
+#     "extrZS"
+# ]
+
 SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
     "Dataset Preparation Menu",
     subtitle="Use this menu to prepare datasets for training.\n",
@@ -23,7 +27,7 @@ SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
 
 SUBMIT_DATA_PREP_MENU_DEFAULTS = {
     "default_ncores": 2,
-    "default_outlier_method": "extrZS",
+#    "default_outlier_method": "extrZS",
     "default_q00_threshold": 0.005,
     "default_train_size": [1000],
     "default_val_size": 250,
@@ -37,7 +41,7 @@ class SubmitDataPrepMenuOptions(MenuOptions):
 
     selected_input_directory_path: Path
     selected_number_of_cores: int
-    selected_outlier_method: str
+#    selected_outlier_method: str
     selected_q00_threshold: float
     selected_train_size: int
     selected_val_size: int
@@ -79,17 +83,18 @@ class SubmitDataPrepFunctions:
             submit_data_prep_menu_options.selected_number_of_cores,
         )
 
-    @staticmethod
-    def select_outlier_method():
-        """Asks user to select method for outliers"""
-        submit_data_prep_menu_options.selected_outlier_method = user_input_restricted(
-            "Enter outlier removal method: ",
-            submit_data_prep_menu_options.selected_outlier_method,
-        )
-        # update logger
-        ichor.hpc.global_variables.LOGGER.info(
-            f"Dataset outliers removed using {submit_data_prep_menu_options.selected_outlier_method} method."
-        )
+    # @staticmethod
+    # def select_outlier_method():
+    #     """Asks user to select method for outliers"""
+    #     submit_data_prep_menu_options.selected_outlier_method = user_input_restricted(
+
+    #         "Enter outlier removal method: ",
+    #         submit_data_prep_menu_options.selected_outlier_method,
+    #     )
+    #     # update logger
+    #     ichor.hpc.global_variables.LOGGER.info(
+    #         f"Dataset outliers removed using {submit_data_prep_menu_options.selected_outlier_method} method."
+    #     )
 
     @staticmethod
     def select_q00_threshold():
@@ -151,9 +156,8 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def submit_data_prep_on_compute():
         """Submits polus job for data preparation."""
-        (ncores, outlier_method, q00_threshold, train_size, val_size, test_size) = (
+        (ncores, q00_threshold, train_size, val_size, test_size) = (
             submit_data_prep_menu_options.selected_number_of_cores,
-            submit_data_prep_menu_options.selected_outlier_method,
             submit_data_prep_menu_options.selected_q00_threshold,
             submit_data_prep_menu_options.selected_train_size,
             submit_data_prep_menu_options.selected_val_size,
@@ -164,7 +168,7 @@ class SubmitDataPrepFunctions:
 
         dataset_script = write_dataset_prep(
             outlier_input_dir=input_path,
-            outlier_method=outlier_method,
+            # outlier_method=outlier_method,
             q00_threshold=q00_threshold,
             train_size=train_size,
             val_size=val_size,
@@ -197,10 +201,10 @@ submit_data_prep_menu_items = [
         "Change cores",
         SubmitDataPrepFunctions.select_number_of_cores,
     ),
-    FunctionItem(
-        "Change outlier method",
-        SubmitDataPrepFunctions.select_outlier_method,
-    ),
+    # FunctionItem(
+    #     "Change outlier method",
+    #     SubmitDataPrepFunctions.select_outlier_method,
+    # ),
     FunctionItem(
         "Change q00 threshold",
         SubmitDataPrepFunctions.select_q00_threshold,
