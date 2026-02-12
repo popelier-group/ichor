@@ -11,6 +11,7 @@ from ichor.cli.useful_functions import (
     user_input_restricted,
     user_input_int,
     user_input_path,
+    user_input_float,
 )
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
@@ -37,7 +38,7 @@ class SubmitDataPrepMenuOptions(MenuOptions):
     selected_input_directory_path: Path
     selected_number_of_cores: int
     selected_outlier_method: str
-    selected_q00_threshold: int
+    selected_q00_threshold: float
     selected_train_size: int
     selected_val_size: int
     selected_test_size: int
@@ -93,7 +94,7 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_q00_threshold():
         """Asks user to select the recovery test filter threshold for q00."""
-        submit_data_prep_menu_options.selected_q00_threshold = user_input_int(
+        submit_data_prep_menu_options.selected_q00_threshold = user_input_float(
             "Enter filter threshold: ",
             submit_data_prep_menu_options.selected_q00_threshold,
         )
