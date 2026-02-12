@@ -110,9 +110,9 @@ def recursive_move(src: Path, dst: Path) -> None:
     :param src: The current location of directory of file
     :param dst: The location where the directory or file should be moved to
     """
-    if src.isdir():
+    if src.is_dir():
         for f in src.iterdir():
-            if f.isdir() and (dst / f.name).exists():
+            if f.is_dir() and (dst / f.name).exists():
                 recursive_move(f, dst / f.name)
             else:
                 move(f, dst)
