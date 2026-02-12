@@ -41,7 +41,7 @@ def write_dataset_prep(
     **kwargs,
 ) -> Optional[JobID]:
 
-    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
+    #mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
     dataset_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
     input_files_dir=move(Path(outlier_input_dir), Path(dataset_dir/outlier_input_dir))
     input_filename = "dataset_split" + DatasetPrepScript.get_filetype()
