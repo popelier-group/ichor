@@ -26,10 +26,10 @@ from ichor.cli.main_menu_submenus.points_directory_menu import (
     points_directory_menu,
     POINTS_DIRECTORY_MENU_DESCRIPTION,
 )
-from ichor.cli.main_menu_submenus.sampling_menu import (
-    sampling_menu,
-    SAMPLING_MENU_DESCRIPTION,
-)
+# from ichor.cli.main_menu_submenus.sampling_menu import (
+#     sampling_menu,
+#     SAMPLING_MENU_DESCRIPTION,
+# )
 from ichor.cli.main_menu_submenus.tools_menu.tools_menu import (
     tools_menu,
     TOOLS_MENU_DESCRIPTION,
@@ -99,7 +99,7 @@ main_menu_items = [
         MOLECULAR_DYNAMICS_MENU_DESCRIPTION.title, molecular_dynamics_menu, main_menu
     ),
     SubmenuItem(TRAJECTORY_MENU_DESCRIPTION.title, trajectory_menu, main_menu),
-    SubmenuItem(SAMPLING_MENU_DESCRIPTION.title, sampling_menu, main_menu),
+    # SubmenuItem(SAMPLING_MENU_DESCRIPTION.title, sampling_menu, main_menu),
     SubmenuItem(
         POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu
     ),
