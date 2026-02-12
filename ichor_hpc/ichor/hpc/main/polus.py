@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 import ichor.hpc.global_variables
-from ichor.core.common.io import mkdir
+from ichor.core.common.io import mkdir, move
 from ichor.core.files.polus import DatasetPrepScript, DiversityScript
 
 from ichor.hpc.batch_system import JobID
@@ -42,13 +42,14 @@ def write_dataset_prep(
 ) -> Optional[JobID]:
 
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
-    output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
+    dataset_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
+    input_files_dir=move(Path(outlier_input_dir), dataset_dir)
     input_filename = "dataset_split" + DatasetPrepScript.get_filetype()
-    input_file_path = Path(input_filename)
+    input_file_path = Path(dataset_dir / input_filename)
 
     dataset_input_script = DatasetPrepScript(
         Path(input_file_path),
-        outlier_input_dir=Path(outlier_input_dir),
+        outlier_input_dir=Path(input_files_dir),
         **kwargs,
     )
     dataset_input_script.write()
@@ -61,7 +62,7 @@ def submit_polus(
     script_name: Optional[Union[str, Path]],
     hold: Optional[JobID] = None,
     ncores=2,
-    cwd=ichor.hpc.global_variables.FILE_STRUCTURE["DATASETS"],,
+    cwd=ichor.hpc.global_variables.FILE_STRUCTURE["DATASETS"],
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
     **kwargs,
