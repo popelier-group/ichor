@@ -100,7 +100,7 @@ class SubmitTrainingFunctions:
         """Asks user to select gwo cycles."""
         submit_training_menu_options.selected_gwo_cycles = user_input_int(
             "Enter gwo cycles: ",
-            submit_training_menu_options.gwo_cycles,
+            submit_training_menu_options.selected_gwo_cycles,
         )
 
     @staticmethod
