@@ -65,7 +65,6 @@ def write_dataset_prep(
     src = data_input_script.path
     dst = dataset_dir/src.name
     move(src, dst)
-    dataset_input_script = dst
 
     return dataset_input_script.path
 
