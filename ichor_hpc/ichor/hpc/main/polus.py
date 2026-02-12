@@ -56,7 +56,7 @@ def write_dataset_prep(
 
     dataset_input_script = DatasetPrepScript(
         Path(input_file_path),
-        outlier_input_dir=Path(outlier_input_dir),
+        outlier_input_dir=Path(input_dir_path).resolve(),
         **kwargs,
     )
     dataset_input_script.write()
