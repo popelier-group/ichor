@@ -67,11 +67,11 @@ def write_dataset_prep(
 def submit_polus(
     input_script: Path,
     script_name: Optional[Union[str, Path]],
+    cwd: Optional[Path] = None,
     hold: Optional[JobID] = None,
     ncores=2,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
-    cwd: Path,
     **kwargs,
 ) -> JobID:
     """Function that writes out a submission script which contains an array of
