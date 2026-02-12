@@ -52,7 +52,7 @@ def write_dataset_prep(
 
     #input_files_dir=move(Path(outlier_input_dir), Path(dataset_dir/outlier_input_dir))
     input_filename = "dataset_split" + DatasetPrepScript.get_filetype()
-    input_file_path = Path(dataset_dir/input_filename)
+    input_file_path = Path(dataset_dir / input_filename)
 
     dataset_input_script = DatasetPrepScript(
         Path(input_file_path),
