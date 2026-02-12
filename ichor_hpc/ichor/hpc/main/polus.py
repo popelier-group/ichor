@@ -44,7 +44,7 @@ def write_dataset_prep(
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
     output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
     input_filename = "dataset_split" + DatasetPrepScript.get_filetype()
-    input_file_path = Path(output_dir / input_filename)
+    input_file_path = Path(input_filename)
 
     dataset_input_script = DatasetPrepScript(
         Path(input_file_path),
@@ -61,6 +61,7 @@ def submit_polus(
     script_name: Optional[Union[str, Path]],
     hold: Optional[JobID] = None,
     ncores=2,
+    cwd=ichor.hpc.global_variables.FILE_STRUCTURE["DATASETS"],,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
     **kwargs,
