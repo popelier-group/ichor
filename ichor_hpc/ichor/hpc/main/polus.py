@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 import ichor.hpc.global_variables
-from ichor.core.common.io import mkdir, move
+from ichor.core.common.io import mkdir, recursive_move
 from ichor.core.files.polus import DatasetPrepScript, DiversityScript
 
 from ichor.hpc.batch_system import JobID
@@ -43,7 +43,7 @@ def write_dataset_prep(
 
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
     dataset_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
-    input_files_dir=move(Path(outlier_input_dir), dataset_dir)
+    input_files_dir=recursive_move(Path(outlier_input_dir), dataset_dir)
     input_filename = "dataset_split" + DatasetPrepScript.get_filetype()
     input_file_path = Path(dataset_dir / input_filename)
 
