@@ -67,7 +67,7 @@ def write_dataset_prep(
 def submit_polus(
     input_script: Path,
     script_name: Optional[Union[str, Path]],
-    cwd: Optional[Path] = None,
+    cwd: ichor.hpc.global_variables.FILE_STRUCTURE["datasets"],
     hold: Optional[JobID] = None,
     ncores=2,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
