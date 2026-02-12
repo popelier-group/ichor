@@ -156,11 +156,11 @@ submit_gaussian_menu_items = [
         SubmitGaussianFunctions.select_overwrite_existing_gjfs,
     ),
     FunctionItem(
-        "Submit to Gaussian",
+        "SUBMIT to Gaussian",
         SubmitGaussianFunctions.xyz_to_gaussian_on_compute,
     ),
     FunctionItem(
-        "Submit exisiting .gjf file",
+        "SUBMIT exisiting .gjf file",
         SubmitGaussianFunctions.submit_existing_gjf,
     ),
 ]

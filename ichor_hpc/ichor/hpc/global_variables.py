@@ -217,6 +217,12 @@ FILE_STRUCTURE.add(
     type_=FileType.Directory,
     description="""Directory containing gaussian gjf file for initial optimisation folder""",
 )
+FILE_STRUCTURE.add(
+    "METADYNAMICS_TRAJ",
+    "metadynamics_traj",
+    type_=FileType.Directory,
+    description="""Directory containing metadynamics trajectory calculations""",
+)
 FILE_STRUCTURE.add("GJF", "dlpoly_gjf", parent="dlpoly", type_=FileType.Directory)
 FILE_STRUCTURE.add("AMBER", "amber", type_=FileType.Directory)
 
@@ -241,6 +247,7 @@ SCRIPT_NAMES = ScriptNames(
         "aimall": "AIMALL.sh",
         "ferebus": "FEREBUS.sh",
         "xtb": "ase_xtb.sh",
+        "mtd": "mtd_calc.sh",
         "ichor": ScriptNames(
             {
                 "gaussian": "ICHOR_GAUSSIAN.sh",

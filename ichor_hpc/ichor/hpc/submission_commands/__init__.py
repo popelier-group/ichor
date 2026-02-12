@@ -6,6 +6,7 @@ from ichor.hpc.submission_commands.gaussian_command import GaussianCommand
 from ichor.hpc.submission_commands.orca_command import OrcaCommand
 from ichor.hpc.submission_commands.python_command import PythonCommand
 from ichor.hpc.submission_commands.tyche_command import TycheCommand
+from ichor.hpc.submission_commands.anaconda_command import AnacondaCommand
 
 __all__ = [
     "AIMAllCommand",
@@ -16,4 +17,5 @@ __all__ = [
     "PythonCommand",
     "TycheCommand",
     "OrcaCommand",
+    "AnacondaCommand",
 ]
