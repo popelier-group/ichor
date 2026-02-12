@@ -48,7 +48,8 @@ def write_dataset_prep(
     # Move input files dir into DATASETS dir
     src = Path(outlier_input_dir)
     dst = dataset_dir/src.name
-    input_dir_path = move(src, dst)
+    move(src, dst)
+    input_dir_path = dst
 
     input_filename = "dataset_split" + DatasetPrepScript.get_filetype()
     input_file_path = Path(dataset_dir / input_filename)
