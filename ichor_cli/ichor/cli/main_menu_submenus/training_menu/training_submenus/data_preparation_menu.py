@@ -235,7 +235,7 @@ submit_data_prep_menu_items = [
         SubmitDataPrepFunctions.select_test_size,
     ),
     FunctionItem(
-        "Submit data_prep sampler",
+        "Submit data prep sampler",
         SubmitDataPrepFunctions.submit_data_prep_on_compute,
     ),
 ]
