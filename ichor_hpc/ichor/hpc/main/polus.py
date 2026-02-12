@@ -52,7 +52,7 @@ def write_dataset_prep(
     input_dir_path = dst
 
     input_filename = "dataset_split" + DatasetPrepScript.get_filetype()
-    input_file_path = Path(input_filename)
+    input_file_path = Path(dataset_dir / input_filename)
 
     dataset_input_script = DatasetPrepScript(
         Path(input_file_path),
@@ -60,11 +60,6 @@ def write_dataset_prep(
         **kwargs,
     )
     dataset_input_script.write()
-
-    # move dataset input script into DATASET dir after writing
-    src = data_input_script.path
-    dst = dataset_dir/src.name
-    move(src, dst)
 
     return dataset_input_script.path
 

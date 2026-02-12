@@ -176,7 +176,7 @@ class SubmitDataPrepFunctions:
         )
 
         submit_polus(
-            input_script=dataset_script,
+            input_script="dataset_split.py",
             script_name=ichor.hpc.global_variables.SCRIPT_NAMES["datasets"],
             cwd=Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"]).resolve(),
             ncores=ncores,
