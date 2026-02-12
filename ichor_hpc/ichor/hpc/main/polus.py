@@ -61,7 +61,6 @@ def submit_polus(
     input_script: Path,
     script_name: Optional[Union[str, Path]],
     hold: Optional[JobID] = None,
-    cwd: Path,
     ncores=2,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
