@@ -16,18 +16,18 @@ from ichor.cli.useful_functions import (
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
 
-# AVAILABLE_PROPS = [
-#     "iqa",
-#     "q00",
-#     "q10",
-#     "q11c",
-#     "q11s",
-#     "q20",
-#     "q21s",
-#     "q21c",
-#     "q22s",
-#     "q22c"
-# ]
+AVAILABLE_PROPS = [
+    "iqa",
+    "q00",
+    "q10",
+    "q11c",
+    "q11s",
+    "q20",
+    "q21s",
+    "q21c",
+    "q22s",
+    "q22c"
+]
 
 SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
     "Dataset Preparation Menu",
