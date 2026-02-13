@@ -219,6 +219,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         split_size: int = 1000,
         every: int = 1,
         center=False,
+        parent_dir: Path = None,
     ) -> Path:
         """Writes out every nth timestep to a separate .xyz file. This method differs
         from `to_dir` because it has a structure system_name_root / points_directory / xyz file.
@@ -243,7 +244,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         # capitalize system name
         system_name = system_name.upper()
 
-        root_path = Path(system_name).with_suffix(default_parent_suffix)
+        root_path = parent_dir / Path(system_name).with_suffix(default_parent_suffix)
 
         # make root directory that will contain PointsDirectory-like dirs
         mkdir(root_path, empty=True)
