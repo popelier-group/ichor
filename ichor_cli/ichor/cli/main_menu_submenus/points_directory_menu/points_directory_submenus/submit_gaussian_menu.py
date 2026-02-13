@@ -135,7 +135,7 @@ class SubmitGaussianFunctions:
 
         # add memory link0 to GJF
         mem_per_core = GaussianCommand.memory_per_core
-        mem = (mem_per_core - 1) * ncores
+        mem = (int(mem_per_core) - 1) * ncores
         link0 = [f"NProcShared={ncores}", f"Mem={mem}GB"]
 
         is_parent_directory_to_many_points_directories = (
