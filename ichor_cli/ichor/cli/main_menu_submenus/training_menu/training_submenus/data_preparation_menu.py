@@ -18,15 +18,15 @@ from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
 AVAILABLE_PROPS = {
     "iqa": "iqa",
-    "q00":"q00", 
-    "q10":"q10",
-    "q11c":"q11c",
-    "q11s":"q11s",
-    "q20":"q20",
-    "q21s":"q21s",
-    "q21c":"q21c",
-    "q22s":"q22s",
-    "q22c":"q22c",
+    "q00": "q00",
+    "q10": "q10",
+    "q11c": "q11c",
+    "q11s": "q11s",
+    "q20": "q20",
+    "q21s": "q21s",
+    "q21c": "q21c",
+    "q22s": "q22s",
+    "q22c": "q22c",
 }
 
 SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
@@ -96,18 +96,19 @@ class SubmitDataPrepFunctions:
     def select_props():
         """Asks user to select the number of properties to train on."""
         number_of_props = user_input_int(
-            "Enter number of properties to train on: ",
+            f"Properties: {AVAILABLE_PROPS.keys()}\n Enter number of properties to train on: ",
         )
 
         props = []
 
         for prop in range(1, number_of_props + 1):
-            props.append(user_input_restricted(
-            AVAILABLE_PROPS.keys(),
-            f"Enter property {prop}: ",
+            props.append(
+                user_input_restricted(
+                    AVAILABLE_PROPS.keys(),
+                    f"Enter property {prop}: ",
                 )
             )
-        
+
         submit_data_prep_menu_options.selected_props = props
 
         # update logger
@@ -223,9 +224,9 @@ submit_data_prep_menu_items = [
         SubmitDataPrepFunctions.select_number_of_cores,
     ),
     FunctionItem(
-         "Change properties",
-         SubmitDataPrepFunctions.select_props,
-     ),
+        "Change properties",
+        SubmitDataPrepFunctions.select_props,
+    ),
     FunctionItem(
         "Change q00 threshold",
         SubmitDataPrepFunctions.select_q00_threshold,

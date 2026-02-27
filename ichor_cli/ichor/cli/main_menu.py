@@ -95,9 +95,6 @@ main_menu_items = [
     SubmenuItem(
         POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu
     ),
-    SubmenuItem(
-        POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu
-    ),
     SubmenuItem(TRAINING_MENU_DESCRIPTION.title, training_menu, main_menu),
     SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
     SubmenuItem(TOOLS_MENU_DESCRIPTION.title, tools_menu, main_menu),
