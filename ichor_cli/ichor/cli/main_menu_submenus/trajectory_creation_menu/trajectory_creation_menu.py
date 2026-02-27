@@ -18,7 +18,7 @@ from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import user_input_path
 
 TRAJECTORY_CREATION_MENU_DESCRIPTION = MenuDescription(
-    "Trajectory Creation Menu",
+    "Dynamics / Trajectory Creation Menu",
     subtitle="Use this menu to create a sample pool of conformers with molecular dynamics or metadynamics.",
 )
 

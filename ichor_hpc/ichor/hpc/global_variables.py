@@ -194,13 +194,13 @@ FILE_STRUCTURE.add(
     description="""Directory with files relating to DLPOLY simulations.""",
 )
 FILE_STRUCTURE.add(
-    "OPTIMISED_GEOMS",
+    "1_OPTIMISED_GEOMS",
     "optimised_geoms",
     type_=FileType.Directory,
     description="""Directory containing gaussian gjf file for initial optimisation folder""",
 )
 FILE_STRUCTURE.add(
-    "METADYNAMICS_TRAJ",
+    "2_METADYNAMICS_TRAJ",
     "metadynamics_traj",
     type_=FileType.Directory,
     description="""Directory containing metadynamics trajectory calculations""",

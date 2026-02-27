@@ -12,7 +12,7 @@ from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 
 INITIAL_STRUCTURE_MENU_DESCRIPTION = MenuDescription(
-    "Initial Structure Menu",
+    "Optimisation / Initial Structure Menu",
     subtitle="This menu is designed for generating your initial xyz file for building ML models.\n",
 )
 
