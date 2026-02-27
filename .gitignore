@@ -9,7 +9,6 @@ rmsd*
 .DATA/
 makeSets.py
 *.code-workspace
-FEREBUS/
 __pycache__/
 periodic_kernel_implementation_testing.py
 ichor.egg-info/
