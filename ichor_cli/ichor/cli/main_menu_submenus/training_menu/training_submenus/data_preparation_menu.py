@@ -101,7 +101,7 @@ class SubmitDataPrepFunctions:
 
         props = []
 
-        for train_set in range(1, number_of_training_sets + 1):
+        for prop in range(1, number_of_props + 1):
             props.append(user_input_restricted(
             AVAILABLE_PROPS.keys(),
             "Select properties for training: ",
