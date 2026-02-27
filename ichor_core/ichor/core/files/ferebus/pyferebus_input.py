@@ -53,14 +53,11 @@ class PyFerebusScript(WriteFile, File):
         weights_lambda: Optional[float] = None,
         gwo_cycles: Optional[int] = None,
         elitism: Optional[int] = None,
+        scaling: bool = False,
         transfer_learning: bool = True,
-        split_method: Optional[str] = None,
-        split_ratio: Optional[float] = None,
-        relax_weight: Optional[float] = None,
-        multi_source: bool = False,
-        nsources: Optional[int] = None,
-        full_seeding: bool = True,
-        seed_rng: bool = False,
+        level_of_theory: Optional[str] = None,
+        iqa_deviation_factor: Optional[float] = None,
+        full_ard: bool = True,
         path_to_executeable: Optional[Path] = None,
     ):
         File.__init__(self, path)
@@ -106,14 +103,11 @@ class PyFerebusScript(WriteFile, File):
         self.weights_lambda: float = weights_lambda
         self.gwo_cycles: int = gwo_cycles
         self.elitism: int = elitism
+        self.scaling: bool = scaling
         self.transfer_learning: bool = transfer_learning
-        self.split_method: str = split_method
-        self.split_ratio: float = split_ratio
-        self.relax_weight: float = relax_weight
-        self.multi_source: bool = multi_source
-        self.nsources: int = nsources
-        self.full_seeding: bool = full_seeding
-        self.seed_rng: bool = seed_rng
+        self.level_of_theory: str = level_of_theory
+        self.iqa_deviation_factor: float = iqa_deviation_factor
+        self.full_ard: bool = full_ard
         self.path_to_executeable: Path = path_to_executeable
 
     # def machine(self) -> str:
@@ -169,14 +163,11 @@ class PyFerebusScript(WriteFile, File):
         self.weights_lambda = self.weights_lambda or 1.0e-10
         self.gwo_cycles = self.gwo_cycles or 1
         self.elitism = self.elitism or 1
+        self.scaling = self.scaling or False
         self.transfer_learning = self.transfer_learning or True
-        self.split_method = self.split_method or "random"
-        self.split_ratio = self.split_ratio or 0.25
-        self.relax_weight = self.relax_weight or 0.20
-        self.multi_source = self.multi_source or False
-        self.nsources = self.nsources or 1
-        self.full_seeding = self.full_seeding or True
-        self.seed_rng = self.seed_rng or False
+        self.level_of_theory = self.level_of_theory or "b3lyp/6-31+g(d,p)"
+        self.iqa_deviation_factor = self.iqa_deviation_factor or 1.0
+        self.full_ard = self.full_ard or True
         self.path_to_executeable = self.path_to_executeable or None
 
     # write file from a template
@@ -231,14 +222,11 @@ class PyFerebusScript(WriteFile, File):
             weights_lambda=$weights_lambda,
             gwo_cycles=$gwo_cycles,
             elitism=$elitism,
+            scaling=$scaling,
             transfer_learning=$transfer_learning,
-            split_method="$split_method",
-            split_ratio=$split_ratio,
-            relax_weight=$relax_weight,
-            multisource=$multi_source,
-            nsources=$nsources,
-            full_seeding=$full_seeding,
-            seedRNG=$seed_rng,
+            level_of_theory=$level_of_theory,
+            iqa_deviation_factor=$iqa_deviation_factor,
+            full_ARD=$full_ARD,
             pathToExecutable=$path_to_executeable
         )
 
@@ -290,14 +278,11 @@ class PyFerebusScript(WriteFile, File):
             weights_lambda=self.weights_lambda,
             gwo_cycles=self.gwo_cycles,
             elitism=self.elitism,
+            scaling=self.scaling,
             transfer_learning=self.transfer_learning,
-            split_method=self.split_method,
-            split_ratio=self.split_ratio,
-            relax_weight=self.relax_weight,
-            multi_source=self.multi_source,
-            nsources=self.nsources,
-            full_seeding=self.full_seeding,
-            seed_rng=self.seed_rng,
+            level_of_theory=self.level_of_theory,
+            iqa_deviation_factor=self.iqa_deviation_factor,
+            full_ard=self.full_ard,
             path_to_executeable=self.path_to_executeable,
         )
 
