@@ -50,7 +50,7 @@ class SubmitDataPrepMenuOptions(MenuOptions):
 
     selected_input_directory_path: Path
     selected_number_of_cores: int
-    # selected_props: str
+    selected_props: str
     selected_q00_threshold: float
     selected_train_size: int
     selected_val_size: int
@@ -222,10 +222,10 @@ submit_data_prep_menu_items = [
         "Change cores",
         SubmitDataPrepFunctions.select_number_of_cores,
     ),
-    # FunctionItem(
-    #     "Change outlier method",
-    #     SubmitDataPrepFunctions.select_outlier_method,
-    # ),
+    FunctionItem(
+         "Change properties",
+         SubmitDataPrepFunctions.select_props,
+     ),
     FunctionItem(
         "Change q00 threshold",
         SubmitDataPrepFunctions.select_q00_threshold,
