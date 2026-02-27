@@ -95,8 +95,12 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_props():
         """Asks user to select the number of properties to train on."""
+        prop_list = []
+        for key in AVAILABLE_PROPS.keys():
+            prop_list.append(key)
+
         number_of_props = user_input_int(
-            f"Properties: {AVAILABLE_PROPS.keys()}\n Enter number of properties to train on: ",
+            f"Properties: {prop_list}\nEnter number of properties to train on: ",
         )
 
         props = []
