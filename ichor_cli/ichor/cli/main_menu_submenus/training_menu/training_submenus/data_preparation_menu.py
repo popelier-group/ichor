@@ -26,7 +26,7 @@ AVAILABLE_PROPS = [
     "q21s",
     "q21c",
     "q22s",
-    "q22c"
+    "q22c",
 ]
 
 SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
@@ -102,8 +102,8 @@ class SubmitDataPrepFunctions:
         props = []
 
         for prop in range(1, number_of_props + 1):
+            if prop in AVAILABLE_PROPS
             props.append(user_input_restricted(
-            AVAILABLE_PROPS.keys(),
             "Select properties for training: ",
                 )
             )
