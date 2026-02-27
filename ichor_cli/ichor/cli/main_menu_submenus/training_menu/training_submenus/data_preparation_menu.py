@@ -36,7 +36,7 @@ SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
 
 SUBMIT_DATA_PREP_MENU_DEFAULTS = {
     "default_ncores": 2,
-    # "default_props": ["iqa"],
+    "default_props": ["iqa"],
     "default_q00_threshold": 0.005,
     "default_train_size": [1000],
     "default_val_size": 250,
@@ -92,21 +92,28 @@ class SubmitDataPrepFunctions:
             submit_data_prep_menu_options.selected_number_of_cores,
         )
 
-    # @staticmethod
-    # def select_props():
-    #     """Asks user to select the properties"""
-    #     submit_data_prep_menu_options.selected_props = user_input_restricted(
-    #         "Select properties for training: ",
-    #         submit_data_prep_menu_options.selected_props,
-    #     )
+    @staticmethod
+    def select_props():
+        """Asks user to select the number of properties to train on."""
+        number_of_props = user_input_int(
+            "Enter number of properties to train on: ",
+        )
 
-    #     props = []
+        props = []
 
+        for train_set in range(1, number_of_training_sets + 1):
+            props.append(user_input_restricted(
+            AVAILABLE_PROPS.keys(),
+            "Select properties for training: ",
+                )
+            )
+        
+        submit_data_prep_menu_options.selected_props = props
 
-    #     # update logger
-    #     ichor.hpc.global_variables.LOGGER.info(
-    #         f"Properties for training: {submit_data_prep_menu_options.selected_props}."
-    #     )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Properties for training: {submit_data_prep_menu_options.selected_props}."
+        )
 
     @staticmethod
     def select_q00_threshold():
@@ -168,8 +175,9 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def submit_data_prep_on_compute():
         """Submits polus job for data preparation."""
-        (ncores, q00_threshold, train_size, val_size, test_size) = (
+        (ncores, props, q00_threshold, train_size, val_size, test_size) = (
             submit_data_prep_menu_options.selected_number_of_cores,
+            submit_data_prep_menu_options.selected_props,
             submit_data_prep_menu_options.selected_q00_threshold,
             submit_data_prep_menu_options.selected_train_size,
             submit_data_prep_menu_options.selected_val_size,
@@ -180,8 +188,8 @@ class SubmitDataPrepFunctions:
 
         dataset_script = write_dataset_prep(
             outlier_input_dir=input_path,
-            # outlier_method=outlier_method,
             q00_threshold=q00_threshold,
+            props=props,
             train_size=train_size,
             val_size=val_size,
             test_size=test_size,

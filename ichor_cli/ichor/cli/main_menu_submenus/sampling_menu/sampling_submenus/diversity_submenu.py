@@ -17,7 +17,7 @@ SUBMIT_DIVERSITY_MENU_DESCRIPTION = MenuDescription(
 )
 
 SUBMIT_DIVERSITY_MENU_DEFAULTS = {
-    "default_ncores": 2,
+    "default_ncores": 4,
     "default_weights": False,
     "default_sample_size": 1000,
 }

@@ -19,7 +19,6 @@ SAMPLING_MENU_DESCRIPTION = MenuDescription(
     subtitle="Use this menu to perform diversity sampling on a trajectory.\n",
 )
 
-
 @dataclass
 class SamplingMenuOptions(MenuOptions):
     selected_trajectory_path: Path = (
@@ -77,7 +76,6 @@ class SamplingFunctions:
         sampling_menu_options.selected_xyz_path = (
             ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
         )
-
 
 # initialize menu
 sampling_menu = ConsoleMenu(
