@@ -224,7 +224,7 @@ class PyFerebusScript(WriteFile, File):
             elitism=$elitism,
             scaling=$scaling,
             transfer_learning=$transfer_learning,
-            level_of_theory=$level_of_theory,
+            level_of_theory="$level_of_theory",
             iqa_deviation_factor=$iqa_deviation_factor,
             full_ARD=$full_ard,
             pathToExecutable=$path_to_executeable
