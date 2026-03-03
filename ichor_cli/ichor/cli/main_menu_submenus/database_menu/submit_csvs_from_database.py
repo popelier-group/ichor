@@ -27,8 +27,7 @@ from ichor.hpc.main.database import AVAILABLE_DATABASE_FORMATS
 
 SUBMIT_CSVS_MENU_DESCRIPTION = MenuDescription(
     "Database Processing Menu",
-    subtitle="Use this menu to get things from a database.\n
-    "Note: You are using NEW FEATURES\n",
+    subtitle="Use this menu to get things from a database.\nNote: You are using NEW FEATURES\n",
 )
 
 # TODO: possibly make this be read from a file
