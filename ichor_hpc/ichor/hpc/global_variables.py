@@ -181,18 +181,6 @@ FILE_STRUCTURE.add(
         the inputs/outputs in the job script itself.""",
 )
 FILE_STRUCTURE.add(
-    "DATASETS",
-    "datasets",
-    type_=FileType.Directory,
-    description="""A directory containing test, train and validation sets for ML.""",
-)
-FILE_STRUCTURE.add(
-    "DIVERSITY_SAMPLING",
-    "diversity_sampling",
-    type_=FileType.Directory,
-    description="""Directory containing diversity sampled trajectory""",
-)
-FILE_STRUCTURE.add(
     "CP2K",
     "cp2k",
     type_=FileType.Directory,
@@ -205,12 +193,7 @@ FILE_STRUCTURE.add(
     type_=FileType.Directory,
     description="""Directory with files relating to DLPOLY simulations.""",
 )
-FILE_STRUCTURE.add(
-    "TRAINING_MODELS",
-    "training_models",
-    type_=FileType.Directory,
-    description="""Directory containing training models.""",
-)
+
 FILE_STRUCTURE.add(
     "1_OPTIMISED_GEOMS",
     "optimised_geoms",
@@ -223,6 +206,26 @@ FILE_STRUCTURE.add(
     type_=FileType.Directory,
     description="""Directory containing metadynamics trajectory calculations""",
 )
+FILE_STRUCTURE.add(
+    "3_DIVERSITY_SAMPLING",
+    "diversity_sampling",
+    type_=FileType.Directory,
+    description="""Directory containing diversity sampled trajectory""",
+)
+# 4_PROPERTY_CALC is defined as part of pointsdir creation
+FILE_STRUCTURE.add(
+    "5_DATASETS",
+    "datasets",
+    type_=FileType.Directory,
+    description="""A directory containing test, train and validation sets for ML.""",
+)
+FILE_STRUCTURE.add(
+    "6_TRAINING_MODELS",
+    "training_models",
+    type_=FileType.Directory,
+    description="""Directory containing training models.""",
+)
+
 FILE_STRUCTURE.add("GJF", "dlpoly_gjf", parent="dlpoly", type_=FileType.Directory)
 FILE_STRUCTURE.add("AMBER", "amber", type_=FileType.Directory)
 
