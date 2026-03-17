@@ -23,7 +23,8 @@ def write_diversity_sampling(
     mkdir(div_parent)
     # extract system name from traj
     system_name_long = Path(filename).stem
-    system_name = system_name_long.replace("_MTD_OUT", "")
+    system_name_str = system_name_long.replace("_MTD_OUT", "")
+    system_name = system_name_str.replace("_mtd_out", "")
     # subfolder for running calc
     output_dir = Path(div_parent / system_name)
     mkdir(output_dir)
