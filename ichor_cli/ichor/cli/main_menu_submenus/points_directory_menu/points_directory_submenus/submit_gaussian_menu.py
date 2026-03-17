@@ -124,6 +124,7 @@ class SubmitGaussianFunctions:
     @staticmethod
     def points_directory_to_gaussian_on_compute():
         """Submits a single PointsDirectory to Gaussian on compute."""
+        print("STARTING GAUSSIAN JOB SUBMISSION\n")
 
         (method, basis_set, ncores, overwrite_existing, force_calculate_wfn) = (
             submit_gaussian_menu_options.selected_method,

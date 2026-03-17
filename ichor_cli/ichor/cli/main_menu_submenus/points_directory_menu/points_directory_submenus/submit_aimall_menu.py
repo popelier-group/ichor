@@ -117,7 +117,7 @@ class SubmitAIMALLFunctions:
     @staticmethod
     def points_directory_to_aimall_on_compute():
         """Submits a single PointsDirectory or many PointsDirectory-ies to AIMAll on compute."""
-
+        print("STARTING AIMALL JOB SUBMISSION\n")
         method, ncores, naat, encomp = (
             submit_aimall_menu_options.selected_method,
             submit_aimall_menu_options.selected_number_of_cores,
