@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 import ichor.hpc.global_variables
-from ichor.core.common.io import mkdir, move
+from ichor.core.common.io import mkdir, cp
 from ichor.core.files.polus import DatasetPrepScript, DiversityScript
 
 from ichor.hpc.batch_system import JobID
@@ -64,7 +64,8 @@ def write_dataset_prep(
     # Move input files dir into DATASETS dir
     src = Path(outlier_input_dir)
     dst = dataset_dir / src.name
-    move(src, dst)
+    # copy to avoid accidental deletion
+    cp(src, dst)
 
     input_filename = "dataset_split" + DatasetPrepScript.get_filetype()
     input_file_path = Path(dataset_dir / input_filename)
