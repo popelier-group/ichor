@@ -64,6 +64,7 @@ def write_dataset_prep(
     # Move input files dir into DATASETS dir
     src = Path(outlier_input_dir)
     dst = dataset_dir / "processed_csvs"
+    mkdir(dst)
     # copy to avoid accidental deletion
     copytree(src, dst)
 
