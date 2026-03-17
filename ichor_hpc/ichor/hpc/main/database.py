@@ -106,6 +106,7 @@ def submit_make_csvs_from_database(
     """
 
     system_name = db_path.name
+    parent_path = db_path.parent
 
     # if no alf is given, then automatically calculate it
     if not alf:
@@ -128,7 +129,7 @@ def submit_make_csvs_from_database(
     str_part3 = f" max_integration_error={float_integration_error},"
     str_part4 = f" calc_multipoles={rotate_multipole_moments}, calc_forces={calculate_feature_forces})"
     text_list.append(str_part1 + str_part2 + str_part3 + str_part4)
-    # text_list.append(f"mkdir 5_TRAINING")
+    text_list.append(f"os.system(mv input_files {parent_path})")
     # text_list.append(f"mkdir 5_TRAINING/{system_name}")
     # text_list.append(f"mv input_files 5_TRAINING/{system_name}")
 
