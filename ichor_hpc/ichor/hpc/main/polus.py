@@ -65,20 +65,19 @@ def write_dataset_prep(
     src = Path(outlier_input_dir)
     dst = dataset_dir / src.name
     move(src, dst)
-    input_dir_path = dst
 
     input_filename = "dataset_split" + DatasetPrepScript.get_filetype()
     input_file_path = Path(dataset_dir / input_filename)
 
     dataset_input_script = DatasetPrepScript(
         Path(input_file_path),
-        outlier_input_dir=Path(input_dir_path).resolve(),
+        outlier_input_dir=dst,
         system_name=system_name,
         **kwargs,
     )
     dataset_input_script.write()
 
-    return dataset_input_script.path
+    return input_filename, dataset_dir
 
 
 def submit_polus(
