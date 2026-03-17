@@ -197,7 +197,6 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         for i, atoms_instance in enumerate(
             tqdm(
                 self,
-                ascii=True,
                 desc="Processing point dirs",
             )
         ):
@@ -268,7 +267,6 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         for i, atoms_instance in enumerate(
             tqdm(
                 geometries_to_write,
-                ascii=True,
                 desc="Processing point dirs",
             )
         ):
