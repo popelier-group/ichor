@@ -26,6 +26,9 @@ def write_diversity_sampling(
     system_name = system_name_long.replace("_MTD_OUT", "")
     # subfolder for running calc
     output_dir = Path(div_parent / system_name)
+    mkdir(output_dir)
+
+    # make python script within subfolder
     input_filename = "diversity_input" + DiversityScript.get_filetype()
     input_file_path = Path(output_dir / input_filename)
 
