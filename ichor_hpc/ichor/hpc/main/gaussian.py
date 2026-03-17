@@ -121,7 +121,7 @@ def write_gjfs(
 
     gjfs = []
 
-    for point_directory in points_directory:
+    for point_directory in tqdm(points_directory, desc="Creating GJF files"):
 
         # remove the .pointdirectory suffix
         gjf_fle_name = point_directory.path.with_suffix("").name + GJF.get_filetype()

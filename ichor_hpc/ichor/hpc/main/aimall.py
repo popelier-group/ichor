@@ -75,7 +75,7 @@ def add_method_and_get_wfn_paths(points: PointsDirectory, method: str) -> List[P
     gives the wrong results."""
 
     wfns = []
-    for point in points:
+    for point in tqdm(points, desc="Extracting WFN files"):
         # write out the wfn file with the method modified because AIMAll needs to know the functional used
         if point.wfn and point.wfn.exists():
             try:
