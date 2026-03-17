@@ -1,6 +1,7 @@
 import shutil
 from pathlib import Path
 from typing import List, Optional, Union
+from tqdm import tqdm
 
 import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
@@ -195,7 +196,7 @@ def submit_gjfs(
 
         number_of_jobs = 0
 
-        for gjf in gjfs:
+        for gjf in tqdm(gjfs, desc="Submitting GJF files"):
 
             # (even if wfn file exits) or a wfn file does not exist
             if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():

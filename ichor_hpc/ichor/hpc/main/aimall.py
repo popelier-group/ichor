@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List, Optional, Union
 from warnings import warn
+from tqdm import tqdm
 
 import ichor.hpc.global_variables
 
@@ -124,7 +125,7 @@ def submit_wfns(
 
         nsubmitted_jobs = 0
 
-        for wfn in wfns:
+        for wfn in tqdm(wfns, desc="Submitting WFN files"):
 
             if (
                 force_calculate_ints
