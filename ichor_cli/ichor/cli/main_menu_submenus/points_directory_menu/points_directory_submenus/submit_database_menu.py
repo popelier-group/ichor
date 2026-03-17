@@ -12,6 +12,7 @@ from ichor.cli.useful_functions import (
     user_input_int,
     user_input_restricted,
     user_input_path,
+    user_input_free_flow,
 )
 from ichor.core.files import PointsDirectory, PointsDirectoryParent
 from ichor.core.useful_functions import single_or_many_points_directories
@@ -152,6 +153,10 @@ class SubmitDatabaseFunctions:
                 )
                 func = getattr(pointdir, str_database_method)
                 func(print_missing_data=True)
+        answer = ""
+        user_input_free_flow(
+            "DATABASE COMPUTATION SUBMITTED. Press enter to continue: ", answer
+        )
 
 
 # make menu items

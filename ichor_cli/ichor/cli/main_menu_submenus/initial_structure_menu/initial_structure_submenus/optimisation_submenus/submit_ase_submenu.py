@@ -158,9 +158,9 @@ class SubmitAseFunctions:
             fmax=fmax,
             overwrite=overwrite,
         )
-
-        SUBMIT_ASE_MENU_DESCRIPTION.prologue_description_text = (
-            "XYZ optimisation submitted successfully to ASE \n"
+        answer = ""
+        user_input_free_flow(
+            "ASE OPTIMISATION SUBMITTED. Press enter to continue: ", answer
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(

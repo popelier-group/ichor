@@ -194,6 +194,11 @@ class SubmitGaussianFunctions:
                 / pd.path.name
                 / "GAUSSIAN",
             )
+        answer = ""
+        user_input_free_flow(
+            "GAUSSIAN WAVEFUNCTION COMPUTATION SUBMITTED. Press enter to continue: ",
+            answer,
+        )
 
 
 # make menu items

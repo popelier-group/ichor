@@ -18,11 +18,16 @@ def write_diversity_sampling(
     **kwargs,
 ) -> Optional[JobID]:
 
-    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
-    output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
+    # diversity parent folder
+    div_parent = Path(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
+    mkdir(div_parent)
+    # extract system name from traj
+    system_name_long = Path(filename).stem
+    system_name = system_name_long.replace("_MTD_OUT", "")
+    # subfolder for running calc
+    output_dir = Path(div_parent / system_name)
     input_filename = "diversity_input" + DiversityScript.get_filetype()
     input_file_path = Path(output_dir / input_filename)
-    system_name = Path(filename).stem
 
     div_input_script = DiversityScript(
         Path(input_file_path),
@@ -43,9 +48,14 @@ def write_dataset_prep(
     **kwargs,
 ) -> Optional[JobID]:
 
+    # extract system name from data somehow...
+    # system_name = Path(filename).stem
+    system_name = "test"
     # Make new directory called DATASETS
-    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
-    dataset_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
+    data_parent = ichor.hpc.global_variables.FILE_STRUCTURE["datasets"]
+    mkdir(data_parent)
+
+    dataset_dir = Path(data_parent / system_name)
 
     # Move input files dir into DATASETS dir
     src = Path(outlier_input_dir)
@@ -59,6 +69,7 @@ def write_dataset_prep(
     dataset_input_script = DatasetPrepScript(
         Path(input_file_path),
         outlier_input_dir=Path(input_dir_path).resolve(),
+        system_name=system_name,
         **kwargs,
     )
     dataset_input_script.write()

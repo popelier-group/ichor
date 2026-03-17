@@ -13,6 +13,7 @@ from ichor.cli.useful_functions import (
     user_input_int,
     user_input_path,
     user_input_restricted,
+    user_input_free_flow,
 )
 
 from ichor.core.database.query_database import (
@@ -181,6 +182,10 @@ class SubmitCSVSFunctions:
                 rotate_multipole_moments=rotate_multipole_moments,
                 calculate_feature_forces=calculate_feature_forces,
             )
+        answer = ""
+        user_input_free_flow(
+            "DATABASE CSV EXTRACT SUBMITTED. Press enter to continue: ", answer
+        )
 
 
 # make menu items

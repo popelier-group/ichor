@@ -12,6 +12,7 @@ from ichor.cli.useful_functions import (
     user_input_int,
     user_input_path,
     user_input_float,
+    user_input_free_flow,
 )
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
@@ -201,14 +202,15 @@ class SubmitDataPrepFunctions:
         )
 
         submit_polus(
-            input_script="dataset_split.py",
+            input_script=dataset_script,
             script_name=ichor.hpc.global_variables.SCRIPT_NAMES["datasets"],
             cwd=Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"]).resolve(),
             ncores=ncores,
         )
 
-        SUBMIT_DATA_PREP_MENU_DESCRIPTION.prologue_description_text = (
-            "Successfully submitted data preparation \n"
+        answer = ""
+        user_input_free_flow(
+            "DATASET SPLITTING JOB SUBMITTED. Press enter to continue: ", answer
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(

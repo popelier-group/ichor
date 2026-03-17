@@ -7,7 +7,11 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_bool, user_input_int
+from ichor.cli.useful_functions import (
+    user_input_bool,
+    user_input_int,
+    user_input_free_flow,
+)
 from ichor.hpc.main.polus import submit_polus, write_diversity_sampling
 
 
@@ -106,8 +110,9 @@ class SubmitDiversityFunctions:
             ncores=ncores,
         )
 
-        SUBMIT_DIVERSITY_MENU_DESCRIPTION.prologue_description_text = (
-            "Successfully submitted diversity sampling \n"
+        answer = ""
+        user_input_free_flow(
+            "DIVERSITY SAMPLING SUBMITTED. Press enter to continue: ", answer
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(

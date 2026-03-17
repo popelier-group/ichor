@@ -11,6 +11,7 @@ from ichor.cli.useful_functions.user_input import (
     user_input_bool,
     user_input_int,
     user_input_path,
+    user_input_free_flow,
 )
 from ichor.core.files import Trajectory
 
@@ -77,6 +78,11 @@ class TrajSplitFunctions:
         parent_path = Path("4_PROPERTY_CALC")
 
         traj.to_dir(system_name, every, to_center, parent_path)
+        answer = ""
+        user_input_free_flow(
+            "TRAJECTORY SPLIT INTO SINGLE POINTS DIRECTORY. Press enter to continue: ",
+            answer,
+        )
 
     @staticmethod
     def split_trajectory_into_many_points_directories():
@@ -110,6 +116,11 @@ class TrajSplitFunctions:
         parent_path = Path("4_PROPERTY_CALC")
 
         traj.to_dirs(system_name, nsplit, every, to_center, parent_path)
+        answer = ""
+        user_input_free_flow(
+            "TRAJECTORY SPLIT INTO MULTIPLE POINTS DIRECTORIES. Press enter to continue: ",
+            answer,
+        )
 
 
 # initialize menu

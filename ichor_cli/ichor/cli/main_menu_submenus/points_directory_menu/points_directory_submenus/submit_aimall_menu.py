@@ -175,6 +175,10 @@ class SubmitAIMALLFunctions:
                 / pd.path.name
                 / "AIMALL",
             )
+        answer = ""
+        user_input_free_flow(
+            "AIMALL COMPUTATION SUBMITTED. Press enter to continue: ", answer
+        )
 
 
 # make menu items

@@ -35,7 +35,7 @@ def submit_make_database(
         points_dir_path
     )
 
-    db_name = points_dir_path.stem
+    db_name = Path(points_dir_path / points_dir_path.stem)
 
     # this is used to be able to call the respective methods from PointsDirectory
     # so that the same code below is used with the respective methods
@@ -105,6 +105,8 @@ def submit_make_csvs_from_database(
     :param calculate_feature_forces: Whether or not to calculate ALF forces, defaults to False
     """
 
+    system_name = db_path.name
+
     # if no alf is given, then automatically calculate it
     if not alf:
         alf = get_alf_from_first_db_geometry(db_path, db_type)
@@ -126,9 +128,16 @@ def submit_make_csvs_from_database(
     str_part3 = f" max_integration_error={float_integration_error},"
     str_part4 = f" calc_multipoles={rotate_multipole_moments}, calc_forces={calculate_feature_forces})"
     str_part5 = f"mkdir 5_TRAINING"
-    str_part6 = f"mv input_files 5_TRAINING"
+    str_part6 = f"mkdir 5_TRAINING/{system_name}"
+    str_part7 = f"mv input_files 5_TRAINING/{system_name}"
     text_list.append(
-        str_part1 + str_part2 + str_part3 + str_part4 + str_part5 + str_part6
+        str_part1
+        + str_part2
+        + str_part3
+        + str_part4
+        + str_part5
+        + str_part6
+        + str_part7
     )
 
     return submit_free_flow_python_command_on_compute(
