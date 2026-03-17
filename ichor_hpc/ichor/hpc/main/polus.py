@@ -58,8 +58,8 @@ def write_dataset_prep(
     # Make new directory called DATASETS
     data_parent = ichor.hpc.global_variables.FILE_STRUCTURE["datasets"]
     mkdir(data_parent)
-
     dataset_dir = Path(data_parent / system_name)
+    mkdir(dataset_dir)
 
     # Move input files dir into DATASETS dir
     src = Path(outlier_input_dir)
