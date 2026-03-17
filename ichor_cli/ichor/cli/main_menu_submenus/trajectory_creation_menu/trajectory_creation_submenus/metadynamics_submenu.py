@@ -69,16 +69,16 @@ class MetadynamicsMenuFunctions:
         """
         Select timestep for metadynamics simulation.
         """
-        metadynamics_menu_options.selected_md_runsteps = user_input_float(
-            "Select timestep (fs): ", metadynamics_menu_options.selected_md_runsteps
+        metadynamics_menu_options.selected_timestep = user_input_float(
+            "Select timestep (fs): ", metadynamics_menu_options.selected_timestep
         )
 
     def select_number_of_md_timesteps():
         """
         Select how many timesteps to run the MD calculation for.
         """
-        metadynamics_menu_options.ntimestep = user_input_int(
-            "Number of MD timesteps: ", metadynamics_menu_options.ntimestep
+        metadynamics_menu_options.selected_md_runsteps = user_input_int(
+            "Number of MD timesteps: ", metadynamics_menu_options.selected_md_runsteps
         )
 
     @staticmethod
