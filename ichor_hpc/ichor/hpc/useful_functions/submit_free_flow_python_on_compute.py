@@ -17,12 +17,24 @@ def compile_strings_to_python_code(strings_list: List[str]) -> str:
     return ";".join(strings_list)
 
 
-def submit_free_flow_python_command_on_compute(text_list, script_name, ncores):
-
+def submit_free_flow_python_command_on_compute(
+    text_list,
+    script_name,
+    ncores,
+    post_commands=None,
+):
     final_cmd = compile_strings_to_python_code(text_list)
     py_cmd = FreeFlowPythonCommand(final_cmd)
-    with SubmissionScript(script_name, ncores=ncores) as submission_script:
 
+    with SubmissionScript(script_name, ncores=ncores) as submission_script:
         submission_script.add_command(py_cmd)
+
+        # Add optional extra commands
+        if post_commands:
+            if isinstance(post_commands, str):
+                submission_script.add_command(post_commands)
+            else:
+                for cmd in post_commands:
+                    submission_script.add_command(cmd)
 
     return submission_script.submit()
