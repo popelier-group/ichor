@@ -77,7 +77,7 @@ def write_dataset_prep(
     )
     dataset_input_script.write()
 
-    return input_filename, dataset_dir
+    return input_file_path, dataset_dir
 
 
 def submit_polus(

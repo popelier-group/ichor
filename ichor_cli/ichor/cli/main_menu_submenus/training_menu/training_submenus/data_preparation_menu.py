@@ -192,7 +192,7 @@ class SubmitDataPrepFunctions:
 
         input_path = Path(ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH)
 
-        script_name, system_dir = write_dataset_prep(
+        script_path, system_dir = write_dataset_prep(
             outlier_input_dir=input_path,
             q00_threshold=q00_threshold,
             props=props,
@@ -202,7 +202,7 @@ class SubmitDataPrepFunctions:
         )
 
         submit_polus(
-            input_script=script_name,
+            input_script=script_path,
             script_name=ichor.hpc.global_variables.SCRIPT_NAMES["datasets"],
             cwd=system_dir,
             ncores=ncores,
