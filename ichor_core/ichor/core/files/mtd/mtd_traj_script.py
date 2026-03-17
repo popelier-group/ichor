@@ -113,7 +113,7 @@ class MtdTrajScript(WriteFile, File):
         self.md_timestep = self.md_timestep or 1.0
         self.md_friction = self.md_friction or 0.01
         self.md_communication = self.md_communication or "world"
-        self.md_runsteps = self.md_runsteps or 100000
+        self.md_runsteps = self.md_runsteps or 10000
         self.md_freq_out = self.md_freq_out or 10000
         self.md_interval = self.md_interval or int(self.md_runsteps / self.md_freq_out)
 
