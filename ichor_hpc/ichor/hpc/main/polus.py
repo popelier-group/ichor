@@ -71,7 +71,7 @@ def write_dataset_prep(
 
     dataset_input_script = DatasetPrepScript(
         Path(input_file_path),
-        outlier_input_dir=dst,
+        outlier_input_dir="processed_csvs",
         system_name=system_name,
         **kwargs,
     )
