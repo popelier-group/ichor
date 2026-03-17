@@ -63,8 +63,9 @@ def write_dataset_prep(
 
     # Move input files dir into DATASETS dir
     src = Path(outlier_input_dir)
+    dst = dataset_dir / "processed_csvs"
     # copy to avoid accidental deletion
-    copytree(src, dataset_dir)
+    copytree(src, dst)
 
     input_filename = "dataset_split" + DatasetPrepScript.get_filetype()
     input_file_path = Path(dataset_dir / input_filename)
