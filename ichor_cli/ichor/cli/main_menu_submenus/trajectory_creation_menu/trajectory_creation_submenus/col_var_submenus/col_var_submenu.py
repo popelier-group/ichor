@@ -122,6 +122,14 @@ class ColVarMenuFunctions:
     @staticmethod
     def draw_labeled_molecule():
         mtd.draw_labeled_molecule(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
+        output_path = Path(
+            ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
+        ).with_suffix(".png")
+        answer = ""
+        user_input_free_flow(
+            f"Molecule image generated at {output_path}.\n Press enter to continue: ",
+            answer,
+        )
 
 
 # initialize menu
