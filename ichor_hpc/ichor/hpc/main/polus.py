@@ -53,17 +53,18 @@ def write_dataset_prep(
 ) -> Optional[JobID]:
 
     # extract system name from data somehow...
-    # system_name = Path(filename).stem
-    system_name = "test"
-    # Make new directory called DATASETS
+    system_name = Path(outlier_input_dir).stem
+    # Make new parent directory called DATASETS
     data_parent = ichor.hpc.global_variables.FILE_STRUCTURE["datasets"]
     mkdir(data_parent)
+    # Make a subfolder for the structure
     dataset_dir = Path(data_parent / system_name)
     mkdir(dataset_dir)
-
     # Move input files dir into DATASETS dir
+    # Make a subfolder for the processed CSVs
+    csvs_string = system_name + "_processed_csvs"
     src = Path(outlier_input_dir)
-    dst = dataset_dir / "processed_csvs"
+    dst = dataset_dir / csvs_string
     mkdir(dst)
     # copy to avoid accidental deletion
     copytree(src, dst)
@@ -73,7 +74,7 @@ def write_dataset_prep(
 
     dataset_input_script = DatasetPrepScript(
         Path(input_file_path),
-        outlier_input_dir="processed_csvs",
+        outlier_input_dir=csvs_string,
         system_name=system_name,
         **kwargs,
     )

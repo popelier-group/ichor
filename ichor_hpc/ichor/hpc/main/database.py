@@ -104,9 +104,16 @@ def submit_make_csvs_from_database(
         moments, defaults to True
     :param calculate_feature_forces: Whether or not to calculate ALF forces, defaults to False
     """
-
+    # path to save database
     parent_path = db_path.parent
-    csvs_path = Path(parent_path / "processed_csvs")
+    # find system name from parent folder
+    system_name = parent_path.name
+    # strip pointsdir
+    for suffix in (".pointsdir", ".pointsdirparent"):
+        system_name = system_name.removesuffix(suffix)
+    # append system name to processed csvs
+    csvs_dir_name = system_name + "processed_csvs"
+    csvs_path = Path(parent_path / csvs_dir_name)
 
     # if no alf is given, then automatically calculate it
     if not alf:
