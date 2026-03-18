@@ -154,7 +154,7 @@ submit_diversity_menu_items = [
     ),
     FunctionItem(
         "Change chunk size",
-        SubmitDiversityFunctions.select_sample_size,
+        SubmitDiversityFunctions.select_chunk_size,
     ),
     FunctionItem(
         "Submit diversity sampler",
