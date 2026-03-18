@@ -107,7 +107,7 @@ def submit_make_csvs_from_database(
     # path to save database
     parent_path = db_path.parent
     # find system name from parent folder
-    system_name = parent_path.name
+    system_name = db_path.name
     # strip pointsdir
     for suffix in (".pointsdir", ".pointsdirparent"):
         system_name = system_name.removesuffix(suffix)
