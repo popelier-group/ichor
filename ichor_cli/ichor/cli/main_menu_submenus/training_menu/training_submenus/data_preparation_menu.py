@@ -110,10 +110,15 @@ class SubmitDataPrepFunctions:
 
             prop = user_input_restricted(
             remaining_props,
-            f"Enter property: ",
+            f"Enter property (or 'all'): ",
             )
-            props.append(prop)
 
+            if prop == "all":
+                props = list(AVAILABLE_PROPS.keys())
+                break
+            
+            if prop:
+                props.append(prop)
 
         submit_data_prep_menu_options.selected_props = props
 
