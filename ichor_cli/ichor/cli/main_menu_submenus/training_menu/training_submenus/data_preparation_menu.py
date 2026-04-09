@@ -159,8 +159,10 @@ class SubmitDataPrepFunctions:
         training_sets = []
 
         while True:
+            current = ", ".join(map(str, training_sets)) if training_sets else "none"
+
             user_input = input(
-                f"Currently selected: {training_sets}\n"
+                f"Currently selected: {current}\n"
                 "Enter training set size (type 'q' to finish): "
                 )
 
