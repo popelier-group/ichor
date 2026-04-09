@@ -214,13 +214,13 @@ FILE_STRUCTURE.add(
 )
 # 4_PROPERTY_CALC is defined as part of pointsdir creation
 FILE_STRUCTURE.add(
-    "5_DATASETS",
-    "datasets",
+    "5_TRAINING",
+    "training",
     type_=FileType.Directory,
     description="""A directory containing test, train and validation sets for ML.""",
 )
 FILE_STRUCTURE.add(
-    "6_TRAINING_MODELS",
+    "6_TRAINED_MODELS",
     "training_models",
     type_=FileType.Directory,
     description="""Directory containing training models.""",

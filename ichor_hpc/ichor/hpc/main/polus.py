@@ -53,9 +53,10 @@ def write_dataset_prep(
 ) -> Optional[JobID]:
 
     # extract system name from data somehow...
-    system_name = Path(outlier_input_dir).stem
+    system_name = Path(outlier_input_dir).parent.name.split(".", 1)[0]
+
     # Make new parent directory called DATASETS
-    data_parent = ichor.hpc.global_variables.FILE_STRUCTURE["datasets"]
+    data_parent = ichor.hpc.global_variables.FILE_STRUCTURE["training"]
     mkdir(data_parent)
     # Make a subfolder for the structure
     dataset_dir = Path(data_parent / system_name)

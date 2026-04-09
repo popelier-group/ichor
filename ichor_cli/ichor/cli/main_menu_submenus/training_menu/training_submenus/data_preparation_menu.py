@@ -36,6 +36,7 @@ SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
 )
 
 SUBMIT_DATA_PREP_MENU_DEFAULTS = {
+    "default_input": "",
     "default_ncores": 2,
     "default_props": ["iqa"],
     "default_q00_threshold": 0.005,
@@ -96,7 +97,7 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_props():
         """Asks user to select the number of properties to train on."""
-         
+
         while True:
             choice = input(
                 "Train on (1) all properties or (2) select individually? [1/2]: "
@@ -107,17 +108,20 @@ class SubmitDataPrepFunctions:
             else:
                 print("Invalid input. Please enter '1' or '2'.")
 
-
         if choice == "1":
             props = list(AVAILABLE_PROPS.keys())
 
-        else: 
+        else:
             props = ["iqa"]
             while True:
                 print(
                     f"Add a new property for training (you've chosen '{', '.join(props)}' so far):"
                 )
-                add_more = input("Do you want to add another property? (y/n): ").strip().lower()
+                add_more = (
+                    input("Do you want to add another property? (y/n): ")
+                    .strip()
+                    .lower()
+                )
 
                 if add_more not in ("y", "yes"):
                     break
@@ -125,15 +129,13 @@ class SubmitDataPrepFunctions:
                 remaining_props = [p for p in AVAILABLE_PROPS if p not in props]
 
                 prop = user_input_restricted(
-                remaining_props,
-                f"Enter property: ",
+                    remaining_props,
+                    f"Enter property: ",
                 )
 
                 props.append(prop)
 
-
         submit_data_prep_menu_options.selected_props = props
-
 
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
@@ -155,7 +157,7 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_train_size():
         """Asks user to select the size of the training set for machine learning."""
-        
+
         training_sets = []
 
         while True:
@@ -164,7 +166,7 @@ class SubmitDataPrepFunctions:
             user_input = input(
                 f"Currently selected: {current}\n"
                 "Enter training set size (type 'q' to finish): "
-                )
+            )
 
             if user_input in ("q", "quit"):
                 if not training_sets:
@@ -228,31 +230,36 @@ class SubmitDataPrepFunctions:
         )
 
         input_path = Path(ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH)
+        if len(input_path) > 0:
+            script_path, system_dir = write_dataset_prep(
+                outlier_input_dir=input_path,
+                q00_threshold=q00_threshold,
+                props=props,
+                train_size=train_size,
+                val_size=val_size,
+                test_size=test_size,
+            )
 
-        script_path, system_dir = write_dataset_prep(
-            outlier_input_dir=input_path,
-            q00_threshold=q00_threshold,
-            props=props,
-            train_size=train_size,
-            val_size=val_size,
-            test_size=test_size,
-        )
+            submit_polus(
+                input_script=script_path,
+                script_name=ichor.hpc.global_variables.SCRIPT_NAMES["datasets"],
+                cwd=system_dir,
+                ncores=ncores,
+            )
 
-        submit_polus(
-            input_script=script_path,
-            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["datasets"],
-            cwd=system_dir,
-            ncores=ncores,
-        )
-
-        answer = ""
-        user_input_free_flow(
-            "DATASET SPLITTING JOB SUBMITTED. Press enter to continue: ", answer
-        )
-        # update logger
-        ichor.hpc.global_variables.LOGGER.info(
-            f"Data preparation for machine learning job submitted"
-        )
+            answer = ""
+            user_input_free_flow(
+                "DATASET SPLITTING JOB SUBMITTED. Press enter to continue: ", answer
+            )
+            # update logger
+            ichor.hpc.global_variables.LOGGER.info(
+                f"Data preparation for machine learning job submitted"
+            )
+        else:
+            user_input_free_flow(
+                "No input CSV files for atoms and features found. Please select a folder containing data. Press enter to continue: ",
+                answer,
+            )
 
 
 # make menu items
