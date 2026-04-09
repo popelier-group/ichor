@@ -99,7 +99,7 @@ class SubmitDataPrepFunctions:
         print(f"Train on (1) all properties or (2) select individually? ")
 
         choice = user_input_restricted(
-        "12"
+        "12",
         f"Select option: ",
         )
         
