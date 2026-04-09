@@ -161,7 +161,7 @@ class SubmitDataPrepFunctions:
 
         while True:
             user_input = input(
-                f"Enter training set size (current: {training_sets}):"
+                f"Currently selected: {training_sets})\n Enter training set size: "
                 )
 
             if user_input in ("done", "d", "exit", "quit"):
