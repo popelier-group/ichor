@@ -63,7 +63,7 @@ def write_dataset_prep(
     mkdir(dataset_dir)
     # Move input files dir into DATASETS dir
     # Make a subfolder for the processed CSVs
-    csvs_string = system_name + "_processed_csvs"
+    csvs_string = "processed_csvs"
     src = Path(outlier_input_dir)
     dst = dataset_dir / csvs_string
     mkdir(dst)
