@@ -105,9 +105,11 @@ class SubmitDataPrepFunctions:
 
             if add_more not in ("y", "yes"):
                 break
+            
+            remaining = [p for p in AVAILABLE_PROPS if p not in props]
 
             prop = user_input_restricted(
-            AVAILABLE_PROPS.keys(),
+            f"Remaining options: {', '.join(remaining)}",
             f"Enter property: ",
             )
             props.append(prop)
