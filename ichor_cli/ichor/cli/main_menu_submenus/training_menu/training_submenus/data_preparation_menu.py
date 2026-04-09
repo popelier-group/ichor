@@ -96,13 +96,18 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_props():
         """Asks user to select the number of properties to train on."""
-        print(f"Train on (1) all properties or (2) select individually? ")
+         
+        while True:
+            choice = input(
+                "Train on (1) all properties or (2) select individually? [1/2]: "
+            ).strip()
 
-        choice = user_input_restricted(
-        "12",
-        f"Select option: ",
-        )
-        
+            if choice in ("1", "2"):
+                break
+            else:
+                print("Invalid input. Please enter '1' or '2'.")
+
+
         if choice == "1":
             props = list(AVAILABLE_PROPS.keys())
 
