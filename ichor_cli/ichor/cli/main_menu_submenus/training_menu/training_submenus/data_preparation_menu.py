@@ -157,14 +157,14 @@ class SubmitDataPrepFunctions:
         """Asks user to select the size of the training set for machine learning."""
         
         training_sets = []
-        print("Enter training set sizes (type 'done' to finish): ")
 
         while True:
             user_input = input(
-                f"Currently selected: {training_sets})\n Enter training set size: "
+                f"Currently selected: {training_sets}\n"
+                "Enter training set size (type 'q' to finish): "
                 )
 
-            if user_input in ("done", "d", "exit", "quit"):
+            if user_input in ("q", "quit"):
                 if not training_sets:
                     print("You must enter at least one training size.")
                     continue
