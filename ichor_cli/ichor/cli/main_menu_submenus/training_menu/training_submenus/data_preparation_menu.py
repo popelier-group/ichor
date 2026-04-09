@@ -161,8 +161,8 @@ class SubmitDataPrepFunctions:
 
         while True:
             user_input = input(
-                f"Enter training set size (current: {', '.join(training_sets)}): "
-                ).strip().lower()
+                f"Enter training set size (current: {training_sets}):"
+                )
 
             if user_input in ("done", "d", "exit", "quit"):
                 if not training_sets:
