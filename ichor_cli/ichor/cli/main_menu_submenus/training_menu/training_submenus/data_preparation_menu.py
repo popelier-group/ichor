@@ -157,18 +157,30 @@ class SubmitDataPrepFunctions:
         """Asks user to select the size of the training set for machine learning."""
         
         training_sets = []
+        print("Enter training set sizes (type 'done' to finish): ")
+
         while True:
-            print(
-                f"Add a new training set size (you've chosen '{', '.join(training_sets)}' so far):"
-            )
-            add_more = input("Do you want to add another training set? (y/n): ").strip().lower()
+            user_input = input(
+                f"Enter training set size (current: {', '.join(training_sets)}): "
+                ).strip().lower()
 
-            if add_more not in ("y", "yes"):
-                    break
+            if user_input in ("done", "d", "exit", "quit"):
+                if not training_sets:
+                    print("You must enter at least one training size.")
+                    continue
+                break
 
-            training_sets.append(
-                user_input_int(f"Enter training set size: ")
-            )
+            try:
+                value = int(user_input)
+
+                if value <= 0:
+                    print("Please enter a positive integer.")
+                    continue
+
+                training_sets.append(value)
+
+            except ValueError:
+                print("Invalid input. Please enter an integer or 'done' to finish.")
 
         submit_data_prep_menu_options.selected_train_size = training_sets
 
