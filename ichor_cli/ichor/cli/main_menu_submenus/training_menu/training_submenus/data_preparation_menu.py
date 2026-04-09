@@ -257,6 +257,7 @@ class SubmitDataPrepFunctions:
                 f"Data preparation for machine learning job submitted"
             )
         else:
+            answer = ""
             user_input_free_flow(
                 "No input CSV files for atoms and features found. Please select a folder containing data. Press enter to continue: ",
                 answer,
