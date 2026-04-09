@@ -96,29 +96,36 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_props():
         """Asks user to select the number of properties to train on."""
-        props = ["iqa"]
-        while True:
-            print(
-                f"Add a new property for training (you've chosen '{', '.join(props)}' so far):"
-            )
-            add_more = input("Do you want to add another property? (y/n): ").strip().lower()
+        print(f"Train on (1) all properties or (2) select individually? ")
 
-            if add_more not in ("y", "yes"):
-                break
+        choice = user_input_restricted(
+        "12"
+        f"Select option: ",
+        )
+        
+        if choice == "1":
+            props = list(AVAILABLE_PROPS.keys())
 
-            remaining_props = [p for p in AVAILABLE_PROPS if p not in props]
+        else: 
+            props = ["iqa"]
+            while True:
+                print(
+                    f"Add a new property for training (you've chosen '{', '.join(props)}' so far):"
+                )
+                add_more = input("Do you want to add another property? (y/n): ").strip().lower()
 
-            prop = user_input_restricted(
-            remaining_props,
-            f"Enter property (or 'all'): ",
-            )
+                if add_more not in ("y", "yes"):
+                    break
 
-            if prop == "all":
-                props = list(AVAILABLE_PROPS.keys())
-                break
-            
-            if prop:
+                remaining_props = [p for p in AVAILABLE_PROPS if p not in props]
+
+                prop = user_input_restricted(
+                remaining_props,
+                f"Enter property: ",
+                )
+
                 props.append(prop)
+
 
         submit_data_prep_menu_options.selected_props = props
 
