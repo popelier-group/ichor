@@ -212,7 +212,7 @@ class SubmitDataPrepFunctions:
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"Test set size {submit_data_prep_menu_options.selected_q00_threshold}"
+            f"Test set size {submit_data_prep_menu_options.selected_test_size}"
         )
 
     @staticmethod
