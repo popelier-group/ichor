@@ -32,7 +32,7 @@ class ExtractModelsScript(WriteFile, File):
                 workdir = os.path.abspath(os.path.join(current_dir, "../../"))
 
                 # models directory (create if it doesn't exist)
-                models_dir = os.path.join(workdir, "models")
+                models_dir = os.path.join(workdir, "model_krig")
                 os.makedirs(models_dir, exist_ok=True)
 
                 # recursively find all .model files under current directory
