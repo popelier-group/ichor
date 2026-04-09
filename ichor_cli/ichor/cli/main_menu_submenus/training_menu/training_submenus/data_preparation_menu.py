@@ -96,25 +96,25 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_props():
         """Asks user to select the number of properties to train on."""
-        prop_list = []
-        for key in AVAILABLE_PROPS.keys():
-            prop_list.append(key)
-
-        number_of_props = user_input_int(
-            f"Properties: {prop_list}\nEnter number of properties to train on: ",
-        )
-
-        props = []
-
-        for prop in range(1, number_of_props + 1):
-            props.append(
-                user_input_restricted(
-                    AVAILABLE_PROPS.keys(),
-                    f"Enter property {prop}: ",
-                )
+        props = ["iqa"]
+        while True:
+            print(
+                f"Add a new property for training (you've chosen '{', '.join(props)}' so far):"
             )
+            add_more = input("Do you want to add another property? (y/n): ").strip().lower()
+
+            if add_more not in ("y", "yes"):
+                break
+
+            prop = user_input_restricted(
+            AVAILABLE_PROPS.keys(),
+            f"Enter property: ",
+            )
+            props.append(prop)
+
 
         submit_data_prep_menu_options.selected_props = props
+
 
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
