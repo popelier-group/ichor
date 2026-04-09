@@ -229,7 +229,9 @@ class SubmitDataPrepFunctions:
         )
 
         input_path = Path(ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH)
-        if len(str(input_path)) > 0:
+        has_csv = any(input_path.glob("*.csv"))
+
+        if has_csv:
             script_path, system_dir = write_dataset_prep(
                 outlier_input_dir=input_path,
                 q00_threshold=q00_threshold,
