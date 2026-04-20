@@ -16,12 +16,12 @@ def find_and_setup_ferebus_subdirs(input_dir):
     # find directories containing training data and job-details files
     # makes sure to copy job-details file into each subdirectory
     # ferebus needs job-details and properties to be in same directory
-    training_dir_list = []
-
     base = Path(input_dir)
 
-    # Only look at immediate children of DATASETS/
-    training_dirs = [d for d in base.iterdir() if d.is_dir() and "TRAIN" in d.name]
+    dest_paths = []
+
+    # Recursively find TRAIN directories anywhere under base
+    training_dirs = [d for d in base.rglob("*") if d.is_dir() and "TRAIN" in d.name]
 
     print(f"Found {len(training_dirs)} TRAIN directories.")
 
@@ -31,7 +31,7 @@ def find_and_setup_ferebus_subdirs(input_dir):
             print(f"Skipping {d.name}: no job-details file")
             continue
 
-        # exactly one subfolder
+        # exactly one subfolder inside each TRAIN directory
         subdirs = [p for p in d.iterdir() if p.is_dir()]
         if len(subdirs) != 1:
             print(f"Skipping {d.name}: expected 1 subfolder, found {len(subdirs)}")
@@ -39,11 +39,12 @@ def find_and_setup_ferebus_subdirs(input_dir):
 
         dest = subdirs[0] / "job-details"
         shutil.copy(job_file, dest)
-        print(f"Copied job-details to {dest}")
-        training_dir_list.append(dest)
+
+        dest_paths.append(dest)
+        print(f"Copied job-details → {dest}")
 
     # return list of training directories so user can choose how many to submit
-    return training_dir_list
+    return dest_paths
 
 
 def write_pyferebus_input_script(
