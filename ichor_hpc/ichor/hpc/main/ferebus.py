@@ -12,24 +12,56 @@ from ichor.hpc.submission_commands import PythonCommand
 from ichor.hpc.submission_script import SubmissionScript
 
 
+def find_and_setup_ferebus_subdirs(input_dir):
+    # find directories containing training data and job-details files
+    # makes sure to copy job-details file into each subdirectory
+    # ferebus needs job-details and properties to be in same directory
+    training_dir_list = []
+
+    for td in input_dir.rglob("*"):
+        if td.is_dir() and "TRAIN" in td.name:
+            job_file = td / "job-details"
+            if not job_file.is_file():
+                continue
+
+            training_dir_list.append(td)
+            # Find all immediate subdirectories
+            subdirs = [p for p in td.iterdir() if p.is_dir()]
+
+            if len(subdirs) != 1:
+                print(
+                    f"Skipping {td} — expected exactly one subfolder, found {len(subdirs)}"
+                )
+                continue
+
+            dest_dir = subdirs[0]
+            shutil.copy(job_file, dest_dir / "job-details")
+            print(f"Copied job-details → {dest_dir}")
+
+        # return list of training directories so user can choose how many to submit
+        return td
+
+
 def write_pyferebus_input_script(
+    input_dir,
     hold: JobID = None,
     **kwargs,
 ) -> Optional[JobID]:
 
-    #mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
-    #output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
+    # mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
+    # output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
     input_filename = "pyferebus_input" + PyFerebusScript.get_filetype()
-    #input_file_path = Path(output_dir / input_filename)
+    # input_file_path = Path(output_dir / input_filename)
 
     pyferebus_input_script = PyFerebusScript(
         Path(input_filename),
-        #Path(input_file_path),
+        # Path(input_file_path),
         **kwargs,
     )
     pyferebus_input_script.write()
 
     return pyferebus_input_script.path
+
 
 def write_extract_models_script(
     hold: JobID = None,

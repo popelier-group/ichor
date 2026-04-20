@@ -76,7 +76,7 @@ class SubmitDataPrepFunctions:
 
     @staticmethod
     def select_input_directory():
-        """Asks user to update points directory and then updates PointsDirectoryMenuOptions instance."""
+        """Asks user for path to extracted database CSV folder."""
         pd_path = user_input_path("Change Directory Path: ")
         ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH = Path(
             pd_path

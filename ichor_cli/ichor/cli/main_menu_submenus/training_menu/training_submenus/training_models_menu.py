@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 import subprocess
 
 import ichor.cli.global_menu_variables
@@ -12,9 +13,14 @@ from ichor.cli.useful_functions import (
     user_input_restricted,
     user_input_float,
     user_input_free_flow,
+    user_input_path,
 )
 
-from ichor.hpc.main import write_extract_models_script, write_pyferebus_input_script
+from ichor.hpc.main import (
+    write_extract_models_script,
+    write_pyferebus_input_script,
+    find_and_setup_ferebus_subdirs,
+)
 
 AVAILABLE_MEAN_TYPES = {
     "physical": 15,
@@ -31,6 +37,7 @@ SUBMIT_TRAINING_MENU_DESCRIPTION = MenuDescription(
 
 # TODO: possibly make this be read from a file
 SUBMIT_TRAINING_MENU_DEFAULTS = {
+    "default_input": "",
     "default_ncores": 20,
     "default_kernel": "rbfc_per",
     "default_max_iter": 100,
@@ -43,7 +50,7 @@ SUBMIT_TRAINING_MENU_DEFAULTS = {
 # dataclass used to store values for SubmitTrainingLMenu
 @dataclass
 class SubmitTrainingMenuOptions(MenuOptions):
-
+    selected_input_directory_path: Path
     selected_number_of_cores: str
     selected_kernel: str
     selected_max_iter: int
@@ -60,6 +67,22 @@ submit_training_menu_options = SubmitTrainingMenuOptions(
 
 # class with static methods for each menu item that calls a function.
 class SubmitTrainingFunctions:
+    @staticmethod
+    def select_input_directory():
+        """Asks user to update path to directory containing training folders."""
+        pd_path = user_input_path("Change Directory Path: ")
+        ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH = Path(
+            pd_path
+        ).absolute()
+        submit_training_menu_options.selected_input_directory_path = (
+            ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH
+        )
+        training_dirs = find_and_setup_ferebus_subdirs(
+            submit_training_menu_options.selected_input_directory_path
+        )
+        print(f"Found {len(training_dirs)} training dirs.")
+        print(f"Paths to training dirs: {training_dirs} ")
+
     @staticmethod
     def select_number_of_cores():
         """Asks user to select number of cores."""
@@ -116,6 +139,7 @@ class SubmitTrainingFunctions:
         mean_type_key = submit_training_menu_options.selected_mean_type
 
         (
+            input_dir,
             ncores,
             kernel,
             max_iter,
@@ -123,6 +147,7 @@ class SubmitTrainingFunctions:
             mean_type,
             gwo_cycles,
         ) = (
+            submit_training_menu_options.selected_input_directory_path,
             submit_training_menu_options.selected_number_of_cores,
             AVAILABLE_KERNEL_TYPES[kernel_type_key],
             submit_training_menu_options.selected_max_iter,
@@ -132,6 +157,7 @@ class SubmitTrainingFunctions:
         )
 
         pyferebus_input_script = write_pyferebus_input_script(
+            input_dir=input_dir,
             ncores=ncores,
             kernel=kernel,
             max_iter=max_iter,
@@ -158,6 +184,10 @@ class SubmitTrainingFunctions:
 # make menu items
 # can use lambda functions to change text of options as well :)
 submit_training_menu_items = [
+    FunctionItem(
+        "Select input data folder",
+        SubmitTrainingFunctions.select_input_directory,
+    ),
     FunctionItem(
         "Change number of cores",
         SubmitTrainingFunctions.select_number_of_cores,
