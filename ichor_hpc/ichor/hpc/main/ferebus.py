@@ -18,28 +18,32 @@ def find_and_setup_ferebus_subdirs(input_dir):
     # ferebus needs job-details and properties to be in same directory
     training_dir_list = []
 
-    for td in input_dir.rglob("*"):
-        if td.is_dir() and "TRAIN" in td.name:
-            job_file = td / "job-details"
-            if not job_file.is_file():
-                continue
+    base = Path(input_dir)
 
-            training_dir_list.append(td)
-            # Find all immediate subdirectories
-            subdirs = [p for p in td.iterdir() if p.is_dir()]
+    # Only look at immediate children of DATASETS/
+    training_dirs = [d for d in base.iterdir() if d.is_dir() and "TRAIN" in d.name]
 
-            if len(subdirs) != 1:
-                print(
-                    f"Skipping {td} — expected exactly one subfolder, found {len(subdirs)}"
-                )
-                continue
+    print(f"Found {len(training_dirs)} TRAIN directories.")
 
-            dest_dir = subdirs[0]
-            shutil.copy(job_file, dest_dir / "job-details")
-            print(f"Copied job-details → {dest_dir}")
+    for d in training_dirs:
+        job_file = d / "job-details"
+        if not job_file.is_file():
+            print(f"Skipping {d.name}: no job-details file")
+            continue
 
-        # return list of training directories so user can choose how many to submit
-        return training_dir_list
+        # exactly one subfolder
+        subdirs = [p for p in d.iterdir() if p.is_dir()]
+        if len(subdirs) != 1:
+            print(f"Skipping {d.name}: expected 1 subfolder, found {len(subdirs)}")
+            continue
+
+        dest = subdirs[0] / "job-details"
+        shutil.copy(job_file, dest)
+        print(f"Copied job-details to {dest}")
+        training_dir_list.append(dest)
+
+    # return list of training directories so user can choose how many to submit
+    return training_dir_list
 
 
 def write_pyferebus_input_script(
