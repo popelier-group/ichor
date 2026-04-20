@@ -39,7 +39,7 @@ def find_and_setup_ferebus_subdirs(input_dir):
             print(f"Copied job-details → {dest_dir}")
 
         # return list of training directories so user can choose how many to submit
-        return td
+        return training_dir_list
 
 
 def write_pyferebus_input_script(
