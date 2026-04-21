@@ -53,14 +53,10 @@ def write_pyferebus_input_script(
     **kwargs,
 ) -> Optional[JobID]:
 
-    # mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
-    # output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
     input_filename = "pyferebus_input" + PyFerebusScript.get_filetype()
-    # input_file_path = Path(output_dir / input_filename)
 
     pyferebus_input_script = PyFerebusScript(
         Path(input_filename),
-        # Path(input_file_path),
         **kwargs,
     )
     pyferebus_input_script.write()

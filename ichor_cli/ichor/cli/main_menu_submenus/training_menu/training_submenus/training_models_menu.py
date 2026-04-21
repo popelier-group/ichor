@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-import subprocess
+import subprocess, os
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
@@ -38,6 +38,7 @@ SUBMIT_TRAINING_MENU_DESCRIPTION = MenuDescription(
 # TODO: possibly make this be read from a file
 SUBMIT_TRAINING_MENU_DEFAULTS = {
     "default_input": "",
+    "default_training_folders": [],
     "default_ncores": 20,
     "default_kernel": "rbfc_per",
     "default_max_iter": 100,
@@ -51,6 +52,7 @@ SUBMIT_TRAINING_MENU_DEFAULTS = {
 @dataclass
 class SubmitTrainingMenuOptions(MenuOptions):
     selected_input_directory_path: Path
+    selected_train_folders: list[Path]
     selected_number_of_cores: str
     selected_kernel: str
     selected_max_iter: int
@@ -80,8 +82,7 @@ class SubmitTrainingFunctions:
         training_dirs = find_and_setup_ferebus_subdirs(
             submit_training_menu_options.selected_input_directory_path
         )
-        print(f"Found {len(training_dirs)} training dirs.")
-        print(f"Paths to training dirs: {training_dirs} ")
+        submit_training_menu_options.selected_train_folders = training_dirs
 
     @staticmethod
     def select_number_of_cores():
@@ -133,45 +134,53 @@ class SubmitTrainingFunctions:
 
     @staticmethod
     def submit_training_on_compute():
-        """Creates and submits models for training."""
-        # key:values from dictionaries
-        kernel_type_key = submit_training_menu_options.selected_kernel
-        mean_type_key = submit_training_menu_options.selected_mean_type
+        for job_details_path in submit_training_menu_options.selected_train_folders:
+            workdir = job_details_path.parent  # SEQ-XX-25-25 folder
+            print(f"\n=== Running pyferebus in {workdir} ===")
+            # Change into the working directory
+            os.chdir(workdir)
 
-        (
-            input_dir,
-            ncores,
-            kernel,
-            max_iter,
-            huber_delta,
-            mean_type,
-            gwo_cycles,
-        ) = (
-            submit_training_menu_options.selected_input_directory_path,
-            submit_training_menu_options.selected_number_of_cores,
-            AVAILABLE_KERNEL_TYPES[kernel_type_key],
-            submit_training_menu_options.selected_max_iter,
-            submit_training_menu_options.selected_huber_delta,
-            AVAILABLE_MEAN_TYPES[mean_type_key],
-            submit_training_menu_options.selected_gwo_cycles,
-        )
+            """Creates and submits models for training."""
+            # key:values from dictionaries
+            kernel_type_key = submit_training_menu_options.selected_kernel
+            mean_type_key = submit_training_menu_options.selected_mean_type
 
-        pyferebus_input_script = write_pyferebus_input_script(
-            input_dir=input_dir,
-            ncores=ncores,
-            kernel=kernel,
-            max_iter=max_iter,
-            huber_delta=huber_delta,
-            mean_type=mean_type,
-            gwo_cycles=gwo_cycles,
-        )
+            (
+                workdir,
+                ncores,
+                kernel,
+                max_iter,
+                huber_delta,
+                mean_type,
+                gwo_cycles,
+            ) = (
+                workdir,
+                submit_training_menu_options.selected_number_of_cores,
+                AVAILABLE_KERNEL_TYPES[kernel_type_key],
+                submit_training_menu_options.selected_max_iter,
+                submit_training_menu_options.selected_huber_delta,
+                AVAILABLE_MEAN_TYPES[mean_type_key],
+                submit_training_menu_options.selected_gwo_cycles,
+            )
 
-        extract_models_script = write_extract_models_script()
+            pyferebus_input_script = write_pyferebus_input_script(
+                input_dir=workdir,
+                ncores=ncores,
+                kernel=kernel,
+                max_iter=max_iter,
+                huber_delta=huber_delta,
+                mean_type=mean_type,
+                gwo_cycles=gwo_cycles,
+            )
 
-        # run the pyferebus input script. As submit on compute is hard coded to true
-        # pyferebus will handle the submission
+            extract_models_script = write_extract_models_script()
 
-        subprocess.run(["python3", "pyferebus_input.py"], check=True)
+            # run the pyferebus input script. As submit on compute is hard coded to true
+            # pyferebus will handle the submission
+
+            subprocess.run(
+                ["python3", pyferebus_input_script.name], cwd=workdir, check=True
+            )
 
         answer = ""
         user_input_free_flow(
