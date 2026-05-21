@@ -22,6 +22,15 @@ from ichor.hpc.main import (
     find_and_setup_ferebus_subdirs,
 )
 
+
+# override path display to menu
+def display_path(p: Path, keep=3):
+    parts = p.parts
+    if len(parts) <= keep:
+        return str(p)
+    return "..." + str(Path(*parts[-keep:]))
+
+
 AVAILABLE_MEAN_TYPES = {
     "physical": 15,
 }
@@ -59,6 +68,24 @@ class SubmitTrainingMenuOptions(MenuOptions):
     selected_huber_delta: float
     selected_mean_type: str
     selected_gwo_cycles: int
+
+    def __call__(self):
+        """Return a formatted string for display in the menu."""
+        lines = []
+
+        for field_name, value in self.__dict__.items():
+
+            # shorten single paths
+            if isinstance(value, Path):
+                value = display_path(value)
+
+            # shorten lists of paths
+            elif isinstance(value, list) and value and isinstance(value[0], Path):
+                value = [display_path(p) for p in value]
+
+            lines.append(f"{field_name.replace('_', ' ').title()}: {value}")
+
+        return "\n".join(lines) + "\n"
 
 
 # initialize dataclass for storing information for menu
