@@ -69,7 +69,7 @@ class SubmitTrainingMenuOptions(MenuOptions):
     selected_mean_type: str
     selected_gwo_cycles: int
 
-    def get_display_value(self, value, keep_first=3):
+    def get_display_value(self, value, keep_first=1):
         from pathlib import Path
 
         # Single path → shorten normally
