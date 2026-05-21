@@ -69,17 +69,26 @@ class SubmitTrainingMenuOptions(MenuOptions):
     selected_mean_type: str
     selected_gwo_cycles: int
 
-    def get_display_value(self, value):
+    def get_display_value(self, value, keep_first=3):
         from pathlib import Path
 
-        # shorten single paths
+        # Single path → shorten normally
         if isinstance(value, Path):
             return display_path(value)
 
-        # shorten lists of paths
+        # List of paths → apply compact display
         if isinstance(value, list) and value and isinstance(value[0], Path):
-            return [display_path(p) for p in value]
+            n = len(value)
 
+            # Shorten each path
+            short = [display_path(p) for p in value]
+
+            if n <= keep_first + 1:
+                # List is small → show all
+                return short
+
+            # Otherwise → first 3, ellipsis, last 1
+            return short[:keep_first] + ["..."] + [short[-1]]
         return value
 
 
