@@ -61,13 +61,16 @@ class MenuOptions:
         if TERMCOLOR_IMPORTED:
             return "".join(
                 [
-                    f"-- {MenuOptions.formatter_menu_options(k)}: {colored(str(v), 'green')}\n"
+                    f"-- {MenuOptions.formatter_menu_options(k)}: "
+                    f"{colored(str(self.get_display_value(v)) if hasattr(self, 'get_display_value') else str(v), 'green')}\n"
                     for k, v in asdict(self).items()
                 ]
             )
+
         return "".join(
             [
-                f"-- {MenuOptions.formatter_menu_options(k)}: {v}\n"
+                f"-- {MenuOptions.formatter_menu_options(k)}: "
+                f"{self.get_display_value(v) if hasattr(self, 'get_display_value') else v}\n"
                 for k, v in asdict(self).items()
             ]
         )
