@@ -23,6 +23,9 @@ def find_and_setup_ferebus_subdirs(input_dir):
     # Recursively find TRAIN directories anywhere under base
     training_dirs = [d for d in base.rglob("*") if d.is_dir() and "TRAIN" in d.name]
 
+    # sort numerically by the number in the folder name
+    training_dirs.sort(key=lambda p: int("".join(filter(str.isdigit, p.name))))
+
     print(f"Found {len(training_dirs)} TRAIN directories.")
 
     for d in training_dirs:
