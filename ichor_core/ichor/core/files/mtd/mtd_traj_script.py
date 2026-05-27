@@ -135,7 +135,7 @@ class MtdTrajScript(WriteFile, File):
         group_str = f'\t"GROUP ATOMS={cv_to_str} LABEL=g{num}",\n'
         return group_str
 
-    ## need some complex logic here to define MTD arguments etc.
+    # need some complex logic here to define MTD arguments etc.
     def build_mtd_setup_str(self):
 
         header_line = f'[f"UNITS LENGTH={self.dist_units} TIME={{1/ps}} ENERGY={self.energy_units}",\n'

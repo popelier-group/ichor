@@ -59,7 +59,7 @@ def convert_xyz_to_mol(xyz_file):
 
 def print_molecule_information(mol):
     print("\nMOLECULE DESCRIPTORS:\n")
-    ## molecule descriptors
+    # molecule descriptors
     # smiles
     smiles = Chem.MolToSmiles(mol, canonical=True)
     print("SMILES:", smiles)
@@ -75,7 +75,7 @@ def print_neighbour_information(mol):
     # sanitise and add hydrogens
     mol = Chem.AddHs(mol)
 
-    ## list atoms and their neighbours
+    # list atoms and their neighbours
     print("Neighbour list: ")
     for atom in mol.GetAtoms():
         idx = atom.GetIdx()

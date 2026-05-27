@@ -1,10 +1,9 @@
 import shutil
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
-from ichor.core.files import Trajectory
 from ichor.core.files.mtd import MtdTrajScript
 
 from ichor.hpc.batch_system import JobID
@@ -12,7 +11,7 @@ from ichor.hpc.submission_commands import AnacondaCommand
 from ichor.hpc.submission_script import SubmissionScript
 
 
-## set up folder for running mtd calculation
+# set up folder for running mtd calculation
 def prep_mtd(
     input_xyz_path: Union[str, Path],
     overwrite=False,
@@ -36,7 +35,7 @@ def prep_mtd(
             shutil.rmtree(rm_path)
             mkdir(mtd_dir)
             shutil.copy(input_xyz_path, dest_name)
-        except:
+        except Exception:
             print("FILE DOES NOT EXIST FOR OVERWRITE. RUNNING AS NORMAL")
             pass
     # if not set to overwrite and file exits
@@ -51,7 +50,7 @@ def prep_mtd(
     script_filename = "mtd" + MtdTrajScript.get_filetype()
     input_file_path = Path(mtd_dir / script_filename)
 
-    ## build mtd script here
+    # build mtd script here
     mtd_input_script = MtdTrajScript(
         Path(input_file_path),
         dest_name,

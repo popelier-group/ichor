@@ -50,10 +50,10 @@ class AnacondaCommand(SubmissionCommand):
             "python",
             "env_name",
         )
-        ## here is where we can set plumed anaconda environment
+        # here is where we can set plumed anaconda environment
         try:
             return f"source activate {str(anaconda_env)}"
-        except:
+        except Exception:
             raise PythonEnvironmentNotFound(
                 "Python environment was not found. Cannot submit Python command."
             )

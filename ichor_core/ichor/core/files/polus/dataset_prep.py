@@ -58,7 +58,7 @@ class DatasetPrepScript(WriteFile, File):
         self.outlier_method = self.outlier_method or "extrZS"
         self.system_name = self.system_name or "molecule"
         self.q00_threshold = self.q00_threshold or 0.005
-        self.props = self.props or f'["iqa"]'
+        self.props = self.props or '["iqa"]'
         self.val_size = self.val_size or [250]
         self.test_size = self.test_size or [1000]
 

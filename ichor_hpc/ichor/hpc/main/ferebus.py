@@ -1,15 +1,9 @@
-import shutil
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
-import ichor.hpc.global_variables
-from ichor.core.common.io import mkdir
 from ichor.core.files.ferebus import ExtractModelsScript, PyFerebusScript
 
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.global_variables import get_param_from_config
-from ichor.hpc.submission_commands import PythonCommand
-from ichor.hpc.submission_script import SubmissionScript
 
 
 def write_pyferebus_input_script(
