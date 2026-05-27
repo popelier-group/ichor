@@ -75,11 +75,7 @@ class SubmitDiversityFunctions:
     @staticmethod
     def submit_diversity_on_compute():
         """Creates and submits an optimisation using ase calculator."""
-        (
-            ncores,
-            weights,
-            sample_size,
-        ) = (
+        (ncores, weights, sample_size,) = (
             submit_diversity_menu_options.selected_number_of_cores,
             submit_diversity_menu_options.selected_weights,
             submit_diversity_menu_options.selected_sample_size,

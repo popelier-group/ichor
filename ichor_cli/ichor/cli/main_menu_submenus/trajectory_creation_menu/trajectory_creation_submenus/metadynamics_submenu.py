@@ -1,21 +1,23 @@
 from dataclasses import dataclass
-from pathlib import Path
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
 
 from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
+from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenus.col_var_submenu import (
+    col_var_menu,
+    ColVarMenuFunctions,
+)
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    user_input_bool,
     user_input_float,
     user_input_free_flow,
     user_input_int,
-    user_input_bool,
 )
 from ichor.hpc.molecular_dynamics import prep_mtd, submit_mtd
-
 
 METADYNAMICS_MENU_DEFAULTS = {
     "default_collective_variables": [],
@@ -50,10 +52,6 @@ metadynamics_menu_options = MetadynamicsMenuOptions(
     *METADYNAMICS_MENU_DEFAULTS.values()
 )
 
-from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenus.col_var_submenu import (
-    col_var_menu,
-    ColVarMenuFunctions,
-)
 
 # Inject shared options into submenu logic
 ColVarMenuFunctions.shared_options = metadynamics_menu_options
@@ -61,7 +59,6 @@ ColVarMenuFunctions.shared_options = metadynamics_menu_options
 
 # class with static methods for each menu item that calls a function.
 class MetadynamicsMenuFunctions:
-
     @staticmethod
     def select_timestep():
         """
@@ -169,7 +166,7 @@ class MetadynamicsMenuFunctions:
             user_input_free_flow("MTD SUBBED. Press enter to continue: ", answer)
             # update logger
             ichor.hpc.global_variables.LOGGER.info(
-                f"Metadynamics trajectory generation job submitted"
+                "Metadynamics trajectory generation job submitted"
             )
 
 

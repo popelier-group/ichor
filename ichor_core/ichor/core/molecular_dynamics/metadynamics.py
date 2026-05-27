@@ -3,10 +3,8 @@ from pathlib import Path
 from ase import io
 
 from rdkit import Chem
-from rdkit.Chem import inchi, AllChem, Draw
+from rdkit.Chem import AllChem, inchi, rdDetermineBonds, rdMolDescriptors
 from rdkit.Chem.Draw import rdMolDraw2D
-from rdkit.Chem import rdDetermineBonds
-from rdkit.Chem import rdMolDescriptors
 
 # Define SMARTS patterns for common functional groups
 functional_groups = {
@@ -135,7 +133,7 @@ def print_rotatable_bonds(mol):
 
     print(f"Number of rotatable bonds: {len(rotatable_bonds)}")
     for i, (a1, a2) in enumerate(rotatable_bonds):
-        print(f"Rotatable bond {i+1}: atoms {a1} - {a2}")
+        print(f"Rotatable bond {i + 1}: atoms {a1} - {a2}")
 
 
 def print_dihedrals(mol):
@@ -171,7 +169,7 @@ def print_dihedrals(mol):
 
     print(f"Number of rotatable dihedrals: {len(dihedrals)}")
     for i, (a0, a1, a2, a3) in enumerate(dihedrals):
-        print(f"Dihedral {i+1}: atoms {a0} - {a1} - {a2} - {a3}")
+        print(f"Dihedral {i + 1}: atoms {a0} - {a1} - {a2} - {a3}")
 
 
 def print_hbond_info(mol):
@@ -181,11 +179,11 @@ def print_hbond_info(mol):
 
     print(f"H-bond donors: {donors}")
     print(f"H-bond acceptors: {acceptors}")
-    # Donor: [!H0;#7,#8] — N or O with at least one hydrogen
+    # Donor: [!H0;#7,#8] - N or O with at least one hydrogen
     donor_smarts = Chem.MolFromSmarts("[!H0;#7,#8]")
     donor_matches = mol.GetSubstructMatches(donor_smarts)
 
-    # Acceptor: [#8,#7] — O or N atoms
+    # Acceptor: [#8,#7] - O or N atoms
     acceptor_smarts = Chem.MolFromSmarts("[#8,#7]")
     acceptor_matches = mol.GetSubstructMatches(acceptor_smarts)
 

@@ -1,11 +1,11 @@
-from pathlib import Path
 import shutil
+from pathlib import Path
 from typing import List, Optional, Union
 
 import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
-from ichor.core.files.mtd import MtdTrajScript
 from ichor.core.files import Trajectory
+from ichor.core.files.mtd import MtdTrajScript
 
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import AnacondaCommand
