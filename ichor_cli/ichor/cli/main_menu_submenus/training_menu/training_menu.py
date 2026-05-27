@@ -1,9 +1,6 @@
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Union
 
-import ichor.cli.global_menu_variables
-from consolemenu.items import FunctionItem, SubmenuItem
+from consolemenu.items import SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.training_menu.training_submenus.data_preparation_menu import (
     submit_data_prep_menu,
@@ -16,7 +13,6 @@ from ichor.cli.main_menu_submenus.training_menu.training_submenus.training_model
 
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions.user_input import user_input_path
 
 
 TRAINING_MENU_DESCRIPTION = MenuDescription(

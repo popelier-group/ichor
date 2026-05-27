@@ -8,25 +8,25 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
-    user_input_restricted,
+    user_input_float,
     user_input_int,
     user_input_path,
-    user_input_float,
+    user_input_restricted,
 )
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
 
 AVAILABLE_PROPS = {
     "iqa": "iqa",
-    "q00":"q00", 
-    "q10":"q10",
-    "q11c":"q11c",
-    "q11s":"q11s",
-    "q20":"q20",
-    "q21s":"q21s",
-    "q21c":"q21c",
-    "q22s":"q22s",
-    "q22c":"q22c",
+    "q00": "q00",
+    "q10": "q10",
+    "q11c": "q11c",
+    "q11s": "q11s",
+    "q20": "q20",
+    "q21s": "q21s",
+    "q21c": "q21c",
+    "q22s": "q22s",
+    "q22c": "q22c",
 }
 
 SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
@@ -47,7 +47,6 @@ SUBMIT_DATA_PREP_MENU_DEFAULTS = {
 # dataclass used to store values for submit dataset preparation menu
 @dataclass
 class SubmitDataPrepMenuOptions(MenuOptions):
-
     selected_input_directory_path: Path
     selected_number_of_cores: int
     selected_props: str
@@ -72,7 +71,6 @@ submit_data_prep_menu_options = SubmitDataPrepMenuOptions(
 
 # class with static methods for each menu item that calls a function.
 class SubmitDataPrepFunctions:
-
     @staticmethod
     def select_input_directory():
         """Asks user to update points directory and then updates PointsDirectoryMenuOptions instance."""
@@ -102,12 +100,13 @@ class SubmitDataPrepFunctions:
         props = []
 
         for prop in range(1, number_of_props + 1):
-            props.append(user_input_restricted(
-            AVAILABLE_PROPS.keys(),
-            f"Enter property {prop}: ",
+            props.append(
+                user_input_restricted(
+                    AVAILABLE_PROPS.keys(),
+                    f"Enter property {prop}: ",
                 )
             )
-        
+
         submit_data_prep_menu_options.selected_props = props
 
         # update logger
@@ -186,7 +185,7 @@ class SubmitDataPrepFunctions:
 
         input_path = Path(ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH)
 
-        dataset_script = write_dataset_prep(
+        _ = write_dataset_prep(
             outlier_input_dir=input_path,
             q00_threshold=q00_threshold,
             props=props,
@@ -207,7 +206,7 @@ class SubmitDataPrepFunctions:
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"Data preparation for machine learning job submitted"
+            "Data preparation for machine learning job submitted"
         )
 
 
@@ -223,9 +222,9 @@ submit_data_prep_menu_items = [
         SubmitDataPrepFunctions.select_number_of_cores,
     ),
     FunctionItem(
-         "Change properties",
-         SubmitDataPrepFunctions.select_props,
-     ),
+        "Change properties",
+        SubmitDataPrepFunctions.select_props,
+    ),
     FunctionItem(
         "Change q00 threshold",
         SubmitDataPrepFunctions.select_q00_threshold,

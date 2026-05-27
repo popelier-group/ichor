@@ -1,15 +1,9 @@
-import shutil
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
-import ichor.hpc.global_variables
-from ichor.core.common.io import mkdir
-from ichor.core.files.ferebus import PyFerebusScript, ExtractModelsScript
+from ichor.core.files.ferebus import ExtractModelsScript, PyFerebusScript
 
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.global_variables import get_param_from_config
-from ichor.hpc.submission_commands import PythonCommand
-from ichor.hpc.submission_script import SubmissionScript
 
 
 def write_pyferebus_input_script(
@@ -17,19 +11,20 @@ def write_pyferebus_input_script(
     **kwargs,
 ) -> Optional[JobID]:
 
-    #mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
-    #output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
+    # mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
+    # output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
     input_filename = "pyferebus_input" + PyFerebusScript.get_filetype()
-    #input_file_path = Path(output_dir / input_filename)
+    # input_file_path = Path(output_dir / input_filename)
 
     pyferebus_input_script = PyFerebusScript(
         Path(input_filename),
-        #Path(input_file_path),
+        # Path(input_file_path),
         **kwargs,
     )
     pyferebus_input_script.write()
 
     return pyferebus_input_script.path
+
 
 def write_extract_models_script(
     hold: JobID = None,

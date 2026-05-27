@@ -1,7 +1,7 @@
 import textwrap
 from pathlib import Path
 from string import Template
-from typing import Optional, Union
+from typing import Union
 
 from ichor.core.files.file import File, WriteFile
 

@@ -1,4 +1,3 @@
-import shutil
 from pathlib import Path
 from typing import Optional, Union
 
@@ -44,10 +43,10 @@ def write_dataset_prep(
     # Make new directory called DATASETS
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
     dataset_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
-    
+
     # Move input files dir into DATASETS dir
     src = Path(outlier_input_dir)
-    dst = dataset_dir/src.name
+    dst = dataset_dir / src.name
     move(src, dst)
     input_dir_path = dst
 

@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import subprocess
+from dataclasses import dataclass
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
@@ -7,7 +7,11 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_int, user_input_restricted, user_input_float
+from ichor.cli.useful_functions import (
+    user_input_float,
+    user_input_int,
+    user_input_restricted,
+)
 
 from ichor.hpc.main import write_extract_models_script, write_pyferebus_input_script
 
@@ -38,7 +42,6 @@ SUBMIT_TRAINING_MENU_DEFAULTS = {
 # dataclass used to store values for SubmitTrainingLMenu
 @dataclass
 class SubmitTrainingMenuOptions(MenuOptions):
-
     selected_number_of_cores: str
     selected_kernel: str
     selected_max_iter: int
@@ -62,7 +65,7 @@ class SubmitTrainingFunctions:
             "Enter number of cores: ",
             submit_training_menu_options.selected_number_of_cores,
         )
-    
+
     @staticmethod
     def select_kernel():
         """Asks user to select kernel."""
@@ -78,7 +81,7 @@ class SubmitTrainingFunctions:
             "Enter number of max iterations: ",
             submit_training_menu_options.selected_max_iter,
         )
-    
+
     @staticmethod
     def select_huber_delta():
         """Asks user to select huber delta."""
@@ -86,7 +89,7 @@ class SubmitTrainingFunctions:
             "Enter huber delta: ",
             submit_training_menu_options.selected_huber_delta,
         )
-    
+
     @staticmethod
     def select_mean_type():
         """Asks user to select mean type."""
@@ -106,18 +109,11 @@ class SubmitTrainingFunctions:
     @staticmethod
     def submit_training_on_compute():
         """Creates and submits models for training."""
-        # key:values from dictionaries 
+        # key:values from dictionaries
         kernel_type_key = submit_training_menu_options.selected_kernel
         mean_type_key = submit_training_menu_options.selected_mean_type
 
-        (
-            ncores,
-            kernel,
-            max_iter,
-            huber_delta,
-            mean_type,
-            gwo_cycles,
-        ) = (
+        (ncores, kernel, max_iter, huber_delta, mean_type, gwo_cycles,) = (
             submit_training_menu_options.selected_number_of_cores,
             AVAILABLE_KERNEL_TYPES[kernel_type_key],
             submit_training_menu_options.selected_max_iter,
@@ -126,7 +122,7 @@ class SubmitTrainingFunctions:
             submit_training_menu_options.selected_gwo_cycles,
         )
 
-        pyferebus_input_script = write_pyferebus_input_script(           
+        _ = write_pyferebus_input_script(
             ncores=ncores,
             kernel=kernel,
             max_iter=max_iter,
@@ -135,24 +131,18 @@ class SubmitTrainingFunctions:
             gwo_cycles=gwo_cycles,
         )
 
-        extract_models_script = write_extract_models_script()
+        _ = write_extract_models_script()
 
         # run the pyferebus input script. As submit on compute is hard coded to true
-        # pyferebus will handle the submission 
+        # pyferebus will handle the submission
 
         subprocess.run(["python3", "pyferebus_input.py"], check=True)
-
-
 
         SUBMIT_TRAINING_MENU_DESCRIPTION.prologue_description_text = (
             "Successfully submitted models for training \n"
         )
         # update logger
-        ichor.hpc.global_variables.LOGGER.info(
-            f"Training models job submitted"
-        )
-
-
+        ichor.hpc.global_variables.LOGGER.info("Training models job submitted")
 
 
 # make menu items

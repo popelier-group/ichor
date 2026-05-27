@@ -18,10 +18,6 @@ from ichor.cli.main_menu_submenus.initial_structure_menu import (
     initial_structure_menu,
     INITIAL_STRUCTURE_MENU_DESCRIPTION,
 )
-from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_menu import (
-    trajectory_creation_menu,
-    TRAJECTORY_CREATION_MENU_DESCRIPTION,
-)
 from ichor.cli.main_menu_submenus.points_directory_menu import (
     points_directory_menu,
     POINTS_DIRECTORY_MENU_DESCRIPTION,
@@ -37,6 +33,10 @@ from ichor.cli.main_menu_submenus.tools_menu.tools_menu import (
 from ichor.cli.main_menu_submenus.training_menu.training_menu import (
     training_menu,
     TRAINING_MENU_DESCRIPTION,
+)
+from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_menu import (
+    trajectory_creation_menu,
+    TRAJECTORY_CREATION_MENU_DESCRIPTION,
 )
 from ichor.cli.main_menu_submenus.trajectory_menu.trajectory_menu import (
     trajectory_menu,
@@ -104,9 +104,7 @@ main_menu_items = [
         POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu
     ),
     SubmenuItem(SUBMIT_CSVS_MENU_DESCRIPTION.title, submit_csvs_menu, main_menu),
-    SubmenuItem(
-        TRAINING_MENU_DESCRIPTION.title, training_menu, main_menu
-    ),
+    SubmenuItem(TRAINING_MENU_DESCRIPTION.title, training_menu, main_menu),
     SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
     SubmenuItem(TOOLS_MENU_DESCRIPTION.title, tools_menu, main_menu),
 ]
