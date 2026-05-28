@@ -181,11 +181,11 @@ def print_hbond_info(mol):
 
     print(f"H-bond donors: {donors}")
     print(f"H-bond acceptors: {acceptors}")
-    # Donor: [!H0;#7,#8] — N or O with at least one hydrogen
+    # Donor: [!H0;#7,#8] - N or O with at least one hydrogen
     donor_smarts = Chem.MolFromSmarts("[!H0;#7,#8]")
     donor_matches = mol.GetSubstructMatches(donor_smarts)
 
-    # Acceptor: [#8,#7] — O or N atoms
+    # Acceptor: [#8,#7] - O or N atoms
     acceptor_smarts = Chem.MolFromSmarts("[#8,#7]")
     acceptor_matches = mol.GetSubstructMatches(acceptor_smarts)
 

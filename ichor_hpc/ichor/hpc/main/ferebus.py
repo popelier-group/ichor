@@ -44,7 +44,7 @@ def find_and_setup_ferebus_subdirs(input_dir):
         shutil.copy(job_file, dest)
 
         dest_paths.append(dest)
-        print(f"Copied job-details → {dest}")
+        print(f"Copied job-details -> {dest}")
 
     # return list of training directories so user can choose how many to submit
     return dest_paths

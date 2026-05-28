@@ -72,11 +72,11 @@ class SubmitTrainingMenuOptions(MenuOptions):
     def get_display_value(self, value, keep_first=1):
         from pathlib import Path
 
-        # Single path → shorten normally
+        # Single path -> shorten normally
         if isinstance(value, Path):
             return display_path(value)
 
-        # List of paths → apply compact display
+        # List of paths -> apply compact display
         if isinstance(value, list) and value and isinstance(value[0], Path):
             n = len(value)
 
@@ -84,10 +84,10 @@ class SubmitTrainingMenuOptions(MenuOptions):
             short = [display_path(p) for p in value]
 
             if n <= keep_first + 1:
-                # List is small → show all
+                # List is small -> show all
                 return short
 
-            # Otherwise → first 3, ellipsis, last 1
+            # Otherwise -> first 3, ellipsis, last 1
             return short[:keep_first] + ["..."] + [short[-1]]
         return value
 
