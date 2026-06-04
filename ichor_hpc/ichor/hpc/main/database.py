@@ -112,7 +112,7 @@ def submit_make_csvs_from_database(
     for suffix in (".pointsdir", ".pointsdirparent", ".sqlite"):
         system_name = system_name.removesuffix(suffix)
     # append system name to processed csvs
-    csvs_dir_name = system_name + "_processed_csvs"
+    csvs_dir_name = "0_" + system_name + "_processed_csvs"
     csvs_path = Path(parent_path / csvs_dir_name)
 
     # if no alf is given, then automatically calculate it
