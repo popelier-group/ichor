@@ -6,42 +6,35 @@ import ichor.hpc.global_variables
 
 from consolemenu.items import SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
-from ichor.cli.main_menu_submenus.analysis_menu import (
-    analysis_menu,
-    ANALYSIS_MENU_DESCRIPTION,
-)
-from ichor.cli.main_menu_submenus.database_menu.submit_csvs_from_database import (
-    submit_csvs_menu,
-    SUBMIT_CSVS_MENU_DESCRIPTION,
-)
 from ichor.cli.main_menu_submenus.initial_structure_menu import (
     initial_structure_menu,
     INITIAL_STRUCTURE_MENU_DESCRIPTION,
-)
-from ichor.cli.main_menu_submenus.points_directory_menu import (
-    points_directory_menu,
-    POINTS_DIRECTORY_MENU_DESCRIPTION,
-)
-from ichor.cli.main_menu_submenus.sampling_menu import (
-    sampling_menu,
-    SAMPLING_MENU_DESCRIPTION,
-)
-from ichor.cli.main_menu_submenus.tools_menu.tools_menu import (
-    tools_menu,
-    TOOLS_MENU_DESCRIPTION,
-)
-from ichor.cli.main_menu_submenus.training_menu.training_menu import (
-    training_menu,
-    TRAINING_MENU_DESCRIPTION,
 )
 from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_menu import (
     trajectory_creation_menu,
     TRAJECTORY_CREATION_MENU_DESCRIPTION,
 )
-from ichor.cli.main_menu_submenus.trajectory_menu.trajectory_menu import (
-    trajectory_menu,
-    TRAJECTORY_MENU_DESCRIPTION,
+from ichor.cli.main_menu_submenus.sampling_menu import (
+    sampling_menu,
+    SAMPLING_MENU_DESCRIPTION,
 )
+from ichor.cli.main_menu_submenus.points_directory_menu import (
+    points_directory_menu,
+    POINTS_DIRECTORY_MENU_DESCRIPTION,
+)
+from ichor.cli.main_menu_submenus.training_menu.training_menu import (
+    training_menu,
+    TRAINING_MENU_DESCRIPTION,
+)
+from ichor.cli.main_menu_submenus.analysis_menu import (
+    analysis_menu,
+    ANALYSIS_MENU_DESCRIPTION,
+)
+from ichor.cli.main_menu_submenus.tools_menu.tools_menu import (
+    tools_menu,
+    TOOLS_MENU_DESCRIPTION,
+)
+
 
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
@@ -98,12 +91,10 @@ main_menu_items = [
     SubmenuItem(
         TRAJECTORY_CREATION_MENU_DESCRIPTION.title, trajectory_creation_menu, main_menu
     ),
-    SubmenuItem(TRAJECTORY_MENU_DESCRIPTION.title, trajectory_menu, main_menu),
     SubmenuItem(SAMPLING_MENU_DESCRIPTION.title, sampling_menu, main_menu),
     SubmenuItem(
         POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu
     ),
-    SubmenuItem(SUBMIT_CSVS_MENU_DESCRIPTION.title, submit_csvs_menu, main_menu),
     SubmenuItem(TRAINING_MENU_DESCRIPTION.title, training_menu, main_menu),
     SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
     SubmenuItem(TOOLS_MENU_DESCRIPTION.title, tools_menu, main_menu),

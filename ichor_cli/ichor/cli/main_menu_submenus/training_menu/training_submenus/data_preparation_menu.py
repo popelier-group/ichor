@@ -11,10 +11,10 @@ from ichor.cli.useful_functions import (
     user_input_float,
     user_input_int,
     user_input_path,
-    user_input_restricted,
+    user_input_float,
+    user_input_free_flow,
 )
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
-
 
 AVAILABLE_PROPS = {
     "iqa": "iqa",
@@ -35,6 +35,7 @@ SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
 )
 
 SUBMIT_DATA_PREP_MENU_DEFAULTS = {
+    "default_input": "",
     "default_ncores": 2,
     "default_props": ["iqa"],
     "default_q00_threshold": 0.005,
@@ -49,7 +50,7 @@ SUBMIT_DATA_PREP_MENU_DEFAULTS = {
 class SubmitDataPrepMenuOptions(MenuOptions):
     selected_input_directory_path: Path
     selected_number_of_cores: int
-    selected_props: str
+    selected_props: list[str]
     selected_q00_threshold: float
     selected_train_size: int
     selected_val_size: int
@@ -64,7 +65,6 @@ class SubmitDataPrepMenuOptions(MenuOptions):
 
 # initialize dataclass for storing information for menu
 submit_data_prep_menu_options = SubmitDataPrepMenuOptions(
-    ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH,
     *SUBMIT_DATA_PREP_MENU_DEFAULTS.values(),
 )
 
@@ -73,7 +73,7 @@ submit_data_prep_menu_options = SubmitDataPrepMenuOptions(
 class SubmitDataPrepFunctions:
     @staticmethod
     def select_input_directory():
-        """Asks user to update points directory and then updates PointsDirectoryMenuOptions instance."""
+        """Asks user for path to extracted database CSV folder."""
         pd_path = user_input_path("Change Directory Path: ")
         ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH = Path(
             pd_path
@@ -93,19 +93,43 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_props():
         """Asks user to select the number of properties to train on."""
-        number_of_props = user_input_int(
-            "Enter number of properties to train on: ",
-        )
 
-        props = []
+        while True:
+            choice = input(
+                "Train on (1) all properties or (2) select individually? [1/2]: "
+            ).strip()
 
-        for prop in range(1, number_of_props + 1):
-            props.append(
-                user_input_restricted(
-                    AVAILABLE_PROPS.keys(),
-                    f"Enter property {prop}: ",
+            if choice in ("1", "2"):
+                break
+            else:
+                print("Invalid input. Please enter '1' or '2'.")
+
+        if choice == "1":
+            props = list(AVAILABLE_PROPS.keys())
+
+        else:
+            props = ["iqa"]
+            while True:
+                print(
+                    f"Add a new property for training (you've chosen '{', '.join(props)}' so far):"
                 )
-            )
+                add_more = (
+                    input("Do you want to add another property? (y/n): ")
+                    .strip()
+                    .lower()
+                )
+
+                if add_more not in ("y", "yes"):
+                    break
+
+                remaining_props = [p for p in AVAILABLE_PROPS if p not in props]
+
+                prop = user_input_restricted(
+                    remaining_props,
+                    f"Enter property: ",
+                )
+
+                props.append(prop)
 
         submit_data_prep_menu_options.selected_props = props
 
@@ -129,18 +153,36 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_train_size():
         """Asks user to select the size of the training set for machine learning."""
-        number_of_training_sets = user_input_int(
-            "Enter number of training sets: ",
-        )
 
-        training_set_sizes = []
+        training_sets = []
 
-        for train_set in range(1, number_of_training_sets + 1):
-            training_set_sizes.append(
-                user_input_int(f"Enter training set size {train_set}: ")
+        while True:
+            current = ", ".join(map(str, training_sets)) if training_sets else "none"
+
+            user_input = input(
+                f"Currently selected: {current}\n"
+                "Enter training set size (type 'q' to finish): "
             )
 
-        submit_data_prep_menu_options.selected_train_size = training_set_sizes
+            if user_input in ("q", "quit"):
+                if not training_sets:
+                    print("You must enter at least one training size.")
+                    continue
+                break
+
+            try:
+                value = int(user_input)
+
+                if value <= 0:
+                    print("Please enter a positive integer.")
+                    continue
+
+                training_sets.append(value)
+
+            except ValueError:
+                print("Invalid input. Please enter an integer or 'done' to finish.")
+
+        submit_data_prep_menu_options.selected_train_size = training_sets
 
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
@@ -168,13 +210,13 @@ class SubmitDataPrepFunctions:
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"Test set size {submit_data_prep_menu_options.selected_q00_threshold}"
+            f"Test set size {submit_data_prep_menu_options.selected_test_size}"
         )
 
     @staticmethod
     def submit_data_prep_on_compute():
         """Submits polus job for data preparation."""
-        (ncores, props, q00_threshold, train_size, val_size, test_size) = (
+        ncores, props, q00_threshold, train_size, val_size, test_size = (
             submit_data_prep_menu_options.selected_number_of_cores,
             submit_data_prep_menu_options.selected_props,
             submit_data_prep_menu_options.selected_q00_threshold,
@@ -184,30 +226,39 @@ class SubmitDataPrepFunctions:
         )
 
         input_path = Path(ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH)
+        has_csv = any(input_path.glob("*.csv"))
 
-        _ = write_dataset_prep(
-            outlier_input_dir=input_path,
-            q00_threshold=q00_threshold,
-            props=props,
-            train_size=train_size,
-            val_size=val_size,
-            test_size=test_size,
-        )
+        if has_csv:
+            script_path, system_dir = write_dataset_prep(
+                outlier_input_dir=input_path,
+                q00_threshold=q00_threshold,
+                props=props,
+                train_size=train_size,
+                val_size=val_size,
+                test_size=test_size,
+            )
 
-        submit_polus(
-            input_script="dataset_split.py",
-            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["datasets"],
-            cwd=Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"]).resolve(),
-            ncores=ncores,
-        )
+            submit_polus(
+                input_script=script_path,
+                script_name=ichor.hpc.global_variables.SCRIPT_NAMES["datasets"],
+                cwd=system_dir,
+                ncores=ncores,
+            )
 
-        SUBMIT_DATA_PREP_MENU_DESCRIPTION.prologue_description_text = (
-            "Successfully submitted data preparation \n"
-        )
-        # update logger
-        ichor.hpc.global_variables.LOGGER.info(
-            "Data preparation for machine learning job submitted"
-        )
+            answer = ""
+            user_input_free_flow(
+                "DATASET SPLITTING JOB SUBMITTED. Press enter to continue: ", answer
+            )
+            # update logger
+            ichor.hpc.global_variables.LOGGER.info(
+                f"Data preparation for machine learning job submitted"
+            )
+        else:
+            answer = ""
+            user_input_free_flow(
+                "No input CSV files for atoms and features found. Please select a folder containing data. Press enter to continue: ",
+                answer,
+            )
 
 
 # make menu items

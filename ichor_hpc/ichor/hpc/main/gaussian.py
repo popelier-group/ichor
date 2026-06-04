@@ -1,6 +1,7 @@
 import shutil
 from pathlib import Path
 from typing import List, Optional, Union
+from tqdm import tqdm
 
 import ichor.hpc.global_variables
 from ichor.core.common.io import mkdir
@@ -120,7 +121,7 @@ def write_gjfs(
 
     gjfs = []
 
-    for point_directory in points_directory:
+    for point_directory in tqdm(points_directory, desc="Creating GJF files"):
 
         # remove the .pointdirectory suffix
         gjf_fle_name = point_directory.path.with_suffix("").name + GJF.get_filetype()
@@ -195,7 +196,7 @@ def submit_gjfs(
 
         number_of_jobs = 0
 
-        for gjf in gjfs:
+        for gjf in tqdm(gjfs, desc="Submitting GJF files"):
 
             # (even if wfn file exits) or a wfn file does not exist
             if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():

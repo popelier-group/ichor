@@ -7,9 +7,12 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_bool, user_input_int
+from ichor.cli.useful_functions import (
+    user_input_bool,
+    user_input_int,
+    user_input_free_flow,
+)
 from ichor.hpc.main.polus import submit_polus, write_diversity_sampling
-
 
 SUBMIT_DIVERSITY_MENU_DESCRIPTION = MenuDescription(
     "Submit Diversity Sampling Menu",
@@ -20,6 +23,7 @@ SUBMIT_DIVERSITY_MENU_DEFAULTS = {
     "default_ncores": 4,
     "default_weights": False,
     "default_sample_size": 1000,
+    "default_chunk_size": 500,
 }
 
 
@@ -29,6 +33,7 @@ class SubmitDiversityMenuOptions(MenuOptions):
     selected_number_of_cores: int
     selected_weights: bool
     selected_sample_size: int
+    selected_chunk_size: int
 
 
 # initialize dataclass for storing information for menu
@@ -73,12 +78,30 @@ class SubmitDiversityFunctions:
         )
 
     @staticmethod
+    def select_chunk_size():
+        """Asks user to select the chunk size for splitting matrix."""
+        submit_diversity_menu_options.selected_chunk_size = user_input_int(
+            "Chunk size: ",
+            submit_diversity_menu_options.selected_chunk_size,
+        )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Diversity chunk size {submit_diversity_menu_options.selected_chunk_size}"
+        )
+
+    @staticmethod
     def submit_diversity_on_compute():
         """Creates and submits an optimisation using ase calculator."""
-        (ncores, weights, sample_size,) = (
+        (
+            ncores,
+            weights,
+            sample_size,
+            chunk_size,
+        ) = (
             submit_diversity_menu_options.selected_number_of_cores,
             submit_diversity_menu_options.selected_weights,
             submit_diversity_menu_options.selected_sample_size,
+            submit_diversity_menu_options.selected_chunk_size,
         )
 
         if not weights:
@@ -94,6 +117,7 @@ class SubmitDiversityFunctions:
             seed_geom=xyz_path,
             weights_vector=weights_vector,
             sample_size=sample_size,
+            chunk_size=chunk_size,
         )
 
         submit_polus(
@@ -102,8 +126,9 @@ class SubmitDiversityFunctions:
             ncores=ncores,
         )
 
-        SUBMIT_DIVERSITY_MENU_DESCRIPTION.prologue_description_text = (
-            "Successfully submitted diversity sampling \n"
+        answer = ""
+        user_input_free_flow(
+            "DIVERSITY SAMPLING SUBMITTED. Press enter to continue: ", answer
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
@@ -125,6 +150,10 @@ submit_diversity_menu_items = [
     FunctionItem(
         "Change sample size",
         SubmitDiversityFunctions.select_sample_size,
+    ),
+    FunctionItem(
+        "Change chunk size",
+        SubmitDiversityFunctions.select_chunk_size,
     ),
     FunctionItem(
         "Submit diversity sampler",

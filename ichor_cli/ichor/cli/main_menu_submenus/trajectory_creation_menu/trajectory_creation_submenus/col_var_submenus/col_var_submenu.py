@@ -118,6 +118,8 @@ class ColVarMenuFunctions:
     @staticmethod
     def draw_labeled_molecule():
         mtd.draw_labeled_molecule(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
+        answer = ""
+        user_input_free_flow("Press enter to continue: ", answer)
 
 
 # initialize menu

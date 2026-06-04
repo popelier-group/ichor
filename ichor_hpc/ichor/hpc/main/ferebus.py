@@ -6,19 +6,54 @@ from ichor.core.files.ferebus import ExtractModelsScript, PyFerebusScript
 from ichor.hpc.batch_system import JobID
 
 
+def find_and_setup_ferebus_subdirs(input_dir):
+    # find directories containing training data and job-details files
+    # makes sure to copy job-details file into each subdirectory
+    # ferebus needs job-details and properties to be in same directory
+    base = Path(input_dir)
+
+    dest_paths = []
+
+    # Recursively find TRAIN directories anywhere under base
+    training_dirs = [d for d in base.rglob("*") if d.is_dir() and "TRAIN" in d.name]
+
+    # sort numerically by the number in the folder name
+    training_dirs.sort(key=lambda p: int("".join(filter(str.isdigit, p.name))))
+
+    print(f"Found {len(training_dirs)} TRAIN directories.")
+
+    for d in training_dirs:
+        job_file = d / "job-details"
+        if not job_file.is_file():
+            print(f"Skipping {d.name}: no job-details file")
+            continue
+
+        # exactly one subfolder inside each TRAIN directory
+        subdirs = [p for p in d.iterdir() if p.is_dir()]
+        if len(subdirs) != 1:
+            print(f"Skipping {d.name}: expected 1 subfolder, found {len(subdirs)}")
+            continue
+
+        dest = subdirs[0] / "job-details"
+        shutil.copy(job_file, dest)
+
+        dest_paths.append(dest)
+        print(f"Copied job-details -> {dest}")
+
+    # return list of training directories so user can choose how many to submit
+    return dest_paths
+
+
 def write_pyferebus_input_script(
+    input_dir,
     hold: JobID = None,
     **kwargs,
 ) -> Optional[JobID]:
 
-    # mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
-    # output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["training_models"])
     input_filename = "pyferebus_input" + PyFerebusScript.get_filetype()
-    # input_file_path = Path(output_dir / input_filename)
 
     pyferebus_input_script = PyFerebusScript(
         Path(input_filename),
-        # Path(input_file_path),
         **kwargs,
     )
     pyferebus_input_script.write()

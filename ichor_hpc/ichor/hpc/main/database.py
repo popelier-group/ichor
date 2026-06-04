@@ -35,7 +35,7 @@ def submit_make_database(
         points_dir_path
     )
 
-    db_name = points_dir_path.stem
+    db_name = Path(points_dir_path / points_dir_path.stem)
 
     # this is used to be able to call the respective methods from PointsDirectory
     # so that the same code below is used with the respective methods
@@ -104,6 +104,16 @@ def submit_make_csvs_from_database(
         moments, defaults to True
     :param calculate_feature_forces: Whether or not to calculate ALF forces, defaults to False
     """
+    # path to save database
+    parent_path = db_path.parent
+    # find system name from parent folder
+    system_name = db_path.name
+    # strip pointsdir
+    for suffix in (".pointsdir", ".pointsdirparent"):
+        system_name = system_name.removesuffix(suffix)
+    # append system name to processed csvs
+    csvs_dir_name = system_name + "processed_csvs"
+    csvs_path = Path(parent_path / csvs_dir_name)
 
     # if no alf is given, then automatically calculate it
     if not alf:
@@ -124,8 +134,10 @@ def submit_make_csvs_from_database(
     )
     str_part2 = f" max_diff_iqa_wfn={float_difference_iqa_wfn},"
     str_part3 = f" max_integration_error={float_integration_error},"
-    str_part4 = f" calc_multipoles={rotate_multipole_moments}, calc_forces={calculate_feature_forces})"
-    text_list.append(str_part1 + str_part2 + str_part3 + str_part4)
+    str_part4 = f" calc_multipoles={rotate_multipole_moments}, calc_forces={calculate_feature_forces},"
+    str_part5 = f" parent_directory='{csvs_path}')"
+
+    text_list.append(str_part1 + str_part2 + str_part3 + str_part4 + str_part5)
 
     return submit_free_flow_python_command_on_compute(
         text_list=text_list,

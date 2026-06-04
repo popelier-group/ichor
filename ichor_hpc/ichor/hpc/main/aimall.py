@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List, Optional, Union
 from warnings import warn
+from tqdm import tqdm
 
 import ichor.hpc.global_variables
 
@@ -74,7 +75,7 @@ def add_method_and_get_wfn_paths(points: PointsDirectory, method: str) -> List[P
     gives the wrong results."""
 
     wfns = []
-    for point in points:
+    for point in tqdm(points, desc="Extracting WFN files"):
         # write out the wfn file with the method modified because AIMAll needs to know the functional used
         if point.wfn and point.wfn.exists():
             try:
@@ -124,7 +125,7 @@ def submit_wfns(
 
         nsubmitted_jobs = 0
 
-        for wfn in wfns:
+        for wfn in tqdm(wfns, desc="Submitting WFN files"):
 
             if (
                 force_calculate_ints

@@ -130,6 +130,12 @@ class AmberMenuFunctions:
             dt=dt,
             ln_gamma=ln_gamma,
         )
+        answer = ""
+        user_input_free_flow("AMBER SUBMITTED. Press enter to continue: ", answer)
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            f"AMBER trajectory generation job submitted"
+        )
 
     @staticmethod
     def xyz_from_mdcrd():

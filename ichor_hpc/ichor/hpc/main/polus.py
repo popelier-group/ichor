@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 import ichor.hpc.global_variables
-from ichor.core.common.io import mkdir, move
+from ichor.core.common.io import mkdir, copytree
 from ichor.core.files.polus import DatasetPrepScript, DiversityScript
 
 from ichor.hpc.batch_system import JobID
@@ -17,8 +17,18 @@ def write_diversity_sampling(
     **kwargs,
 ) -> Optional[JobID]:
 
-    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
-    output_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
+    # diversity parent folder
+    div_parent = Path(ichor.hpc.global_variables.FILE_STRUCTURE["diversity_sampling"])
+    mkdir(div_parent)
+    # extract system name from traj
+    system_name_long = Path(filename).stem
+    system_name_str = system_name_long.replace("_MTD_OUT", "")
+    system_name = system_name_str.replace("_mtd_out", "")
+    # subfolder for running calc
+    output_dir = Path(div_parent / system_name)
+    mkdir(output_dir)
+
+    # make python script within subfolder
     input_filename = "diversity_input" + DiversityScript.get_filetype()
     input_file_path = Path(output_dir / input_filename)
 
@@ -27,6 +37,7 @@ def write_diversity_sampling(
         seed_geom=seed_geom,
         output_dir=output_dir,
         filename=filename,
+        system_name=system_name,
         **kwargs,
     )
     div_input_script.write()
@@ -40,27 +51,36 @@ def write_dataset_prep(
     **kwargs,
 ) -> Optional[JobID]:
 
-    # Make new directory called DATASETS
-    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
-    dataset_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["datasets"])
+    # extract system name from data somehow...
+    system_name = Path(outlier_input_dir).parent.name.split(".", 1)[0]
 
+    # Make new parent directory called DATASETS
+    data_parent = ichor.hpc.global_variables.FILE_STRUCTURE["training"]
+    mkdir(data_parent)
+    # Make a subfolder for the structure
+    dataset_dir = Path(data_parent / system_name)
+    mkdir(dataset_dir)
     # Move input files dir into DATASETS dir
+    # Make a subfolder for the processed CSVs
+    csvs_string = "processed_csvs"
     src = Path(outlier_input_dir)
-    dst = dataset_dir / src.name
-    move(src, dst)
-    input_dir_path = dst
+    dst = dataset_dir / csvs_string
+    mkdir(dst)
+    # copy to avoid accidental deletion
+    copytree(src, dst)
 
     input_filename = "dataset_split" + DatasetPrepScript.get_filetype()
     input_file_path = Path(dataset_dir / input_filename)
 
     dataset_input_script = DatasetPrepScript(
         Path(input_file_path),
-        outlier_input_dir=Path(input_dir_path).resolve(),
+        outlier_input_dir=csvs_string,
+        system_name=system_name,
         **kwargs,
     )
     dataset_input_script.write()
 
-    return dataset_input_script.path
+    return input_filename, dataset_dir
 
 
 def submit_polus(

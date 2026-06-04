@@ -1,5 +1,6 @@
-import subprocess
 from dataclasses import dataclass
+from pathlib import Path
+import subprocess, os
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
@@ -8,12 +9,27 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
-    user_input_float,
     user_input_int,
     user_input_restricted,
+    user_input_float,
+    user_input_free_flow,
+    user_input_path,
 )
 
-from ichor.hpc.main import write_extract_models_script, write_pyferebus_input_script
+from ichor.hpc.main import (
+    write_extract_models_script,
+    write_pyferebus_input_script,
+    find_and_setup_ferebus_subdirs,
+)
+
+
+# override path display to menu
+def display_path(p: Path, keep=3):
+    parts = p.parts
+    if len(parts) <= keep:
+        return str(p)
+    return "..." + str(Path(*parts[-keep:]))
+
 
 AVAILABLE_MEAN_TYPES = {
     "physical": 15,
@@ -30,6 +46,8 @@ SUBMIT_TRAINING_MENU_DESCRIPTION = MenuDescription(
 
 # TODO: possibly make this be read from a file
 SUBMIT_TRAINING_MENU_DEFAULTS = {
+    "default_input": "",
+    "default_training_folders": [],
     "default_ncores": 20,
     "default_kernel": "rbfc_per",
     "default_max_iter": 100,
@@ -42,12 +60,36 @@ SUBMIT_TRAINING_MENU_DEFAULTS = {
 # dataclass used to store values for SubmitTrainingLMenu
 @dataclass
 class SubmitTrainingMenuOptions(MenuOptions):
+    selected_input_directory_path: Path
+    selected_train_folders: list[Path]
     selected_number_of_cores: str
     selected_kernel: str
     selected_max_iter: int
     selected_huber_delta: float
     selected_mean_type: str
     selected_gwo_cycles: int
+
+    def get_display_value(self, value, keep_first=1):
+        from pathlib import Path
+
+        # Single path -> shorten normally
+        if isinstance(value, Path):
+            return display_path(value)
+
+        # List of paths -> apply compact display
+        if isinstance(value, list) and value and isinstance(value[0], Path):
+            n = len(value)
+
+            # Shorten each path
+            short = [display_path(p) for p in value]
+
+            if n <= keep_first + 1:
+                # List is small -> show all
+                return short
+
+            # Otherwise -> first 3, ellipsis, last 1
+            return short[:keep_first] + ["..."] + [short[-1]]
+        return value
 
 
 # initialize dataclass for storing information for menu
@@ -58,6 +100,21 @@ submit_training_menu_options = SubmitTrainingMenuOptions(
 
 # class with static methods for each menu item that calls a function.
 class SubmitTrainingFunctions:
+    @staticmethod
+    def select_input_directory():
+        """Asks user to update path to directory containing training folders."""
+        pd_path = user_input_path("Change Directory Path: ")
+        ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH = Path(
+            pd_path
+        ).absolute()
+        submit_training_menu_options.selected_input_directory_path = (
+            ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH
+        )
+        training_dirs = find_and_setup_ferebus_subdirs(
+            submit_training_menu_options.selected_input_directory_path
+        )
+        submit_training_menu_options.selected_train_folders = training_dirs
+
     @staticmethod
     def select_number_of_cores():
         """Asks user to select number of cores."""
@@ -108,46 +165,69 @@ class SubmitTrainingFunctions:
 
     @staticmethod
     def submit_training_on_compute():
-        """Creates and submits models for training."""
-        # key:values from dictionaries
-        kernel_type_key = submit_training_menu_options.selected_kernel
-        mean_type_key = submit_training_menu_options.selected_mean_type
+        for job_details_path in submit_training_menu_options.selected_train_folders:
+            workdir = job_details_path.parent  # SEQ-XX-25-25 folder
+            print(f"\n=== Running pyferebus in {workdir} ===")
+            # Change into the working directory
+            os.chdir(workdir)
 
-        (ncores, kernel, max_iter, huber_delta, mean_type, gwo_cycles,) = (
-            submit_training_menu_options.selected_number_of_cores,
-            AVAILABLE_KERNEL_TYPES[kernel_type_key],
-            submit_training_menu_options.selected_max_iter,
-            submit_training_menu_options.selected_huber_delta,
-            AVAILABLE_MEAN_TYPES[mean_type_key],
-            submit_training_menu_options.selected_gwo_cycles,
-        )
+            """Creates and submits models for training."""
+            # key:values from dictionaries
+            kernel_type_key = submit_training_menu_options.selected_kernel
+            mean_type_key = submit_training_menu_options.selected_mean_type
 
-        _ = write_pyferebus_input_script(
-            ncores=ncores,
-            kernel=kernel,
-            max_iter=max_iter,
-            huber_delta=huber_delta,
-            mean_type=mean_type,
-            gwo_cycles=gwo_cycles,
-        )
+            (
+                workdir,
+                ncores,
+                kernel,
+                max_iter,
+                huber_delta,
+                mean_type,
+                gwo_cycles,
+            ) = (
+                workdir,
+                submit_training_menu_options.selected_number_of_cores,
+                AVAILABLE_KERNEL_TYPES[kernel_type_key],
+                submit_training_menu_options.selected_max_iter,
+                submit_training_menu_options.selected_huber_delta,
+                AVAILABLE_MEAN_TYPES[mean_type_key],
+                submit_training_menu_options.selected_gwo_cycles,
+            )
 
-        _ = write_extract_models_script()
+            pyferebus_input_script = write_pyferebus_input_script(
+                input_dir=workdir,
+                ncores=ncores,
+                kernel=kernel,
+                max_iter=max_iter,
+                huber_delta=huber_delta,
+                mean_type=mean_type,
+                gwo_cycles=gwo_cycles,
+            )
 
-        # run the pyferebus input script. As submit on compute is hard coded to true
-        # pyferebus will handle the submission
+            extract_models_script = write_extract_models_script()
 
-        subprocess.run(["python3", "pyferebus_input.py"], check=True)
+            # run the pyferebus input script. As submit on compute is hard coded to true
+            # pyferebus will handle the submission
 
-        SUBMIT_TRAINING_MENU_DESCRIPTION.prologue_description_text = (
-            "Successfully submitted models for training \n"
+            subprocess.run(
+                ["python3", pyferebus_input_script.name], cwd=workdir, check=True
+            )
+
+        answer = ""
+        user_input_free_flow(
+            "MODEL TRAINING JOB SUBMITTED. Press enter to continue: ", answer
         )
         # update logger
-        ichor.hpc.global_variables.LOGGER.info("Training models job submitted")
+        ichor.hpc.global_variables.LOGGER.info(f"Training models job submitted")
 
 
 # make menu items
 # can use lambda functions to change text of options as well :)
 submit_training_menu_items = [
+    FunctionItem(
+        "Select input data folder",
+        SubmitTrainingFunctions.select_input_directory,
+    ),
     FunctionItem(
         "Change number of cores",
         SubmitTrainingFunctions.select_number_of_cores,

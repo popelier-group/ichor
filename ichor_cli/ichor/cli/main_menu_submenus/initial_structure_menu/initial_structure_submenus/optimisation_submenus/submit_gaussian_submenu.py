@@ -112,6 +112,10 @@ class SubmitGaussianFunctions:
             overwrite_existing=overwrite_existing,
         )
 
+        answer = ""
+        user_input_free_flow(
+            "GAUSSIAN OPTIMISATION SUBMITTED. Press enter to continue: ", answer
+        )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             f"Gaussian optimisation job submitted for {xyz_path}"

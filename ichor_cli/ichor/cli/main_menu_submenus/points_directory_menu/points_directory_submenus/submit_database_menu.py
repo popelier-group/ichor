@@ -1,7 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Union
 
 import ichor.cli.global_menu_variables
-import ichor.hpc.global_variables
 from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
@@ -10,6 +11,8 @@ from ichor.cli.useful_functions import (
     user_input_bool,
     user_input_int,
     user_input_restricted,
+    user_input_path,
+    user_input_free_flow,
 )
 from ichor.core.files import PointsDirectory, PointsDirectoryParent
 from ichor.core.useful_functions import single_or_many_points_directories
@@ -35,6 +38,22 @@ class SubmitDatabaseMenuOptions(MenuOptions):
     selected_database_format: str
     selected_number_of_cores: int
     selected_submit_on_compute: bool
+    # defaults to the current working directory
+    selected_points_directory_path: Path = field(default_factory=lambda: Path.cwd())
+
+    def check_path(self):
+
+        pd_path = Path(self.selected_points_directory_path)
+        if not pd_path.is_dir():
+            return "Current path is not a directory."
+
+    def check_selected_points_directory_path(self) -> Union[str, None]:
+        """Checks whether the given PointsDirectory exists or if it is a directory."""
+        pd_path = Path(self.selected_points_directory_path)
+        if (pd_path.suffix != PointsDirectory._suffix) and (
+            pd_path.suffix != PointsDirectoryParent._suffix
+        ):
+            return f"Current path: {pd_path} might not be PointsDirectory-like)."
 
 
 # initialize dataclass for storing information for menu
@@ -45,9 +64,22 @@ submit_database_menu_options = SubmitDatabaseMenuOptions(
 
 # class with static methods for each menu item that calls a function.
 class SubmitDatabaseFunctions:
+    """Functions that run when menu items are selected"""
+
+    @staticmethod
+    def select_points_directory():
+        """Asks user to update points directory and then updates PointsDirectoryMenuOptions instance."""
+        pd_path = user_input_path("Change PointsDirectory Path: ")
+        ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH = Path(
+            pd_path
+        ).absolute()
+        submit_database_menu_options.selected_points_directory_path = (
+            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+        )
+
     @staticmethod
     def select_database():
-        """Asks user to update the ethod for AIMALL. The method
+        """Asks user to update the method for AIMALL. The method
         needs to be added to the WFN file so that AIMALL does the correct
         calculation."""
 
@@ -79,7 +111,8 @@ class SubmitDatabaseFunctions:
     @staticmethod
     def points_directory_to_database():
         """Converts the current given PointsDirectory to a SQLite3 database. Can be submitted on compute
-        and works for one `PointsDirectory` or parent directory containing many `PointsDirectory`-ies"""
+        and works for one `PointsDirectory` or parent directory containing many `PointsDirectory`-ies
+        """
 
         is_parent_directory_to_many_points_directories = (
             single_or_many_points_directories(
@@ -120,11 +153,19 @@ class SubmitDatabaseFunctions:
                 )
                 func = getattr(pointdir, str_database_method)
                 func(print_missing_data=True)
+        answer = ""
+        user_input_free_flow(
+            "DATABASE COMPUTATION SUBMITTED. Press enter to continue: ", answer
+        )
 
 
 # make menu items
 # can use lambda functions to change text of options as well :)
 submit_database_menu_items = [
+    FunctionItem(
+        "Select PointsDirectory Path or Parent to PointsDirectory",
+        SubmitDatabaseFunctions.select_points_directory,
+    ),
     FunctionItem(
         "Change database format",
         SubmitDatabaseFunctions.select_database,

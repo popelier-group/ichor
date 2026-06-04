@@ -22,6 +22,7 @@ from ichor.hpc.molecular_dynamics import prep_mtd, submit_mtd
 METADYNAMICS_MENU_DEFAULTS = {
     "default_collective_variables": [],
     "default_timestep": 0.005,
+    "default_md_runstep": 10000,
     "default_bias_factor": 5,
     "default_number_of_iterations": 1024,
     "default_temperature": 300,
@@ -40,6 +41,7 @@ METADYNAMICS_MENU_DESCRIPTION = MenuDescription(
 class MetadynamicsMenuOptions(MenuOptions):
     collective_variables: list
     selected_timestep: float
+    selected_md_runsteps: int
     selected_bias: float
     selected_number_of_iterations: int
     selected_temperature: float
@@ -66,6 +68,14 @@ class MetadynamicsMenuFunctions:
         """
         metadynamics_menu_options.selected_timestep = user_input_float(
             "Select timestep (fs): ", metadynamics_menu_options.selected_timestep
+        )
+
+    def select_number_of_md_timesteps():
+        """
+        Select how many timesteps to run the MD calculation for.
+        """
+        metadynamics_menu_options.selected_md_runsteps = user_input_int(
+            "Number of MD timesteps: ", metadynamics_menu_options.selected_md_runsteps
         )
 
     @staticmethod
@@ -138,6 +148,7 @@ class MetadynamicsMenuFunctions:
         else:
             col_vars = metadynamics_menu_options.collective_variables
             timestep = metadynamics_menu_options.selected_timestep
+            md_runsteps = metadynamics_menu_options.selected_md_runsteps
             bias = metadynamics_menu_options.selected_bias
             iterations = metadynamics_menu_options.selected_number_of_iterations
             temperature = metadynamics_menu_options.selected_temperature
@@ -149,6 +160,7 @@ class MetadynamicsMenuFunctions:
                 input_xyz_path=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
                 collective_variables=col_vars,
                 timestep=timestep,
+                md_runsteps=md_runsteps,
                 bias_factor=bias,
                 iterations=iterations,
                 temperature=temperature,
@@ -163,7 +175,7 @@ class MetadynamicsMenuFunctions:
                     script_name=ichor.hpc.global_variables.SCRIPT_NAMES["mtd"],
                     ncores=ncores,
                 )
-            user_input_free_flow("MTD SUBBED. Press enter to continue: ", answer)
+            user_input_free_flow("MTD SUBMITTED. Press enter to continue: ", answer)
             # update logger
             ichor.hpc.global_variables.LOGGER.info(
                 "Metadynamics trajectory generation job submitted"
@@ -189,6 +201,10 @@ metadynamics_menu_items = [
     FunctionItem(
         "Select timestep (fs)",
         MetadynamicsMenuFunctions.select_timestep,
+    ),
+    FunctionItem(
+        "Select number of MD timesteps ",
+        MetadynamicsMenuFunctions.select_number_of_md_timesteps,
     ),
     FunctionItem(
         "Select bias factor for collective variables",

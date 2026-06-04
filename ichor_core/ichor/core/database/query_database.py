@@ -211,6 +211,8 @@ def write_processed_data_for_atoms_parallel(
     import concurrent.futures
     import multiprocessing
 
+    parent_directory = Path(parent_directory)
+
     CPU_COUNT = multiprocessing.cpu_count()
 
     if CPU_COUNT < ncores:
@@ -335,7 +337,7 @@ def write_processed_one_atom_data_to_csv(
         point can be added in the dataset for another atom, if the integration error is good, defaults to 0.001
     :param calc_forces: Whether to calculate -dE/df forces (which takes a long time currently), default False.
     """
-
+    parent_directory = Path(parent_directory)
     # make directory where csvs are going to be stored
     parent_directory.mkdir(exist_ok=True)
 

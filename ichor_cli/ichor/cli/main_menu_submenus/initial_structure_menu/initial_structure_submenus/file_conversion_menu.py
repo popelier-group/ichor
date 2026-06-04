@@ -9,7 +9,11 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_path, user_input_restricted
+from ichor.cli.useful_functions import (
+    user_input_path,
+    user_input_restricted,
+    user_input_free_flow,
+)
 
 AVAILABLE_READ_FILE_FORMATS = [
     "abinit-gsr",
@@ -289,6 +293,9 @@ class FileConversionFunctions:
             images=loaded_atoms,
             format=file_conversion_menu_options.selected_output_file_format,
         )
+        answer = ""
+        user_input_free_flow("FILE CONVERTED. Press enter to continue: ", answer)
+        # update logger
         ichor.hpc.global_variables.LOGGER.info(f"Output file written to {output_path}")
 
 

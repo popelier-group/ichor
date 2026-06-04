@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Union
-
+from tqdm import tqdm
 import numpy as np
 import pandas as pd
 from ichor.core.atoms import Atom, Atoms, ListOfAtoms
@@ -194,7 +194,12 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             root_path = Path(system_name).with_suffix(default_root_suffix)
 
         mkdir(root_path, empty=True)
-        for i, atoms_instance in enumerate(self):
+        for i, atoms_instance in enumerate(
+            tqdm(
+                self,
+                desc="Processing point dirs",
+            )
+        ):
 
             if (i % every) == 0:
                 if center:
@@ -215,6 +220,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         split_size: int = 1000,
         every: int = 1,
         center=False,
+        parent_dir: Path = None,
     ) -> Path:
         """Writes out every nth timestep to a separate .xyz file. This method differs
         from `to_dir` because it has a structure system_name_root / points_directory / xyz file.
@@ -239,7 +245,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         # capitalize system name
         system_name = system_name.upper()
 
-        root_path = Path(system_name).with_suffix(default_parent_suffix)
+        root_path = parent_dir / Path(system_name).with_suffix(default_parent_suffix)
 
         # make root directory that will contain PointsDirectory-like dirs
         mkdir(root_path, empty=True)
@@ -258,7 +264,12 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         geom_counter = 0
 
         # loop over geometries and write to respective dir
-        for i, atoms_instance in enumerate(geometries_to_write):
+        for i, atoms_instance in enumerate(
+            tqdm(
+                geometries_to_write,
+                desc="Processing point dirs",
+            )
+        ):
 
             if center:
                 atoms_instance.centre()
@@ -339,7 +350,11 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         nsplits_counter = 0
 
         # loop over geometries and write to respective dir
-        for total_geom_counter, atoms_instance in enumerate(geometries_to_write):
+        for total_geom_counter, atoms_instance in tqdm(
+            enumerate(geometries_to_write),
+            ascii=True,
+            desc="Processing point dirs",
+        ):
 
             if center:
                 atoms_instance.centre()
@@ -425,7 +440,6 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         index_col=0,
         sheet_name=0,
     ) -> "Trajectory":
-
         """Takes in a csv or excel file containing features and convert it to a `Trajectory` object.
         It assumes that the features start from the very first column
         (column after the index column, if one exists). Feature files that are written out by ichor
