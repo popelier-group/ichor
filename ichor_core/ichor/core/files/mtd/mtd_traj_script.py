@@ -184,10 +184,9 @@ class MtdTrajScript(WriteFile, File):
         system_str_built = self.build_mtd_setup_str()
 
         # set up template for polus script
-        mtd_traj_script_template = Template(
-            textwrap.dedent(
-                """
+        mtd_traj_script_template = Template(textwrap.dedent("""
             from os.path import exists
+            import os
             import numpy as np
             from ase import units
             from ase.units import fs, kJ, mol, nm
@@ -402,9 +401,7 @@ class MtdTrajScript(WriteFile, File):
             # Delete traj.write object file
             os.remove("$traj_path")
 
-        """
-            )
-        )
+        """))
 
         # subsitute template values into script
         script_text = mtd_traj_script_template.substitute(
