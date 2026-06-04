@@ -8,14 +8,13 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
-    user_input_restricted,
+    user_input_float,
     user_input_int,
     user_input_path,
     user_input_float,
     user_input_free_flow,
 )
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
-
 
 AVAILABLE_PROPS = {
     "iqa": "iqa",
@@ -49,7 +48,6 @@ SUBMIT_DATA_PREP_MENU_DEFAULTS = {
 # dataclass used to store values for submit dataset preparation menu
 @dataclass
 class SubmitDataPrepMenuOptions(MenuOptions):
-
     selected_input_directory_path: Path
     selected_number_of_cores: int
     selected_props: list[str]
@@ -73,7 +71,6 @@ submit_data_prep_menu_options = SubmitDataPrepMenuOptions(
 
 # class with static methods for each menu item that calls a function.
 class SubmitDataPrepFunctions:
-
     @staticmethod
     def select_input_directory():
         """Asks user for path to extracted database CSV folder."""
@@ -219,7 +216,7 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def submit_data_prep_on_compute():
         """Submits polus job for data preparation."""
-        (ncores, props, q00_threshold, train_size, val_size, test_size) = (
+        ncores, props, q00_threshold, train_size, val_size, test_size = (
             submit_data_prep_menu_options.selected_number_of_cores,
             submit_data_prep_menu_options.selected_props,
             submit_data_prep_menu_options.selected_q00_threshold,

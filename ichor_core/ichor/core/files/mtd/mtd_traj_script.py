@@ -135,7 +135,7 @@ class MtdTrajScript(WriteFile, File):
         group_str = f'\t"GROUP ATOMS={cv_to_str} LABEL=g{num}",\n'
         return group_str
 
-    ## need some complex logic here to define MTD arguments etc.
+    # need some complex logic here to define MTD arguments etc.
     def build_mtd_setup_str(self):
 
         header_line = f'[f"UNITS LENGTH={self.dist_units} TIME={{1/ps}} ENERGY={self.energy_units}",\n'
@@ -199,7 +199,7 @@ class MtdTrajScript(WriteFile, File):
 
             def restart_from_trajectory(prev_traj, *args, prev_steps=None, atoms=None, **kwargs):
                 atoms.calc = Plumed(*args, atoms=atoms, restart=True, **kwargs)
-    
+
                 with Trajectory(prev_traj) as traj:
                     if prev_steps is None:
                         atoms.calc.istep = len(traj) - 1
@@ -359,8 +359,8 @@ class MtdTrajScript(WriteFile, File):
 
             timestep = $time_step
             ps = $time_units
-            
-            
+
+
             setup = $system_str
 
             # Define molecule
@@ -371,7 +371,7 @@ class MtdTrajScript(WriteFile, File):
 
             # Define calculator
             xtb_calc = XTB(method="$calculator",solvent="$solvent", electronic_temperature=$temperature, max_iterations=$iterations)
-            
+
             # Attach Plumed calculator to atoms object
             mol_mtd.calc = Plumed(calc=xtb_calc,
                                 input=setup,
@@ -381,13 +381,13 @@ class MtdTrajScript(WriteFile, File):
                                 restart = False,
                                 kT=$kT)
             # Define dynamic object
-            dyn = Langevin(atoms=mol_mtd, 
-                          timestep=$md_timestep*units.fs, 
+            dyn = Langevin(atoms=mol_mtd,
+                          timestep=$md_timestep*units.fs,
                           temperature_K=$temperature,
                           friction=$md_friction/units.fs,
                           #communicator = $md_communicator,
                           logfile = "$log_file_name")
-            
+
             # Attach trajectory
             dyn.attach(traj.write, interval=$md_interval)
 

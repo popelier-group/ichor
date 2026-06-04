@@ -1,5 +1,5 @@
-from ichor.core.files.ferebus.pyferebus_input import PyFerebusScript
 from ichor.core.files.ferebus.extract_models import ExtractModelsScript
+from ichor.core.files.ferebus.pyferebus_input import PyFerebusScript
 
 
 __all__ = [

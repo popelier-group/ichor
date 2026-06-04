@@ -1,16 +1,13 @@
 from dataclasses import dataclass
-from pathlib import Path
 
 import ichor.cli.global_menu_variables
+
+import ichor.core.molecular_dynamics.metadynamics as mtd
 from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import (
-    user_input_free_flow,
-)
-
-import ichor.core.molecular_dynamics.metadynamics as mtd
+from ichor.cli.useful_functions import user_input_free_flow
 
 COL_VAR_MENU_DESCRIPTION = MenuDescription(
     "Collective Variable Menu",
@@ -28,7 +25,6 @@ col_var_menu_options = ColVarMenuOptions()
 
 # class with static methods for each menu item that calls a function.
 class ColVarMenuFunctions:
-
     shared_options = None
 
     @staticmethod
@@ -59,7 +55,7 @@ class ColVarMenuFunctions:
             )
 
             while len(col_var) < 4:
-                user_input = input(f"  Enter atom ID {len(col_var)+1}: ").strip()
+                user_input = input(f"  Enter atom ID {len(col_var) + 1}: ").strip()
 
                 if user_input == "" or user_input.lower() == "q":
                     print("  Saving this collective variable.")

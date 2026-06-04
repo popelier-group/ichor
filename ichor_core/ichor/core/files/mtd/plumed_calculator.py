@@ -2,7 +2,7 @@ from os.path import exists
 
 import numpy as np
 
-from ase.calculators.calculator import Calculator, all_changes
+from ase.calculators.calculator import all_changes, Calculator
 from ase.io.trajectory import Trajectory
 from ase.parallel import broadcast, world
 from ase.units import fs, kJ, mol, nm

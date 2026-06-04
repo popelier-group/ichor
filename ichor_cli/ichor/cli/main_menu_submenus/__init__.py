@@ -1,8 +1,8 @@
 from ichor.cli.main_menu_submenus.analysis_menu.analysis_menu import (
     ANALYSIS_MENU_DESCRIPTION,
 )
-from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_menu import (
-    TRAJECTORY_CREATION_MENU_DESCRIPTION,
+from ichor.cli.main_menu_submenus.initial_structure_menu.initial_structure_menu import (
+    INITIAL_STRUCTURE_MENU_DESCRIPTION,
 )
 from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu import (
     POINTS_DIRECTORY_MENU_DESCRIPTION,

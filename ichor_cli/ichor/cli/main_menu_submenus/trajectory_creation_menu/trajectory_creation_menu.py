@@ -6,12 +6,12 @@ import ichor.cli.global_menu_variables
 from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus import (
-    metadynamics_menu,
-    METADYNAMICS_MENU_DESCRIPTION,
     amber_menu,
     AMBER_MENU_DESCRIPTION,
     cp2k_menu,
     CP2K_MENU_DESCRIPTION,
+    metadynamics_menu,
+    METADYNAMICS_MENU_DESCRIPTION,
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions

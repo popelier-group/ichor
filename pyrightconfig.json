@@ -1,0 +1,9 @@
+{
+  "extraPaths": [
+    "ichor_core",
+    "ichor_hpc",
+    "ichor_cli"
+  ],
+  "venvPath": ".",
+  "venv": ".venv"
+}

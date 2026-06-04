@@ -14,7 +14,6 @@ from ichor.cli.useful_functions import (
 )
 from ichor.hpc.main.polus import submit_polus, write_diversity_sampling
 
-
 SUBMIT_DIVERSITY_MENU_DESCRIPTION = MenuDescription(
     "Submit Diversity Sampling Menu",
     subtitle="Use this menu to perform diversity sampling on a trajectory.\n",

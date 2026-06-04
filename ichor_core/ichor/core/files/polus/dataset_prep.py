@@ -58,10 +58,7 @@ class DatasetPrepScript(WriteFile, File):
         self.outlier_method = self.outlier_method or "extrZS"
         self.system_name = self.system_name or "molecule"
         self.q00_threshold = self.q00_threshold or 0.005
-        self.props = (
-            self.props
-            or f'["iqa"]'
-        )
+        self.props = self.props or '["iqa"]'
         self.val_size = self.val_size or [250]
         self.test_size = self.test_size or [1000]
 
@@ -94,12 +91,12 @@ class DatasetPrepScript(WriteFile, File):
             )
             outlier_job.Execute()
 
-            # IQA correction 
+            # IQA correction
             iqa_corr_job = iqa_correct(
                 inputDir="OUTLIER_CHECK",
                 allProps=$iqa_all_props,
                 system_name="$system_name",
-                outputDir=None, 
+                outputDir=None,
                 working_directory=None,
                 geom_IDs=$geom_ids,
             )
