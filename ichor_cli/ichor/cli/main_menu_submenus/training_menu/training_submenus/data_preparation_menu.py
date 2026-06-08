@@ -168,8 +168,8 @@ class SubmitDataPrepFunctions:
 
         while True:
             choice = input(
-                "Train up to (1) IQA energies (2) monopoles (3) dipoles "
-                "(4) quadrupoles (5) octupoles (6) hexadecapoles: "
+                "Train up to:\n (1) IQA energies (2) monopoles (3) dipoles "
+                "(4) quadrupoles (5) octupoles (6) hexadecapoles "
             ).strip()
 
             if choice in choice_map:
