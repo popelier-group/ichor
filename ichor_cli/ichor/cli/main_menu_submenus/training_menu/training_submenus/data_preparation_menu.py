@@ -9,10 +9,10 @@ from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     user_input_float,
+    user_input_free_flow,
     user_input_int,
     user_input_path,
-    user_input_float,
-    user_input_free_flow,
+    user_input_restricted,
 )
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
@@ -126,7 +126,7 @@ class SubmitDataPrepFunctions:
 
                 prop = user_input_restricted(
                     remaining_props,
-                    f"Enter property: ",
+                    "Enter property: ",
                 )
 
                 props.append(prop)
@@ -251,7 +251,7 @@ class SubmitDataPrepFunctions:
             )
             # update logger
             ichor.hpc.global_variables.LOGGER.info(
-                f"Data preparation for machine learning job submitted"
+                "Data preparation for machine learning job submitted"
             )
         else:
             answer = ""

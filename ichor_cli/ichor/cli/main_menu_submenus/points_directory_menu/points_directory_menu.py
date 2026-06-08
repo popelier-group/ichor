@@ -1,17 +1,18 @@
 from dataclasses import dataclass
+
 from consolemenu.items import SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus import (
     submit_aimall_menu,
     SUBMIT_AIMALL_MENU_DESCRIPTION,
+    submit_csvs_menu,
+    SUBMIT_CSVS_MENU_DESCRIPTION,
     submit_database_menu,
     SUBMIT_DATABASE_MENU_DESCRIPTION,
     submit_gaussian_menu,
     SUBMIT_GAUSSIAN_MENU_DESCRIPTION,
     traj_split_menu,
     TRAJ_SPLIT_MENU_DESCRIPTION,
-    submit_csvs_menu,
-    SUBMIT_CSVS_MENU_DESCRIPTION,
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions

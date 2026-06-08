@@ -9,10 +9,10 @@ from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     user_input_bool,
-    user_input_int,
-    user_input_restricted,
-    user_input_path,
     user_input_free_flow,
+    user_input_int,
+    user_input_path,
+    user_input_restricted,
 )
 from ichor.core.files import PointsDirectory, PointsDirectoryParent
 from ichor.core.useful_functions import single_or_many_points_directories

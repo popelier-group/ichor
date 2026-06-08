@@ -26,7 +26,6 @@ CP2K_MENU_DESCRIPTION = MenuDescription(
 
 @dataclass
 class CP2KMenuOptions(MenuOptions):
-
     selected_method: str
     selected_basis_set: str
     selected_temperature: int
@@ -132,7 +131,7 @@ class CP2KMenuFunctions:
         user_input_free_flow("CP2K SUBMITTED. Press enter to continue: ", answer)
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"CP2K trajectory generation job submitted"
+            "CP2K trajectory generation job submitted"
         )
 
 

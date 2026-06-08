@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import List, Optional, Union
 from warnings import warn
-from tqdm import tqdm
 
 import ichor.hpc.global_variables
 
@@ -12,6 +11,7 @@ from ichor.core.files.file import FileWriteError
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import AIMAllCommand
 from ichor.hpc.submission_script import SubmissionScript
+from tqdm import tqdm
 
 
 def submit_points_directory_to_aimall(

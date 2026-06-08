@@ -10,9 +10,9 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    user_input_free_flow,
     user_input_path,
     user_input_restricted,
-    user_input_free_flow,
 )
 
 AVAILABLE_READ_FILE_FORMATS = [

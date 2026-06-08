@@ -1,6 +1,6 @@
+import shutil
 from pathlib import Path
 from typing import Optional
-import shutil
 
 from ichor.core.files.ferebus import ExtractModelsScript, PyFerebusScript
 

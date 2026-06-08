@@ -9,8 +9,8 @@ from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     user_input_bool,
-    user_input_int,
     user_input_free_flow,
+    user_input_int,
 )
 from ichor.hpc.main.polus import submit_polus, write_diversity_sampling
 
@@ -92,12 +92,7 @@ class SubmitDiversityFunctions:
     @staticmethod
     def submit_diversity_on_compute():
         """Creates and submits an optimisation using ase calculator."""
-        (
-            ncores,
-            weights,
-            sample_size,
-            chunk_size,
-        ) = (
+        (ncores, weights, sample_size, chunk_size,) = (
             submit_diversity_menu_options.selected_number_of_cores,
             submit_diversity_menu_options.selected_weights,
             submit_diversity_menu_options.selected_sample_size,

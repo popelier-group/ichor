@@ -9,9 +9,9 @@ from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions.user_input import (
     user_input_bool,
+    user_input_free_flow,
     user_input_int,
     user_input_path,
-    user_input_free_flow,
 )
 from ichor.core.files import Trajectory
 
