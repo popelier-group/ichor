@@ -6,7 +6,6 @@
 ![Release](https://img.shields.io/github/v/release/popelier-group/ICHOR?sort=semver)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Documentation Status](https://readthedocs.org/projects/ichor/badge/?version=latest)](https://ichor.readthedocs.io/en/latest/?badge=latest)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11182102.svg)](https://doi.org/10.5281/zenodo.11182102)
 
 `ichor` is a Python package used to simplify data management from computational chemistry programs and aid with machine learning force field development. If you would like to request missing features or run into a bug, don't hesitate to create an [issue](https://github.com/popelier-group/ICHOR/issues).
 
@@ -19,6 +18,13 @@ Here is a list of things that the package is intended to do:
 5. collate tools for machine learning dataset and model analysis, as well as molecular dynamics simulation benchmarking
 
 Realistically, the file management portion of `ichor` (as well as the workload manager integration) is very general, so it can be used for any type of data that might not even be computational chemistry related. However, the focus of the source code itself is on computational chemistry and machine learning force field development.
+
+## Citing Us
+
+If you use `ichor`, please cite the following two papers:
+
+- [Y. T. Manchev, M. J. Burn, P. L. A. Popelier, J. Comput. Chem.2024, 45(32), 2912.](https://doi.org/10.1002/jcc.27477)
+- [M. J. Burn, P. L. A. Popelier, Materials Advances.2022, 3(23), 8729.](https://doi.org/10.1039/D2MA00673A)
 
 ## Getting Started
 ---
@@ -34,10 +40,6 @@ The `ichor.hpc` package is used to submit jobs on compute clusters (SGE/SLURM).
 The `ichor.cli` package provides a simple to use command line interface (CLI), providing an easy access to access the most commonly used tools from ichor.
 
 **You will need to have an `ichor_config.yaml` file in your home directory for configuration settings relating to HPC clusters, refer to the documentation for examples. An example `ichor_config.yaml` is provided in the repository.**
-
-## Papers
-
-The published paper for `ichor` can be found [here](https://doi.org/10.1002/jcc.27477).
 
 ## Documentation
 
