@@ -169,12 +169,12 @@ class SubmitDataPrepFunctions:
         while True:
             choice = input(
                 "Train up to which level?\n"
-                "(1) Energy only (IQA)\n"
-                "(2) + Charges (monopoles)\n"
+                "(1) Iqa energies only\n"
+                "(2) + Monopoles\n"
                 "(3) + Dipoles\n"
                 "(4) + Quadrupoles\n"
                 "(5) + Octupoles\n"
-                "(6) + Hexadecapoles\n"
+                "(6) + Hexadecapoles\n\n"
                 "Choice: "
             ).strip()
 
