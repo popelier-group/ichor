@@ -26,6 +26,10 @@ If you use `ichor`, please cite the following two papers:
 - [Y. T. Manchev, M. J. Burn, P. L. A. Popelier, J. Comput. Chem.2024, 45(32), 2912.](https://doi.org/10.1002/jcc.27477)
 - [M. J. Burn, P. L. A. Popelier, Materials Advances.2022, 3(23), 8729.](https://doi.org/10.1039/D2MA00673A)
 
+## Documentation
+
+Documentation of all three packages, including examples, can be found [here](https://ichor.readthedocs.io/en/latest/).
+
 ## Getting Started
 ---
 The namespace package `ichor` is divided into three parts, `ichor.core`, `ichor.hpc`, and `ichor.cli`.
@@ -41,10 +45,10 @@ The `ichor.cli` package provides a simple to use command line interface (CLI), p
 
 **You will need to have an `ichor_config.yaml` file in your home directory for configuration settings relating to HPC clusters, refer to the documentation for examples. An example `ichor_config.yaml` is provided in the repository.**
 
-## Documentation
-
-Documentation of all three packages, including examples, can be found [here](https://ichor.readthedocs.io/en/latest/).
-
 ## Contributing
 
 Contributions are very welcome! More information on how to correctly contribute can be found in the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+
+## License
+
+`ichor` is [MIT Licensed.](https://github.com/popelier-group/ichor/blob/main/LICENSE)
