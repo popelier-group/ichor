@@ -175,7 +175,7 @@ class SubmitDataPrepFunctions:
                 "(4) + Quadrupoles\n"
                 "(5) + Octupoles\n"
                 "(6) + Hexadecapoles\n\n"
-                "Choice: "
+                "Enter option number: "
             ).strip()
 
             if choice in choice_map:
