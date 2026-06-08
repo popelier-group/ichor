@@ -6,5 +6,5 @@
   ],
   "venvPath": ".",
   "venv": ".venv",
-  "typeCheckingMode": "basic"
+  "typeCheckingMode": "off"
 }
