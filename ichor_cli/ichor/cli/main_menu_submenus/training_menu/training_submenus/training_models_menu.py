@@ -1,6 +1,7 @@
+import os
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-import subprocess, os
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
@@ -9,17 +10,17 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
-    user_input_int,
-    user_input_restricted,
     user_input_float,
     user_input_free_flow,
+    user_input_int,
     user_input_path,
+    user_input_restricted,
 )
 
 from ichor.hpc.main import (
+    find_and_setup_ferebus_subdirs,
     write_extract_models_script,
     write_pyferebus_input_script,
-    find_and_setup_ferebus_subdirs,
 )
 
 
@@ -176,15 +177,7 @@ class SubmitTrainingFunctions:
             kernel_type_key = submit_training_menu_options.selected_kernel
             mean_type_key = submit_training_menu_options.selected_mean_type
 
-            (
-                workdir,
-                ncores,
-                kernel,
-                max_iter,
-                huber_delta,
-                mean_type,
-                gwo_cycles,
-            ) = (
+            (workdir, ncores, kernel, max_iter, huber_delta, mean_type, gwo_cycles,) = (
                 workdir,
                 submit_training_menu_options.selected_number_of_cores,
                 AVAILABLE_KERNEL_TYPES[kernel_type_key],
@@ -204,7 +197,7 @@ class SubmitTrainingFunctions:
                 gwo_cycles=gwo_cycles,
             )
 
-            extract_models_script = write_extract_models_script()
+            write_extract_models_script()
 
             # run the pyferebus input script. As submit on compute is hard coded to true
             # pyferebus will handle the submission
@@ -218,7 +211,7 @@ class SubmitTrainingFunctions:
             "MODEL TRAINING JOB SUBMITTED. Press enter to continue: ", answer
         )
         # update logger
-        ichor.hpc.global_variables.LOGGER.info(f"Training models job submitted")
+        ichor.hpc.global_variables.LOGGER.info("Training models job submitted")
 
 
 # make menu items

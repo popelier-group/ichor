@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 import ichor.hpc.global_variables
-from ichor.core.common.io import mkdir, copytree
+from ichor.core.common.io import copytree, mkdir
 from ichor.core.files.polus import DatasetPrepScript, DiversityScript
 
 from ichor.hpc.batch_system import JobID

@@ -47,7 +47,6 @@ def ask_user_for_mdcrd_paths():
 
 @dataclass
 class AmberMenuOptions(MenuOptions):
-
     selected_temperature: int
     selected_number_of_timesteps: int
     selected_write_coordinates_every_nth_timestep: int
@@ -134,7 +133,7 @@ class AmberMenuFunctions:
         user_input_free_flow("AMBER SUBMITTED. Press enter to continue: ", answer)
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"AMBER trajectory generation job submitted"
+            "AMBER trajectory generation job submitted"
         )
 
     @staticmethod

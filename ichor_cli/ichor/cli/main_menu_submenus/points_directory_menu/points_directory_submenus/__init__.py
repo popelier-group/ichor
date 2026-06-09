@@ -2,6 +2,10 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
     submit_aimall_menu,
     SUBMIT_AIMALL_MENU_DESCRIPTION,
 )
+from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.submit_csvs_from_database import (
+    submit_csvs_menu,
+    SUBMIT_CSVS_MENU_DESCRIPTION,
+)
 from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.submit_database_menu import (
     submit_database_menu,
     SUBMIT_DATABASE_MENU_DESCRIPTION,
@@ -13,10 +17,6 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
 from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.traj_split_menu import (
     traj_split_menu,
     TRAJ_SPLIT_MENU_DESCRIPTION,
-)
-from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.submit_csvs_from_database import (
-    submit_csvs_menu,
-    SUBMIT_CSVS_MENU_DESCRIPTION,
 )
 
 __all__ = [

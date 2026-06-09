@@ -1,4 +1,3 @@
-import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Union
@@ -10,10 +9,10 @@ from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     user_input_bool,
+    user_input_free_flow,
     user_input_int,
     user_input_path,
     user_input_restricted,
-    user_input_free_flow,
 )
 
 from ichor.core.database.query_database import (
@@ -42,7 +41,6 @@ SUBMIT_CSVS_MENU_DEFAULTS = {
 # dataclass used to store values for SubmitAIMALLMenu
 @dataclass
 class SubmitCSVSMenuOptions(MenuOptions):
-
     selected_database_path: Path
     selected_database_format: str
     selected_rotate_multipole_moments: bool
@@ -171,7 +169,6 @@ class SubmitCSVSFunctions:
 
         # if running on compute
         else:
-
             submit_make_csvs_from_database(
                 db_path,
                 db_type,

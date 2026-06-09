@@ -4,6 +4,7 @@ from ichor.hpc.main.check_for_missing_files import (
 )
 from ichor.hpc.main.database import submit_make_csvs_from_database
 from ichor.hpc.main.ferebus import (
+    find_and_setup_ferebus_subdirs,
     write_extract_models_script,
     write_pyferebus_input_script,
 )
@@ -13,11 +14,6 @@ from ichor.hpc.main.gaussian import (
     submit_single_gaussian_xyz,
 )
 from ichor.hpc.main.orca import submit_points_directory_to_orca
-from ichor.hpc.main.ferebus import (
-    write_pyferebus_input_script,
-    write_extract_models_script,
-    find_and_setup_ferebus_subdirs,
-)
 
 __all__ = [
     "submit_points_directory_to_aimall",

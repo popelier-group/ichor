@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Union
-from tqdm import tqdm
+
 import numpy as np
 import pandas as pd
 from ichor.core.atoms import Atom, Atoms, ListOfAtoms
@@ -12,6 +12,7 @@ from ichor.core.common.int import count_digits
 from ichor.core.common.io import convert_to_path, mkdir
 from ichor.core.common.itertools import chunker
 from ichor.core.files.file import FileState, ReadFile, WriteFile
+from tqdm import tqdm
 
 
 class Trajectory(ReadFile, WriteFile, ListOfAtoms):
