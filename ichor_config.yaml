@@ -35,9 +35,10 @@ csf3:
     pandora:
       modules: ["mpi/intel-18.0/openmpi/4.0.1"]
 
-    # likely not needed
     python:
-      modules: ["apps/anaconda3/5.2.0/bin"]
+      env_name: "ase_plumed_env"
+      python_path: "~/.conda/envs/ase_plumed_env/bin/python"
+      modules: ["apps/binapps/anaconda3/2024.10"]
 
     tyche:
       modules: ["compilers/intel/18.0.3"]
