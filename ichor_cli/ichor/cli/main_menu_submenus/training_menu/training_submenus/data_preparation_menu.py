@@ -17,16 +17,79 @@ from ichor.cli.useful_functions import (
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
 AVAILABLE_PROPS = {
-    "iqa": "iqa",
-    "q00": "q00",
-    "q10": "q10",
-    "q11c": "q11c",
-    "q11s": "q11s",
-    "q20": "q20",
-    "q21s": "q21s",
-    "q21c": "q21c",
-    "q22s": "q22s",
-    "q22c": "q22c",
+    "iqa": [
+        "iqa",
+    ],
+    "monopoles": [
+        "iqa",
+        "q00",
+    ],
+    "dipoles": [
+        "iqa",
+        "q00",
+        "q10",
+        "q11c",
+        "q11s",
+    ],
+    "quadrupoles": [
+        "iqa",
+        "q00",
+        "q10",
+        "q11c",
+        "q11s",
+        "q20",
+        "q21c",
+        "q21s",
+        "q22c",
+        "q22s",
+    ],
+    "octupoles": [
+        "iqa",
+        "q00",
+        "q10",
+        "q11c",
+        "q11s",
+        "q20",
+        "q21c",
+        "q21s",
+        "q22c",
+        "q22s",
+        "q30",
+        "q31c",
+        "q31s",
+        "q32c",
+        "q32s",
+        "q33c",
+        "q33s",
+    ],
+    "hexadecapoles": [
+        "iqa",
+        "q00",
+        "q10",
+        "q11c",
+        "q11s",
+        "q20",
+        "q21c",
+        "q21s",
+        "q22c",
+        "q22s",
+        "q30",
+        "q31c",
+        "q31s",
+        "q32c",
+        "q32s",
+        "q33c",
+        "q33s",
+        "q40",
+        "q41c",
+        "q41s",
+        "q42c",
+        "q42s",
+        "q43c",
+        "q43s",
+        "q44c",
+        "q44s",
+    ],
 }
 
 SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
@@ -94,42 +157,34 @@ class SubmitDataPrepFunctions:
     def select_props():
         """Asks user to select the number of properties to train on."""
 
+        choice_map = {
+            "1": "iqa",
+            "2": "monopoles",
+            "3": "dipoles",
+            "4": "quadrupoles",
+            "5": "octupoles",
+            "6": "hexadecapoles",
+        }
+
         while True:
             choice = input(
-                "Train on (1) all properties or (2) select individually? [1/2]: "
+                "Train up to which level?\n"
+                "(1) Iqa energies only\n"
+                "(2) + Monopoles\n"
+                "(3) + Dipoles\n"
+                "(4) + Quadrupoles\n"
+                "(5) + Octupoles\n"
+                "(6) + Hexadecapoles\n\n"
+                "Enter option number: "
             ).strip()
 
-            if choice in ("1", "2"):
+            if choice in choice_map:
                 break
             else:
-                print("Invalid input. Please enter '1' or '2'.")
+                print("Invalid input. Please enter a number between 1 and 6.")
 
-        if choice == "1":
-            props = list(AVAILABLE_PROPS.keys())
-
-        else:
-            props = ["iqa"]
-            while True:
-                print(
-                    f"Add a new property for training (you've chosen '{', '.join(props)}' so far):"
-                )
-                add_more = (
-                    input("Do you want to add another property? (y/n): ")
-                    .strip()
-                    .lower()
-                )
-
-                if add_more not in ("y", "yes"):
-                    break
-
-                remaining_props = [p for p in AVAILABLE_PROPS if p not in props]
-
-                prop = user_input_restricted(
-                    remaining_props,
-                    "Enter property: ",
-                )
-
-                props.append(prop)
+        level = choice_map[choice]
+        props = AVAILABLE_PROPS[level]
 
         submit_data_prep_menu_options.selected_props = props
 
