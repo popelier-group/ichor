@@ -123,6 +123,14 @@ class SubmitMorfiFunctions:
         )
 
     @staticmethod
+    def select_number_of_geoms():
+        """Asks user to update the number of geometries."""
+        submit_morfi_menu_options.selected_number_of_geoms = user_input_int(
+            "Enter number of geometries: ",
+            submit_morfi_menu_options.selected_number_of_geoms,
+        )
+
+    @staticmethod
     def select_grid():
         """Asks user to update the grid."""
 
