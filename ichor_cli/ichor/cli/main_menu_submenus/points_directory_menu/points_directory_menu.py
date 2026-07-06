@@ -11,12 +11,13 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
     SUBMIT_DATABASE_MENU_DESCRIPTION,
     submit_gaussian_menu,
     SUBMIT_GAUSSIAN_MENU_DESCRIPTION,
+    submit_morfi_menu,
+    SUBMIT_MORFI_MENU_DESCRIPTION,
     traj_split_menu,
     TRAJ_SPLIT_MENU_DESCRIPTION,
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
     "PointsDirectory Menu",
@@ -58,6 +59,9 @@ point_directory_menu_items = [
     ),
     SubmenuItem(
         SUBMIT_AIMALL_MENU_DESCRIPTION.title, submit_aimall_menu, points_directory_menu
+    ),
+    SubmenuItem(
+        SUBMIT_MORFI_MENU_DESCRIPTION.title, submit_morfi_menu, points_directory_menu
     ),
     SubmenuItem(
         SUBMIT_DATABASE_MENU_DESCRIPTION.title,
