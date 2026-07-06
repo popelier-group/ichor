@@ -263,7 +263,7 @@ submit_morfi_menu_items = [
     FunctionItem("Select Grid", SubmitMorfiFunctions.select_grid),
     FunctionItem(
         "Submit to Morfi on compute",
-        SubmitMorfiFunctions.points_directory_to_gaussian_on_compute,
+        SubmitMorfiFunctions.points_directory_to_morfi_on_compute,
     ),
 ]
 
