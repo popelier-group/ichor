@@ -25,3 +25,7 @@ SELECTED_DATABASE_PATH: Path = Path("").absolute()
 
 # FileConversion options
 SELECTED_INPUT_FILE_PATH: Path = Path("").absolute()
+
+# ToolsMenu model-analysis options
+SELECTED_MODELS_PATH: Path = Path("").absolute()
+SELECTED_VALIDATION_SET_PATH: Path = Path("").absolute()
