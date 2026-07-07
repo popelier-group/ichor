@@ -1,7 +1,8 @@
+import re
 from collections import defaultdict
 from pathlib import Path
 from string import ascii_uppercase
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -13,6 +14,113 @@ from ichor.core.models import Models
 from natsort import natsorted
 
 ascii_uppercase = list(ascii_uppercase)
+
+# FEREBUS/ichor training CSVs are named "<system>_<atom>_<SETTYPE>_SET.csv" where
+# the system name itself may contain underscores, so the atom name is recovered by
+# stripping the known set-type suffix and taking the final token.
+FEREBUS_SET_SUFFIXES = (
+    "_EXT_VALIDATION_SET",
+    "_INT_VALIDATION_SET",
+    "_TRAINING_SET",
+)
+
+# feature columns in FEREBUS training CSVs are named f1, f2, ... fN
+FEATURE_COLUMN_RE = re.compile(r"^f\d+$")
+
+
+def atom_name_from_ferebus_csv(filename: Union[str, Path]) -> str:
+    """Extracts the atom name (e.g. ``C5``) from a FEREBUS/ichor training CSV file
+    name such as ``BZAMID05_MOL_MTD_OUT0_C5_EXT_VALIDATION_SET.csv``.
+
+    :param filename: The CSV file name (or path).
+    :return: The atom name, taken as the token before the set-type suffix.
+    """
+
+    stem = Path(filename).stem  # drops the .csv extension
+    for suffix in FEREBUS_SET_SUFFIXES:
+        if stem.endswith(suffix):
+            stem = stem[: -len(suffix)]
+            break
+    return stem.rsplit("_", 1)[-1]
+
+
+def true_predicted_from_ferebus_csvs(
+    csv_files_list: List[Union[str, Path]],
+    models: Models,
+    energy_scale: float = ha_to_kj_mol,
+) -> dict:
+    """Reads FEREBUS/ichor per-(atom, property) training-style CSVs and uses the
+    given models to predict, returning the nested dict used to make S-curves and
+    metrics.
+
+    Each CSV is expected to contain feature columns named ``f1, f2, ...`` and a
+    single property column named after the property (e.g. ``q43s``, ``iqa``). The
+    atom name is taken from the file name (see :func:`atom_name_from_ferebus_csv`).
+    Only (atom, property) pairs for which both a CSV and a model exist are included.
+
+    :param csv_files_list: A list of per-(atom, property) CSV files. These should
+        all be of a single held-out split (e.g. only the EXT_VALIDATION_SET files).
+    :param models: A ``Models`` instance containing the ``.model`` files.
+    :param energy_scale: Factor applied to energy errors (iqa/wfn) so they are in
+        kJ mol-1. Multipole errors are left in atomic units.
+    :return: a nested dict ``{property: {atom: {"true", "predicted", "error"}}}``
+        (energy errors already scaled to kJ mol-1).
+    """
+
+    # index the CSV data by (atom, property) so it can be matched to each model
+    csv_index: Dict[Tuple[str, str], Tuple[np.ndarray, np.ndarray]] = {}
+    for csv_file in csv_files_list:
+        csv_file = Path(csv_file)
+        df = pd.read_csv(csv_file)
+
+        feature_cols = [c for c in df.columns if FEATURE_COLUMN_RE.match(str(c))]
+        property_cols = [c for c in df.columns if c not in feature_cols]
+
+        if not feature_cols or not property_cols:
+            print(
+                f"Skipping {csv_file.name}: could not identify feature/property columns."
+            )
+            continue
+
+        # the property column is the (single) non-feature column, named after the property
+        property_name = str(property_cols[-1])
+        atom_name = atom_name_from_ferebus_csv(csv_file.name)
+        csv_index[(atom_name, property_name)] = (
+            df[feature_cols].values,
+            df[property_name].values,
+        )
+
+    # get a nested dict of dict of dict of .... https://stackoverflow.com/a/8702435
+    nested_dict = lambda: defaultdict(nested_dict)  # noqa: E731
+    total_dict = nested_dict()
+
+    for model in models:
+        atom_name = model.atom_name
+        property_name = model.prop
+        key = (atom_name, property_name)
+
+        # in case models have "iqa" but the CSV column is "iqa_energy" (or vice versa)
+        if key not in csv_index:
+            if property_name == "iqa" and (atom_name, "iqa_energy") in csv_index:
+                key = (atom_name, "iqa_energy")
+            elif property_name == "iqa_energy" and (atom_name, "iqa") in csv_index:
+                key = (atom_name, "iqa")
+
+        if key not in csv_index:
+            continue
+
+        features_array, true_values = csv_index[key]
+        predicted = model.predict(features_array)
+        errors = true_values - predicted
+
+        if property_name in ("iqa_energy", "iqa", "wfn_energy"):
+            errors = errors * energy_scale
+
+        total_dict[property_name][atom_name]["true"] = true_values
+        total_dict[property_name][atom_name]["predicted"] = predicted
+        total_dict[property_name][atom_name]["error"] = errors
+
+    return total_dict
 
 
 def percentile(n: int) -> np.ndarray:
@@ -217,21 +325,25 @@ def simplified_write_to_excel(
             writer.sheets[sheet_name].insert_chart("A10", atomic_s_curve)
 
 
-def calculate_compact_s_curves_from_files(
+def true_predicted_dict_from_csv_files(
     csv_files_list: List[Union[Path, str]],
     models: Models,
-    output_location: Union[str, Path] = "s_curves_from_df.xlsx",
     property_names: List[str] = None,
-    **kwargs,
-):
-    """Calculates S-curves used to check model prediction performance.
+) -> Tuple[dict, Dict[str, Dict[str, np.ndarray]]]:
+    """Reads per-atom CSV files (features + true property values) and uses the
+    given models to predict, returning the data needed to make S-curves or to
+    compute quality metrics.
 
-    :param csv_files_list: A list of .csv files that contain features columns and property columns.
-    :param models: A ``Models`` instance which contains model files
-    :param output_location: The name of the .xlsx file where to save the s-curves.
-    :param property_names: A list of strings to use for property column names. If left as None,
-        a default set of property names is used
-    :param kwargs: Key word argument to give to xlsxwriter for customizing plots.
+    :param csv_files_list: A list of .csv files that contain feature columns and
+        property columns (as written out by ichor). The atom name is taken from
+        the part of each file name before the first underscore.
+    :param models: A ``Models`` instance which contains the model files.
+    :param property_names: A list of property column names to read. If left as
+        ``None``, a default set (iqa, wfn_energy and the multipole moments) is used.
+    :return: a tuple ``(total_dict, true_values_dict)`` where ``total_dict`` is a
+        nested dict ``{property: {atom: {"true", "predicted", "error"}}}`` (energy
+        errors are already converted to kJ mol-1) and ``true_values_dict`` is
+        ``{atom: {property: array}}`` with the raw (unscaled) true values.
     """
 
     # dicts to read in csv data
@@ -276,6 +388,12 @@ def calculate_compact_s_curves_from_files(
         true_values_dict[atom_name] = {}
 
         for prop in all_props:
+
+            # only read properties that are actually present in the CSV, so that
+            # e.g. an "iqa only" data-prep split (no multipole columns) does not
+            # raise a KeyError
+            if prop not in df_cols:
+                continue
 
             features_dict[atom_name] = test_set_df[features_list].values
             true_values_dict[atom_name][prop] = test_set_df[prop].values
@@ -325,6 +443,30 @@ def calculate_compact_s_curves_from_files(
                 f"Could not get features or true values for atom {atom_name}. \
                     Current property: {property_name}, current model file: {model.path}."
             )
+
+    return total_dict, true_values_dict
+
+
+def calculate_compact_s_curves_from_files(
+    csv_files_list: List[Union[Path, str]],
+    models: Models,
+    output_location: Union[str, Path] = "s_curves_from_df.xlsx",
+    property_names: List[str] = None,
+    **kwargs,
+):
+    """Calculates S-curves used to check model prediction performance.
+
+    :param csv_files_list: A list of .csv files that contain features columns and property columns.
+    :param models: A ``Models`` instance which contains model files
+    :param output_location: The name of the .xlsx file where to save the s-curves.
+    :param property_names: A list of strings to use for property column names. If left as None,
+        a default set of property names is used
+    :param kwargs: Key word argument to give to xlsxwriter for customizing plots.
+    """
+
+    total_dict, true_values_dict = true_predicted_dict_from_csv_files(
+        csv_files_list, models, property_names
+    )
 
     # if we have iqa energy we can compare to wfn energy
     if (

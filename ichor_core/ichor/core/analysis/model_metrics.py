@@ -153,6 +153,116 @@ def calculate_model_metrics(
     return metrics_df
 
 
+def calculate_metrics_from_csv_files(
+    csv_files_list: List[Union[str, Path]],
+    models: "Models",
+    output_location: Optional[Union[str, Path]] = "model_metrics.csv",
+    property_names: Optional[List[str]] = None,
+    percentiles: Sequence[int] = DEFAULT_PERCENTILES,
+) -> pd.DataFrame:
+    """Computes quality metrics from a set of per-atom CSV files (features + true
+    values, as produced by the ichor/polus data-prep step) and a set of models.
+    This is the natural path for evaluating models against a held-out test/valid
+    split, since those splits are stored as CSVs rather than as a PointsDirectory.
+
+    :param csv_files_list: A list of per-atom .csv files containing feature columns
+        and property columns. The atom name is taken from the part of each file
+        name before the first underscore.
+    :param models: A ``Models`` instance containing the ``.model`` files.
+    :param output_location: Path of the CSV file to write the metrics to. If
+        ``None``, no file is written and the DataFrame is only returned.
+    :param property_names: Optional list of property column names to read. Defaults
+        to iqa, wfn_energy and the multipole moments.
+    :param percentiles: Percentiles of the absolute error to report.
+    :return: The metrics DataFrame (also written to ``output_location``).
+    """
+
+    # imported lazily to avoid any package-initialisation ordering issues
+    from ichor.core.analysis.s_curves.compact_s_curves import (
+        true_predicted_dict_from_csv_files,
+    )
+
+    total_dict, _ = true_predicted_dict_from_csv_files(
+        csv_files_list, models, property_names
+    )
+
+    return metrics_df_from_total_dict(
+        total_dict, percentiles=percentiles, output_location=output_location
+    )
+
+
+def metrics_df_from_total_dict(
+    total_dict: dict,
+    percentiles: Sequence[int] = DEFAULT_PERCENTILES,
+    output_location: Optional[Union[str, Path]] = None,
+) -> pd.DataFrame:
+    """Builds a tidy metrics table from a nested ``total_dict`` of the form
+    ``{property: {atom: {"true", "predicted", ...}}}`` (as produced by the CSV
+    readers in :mod:`ichor.core.analysis.s_curves.compact_s_curves`).
+
+    :param total_dict: nested dict keyed by property then atom, each holding
+        ``"true"`` and ``"predicted"`` 1D arrays.
+    :param percentiles: percentiles of the absolute error to report.
+    :param output_location: if not ``None``, the metrics are written to this CSV.
+    :return: the metrics DataFrame.
+    """
+
+    rows = []
+    for type_ in sorted(total_dict.keys()):
+        is_energy = type_ in ENERGY_PROPERTIES
+        error_scale = ha_to_kj_mol if is_energy else 1.0
+        units = "kJ mol-1" if is_energy else "atomic units"
+
+        for atom in total_dict[type_].keys():
+            atom_data = total_dict[type_][atom]
+            metrics = metrics_from_true_predicted(
+                atom_data["true"],
+                atom_data["predicted"],
+                percentiles=percentiles,
+                error_scale=error_scale,
+            )
+            rows.append({"property": type_, "atom": atom, "units": units, **metrics})
+
+    metrics_df = pd.DataFrame(rows)
+
+    if output_location is not None:
+        metrics_df.to_csv(output_location, index=False)
+
+    return metrics_df
+
+
+def calculate_metrics_from_ferebus_csvs(
+    csv_files_list: List[Union[str, Path]],
+    models: "Models",
+    output_location: Optional[Union[str, Path]] = "model_metrics.csv",
+    percentiles: Sequence[int] = DEFAULT_PERCENTILES,
+) -> pd.DataFrame:
+    """Computes quality metrics from FEREBUS/ichor per-(atom, property) training-style
+    CSVs (feature columns ``f1..fN`` plus one property column) and a set of models.
+    This is the natural path for evaluating models stored in ``6_MODELS`` against
+    their held-out EXT_VALIDATION (external) or INT_VALIDATION (internal) split.
+
+    :param csv_files_list: A list of per-(atom, property) CSV files, all of a single
+        held-out split (e.g. only the EXT_VALIDATION_SET files).
+    :param models: A ``Models`` instance containing the ``.model`` files.
+    :param output_location: Path of the CSV file to write the metrics to. If
+        ``None``, no file is written and the DataFrame is only returned.
+    :param percentiles: Percentiles of the absolute error to report.
+    :return: The metrics DataFrame (also written to ``output_location``).
+    """
+
+    # imported lazily to avoid any package-initialisation ordering issues
+    from ichor.core.analysis.s_curves.compact_s_curves import (
+        true_predicted_from_ferebus_csvs,
+    )
+
+    total_dict = true_predicted_from_ferebus_csvs(csv_files_list, models)
+
+    return metrics_df_from_total_dict(
+        total_dict, percentiles=percentiles, output_location=output_location
+    )
+
+
 def get_true_predicted_dicts(
     model_location: Union[str, Path],
     validation_set_location: Union[str, Path],

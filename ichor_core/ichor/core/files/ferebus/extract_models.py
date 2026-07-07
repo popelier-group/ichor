@@ -23,9 +23,7 @@ class ExtractModelsScript(WriteFile, File):
     def _write_file(self, path: Path, *args, **kwargs):
 
         # set up template for polus script
-        extract_models_script_template = Template(
-            textwrap.dedent(
-                """
+        extract_models_script_template = Template(textwrap.dedent("""
             import os
             import shutil
             import glob
@@ -85,15 +83,32 @@ class ExtractModelsScript(WriteFile, File):
                 for file_path in model_files:
                     shutil.copy(file_path, models_dir)
 
+                # 7. Also co-locate the held-out CSVs with the models so the set can
+                #    be evaluated later without needing 5_TRAINING. External validation
+                #    goes to test_set/, internal validation to valid_set/. The
+                #    per-property subfolder is preserved because the CSV file names are
+                #    identical across properties (the property is only in the folder
+                #    name and the CSV column header).
+                for set_suffix, dest_name in (
+                    ("EXT_VALIDATION_SET", "test_set"),
+                    ("INT_VALIDATION_SET", "valid_set"),
+                ):
+                    csv_pattern = os.path.join(str(current_dir), "**", "*_" + set_suffix + ".csv")
+                    csv_files = glob.glob(csv_pattern, recursive=True)
+                    for csv_path in csv_files:
+                        prop_name = os.path.basename(os.path.dirname(csv_path))
+                        csv_dest_dir = os.path.join(models_dir, dest_name, prop_name)
+                        os.makedirs(csv_dest_dir, exist_ok=True)
+                        shutil.copy(csv_path, csv_dest_dir)
+                    print("Copied " + str(len(csv_files)) + " " + set_suffix + " CSVs into " + dest_name)
+
                 print(f"system_name = {system_name}")
                 print(f"leaf_dir = {leaf_dir}")
                 print(f"Copied {len(model_files)} model files into: {models_dir}")
 
             if __name__ == "__main__":
                 main()
-        """
-            )
-        )
+        """))
 
         script_text = extract_models_script_template.substitute()
 
