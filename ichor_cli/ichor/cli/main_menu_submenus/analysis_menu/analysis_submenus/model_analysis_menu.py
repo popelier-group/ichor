@@ -26,6 +26,11 @@ from ichor.core.files.ferebus import ExtractModelsScript
 from ichor.core.models import Models
 from tqdm import tqdm
 
+## TODO - element type averages
+## TODO - s-curves per element type
+## TODO - colouring by atoms
+## TODO - xyz to extract atom types - Bienfait
+
 # held-out split naming used in FEREBUS/ichor training CSV file names
 EXTERNAL_SET_TYPE = "EXT_VALIDATION_SET"
 INTERNAL_SET_TYPE = "INT_VALIDATION_SET"
