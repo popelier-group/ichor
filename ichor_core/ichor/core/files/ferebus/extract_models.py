@@ -84,7 +84,12 @@ class ExtractModelsScript(WriteFile, File):
                 os.makedirs(models_dir, exist_ok=True)
 
                 # 5. Recursively find all .model files under current directory
-                model_files = glob.glob(os.path.join(str(current_dir), "**", "*.model"), recursive=True)
+                #    (walked with a progress bar so it does not look frozen)
+                model_files = []
+                for dirpath, _dirnames, filenames in tqdm(os.walk(current_dir), desc="Finding model files"):
+                    for fname in filenames:
+                        if fname.endswith(".model"):
+                            model_files.append(os.path.join(dirpath, fname))
 
                 # 6. Copy .model files into the new models_dir
                 for file_path in tqdm(model_files, desc="Copying models"):

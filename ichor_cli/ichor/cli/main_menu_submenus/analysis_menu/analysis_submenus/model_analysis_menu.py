@@ -15,19 +15,16 @@ from ichor.cli.useful_functions import (
 )
 from ichor.core.analysis.model_metrics import (
     calculate_metrics_from_ferebus_csvs,
-    calculate_model_metrics,
-    get_true_predicted_dicts,
     metrics_df_from_total_dict,
 )
-from ichor.core.analysis.s_curves import calculate_s_curves
 from ichor.core.analysis.s_curves.compact_s_curves import (
-    mpl_get_true_vals_dict,
     plot_with_matplotlib,
     simplified_write_to_excel,
     true_predicted_from_ferebus_csvs,
 )
 from ichor.core.files.ferebus import ExtractModelsScript
 from ichor.core.models import Models
+from tqdm import tqdm
 
 # held-out split naming used in FEREBUS/ichor training CSV file names
 EXTERNAL_SET_TYPE = "EXT_VALIDATION_SET"
@@ -40,19 +37,23 @@ MODEL_ANALYSIS_MENU_DESCRIPTION = MenuDescription(
 
 MODEL_ANALYSIS_MENU_DEFAULTS = {
     "default_models_path": ichor.cli.global_menu_variables.SELECTED_MODELS_PATH,
-    "default_validation_set_path": ichor.cli.global_menu_variables.SELECTED_VALIDATION_SET_PATH,  # noqa: E501
     "default_test_csv_path": ichor.cli.global_menu_variables.SELECTED_TEST_CSV_PATH,
     "default_set_type": EXTERNAL_SET_TYPE,
-    "default_property_types": None,
-    "default_s_curves_output": "s-curves.xlsx",
-    "default_plot_output": "s-curves.png",
-    "default_metrics_output": "model_metrics.csv",
 }
 
 # subfolder names used when held-out CSVs are co-located inside a model folder
 # (written there by the model-extraction step). Used to auto-fill the CSV path.
 TEST_SET_SUBFOLDER = "test_set"
 VALID_SET_SUBFOLDER = "valid_set"
+
+# analysis outputs (S-curves, plots, metrics) are written into this subfolder of
+# the model folder, to keep each model batch's results tidy
+ANALYSIS_SUBFOLDER = "analysis"
+
+# output file names (fixed; identity comes from the analysis/ folder location)
+S_CURVES_EXCEL_NAME = "s-curves.xlsx"
+S_CURVES_PLOT_NAME = "s-curves.png"
+METRICS_CSV_NAME = "model_metrics.csv"
 
 
 def _discover_seq_folders(root: Path) -> List[Path]:
@@ -75,12 +76,16 @@ def _discover_seq_folders(root: Path) -> List[Path]:
     else:
         candidates = [
             d
-            for d in root.rglob("*")
+            for d in tqdm(root.rglob("*"), desc="Scanning for SEQ folders")
             if d.is_dir() and d.parent.name.startswith("TRAIN-")
         ]
 
     # only keep folders that actually contain models (i.e. completed training)
-    return sorted(d for d in candidates if any(d.rglob("*.model")))
+    return sorted(
+        d
+        for d in tqdm(candidates, desc="Checking for model files")
+        if any(d.rglob("*.model"))
+    )
 
 
 def _find_colocated_csv_folder(models_path: Path) -> Optional[Path]:
@@ -100,13 +105,8 @@ def _find_colocated_csv_folder(models_path: Path) -> Optional[Path]:
 @dataclass
 class ModelAnalysisMenuOptions(MenuOptions):
     selected_models_path: Path
-    selected_validation_set_path: Path
     selected_test_csv_path: Path
     selected_set_type: str
-    selected_property_types: Optional[List[str]]
-    selected_s_curves_output: str
-    selected_plot_output: str
-    selected_metrics_output: str
 
     def check_selected_models_path(self):
         """Checks whether the selected models path contains ``.model`` files."""
@@ -115,12 +115,6 @@ class ModelAnalysisMenuOptions(MenuOptions):
             return "Current models path is not a directory."
         if not Models.check_path(models_path):
             return f"Current path {models_path} does not contain any .model files."
-
-    def check_selected_validation_set_path(self):
-        """Checks whether the selected validation set path is a directory."""
-        validation_path = Path(self.selected_validation_set_path)
-        if not validation_path.is_dir():
-            return "Current validation set path is not a directory."
 
     def check_selected_test_csv_path(self):
         """Checks whether the selected CSV folder contains any .csv files (searched
@@ -136,23 +130,6 @@ class ModelAnalysisMenuOptions(MenuOptions):
 model_analysis_menu_options = ModelAnalysisMenuOptions(
     *MODEL_ANALYSIS_MENU_DEFAULTS.values()
 )
-
-
-def _paths_are_valid() -> bool:
-    """Returns True if both the models path and validation set path are valid,
-    otherwise prints why and returns False."""
-
-    models_error = model_analysis_menu_options.check_selected_models_path()
-    if models_error:
-        user_input_free_flow(f"{models_error} Press enter to continue: ")
-        return False
-
-    validation_error = model_analysis_menu_options.check_selected_validation_set_path()
-    if validation_error:
-        user_input_free_flow(f"{validation_error} Press enter to continue: ")
-        return False
-
-    return True
 
 
 def _csv_inputs_are_valid() -> bool:
@@ -199,36 +176,36 @@ def _discover_model_folders(root: Path) -> List[Path]:
         return []
     if Models.check_path(root):
         return [root]
-    return sorted(d for d in root.rglob("*") if d.is_dir() and Models.check_path(d))
+    return sorted(
+        d
+        for d in tqdm(root.rglob("*"), desc="Scanning for model folders")
+        if d.is_dir() and Models.check_path(d)
+    )
 
 
-def _model_output_prefix(models_path: Optional[Path] = None) -> str:
-    """Builds a filename-safe identifier for a models folder. For the standard
-    ``6_MODELS/<system>/SEQ-XX-YY-ZZ`` layout this is ``<system>_SEQ-XX-YY-ZZ`` so
-    outputs from different models or training splits do not overwrite each other.
+def _analysis_output_path(base_name: str, models_path: Optional[Path] = None) -> Path:
+    """Builds the full path for an analysis output file, placed inside an
+    ``analysis`` subfolder of the model folder (created if needed), e.g.::
 
-    :param models_path: The models folder to build the identifier from. Defaults to
-        the currently selected models path.
+        <models_path>/analysis/s-curves.xlsx
+
+    Writing outputs into each model's own ``analysis`` folder (rather than the
+    current directory) keeps each model batch's results tidy and self-identifying
+    by their location, so no filename prefix is needed.
+
+    :param base_name: The base output file name, e.g. ``s-curves.xlsx``.
+    :param models_path: The model folder to write into. Defaults to the currently
+        selected models path.
     """
 
     if models_path is None:
         models_path = model_analysis_menu_options.selected_models_path
     models_path = Path(models_path)
-    seq_name = models_path.name
-    system_name = models_path.parent.name
 
-    # skip generic/degenerate path pieces
-    skip = {"", ".", "..", "6_MODELS"}
-    parts = [p for p in (system_name, seq_name) if p not in skip]
-    return "_".join(parts) if parts else "model"
+    analysis_dir = models_path / ANALYSIS_SUBFOLDER
+    analysis_dir.mkdir(parents=True, exist_ok=True)
 
-
-def _prefixed_output(base_name: str, models_path: Optional[Path] = None) -> str:
-    """Prefixes ``base_name`` with the model identifier (see
-    :func:`_model_output_prefix`), e.g. ``s-curves.xlsx`` ->
-    ``<system>_SEQ-XX-YY-ZZ_s-curves.xlsx``."""
-
-    return f"{_model_output_prefix(models_path)}_{base_name}"
+    return analysis_dir / base_name
 
 
 def _report_saved_plots(saved_files):
@@ -352,19 +329,6 @@ class ModelAnalysisFunctions:
             print(f"Auto-selected co-located CSV folder: {colocated_csv_folder}")
 
     @staticmethod
-    def select_validation_set_directory():
-        """Asks the user for the validation/test set PointsDirectory."""
-        validation_path = user_input_path(
-            "Enter path to validation/test set PointsDirectory: "
-        )
-        ichor.cli.global_menu_variables.SELECTED_VALIDATION_SET_PATH = Path(
-            validation_path
-        ).absolute()
-        model_analysis_menu_options.selected_validation_set_path = (
-            ichor.cli.global_menu_variables.SELECTED_VALIDATION_SET_PATH
-        )
-
-    @staticmethod
     def select_test_csv_directory():
         """Asks the user for the folder of held-out CSV files. This can be a model
         folder's ``test_set``/``valid_set`` subfolder, or a ``5_TRAINING`` SEQ
@@ -393,93 +357,6 @@ class ModelAnalysisFunctions:
             model_analysis_menu_options.selected_set_type = EXTERNAL_SET_TYPE
 
     @staticmethod
-    def select_property_types():
-        """Asks the user for a comma-separated list of property types to restrict
-        the analysis to (e.g. ``iqa, q00``). Leaving the prompt blank uses all
-        property types found in the models."""
-
-        answer = user_input_free_flow(
-            "Enter comma-separated property types (e.g. iqa, q00), "
-            "or leave blank for all: "
-        )
-        if answer is None:
-            model_analysis_menu_options.selected_property_types = None
-        else:
-            types = [t.strip() for t in answer.split(",") if t.strip()]
-            model_analysis_menu_options.selected_property_types = types or None
-
-    @staticmethod
-    def make_s_curves_excel():
-        """Makes an Excel workbook of S-curves for the selected models and
-        validation set."""
-
-        if not _paths_are_valid():
-            return
-
-        output_name = _prefixed_output(
-            model_analysis_menu_options.selected_s_curves_output
-        )
-        calculate_s_curves(
-            model_location=Path(model_analysis_menu_options.selected_models_path),
-            validation_set_location=Path(
-                model_analysis_menu_options.selected_validation_set_path
-            ),
-            output_location=output_name,
-            types=model_analysis_menu_options.selected_property_types,
-        )
-        user_input_free_flow(
-            f"S-curves written to {Path(output_name).absolute()}. "
-            "Press enter to continue: "
-        )
-
-    @staticmethod
-    def make_s_curves_plot():
-        """Saves matplotlib S-curve images for the selected models and validation
-        set - one separate image file per property type."""
-
-        if not _paths_are_valid():
-            return
-
-        true_dict, predicted_dict = get_true_predicted_dicts(
-            model_location=Path(model_analysis_menu_options.selected_models_path),
-            validation_set_location=Path(
-                model_analysis_menu_options.selected_validation_set_path
-            ),
-            types=model_analysis_menu_options.selected_property_types,
-        )
-        total_dict = mpl_get_true_vals_dict(predicted_dict, true_dict)
-
-        output_name = _prefixed_output(model_analysis_menu_options.selected_plot_output)
-        saved_files = plot_with_matplotlib(total_dict, saved_name=output_name)
-        _report_saved_plots(saved_files)
-
-    @staticmethod
-    def extract_metrics():
-        """Writes a CSV of quality metrics (RMSE, MAE, R2, max error and error
-        percentiles) per atom/property for the selected models and validation
-        set. Also prints the table to the screen."""
-
-        if not _paths_are_valid():
-            return
-
-        output_name = _prefixed_output(
-            model_analysis_menu_options.selected_metrics_output
-        )
-        metrics_df = calculate_model_metrics(
-            model_location=Path(model_analysis_menu_options.selected_models_path),
-            validation_set_location=Path(
-                model_analysis_menu_options.selected_validation_set_path
-            ),
-            output_location=output_name,
-            types=model_analysis_menu_options.selected_property_types,
-        )
-        print(metrics_df.to_string(index=False))
-        user_input_free_flow(
-            f"Metrics written to {Path(output_name).absolute()}. "
-            "Press enter to continue: "
-        )
-
-    @staticmethod
     def make_s_curves_excel_from_csvs():
         """Makes an Excel workbook of S-curves from the selected models and the
         held-out FEREBUS CSVs of the selected split."""
@@ -489,9 +366,7 @@ class ModelAnalysisFunctions:
             return
         _, total_dict = result
 
-        output_name = _prefixed_output(
-            model_analysis_menu_options.selected_s_curves_output
-        )
+        output_name = _analysis_output_path(S_CURVES_EXCEL_NAME)
         simplified_write_to_excel(total_dict, output_name)
         user_input_free_flow(
             f"S-curves written to {Path(output_name).absolute()}. "
@@ -517,7 +392,7 @@ class ModelAnalysisFunctions:
             for property_name, atom_dict in total_dict.items()
         }
 
-        output_name = _prefixed_output(model_analysis_menu_options.selected_plot_output)
+        output_name = _analysis_output_path(S_CURVES_PLOT_NAME)
         saved_files = plot_with_matplotlib(error_dict, saved_name=output_name)
         _report_saved_plots(saved_files)
 
@@ -535,9 +410,7 @@ class ModelAnalysisFunctions:
             _warn_no_csv_files()
             return
 
-        output_name = _prefixed_output(
-            model_analysis_menu_options.selected_metrics_output
-        )
+        output_name = _analysis_output_path(METRICS_CSV_NAME)
         metrics_df = calculate_metrics_from_ferebus_csvs(
             csv_files_list=csv_files,
             models=models,
@@ -593,9 +466,7 @@ class ModelAnalysisFunctions:
             total_dict = true_predicted_from_ferebus_csvs(csv_files, models)
 
             # S-curve Excel workbook
-            excel_out = _prefixed_output(
-                model_analysis_menu_options.selected_s_curves_output, model_folder
-            )
+            excel_out = _analysis_output_path(S_CURVES_EXCEL_NAME, model_folder)
             simplified_write_to_excel(total_dict, excel_out)
 
             # per-property S-curve images (plotter only needs the errors)
@@ -606,15 +477,11 @@ class ModelAnalysisFunctions:
                 }
                 for property_name, atom_dict in total_dict.items()
             }
-            plot_out = _prefixed_output(
-                model_analysis_menu_options.selected_plot_output, model_folder
-            )
+            plot_out = _analysis_output_path(S_CURVES_PLOT_NAME, model_folder)
             plot_with_matplotlib(error_dict, saved_name=plot_out)
 
             # quality metrics CSV
-            metrics_out = _prefixed_output(
-                model_analysis_menu_options.selected_metrics_output, model_folder
-            )
+            metrics_out = _analysis_output_path(METRICS_CSV_NAME, model_folder)
             metrics_df_from_total_dict(total_dict, output_location=metrics_out)
 
             analysed += 1
@@ -637,48 +504,27 @@ model_analysis_menu_items = [
         ModelAnalysisFunctions.select_models_directory,
     ),
     FunctionItem(
-        "Select validation/test set PointsDirectory",
-        ModelAnalysisFunctions.select_validation_set_directory,
-    ),
-    FunctionItem(
-        "Select held-out CSV folder (for [CSVs] options)",
+        "Select held-out CSV folder",
         ModelAnalysisFunctions.select_test_csv_directory,
     ),
     FunctionItem(
-        "Select held-out split: external/test or internal/valid (for [CSVs] options)",
+        "Select held-out split: external/test or internal/valid",
         ModelAnalysisFunctions.select_set_type,
     ),
+    # analysis of the selected model folder using its held-out CSVs
     FunctionItem(
-        "Select property types (optional filter, PointsDirectory path only)",
-        ModelAnalysisFunctions.select_property_types,
-    ),
-    # PointsDirectory-based analysis (general; supply a held-out-only PointsDirectory)
-    FunctionItem(
-        "[PointsDirectory] Make S-curves (Excel workbook)",
-        ModelAnalysisFunctions.make_s_curves_excel,
-    ),
-    FunctionItem(
-        "[PointsDirectory] Make S-curves (matplotlib image)",
-        ModelAnalysisFunctions.make_s_curves_plot,
-    ),
-    FunctionItem(
-        "[PointsDirectory] Extract quality metrics (CSV)",
-        ModelAnalysisFunctions.extract_metrics,
-    ),
-    # CSV-based analysis (matches the train/valid/test CSV splits from data prep)
-    FunctionItem(
-        "[CSVs] Make S-curves (Excel workbook)",
+        "Make S-curves (Excel workbook)",
         ModelAnalysisFunctions.make_s_curves_excel_from_csvs,
     ),
     FunctionItem(
-        "[CSVs] Make S-curves (matplotlib image)",
+        "Make S-curves (matplotlib image)",
         ModelAnalysisFunctions.make_s_curves_plot_from_csvs,
     ),
     FunctionItem(
-        "[CSVs] Extract quality metrics (CSV)",
+        "Extract quality metrics (CSV)",
         ModelAnalysisFunctions.extract_metrics_from_csvs,
     ),
-    # Batch: run CSV-based analysis on every model folder under the selected path
+    # Batch: run analysis on every model folder under the selected path
     FunctionItem(
         "[Batch] Run all analysis on every model folder under the selected path",
         ModelAnalysisFunctions.run_batch_analysis,
