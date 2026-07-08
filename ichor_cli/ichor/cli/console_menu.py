@@ -134,7 +134,9 @@ class ConsoleMenu(OriginalConsoleMenu):
         # add the strings that each parent gives
         for p_options in self.parent_menu_options:
             # the __call__ method of a MenuOption just makes it into a string which can be printed to the prologue
-            prologue_txt += p_options()
+            # (a parent menu may have no options, i.e. this_menu_options is None, so guard against that)
+            if p_options:
+                prologue_txt += p_options()
         # finally add any new options from the current menu, again __call__ method of MenuOption is used
         if self.this_menu_options:
             prologue_txt += self.this_menu_options()
