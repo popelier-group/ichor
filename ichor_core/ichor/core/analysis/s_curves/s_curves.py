@@ -8,6 +8,7 @@ from ichor.core.common.constants import ha_to_kj_mol
 from ichor.core.common.excel import num2col
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models
+from tqdm import tqdm
 
 
 def percentile(n: int) -> np.ndarray:
@@ -156,7 +157,7 @@ def write_to_excel(
         workbook = writer.book
 
         # iterate over all properties, such as iqa, q00, etc.
-        for type_ in true.keys():
+        for type_ in tqdm(true.keys(), desc="Writing S-curve sheets", total=len(true)):
 
             # iqa predictions are in Hartrees, convert to kJ mol-1
             if type_ == "iqa":

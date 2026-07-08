@@ -29,6 +29,13 @@ class ExtractModelsScript(WriteFile, File):
             import glob
             from pathlib import Path
 
+            # progress bars, with a no-op fallback if tqdm is unavailable
+            try:
+                from tqdm import tqdm
+            except ImportError:
+                def tqdm(iterable, **kwargs):
+                    return iterable
+
             def find_seq_folder(start: Path) -> Path:
                 \"\"\"Find the folder that sits between TRAIN-* and iqa, regardless of depth.\"\"\"
                 p = start
@@ -80,7 +87,7 @@ class ExtractModelsScript(WriteFile, File):
                 model_files = glob.glob(os.path.join(str(current_dir), "**", "*.model"), recursive=True)
 
                 # 6. Copy .model files into the new models_dir
-                for file_path in model_files:
+                for file_path in tqdm(model_files, desc="Copying models"):
                     shutil.copy(file_path, models_dir)
 
                 # 7. Also co-locate the held-out CSVs with the models so the set can
@@ -95,7 +102,7 @@ class ExtractModelsScript(WriteFile, File):
                 ):
                     csv_pattern = os.path.join(str(current_dir), "**", "*_" + set_suffix + ".csv")
                     csv_files = glob.glob(csv_pattern, recursive=True)
-                    for csv_path in csv_files:
+                    for csv_path in tqdm(csv_files, desc="Copying " + set_suffix):
                         prop_name = os.path.basename(os.path.dirname(csv_path))
                         csv_dest_dir = os.path.join(models_dir, dest_name, prop_name)
                         os.makedirs(csv_dest_dir, exist_ok=True)

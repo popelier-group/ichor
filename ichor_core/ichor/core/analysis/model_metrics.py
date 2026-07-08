@@ -12,6 +12,7 @@ from ichor.core.analysis.predictions import get_true_predicted
 from ichor.core.common.constants import ha_to_kj_mol
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models
+from tqdm import tqdm
 
 # properties whose prediction errors are reported in kJ mol-1 (they are
 # predicted in Hartrees, so the errors are converted before computing metrics)
@@ -96,7 +97,7 @@ def calculate_metrics_dataframe(
     predicted = predicted.T
 
     rows = []
-    for type_ in sorted(true.keys()):
+    for type_ in tqdm(sorted(true.keys()), desc="Computing metrics"):
         atom_names = true[type_].keys()
         is_energy = type_ in ENERGY_PROPERTIES
         error_scale = ha_to_kj_mol if is_energy else 1.0
@@ -208,7 +209,7 @@ def metrics_df_from_total_dict(
     """
 
     rows = []
-    for type_ in sorted(total_dict.keys()):
+    for type_ in tqdm(sorted(total_dict.keys()), desc="Computing metrics"):
         is_energy = type_ in ENERGY_PROPERTIES
         error_scale = ha_to_kj_mol if is_energy else 1.0
         units = "kJ mol-1" if is_energy else "atomic units"

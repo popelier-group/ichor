@@ -5,6 +5,7 @@ import pandas as pd
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models
+from tqdm import tqdm
 
 
 def get_predicted(
@@ -29,7 +30,7 @@ def get_predicted(
         types = models.types
 
     predicted = {}
-    for atom in atoms:
+    for atom in tqdm(atoms, desc="Predicting atoms"):
         predicted[atom] = {}
         for type_ in types:
             predicted[atom][type_] = models[atom][type_].predict(points).array()

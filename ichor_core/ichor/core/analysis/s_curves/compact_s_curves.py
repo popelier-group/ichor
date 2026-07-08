@@ -1,7 +1,6 @@
 import re
 from collections import defaultdict
 from pathlib import Path
-from string import ascii_uppercase
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -12,8 +11,7 @@ from ichor.core.common.sorting import ignore_alpha
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models
 from natsort import natsorted
-
-ascii_uppercase = list(ascii_uppercase)
+from tqdm import tqdm
 
 # FEREBUS/ichor training CSVs are named "<system>_<atom>_<SETTYPE>_SET.csv" where
 # the system name itself may contain underscores, so the atom name is recovered by
@@ -69,7 +67,7 @@ def true_predicted_from_ferebus_csvs(
 
     # index the CSV data by (atom, property) so it can be matched to each model
     csv_index: Dict[Tuple[str, str], Tuple[np.ndarray, np.ndarray]] = {}
-    for csv_file in csv_files_list:
+    for csv_file in tqdm(csv_files_list, desc="Reading CSVs"):
         csv_file = Path(csv_file)
         df = pd.read_csv(csv_file)
 
@@ -94,7 +92,7 @@ def true_predicted_from_ferebus_csvs(
     nested_dict = lambda: defaultdict(nested_dict)  # noqa: E731
     total_dict = nested_dict()
 
-    for model in models:
+    for model in tqdm(models, desc="Predicting"):
         atom_name = model.atom_name
         property_name = model.prop
         key = (atom_name, property_name)
@@ -237,7 +235,11 @@ def simplified_write_to_excel(
         workbook = writer.book
 
         # iterate over all properties, such as iqa, q00, etc.
-        for sheet_name in total_dict.keys():
+        for sheet_name in tqdm(
+            total_dict.keys(),
+            desc="Writing S-curve sheets",
+            total=len(total_dict),
+        ):
 
             start_row = 2
             start_col = 7
@@ -586,27 +588,50 @@ def mpl_get_true_vals_dict(
     return total_dict
 
 
+# properties whose errors are in kJ mol-1; everything else (multipoles) is in a.u.
+_S_CURVE_ENERGY_PROPERTIES = ("iqa", "iqa_energy", "wfn_energy")
+_S_CURVE_DEFAULT_X_LABEL = "Prediction Error / kJ mol$^{-1}$"
+_S_CURVE_MULTIPOLE_X_LABEL = "Prediction Error / a.u."
+
+
 def plot_with_matplotlib(
     total_dict: Union[List[dict], dict],
-    x_axis_name: str = "Prediction Error / kJ mol$^{-1}$",
+    x_axis_name: str = _S_CURVE_DEFAULT_X_LABEL,
     y_axis_name: str = "%",
     title: str = None,
-    saved_name: str = "s_curves.svg",
-):
+    saved_name: str = "s_curves.png",
+    panel_width: float = 7.0,
+    panel_height: float = 6.0,
+    dpi: int = 200,
+) -> List[Path]:
+    """Plots S-curves, saving a **separate image file for each property**. Every
+    property gets its own figure (all atoms overlaid), named after ``saved_name``
+    with the property appended, e.g. ``s_curves.png`` -> ``s_curves_iqa.png``,
+    ``s_curves_q00.png``, etc.
 
-    # TODO: return an axes which can be customized by user
+    :param total_dict: a nested dict ``{property: {atom: {"error": array}}}`` (or a
+        list of such dicts, which are merged). Only the ``"error"`` values are
+        plotted; if an atom maps directly to an array, that array is used.
+    :param x_axis_name: x-axis label (errors are shown on a log scale). If left at
+        the default, the units are chosen per property (kJ mol-1 for energies,
+        atomic units for multipoles); pass a custom string to override.
+    :param y_axis_name: y-axis label (percentage of points).
+    :param title: optional prefix added to each plot's title (the property name is
+        always shown).
+    :param saved_name: base output file name. The property name is inserted before
+        the extension for each file; ``.png`` is recommended for a readable image.
+    :param panel_width: width in inches of each per-property figure.
+    :param panel_height: height in inches of each per-property figure.
+    :param dpi: resolution of the saved figures.
+    :return: the list of file paths that were written (empty if nothing was plotted
+        or matplotlib is unavailable).
+    """
+
     try:
         import matplotlib
 
-        # import matplotlib
         import matplotlib.pyplot as plt
-
-        # import scienceplots  # noqa
         from matplotlib import ticker as mticker
-
-        # from matplotlib.ticker import AutoMinorLocator, MultipleLocator
-
-        # plt.style.use("science")
 
         matplotlib.rcParams.update(
             {
@@ -621,113 +646,122 @@ def plot_with_matplotlib(
     except ImportError:
         print("Could not import relevant packages.")
 
-        return
+        return []
 
-    FIGURE_LABEL_SIZE = 30
-    X_Y_LABELS_FONTSIZE = 30
-    TICKLABELS_FONTSIZE = 22
-    LABELPAD = 10
-    AXES_PADDING = 10.0
-    LINEWIDTH = 3.0
-    MINOR_LINEWIDTH = 2.0
-    MAJOR_TICK_LENGTH = 6.0
+    TITLE_FONTSIZE = 18
+    X_Y_LABELS_FONTSIZE = 16
+    TICKLABELS_FONTSIZE = 12
+    LEGEND_FONTSIZE = 10
+    LABELPAD = 8
+    AXES_PADDING = 6.0
+    LINEWIDTH = 2.0
+    MINOR_LINEWIDTH = 1.3
+    MAJOR_TICK_LENGTH = 5.0
     MINOR_TICK_LENGTH = 3.0
-    PAD_INCHES = 0.05
 
-    nplots = len(total_dict)
-    WIDTH = 10 * nplots
-    HEIGHT = WIDTH / 3
+    color_cycle = [
+        "0C5DA5",
+        "00B945",
+        "FF9500",
+        "FF2C00",
+        "845B97",
+        "474747",
+        "9e9e9e",
+        "30D5C8",
+        "FA8072",
+    ]
 
-    if isinstance(total_dict, dict):
-        total_dict = [total_dict]
+    # accept a list of dicts (legacy) by merging into one property -> atoms dict
+    if isinstance(total_dict, (list, tuple)):
+        merged = {}
+        for d in total_dict:
+            merged.update(d)
+        total_dict = merged
 
-    fig, ax = plt.subplots(1, nplots, figsize=(WIDTH, HEIGHT), sharey=True)
+    property_names = natsorted(total_dict.keys(), key=ignore_alpha)
+    if len(property_names) == 0:
+        print("No data to plot.")
+        return []
 
-    if not isinstance(ax, np.ndarray):
-        ax = [ax]
+    base_path = Path(saved_name)
+    saved_files: List[Path] = []
 
-    for ax_idx, d in enumerate(total_dict):
+    # one separate figure/file per property
+    for property_name in tqdm(property_names, desc="Plotting S-curves"):
 
-        ax[ax_idx].set_prop_cycle(
-            color=[
-                "0C5DA5",
-                "00B945",
-                "FF9500",
-                "FF2C00",
-                "845B97",
-                "474747",
-                "9e9e9e",
-                "30D5C8",
-                "FA8072",
-            ]
-        )
+        fig, ax = plt.subplots(figsize=(panel_width, panel_height))
+        ax.set_prop_cycle(color=color_cycle)
 
-        # property name, inner dict
-        for key, inner_dict in d.items():
+        inner_dict = total_dict[property_name]
+        atom_names = natsorted(inner_dict.keys(), key=ignore_alpha)
 
-            # sort atom names so they appear correctly in label
-            atom_names = natsorted(inner_dict.keys(), key=ignore_alpha)
+        for an in atom_names:
 
-            for an in atom_names:
+            atom_data = inner_dict[an]
+            # support {"error": array}, the full {"true", "predicted", "error"} dict,
+            # or an atom that maps directly to an array of errors
+            if isinstance(atom_data, dict):
+                array = atom_data.get("error")
+            else:
+                array = atom_data
+            if array is None:
+                continue
 
-                # true pred err keys , arrays values
-                for true_pred_err, array in inner_dict[an].items():
+            array_sorted = np.sort(np.absolute(array))
+            perc = percentile(array_sorted.shape[0])
+            ax.semilogx(array_sorted, perc, label=an, linewidth=LINEWIDTH)
 
-                    # true,pred,err keys , array of values
-                    # should only plot errors for s-curves
+        plot_title = f"{title} - {property_name}" if title else str(property_name)
+        ax.set_title(plot_title, fontsize=TITLE_FONTSIZE, fontweight="bold")
 
-                    array_sorted = np.sort(np.absolute(array))
-                    perc = percentile(array_sorted.shape[0])
+        if atom_names:
+            ax.legend(
+                facecolor="white",
+                framealpha=0.9,
+                frameon=True,
+                fontsize=LEGEND_FONTSIZE,
+                ncol=2 if len(atom_names) > 8 else 1,
+            )
 
-                    ax[ax_idx].semilogx(
-                        array_sorted, perc, label=an, linewidth=LINEWIDTH
-                    )
-
-        ax[ax_idx].legend(
-            facecolor="white", framealpha=1, frameon=True, fontsize=X_Y_LABELS_FONTSIZE
-        )
-
-        # Show the major grid and style it slightly.
-        ax[ax_idx].grid(which="major", color="#DDDDDD", linewidth=LINEWIDTH)
-        # Show the minor grid as well. Style it in very light gray as a thin,
-        # dotted line.
-        ax[ax_idx].grid(
+        # major/minor grids
+        ax.grid(which="major", color="#DDDDDD", linewidth=LINEWIDTH)
+        ax.grid(
             which="minor", color="#EEEEEE", linestyle=":", linewidth=MINOR_LINEWIDTH
         )
-        # Make the minor ticks and gridlines show.
-        ax[ax_idx].minorticks_on()
-        ax[ax_idx].grid(True)
+        ax.minorticks_on()
+        ax.grid(True)
 
-        if x_axis_name:
-            ax[ax_idx].set_xlabel(
-                x_axis_name,
+        # when the default label is used, show the correct units per property
+        # (kJ mol-1 for energies, atomic units for multipoles); a caller-supplied
+        # label is respected as-is
+        if x_axis_name == _S_CURVE_DEFAULT_X_LABEL:
+            x_label = (
+                _S_CURVE_DEFAULT_X_LABEL
+                if property_name in _S_CURVE_ENERGY_PROPERTIES
+                else _S_CURVE_MULTIPOLE_X_LABEL
+            )
+        else:
+            x_label = x_axis_name
+
+        if x_label:
+            ax.set_xlabel(
+                x_label,
                 fontsize=X_Y_LABELS_FONTSIZE,
                 labelpad=LABELPAD,
                 fontweight="bold",
             )
-            # ax.set_xlabel(x_axis_name, fontsize=28, fontweight="bold")
-        # only set the y axis for the first plot
         if y_axis_name:
-            ax[0].set_ylabel(
+            ax.set_ylabel(
                 y_axis_name,
                 fontsize=X_Y_LABELS_FONTSIZE,
                 labelpad=LABELPAD,
                 fontweight="bold",
             )
-            # ax.set_ylabel(y_axis_name, fontsize=28, fontweight="bold")
 
-        # useful mplt stuff
-        # https://stackoverflow.com/questions/2969867/how-do-i-add-space-between-the-ticklabels-and-the-axes-in-matplotlib
-        # https://stackoverflow.com/questions/67253174/how-to-set-space-between-the-axis-and-the-label
-        # https://stackoverflow.com/questions/44078409/matplotlib-semi-log-plot-minor-tick-marks-are-gone-when-range-is-large
-        # https://stackoverflow.com/a/73094650
+        ax.xaxis.set_major_locator(mticker.LogLocator(numticks=999))
+        ax.xaxis.set_minor_locator(mticker.LogLocator(numticks=999, subs="auto"))
 
-        ax[ax_idx].xaxis.set_major_locator(mticker.LogLocator(numticks=999))
-        ax[ax_idx].xaxis.set_minor_locator(
-            mticker.LogLocator(numticks=999, subs="auto")
-        )
-
-        ax[ax_idx].tick_params(
+        ax.tick_params(
             axis="both",
             which="major",
             labelsize=TICKLABELS_FONTSIZE,
@@ -737,31 +771,25 @@ def plot_with_matplotlib(
             right=False,
             pad=AXES_PADDING,
         )
-        ax[ax_idx].tick_params(
+        ax.tick_params(
             axis="both",
             which="minor",
             length=MINOR_TICK_LENGTH,
             width=MINOR_LINEWIDTH,
             top=False,
             right=False,
-            pad=AXES_PADDING,
         )
 
-        tick_labels = ax[ax_idx].get_xticklabels() + ax[ax_idx].get_yticklabels()
-        for t in tick_labels:
-            t.set_fontweight("bold")
-
-        ax[ax_idx].text(
-            0.85,
-            0.15,
-            f"{ascii_uppercase[ax_idx]}",
-            fontsize=FIGURE_LABEL_SIZE,
-            transform=ax[ax_idx].transAxes,
-            fontweight="bold",
+        # insert the property name before the extension, e.g. s_curves_iqa.png
+        out_path = base_path.with_name(
+            f"{base_path.stem}_{property_name}{base_path.suffix}"
         )
+        fig.tight_layout()
+        fig.savefig(out_path, dpi=dpi, bbox_inches="tight")
+        plt.close(fig)
+        saved_files.append(out_path)
 
-        # fig.savefig("s_curves.png", pad_inches = 0.2)
-        fig.savefig(saved_name, pad_inches=PAD_INCHES, dpi=300)
+    return saved_files
 
 
 def plot_with_matplotlib_simple(
@@ -946,7 +974,9 @@ def write_to_excel(
         workbook = writer.book
 
         # iterate over all properties, such as iqa, q00, etc.
-        for sheet_name in true.keys():
+        for sheet_name in tqdm(
+            true.keys(), desc="Writing S-curve sheets", total=len(true)
+        ):
 
             start_row = 2
             start_col = 12

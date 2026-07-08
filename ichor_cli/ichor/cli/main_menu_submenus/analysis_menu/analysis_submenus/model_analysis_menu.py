@@ -17,6 +17,7 @@ from ichor.core.analysis.model_metrics import (
     calculate_metrics_from_ferebus_csvs,
     calculate_model_metrics,
     get_true_predicted_dicts,
+    metrics_df_from_total_dict,
 )
 from ichor.core.analysis.s_curves import calculate_s_curves
 from ichor.core.analysis.s_curves.compact_s_curves import (
@@ -44,7 +45,7 @@ MODEL_ANALYSIS_MENU_DEFAULTS = {
     "default_set_type": EXTERNAL_SET_TYPE,
     "default_property_types": None,
     "default_s_curves_output": "s-curves.xlsx",
-    "default_plot_output": "s-curves.svg",
+    "default_plot_output": "s-curves.png",
     "default_metrics_output": "model_metrics.csv",
 }
 
@@ -184,6 +185,65 @@ def _get_models_and_csv_files():
     csv_files = sorted(csv_root.rglob(f"*_{set_type}.csv"))
 
     return models, csv_files
+
+
+def _discover_model_folders(root: Path) -> List[Path]:
+    """Finds model folders (directories that directly contain ``.model`` files)
+    under ``root``. If ``root`` is itself a model folder it is returned on its own.
+    Used to run analysis over a whole parent folder of model batches, e.g. every
+    ``SEQ-XX-YY-ZZ`` folder under ``6_MODELS`` (the layout produced by the extract
+    step)."""
+
+    root = Path(root)
+    if not root.is_dir():
+        return []
+    if Models.check_path(root):
+        return [root]
+    return sorted(d for d in root.rglob("*") if d.is_dir() and Models.check_path(d))
+
+
+def _model_output_prefix(models_path: Optional[Path] = None) -> str:
+    """Builds a filename-safe identifier for a models folder. For the standard
+    ``6_MODELS/<system>/SEQ-XX-YY-ZZ`` layout this is ``<system>_SEQ-XX-YY-ZZ`` so
+    outputs from different models or training splits do not overwrite each other.
+
+    :param models_path: The models folder to build the identifier from. Defaults to
+        the currently selected models path.
+    """
+
+    if models_path is None:
+        models_path = model_analysis_menu_options.selected_models_path
+    models_path = Path(models_path)
+    seq_name = models_path.name
+    system_name = models_path.parent.name
+
+    # skip generic/degenerate path pieces
+    skip = {"", ".", "..", "6_MODELS"}
+    parts = [p for p in (system_name, seq_name) if p not in skip]
+    return "_".join(parts) if parts else "model"
+
+
+def _prefixed_output(base_name: str, models_path: Optional[Path] = None) -> str:
+    """Prefixes ``base_name`` with the model identifier (see
+    :func:`_model_output_prefix`), e.g. ``s-curves.xlsx`` ->
+    ``<system>_SEQ-XX-YY-ZZ_s-curves.xlsx``."""
+
+    return f"{_model_output_prefix(models_path)}_{base_name}"
+
+
+def _report_saved_plots(saved_files):
+    """Tells the user how many per-property S-curve files were written."""
+    if saved_files:
+        first = Path(saved_files[0]).absolute()
+        user_input_free_flow(
+            f"{len(saved_files)} S-curve plot(s) written, one per property "
+            f"(e.g. {first}). Press enter to continue: "
+        )
+    else:
+        user_input_free_flow(
+            "No S-curve plots written (matplotlib may be missing or there was no "
+            "data). Press enter to continue: "
+        )
 
 
 def _warn_no_csv_files():
@@ -356,7 +416,9 @@ class ModelAnalysisFunctions:
         if not _paths_are_valid():
             return
 
-        output_name = model_analysis_menu_options.selected_s_curves_output
+        output_name = _prefixed_output(
+            model_analysis_menu_options.selected_s_curves_output
+        )
         calculate_s_curves(
             model_location=Path(model_analysis_menu_options.selected_models_path),
             validation_set_location=Path(
@@ -372,9 +434,8 @@ class ModelAnalysisFunctions:
 
     @staticmethod
     def make_s_curves_plot():
-        """Saves a matplotlib image of the S-curves for the selected models and
-        validation set. One subplot is made per property type, so restrict the
-        property types first if the models contain many properties."""
+        """Saves matplotlib S-curve images for the selected models and validation
+        set - one separate image file per property type."""
 
         if not _paths_are_valid():
             return
@@ -388,12 +449,9 @@ class ModelAnalysisFunctions:
         )
         total_dict = mpl_get_true_vals_dict(predicted_dict, true_dict)
 
-        output_name = model_analysis_menu_options.selected_plot_output
-        plot_with_matplotlib(total_dict, saved_name=output_name)
-        user_input_free_flow(
-            f"S-curve plot written to {Path(output_name).absolute()} "
-            "(if matplotlib is installed). Press enter to continue: "
-        )
+        output_name = _prefixed_output(model_analysis_menu_options.selected_plot_output)
+        saved_files = plot_with_matplotlib(total_dict, saved_name=output_name)
+        _report_saved_plots(saved_files)
 
     @staticmethod
     def extract_metrics():
@@ -404,7 +462,9 @@ class ModelAnalysisFunctions:
         if not _paths_are_valid():
             return
 
-        output_name = model_analysis_menu_options.selected_metrics_output
+        output_name = _prefixed_output(
+            model_analysis_menu_options.selected_metrics_output
+        )
         metrics_df = calculate_model_metrics(
             model_location=Path(model_analysis_menu_options.selected_models_path),
             validation_set_location=Path(
@@ -429,7 +489,9 @@ class ModelAnalysisFunctions:
             return
         _, total_dict = result
 
-        output_name = model_analysis_menu_options.selected_s_curves_output
+        output_name = _prefixed_output(
+            model_analysis_menu_options.selected_s_curves_output
+        )
         simplified_write_to_excel(total_dict, output_name)
         user_input_free_flow(
             f"S-curves written to {Path(output_name).absolute()}. "
@@ -438,8 +500,8 @@ class ModelAnalysisFunctions:
 
     @staticmethod
     def make_s_curves_plot_from_csvs():
-        """Saves a matplotlib image of the S-curves from the selected models and
-        the held-out FEREBUS CSVs of the selected split."""
+        """Saves matplotlib S-curve images from the selected models and the held-out
+        FEREBUS CSVs of the selected split - one separate image file per property."""
 
         result = _prepare_ferebus_analysis()
         if result is None:
@@ -455,12 +517,9 @@ class ModelAnalysisFunctions:
             for property_name, atom_dict in total_dict.items()
         }
 
-        output_name = model_analysis_menu_options.selected_plot_output
-        plot_with_matplotlib(error_dict, saved_name=output_name)
-        user_input_free_flow(
-            f"S-curve plot written to {Path(output_name).absolute()} "
-            "(if matplotlib is installed). Press enter to continue: "
-        )
+        output_name = _prefixed_output(model_analysis_menu_options.selected_plot_output)
+        saved_files = plot_with_matplotlib(error_dict, saved_name=output_name)
+        _report_saved_plots(saved_files)
 
     @staticmethod
     def extract_metrics_from_csvs():
@@ -476,7 +535,9 @@ class ModelAnalysisFunctions:
             _warn_no_csv_files()
             return
 
-        output_name = model_analysis_menu_options.selected_metrics_output
+        output_name = _prefixed_output(
+            model_analysis_menu_options.selected_metrics_output
+        )
         metrics_df = calculate_metrics_from_ferebus_csvs(
             csv_files_list=csv_files,
             models=models,
@@ -485,6 +546,82 @@ class ModelAnalysisFunctions:
         print(metrics_df.to_string(index=False))
         user_input_free_flow(
             f"Metrics written to {Path(output_name).absolute()}. "
+            "Press enter to continue: "
+        )
+
+    @staticmethod
+    def run_batch_analysis():
+        """Runs CSV-based analysis (S-curve Excel + per-property plots + metrics
+        CSV) on *every* model batch found under the selected models path - like the
+        extract script runs over every SEQ folder. Each batch uses its own
+        co-located held-out CSVs of the selected split (external/internal), and all
+        outputs are prefixed with the batch identifier so nothing is overwritten.
+
+        Point the models directory at a parent folder (e.g. ``6_MODELS`` or
+        ``6_MODELS/<system>``) to analyse many batches at once, or at a single model
+        folder to analyse just that one.
+        """
+
+        root = Path(model_analysis_menu_options.selected_models_path)
+        model_folders = _discover_model_folders(root)
+        if not model_folders:
+            user_input_free_flow(
+                f"No model folders (containing .model files) found under {root}. "
+                "Press enter to continue: "
+            )
+            return
+
+        set_type = model_analysis_menu_options.selected_set_type
+        print(f"Found {len(model_folders)} model batch(es) to analyse.")
+
+        analysed, skipped = 0, 0
+        for model_folder in model_folders:
+
+            print(f"\n=== Analysing {model_folder} ===")
+            # each batch's held-out CSVs are co-located under it (test_set/valid_set)
+            csv_files = sorted(model_folder.rglob(f"*_{set_type}.csv"))
+            if not csv_files:
+                print(
+                    f"Skipping {model_folder}: no '{set_type}' CSVs found "
+                    "(expected co-located test_set/valid_set)."
+                )
+                skipped += 1
+                continue
+
+            models = Models(model_folder)
+            # predict once, then reuse for excel, plots and metrics
+            total_dict = true_predicted_from_ferebus_csvs(csv_files, models)
+
+            # S-curve Excel workbook
+            excel_out = _prefixed_output(
+                model_analysis_menu_options.selected_s_curves_output, model_folder
+            )
+            simplified_write_to_excel(total_dict, excel_out)
+
+            # per-property S-curve images (plotter only needs the errors)
+            error_dict = {
+                property_name: {
+                    atom: {"error": atom_data["error"]}
+                    for atom, atom_data in atom_dict.items()
+                }
+                for property_name, atom_dict in total_dict.items()
+            }
+            plot_out = _prefixed_output(
+                model_analysis_menu_options.selected_plot_output, model_folder
+            )
+            plot_with_matplotlib(error_dict, saved_name=plot_out)
+
+            # quality metrics CSV
+            metrics_out = _prefixed_output(
+                model_analysis_menu_options.selected_metrics_output, model_folder
+            )
+            metrics_df_from_total_dict(total_dict, output_location=metrics_out)
+
+            analysed += 1
+
+        user_input_free_flow(
+            f"Batch analysis complete: {analysed} analysed, {skipped} skipped. "
+            "Outputs are prefixed with each batch identifier. "
             "Press enter to continue: "
         )
 
@@ -540,6 +677,11 @@ model_analysis_menu_items = [
     FunctionItem(
         "[CSVs] Extract quality metrics (CSV)",
         ModelAnalysisFunctions.extract_metrics_from_csvs,
+    ),
+    # Batch: run CSV-based analysis on every model folder under the selected path
+    FunctionItem(
+        "[Batch] Run all analysis on every model folder under the selected path",
+        ModelAnalysisFunctions.run_batch_analysis,
     ),
 ]
 
