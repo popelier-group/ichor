@@ -21,6 +21,44 @@ ENERGY_PROPERTIES = ("iqa", "iqa_energy", "wfn_energy")
 
 DEFAULT_PERCENTILES = (90, 95, 99)
 
+# identifier columns in a metrics table; everything else is a numeric metric that
+# is averaged when building the average row(s)
+_METRIC_ID_COLUMNS = ("property", "atom", "element", "units")
+
+
+def append_average_rows(metrics_df: pd.DataFrame) -> pd.DataFrame:
+    """Returns a copy of ``metrics_df`` with an average row appended for each
+    property (its metrics averaged over that property's atoms). A row is added per
+    property rather than a single one, because different properties are reported in
+    different units (kJ mol-1 vs atomic units) and so must not be averaged together.
+    The average rows are labelled with ``atom = "AVERAGE"`` and placed at the end.
+
+    :param metrics_df: a metrics table with the identifier columns in
+        ``_METRIC_ID_COLUMNS`` plus numeric metric columns.
+    :return: the table with the average row(s) appended (unchanged if empty).
+    """
+
+    if metrics_df.empty:
+        return metrics_df
+
+    metric_cols = [c for c in metrics_df.columns if c not in _METRIC_ID_COLUMNS]
+
+    avg_rows = []
+    # sort=False keeps the properties in their existing (already sorted) order
+    for property_name, group in metrics_df.groupby("property", sort=False):
+        row = {"property": property_name, "atom": "AVERAGE"}
+        if "element" in metrics_df.columns:
+            elements = group["element"].unique()
+            row["element"] = elements[0] if len(elements) == 1 else "ALL"
+        if "units" in metrics_df.columns:
+            units = group["units"].unique()
+            row["units"] = units[0] if len(units) == 1 else ""
+        for col in metric_cols:
+            row[col] = group[col].mean()
+        avg_rows.append(row)
+
+    return pd.concat([metrics_df, pd.DataFrame(avg_rows)], ignore_index=True)
+
 
 def metrics_from_true_predicted(
     true: np.ndarray,
@@ -158,7 +196,7 @@ def calculate_model_metrics(
     metrics_df = calculate_metrics_dataframe(true, predicted, percentiles=percentiles)
 
     if output_location is not None:
-        metrics_df.to_csv(output_location, index=False)
+        append_average_rows(metrics_df).to_csv(output_location, index=False)
 
     return metrics_df
 
@@ -244,7 +282,7 @@ def metrics_df_from_total_dict(
     metrics_df = pd.DataFrame(rows)
 
     if output_location is not None:
-        metrics_df.to_csv(output_location, index=False)
+        append_average_rows(metrics_df).to_csv(output_location, index=False)
 
     return metrics_df
 
@@ -282,7 +320,7 @@ def write_metrics_per_element(
         out_path = base_path.with_name(
             f"{base_path.stem}_{element}{base_path.suffix}"
         )
-        element_df.to_csv(out_path, index=False)
+        append_average_rows(element_df).to_csv(out_path, index=False)
         written.append(out_path)
 
     return written
