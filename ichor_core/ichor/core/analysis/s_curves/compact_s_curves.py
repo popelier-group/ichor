@@ -1,5 +1,6 @@
+import colorsys
 import re
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -593,6 +594,119 @@ _S_CURVE_ENERGY_PROPERTIES = ("iqa", "iqa_energy", "wfn_energy")
 _S_CURVE_DEFAULT_X_LABEL = "Prediction Error / kJ mol$^{-1}$"
 _S_CURVE_MULTIPOLE_X_LABEL = "Prediction Error / a.u."
 
+# CPK / Jmol-style element colours so that atoms of the same element share a base
+# colour across the S-curve plots (oxygen red, nitrogen blue, carbon black, etc.).
+# A few colours are darkened relative to the classic CPK values so they stay
+# visible against a white plot background.
+ELEMENT_COLORS = {
+    "H": "#B0B0B0",  # white in CPK -> light grey so it is visible on white
+    "C": "#000000",  # black
+    "N": "#3050F8",  # blue
+    "O": "#FF0D0D",  # red
+    "F": "#1FA33F",  # green
+    "Cl": "#1FC21F",  # green
+    "Br": "#A62929",  # dark red / brown
+    "I": "#940094",  # purple
+    "P": "#FF8000",  # orange
+    "S": "#C9A600",  # yellow -> darkened gold for visibility
+    "B": "#CC7A7A",  # salmon
+    "Si": "#9E7A50",  # tan
+    "Na": "#AB5CF2",  # violet
+    "Mg": "#4CB000",  # green
+    "K": "#8F40D4",  # violet
+    "Ca": "#3DBF00",  # green
+    "Fe": "#E06633",  # orange-brown
+    "Zn": "#7D80B0",  # slate
+}
+
+# used for any element not present in ELEMENT_COLORS above
+_FALLBACK_ELEMENT_COLORS = [
+    "#845B97",
+    "#30D5C8",
+    "#FA8072",
+    "#00B945",
+    "#FF9500",
+]
+
+
+def _element_from_atom_name(atom_name: str) -> str:
+    """Returns the element symbol from an atom name, e.g. ``O1`` -> ``O``,
+    ``CL2`` -> ``Cl``. The leading alphabetic characters are taken as the element
+    and normalised to title case so it matches the keys in ``ELEMENT_COLORS``.
+
+    :param atom_name: An atom name such as ``O1``, ``H12`` or ``Cl3``.
+    :return: The element symbol (or the original string if no letters are found).
+    """
+
+    match = re.match(r"[A-Za-z]+", str(atom_name))
+    if not match:
+        return str(atom_name)
+    token = match.group(0)
+    return token[0].upper() + token[1:].lower()
+
+
+def _element_shades(base_hex: str, n: int) -> List[str]:
+    """Returns ``n`` shades of ``base_hex`` that share the same hue but differ in
+    lightness, so several atoms of the same element are distinguishable while still
+    reading as the same colour. A single atom keeps the exact base colour.
+
+    :param base_hex: The base element colour as a hex string.
+    :param n: How many shades (atoms of this element) are needed.
+    :return: A list of ``n`` hex colour strings, brightest first.
+    """
+
+    import matplotlib.colors as mcolors
+
+    if n <= 1:
+        return [base_hex]
+
+    h, lightness, s = colorsys.rgb_to_hls(*mcolors.to_rgb(base_hex))
+    # spread lightness in a band centred on the base colour's lightness, so dark
+    # bases (e.g. carbon) stay dark and light bases (e.g. hydrogen) stay light and
+    # the two do not collapse onto the same greys. The band is shifted (not just
+    # clamped) to keep its full width inside a range visible on a white background.
+    span = 0.40
+    floor, ceil = 0.15, 0.85
+    lo, hi = lightness - span / 2, lightness + span / 2
+    if lo < floor:
+        hi += floor - lo
+        lo = floor
+    if hi > ceil:
+        lo -= hi - ceil
+        hi = ceil
+    lo, hi = max(floor, lo), min(ceil, hi)
+    lightnesses = np.linspace(hi, lo, n)
+    return [mcolors.to_hex(colorsys.hls_to_rgb(h, li, s)) for li in lightnesses]
+
+
+def element_color_map(atom_names: List[str]) -> Dict[str, str]:
+    """Maps each atom name to a colour so that atoms of the same element share a
+    base colour (see ``ELEMENT_COLORS``); when an element occurs more than once the
+    atoms get different shades of that base colour.
+
+    :param atom_names: The atom names to colour, e.g. ``["O1", "H2", "H3", "C4"]``.
+    :return: A dict mapping each atom name to a hex colour string.
+    """
+
+    # group atoms by element, preserving the incoming order within each element
+    groups: "OrderedDict[str, List[str]]" = OrderedDict()
+    for atom_name in atom_names:
+        groups.setdefault(_element_from_atom_name(atom_name), []).append(atom_name)
+
+    colors: Dict[str, str] = {}
+    fallback_idx = 0
+    for element, members in groups.items():
+        base = ELEMENT_COLORS.get(element)
+        if base is None:
+            base = _FALLBACK_ELEMENT_COLORS[
+                fallback_idx % len(_FALLBACK_ELEMENT_COLORS)
+            ]
+            fallback_idx += 1
+        for atom_name, color in zip(members, _element_shades(base, len(members))):
+            colors[atom_name] = color
+
+    return colors
+
 
 def plot_with_matplotlib(
     total_dict: Union[List[dict], dict],
@@ -659,18 +773,6 @@ def plot_with_matplotlib(
     MAJOR_TICK_LENGTH = 5.0
     MINOR_TICK_LENGTH = 3.0
 
-    color_cycle = [
-        "0C5DA5",
-        "00B945",
-        "FF9500",
-        "FF2C00",
-        "845B97",
-        "474747",
-        "9e9e9e",
-        "30D5C8",
-        "FA8072",
-    ]
-
     # accept a list of dicts (legacy) by merging into one property -> atoms dict
     if isinstance(total_dict, (list, tuple)):
         merged = {}
@@ -690,10 +792,12 @@ def plot_with_matplotlib(
     for property_name in tqdm(property_names, desc="Plotting S-curves"):
 
         fig, ax = plt.subplots(figsize=(panel_width, panel_height))
-        ax.set_prop_cycle(color=color_cycle)
 
         inner_dict = total_dict[property_name]
         atom_names = natsorted(inner_dict.keys(), key=ignore_alpha)
+        # colour atoms by element (same element -> same base colour, different
+        # shades when an element appears more than once)
+        atom_colors = element_color_map(atom_names)
 
         for an in atom_names:
 
@@ -709,7 +813,13 @@ def plot_with_matplotlib(
 
             array_sorted = np.sort(np.absolute(array))
             perc = percentile(array_sorted.shape[0])
-            ax.semilogx(array_sorted, perc, label=an, linewidth=LINEWIDTH)
+            ax.semilogx(
+                array_sorted,
+                perc,
+                label=an,
+                linewidth=LINEWIDTH,
+                color=atom_colors[an],
+            )
 
         plot_title = f"{title} - {property_name}" if title else str(property_name)
         ax.set_title(plot_title, fontsize=TITLE_FONTSIZE, fontweight="bold")
