@@ -16,8 +16,10 @@ from ichor.cli.useful_functions import (
 from ichor.core.analysis.model_metrics import (
     calculate_metrics_from_ferebus_csvs,
     metrics_df_from_total_dict,
+    write_metrics_per_element,
 )
 from ichor.core.analysis.s_curves.compact_s_curves import (
+    plot_s_curves_per_element,
     plot_with_matplotlib,
     simplified_write_to_excel,
     true_predicted_from_ferebus_csvs,
@@ -27,8 +29,6 @@ from ichor.core.models import Models
 from tqdm import tqdm
 
 ## TODO - element type averages
-## TODO - s-curves per element type
-## TODO - colouring by atoms
 ## TODO - xyz to extract atom types - Bienfait
 
 # held-out split naming used in FEREBUS/ichor training CSV file names
@@ -213,6 +213,18 @@ def _analysis_output_path(base_name: str, models_path: Optional[Path] = None) ->
     return analysis_dir / base_name
 
 
+def _error_dict_from_total_dict(total_dict: dict) -> dict:
+    """Reduces a nested ``{property: {atom: {"true", "predicted", "error"}}}`` dict
+    to the ``{property: {atom: {"error": array}}}`` form the S-curve plotters need."""
+    return {
+        property_name: {
+            atom: {"error": atom_data["error"]}
+            for atom, atom_data in atom_dict.items()
+        }
+        for property_name, atom_dict in total_dict.items()
+    }
+
+
 def _report_saved_plots(saved_files):
     """Tells the user how many per-property S-curve files were written."""
     if saved_files:
@@ -389,16 +401,27 @@ class ModelAnalysisFunctions:
         _, total_dict = result
 
         # the plotter only needs the errors for each atom/property
-        error_dict = {
-            property_name: {
-                atom: {"error": atom_data["error"]}
-                for atom, atom_data in atom_dict.items()
-            }
-            for property_name, atom_dict in total_dict.items()
-        }
+        error_dict = _error_dict_from_total_dict(total_dict)
 
         output_name = _analysis_output_path(S_CURVES_PLOT_NAME)
         saved_files = plot_with_matplotlib(error_dict, saved_name=output_name)
+        _report_saved_plots(saved_files)
+
+    @staticmethod
+    def make_s_curves_plot_per_element_from_csvs():
+        """Saves matplotlib S-curve images grouped by element type - a separate
+        file for each element (and property), containing only that element's atoms,
+        e.g. ``s-curves_C_iqa.png``, ``s-curves_H_iqa.png``."""
+
+        result = _prepare_ferebus_analysis()
+        if result is None:
+            return
+        _, total_dict = result
+
+        error_dict = _error_dict_from_total_dict(total_dict)
+
+        output_name = _analysis_output_path(S_CURVES_PLOT_NAME)
+        saved_files = plot_s_curves_per_element(error_dict, saved_name=output_name)
         _report_saved_plots(saved_files)
 
     @staticmethod
@@ -425,6 +448,30 @@ class ModelAnalysisFunctions:
         user_input_free_flow(
             f"Metrics written to {Path(output_name).absolute()}. "
             "Press enter to continue: "
+        )
+
+    @staticmethod
+    def extract_metrics_per_element_from_csvs():
+        """Writes a separate quality-metrics CSV for each element type (RMSE, MAE,
+        R2, max error and error percentiles) from the selected models and the
+        held-out FEREBUS CSVs of the selected split, e.g. ``model_metrics_C.csv``,
+        ``model_metrics_H.csv``. Also prints the combined table."""
+
+        result = _prepare_ferebus_analysis()
+        if result is None:
+            return
+        _, total_dict = result
+
+        metrics_df = metrics_df_from_total_dict(total_dict)
+        print(metrics_df.to_string(index=False))
+
+        output_name = _analysis_output_path(METRICS_CSV_NAME)
+        written = write_metrics_per_element(metrics_df, output_name)
+        user_input_free_flow(
+            f"{len(written)} per-element metrics CSV(s) written "
+            f"(e.g. {Path(written[0]).absolute()}). Press enter to continue: "
+            if written
+            else "No metrics written (no data). Press enter to continue: "
         )
 
     @staticmethod
@@ -474,20 +521,19 @@ class ModelAnalysisFunctions:
             excel_out = _analysis_output_path(S_CURVES_EXCEL_NAME, model_folder)
             simplified_write_to_excel(total_dict, excel_out)
 
-            # per-property S-curve images (plotter only needs the errors)
-            error_dict = {
-                property_name: {
-                    atom: {"error": atom_data["error"]}
-                    for atom, atom_data in atom_dict.items()
-                }
-                for property_name, atom_dict in total_dict.items()
-            }
+            # per-property S-curve images (plotter only needs the errors), plus a
+            # per-element set (each element's atoms in their own file)
+            error_dict = _error_dict_from_total_dict(total_dict)
             plot_out = _analysis_output_path(S_CURVES_PLOT_NAME, model_folder)
             plot_with_matplotlib(error_dict, saved_name=plot_out)
+            plot_s_curves_per_element(error_dict, saved_name=plot_out)
 
-            # quality metrics CSV
+            # quality metrics CSV (combined, plus one CSV per element type)
             metrics_out = _analysis_output_path(METRICS_CSV_NAME, model_folder)
-            metrics_df_from_total_dict(total_dict, output_location=metrics_out)
+            metrics_df = metrics_df_from_total_dict(
+                total_dict, output_location=metrics_out
+            )
+            write_metrics_per_element(metrics_df, metrics_out)
 
             analysed += 1
 
@@ -526,8 +572,16 @@ model_analysis_menu_items = [
         ModelAnalysisFunctions.make_s_curves_plot_from_csvs,
     ),
     FunctionItem(
+        "Make S-curves per element type (matplotlib image)",
+        ModelAnalysisFunctions.make_s_curves_plot_per_element_from_csvs,
+    ),
+    FunctionItem(
         "Extract quality metrics (CSV)",
         ModelAnalysisFunctions.extract_metrics_from_csvs,
+    ),
+    FunctionItem(
+        "Extract quality metrics per element type (CSV)",
+        ModelAnalysisFunctions.extract_metrics_per_element_from_csvs,
     ),
     # Batch: run analysis on every model folder under the selected path
     FunctionItem(

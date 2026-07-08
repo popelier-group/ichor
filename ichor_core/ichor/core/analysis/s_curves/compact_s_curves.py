@@ -665,7 +665,11 @@ def _element_shades(base_hex: str, n: int) -> List[str]:
     # bases (e.g. carbon) stay dark and light bases (e.g. hydrogen) stay light and
     # the two do not collapse onto the same greys. The band is shifted (not just
     # clamped) to keep its full width inside a range visible on a white background.
-    span = 0.40
+    # Achromatic elements (carbon black, hydrogen grey) use a narrower band so
+    # their greyscale shades stay in separate dark/light ranges and do not cross
+    # over; coloured elements use a wider band so their shades are easy to tell
+    # apart (hue keeps them distinct from the greys regardless).
+    span = 0.26 if s < 0.12 else 0.40
     floor, ceil = 0.15, 0.85
     lo, hi = lightness - span / 2, lightness + span / 2
     if lo < floor:
@@ -706,6 +710,36 @@ def element_color_map(atom_names: List[str]) -> Dict[str, str]:
             colors[atom_name] = color
 
     return colors
+
+
+def group_total_dict_by_element(
+    total_dict: Dict[str, Dict[str, object]],
+) -> "OrderedDict[str, Dict[str, Dict[str, object]]]":
+    """Splits a nested ``{property: {atom: data}}`` dict into one such dict per
+    element, i.e. ``{element: {property: {atom: data}}}``. The ``data`` values are
+    left untouched (not copied), so this works for both the full
+    ``{"true", "predicted", "error"}`` dicts and error-only dicts.
+
+    :param total_dict: nested dict keyed by property then atom.
+    :return: an ``OrderedDict`` keyed by element symbol (natsorted), each value a
+        ``{property: {atom: data}}`` dict holding only that element's atoms.
+    """
+
+    from ichor.core.common.str import get_characters
+
+    grouped: Dict[str, Dict[str, Dict[str, object]]] = defaultdict(
+        lambda: defaultdict(dict)
+    )
+    for property_name, atom_dict in total_dict.items():
+        for atom_name, data in atom_dict.items():
+            element = get_characters(atom_name)
+            grouped[element][property_name][atom_name] = data
+
+    # return plain dicts (not defaultdicts) in a stable, natsorted element order
+    return OrderedDict(
+        (element, {p: dict(a) for p, a in grouped[element].items()})
+        for element in natsorted(grouped.keys())
+    )
 
 
 def plot_with_matplotlib(
@@ -898,6 +932,57 @@ def plot_with_matplotlib(
         fig.savefig(out_path, dpi=dpi, bbox_inches="tight")
         plt.close(fig)
         saved_files.append(out_path)
+
+    return saved_files
+
+
+def plot_s_curves_per_element(
+    total_dict: Union[List[dict], dict],
+    saved_name: str = "s_curves.png",
+    **kwargs,
+) -> List[Path]:
+    """Plots S-curves separately for each element type, so each element gets its
+    own file(s) containing only that element's atoms. The element symbol is
+    inserted into the file name (and used as the plot title prefix), and each
+    property still gets its own file, e.g. ``s_curves.png`` ->
+    ``s_curves_C_iqa.png``, ``s_curves_H_iqa.png``, ``s_curves_O_q00.png``, etc.
+
+    :param total_dict: a nested dict ``{property: {atom: {"error": array}}}`` (or a
+        list of such dicts, which are merged), as consumed by
+        :func:`plot_with_matplotlib`.
+    :param saved_name: base output file name; the element symbol and property name
+        are inserted before the extension for each file.
+    :param kwargs: any other keyword arguments accepted by
+        :func:`plot_with_matplotlib` (e.g. ``dpi``, ``panel_width``). A ``title``
+        given here is used as a prefix in front of the element symbol.
+    :return: the list of file paths that were written.
+    """
+
+    # accept a list of dicts (legacy) by merging into one property -> atoms dict
+    if isinstance(total_dict, (list, tuple)):
+        merged: dict = {}
+        for d in total_dict:
+            merged.update(d)
+        total_dict = merged
+
+    base_path = Path(saved_name)
+    # a caller-supplied title becomes a prefix in front of the element symbol
+    outer_title = kwargs.pop("title", None)
+
+    saved_files: List[Path] = []
+    for element, element_dict in group_total_dict_by_element(total_dict).items():
+        element_saved_name = base_path.with_name(
+            f"{base_path.stem}_{element}{base_path.suffix}"
+        )
+        element_title = f"{outer_title} {element}" if outer_title else element
+        saved_files.extend(
+            plot_with_matplotlib(
+                element_dict,
+                saved_name=element_saved_name,
+                title=element_title,
+                **kwargs,
+            )
+        )
 
     return saved_files
 

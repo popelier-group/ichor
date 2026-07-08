@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from ichor.core.analysis.predictions import get_true_predicted
 from ichor.core.common.constants import ha_to_kj_mol
+from ichor.core.common.str import get_characters
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models
 from tqdm import tqdm
@@ -110,7 +111,15 @@ def calculate_metrics_dataframe(
                 percentiles=percentiles,
                 error_scale=error_scale,
             )
-            rows.append({"property": type_, "atom": atom, "units": units, **metrics})
+            rows.append(
+                {
+                    "property": type_,
+                    "atom": atom,
+                    "element": get_characters(atom),
+                    "units": units,
+                    **metrics,
+                }
+            )
 
     return pd.DataFrame(rows)
 
@@ -222,7 +231,15 @@ def metrics_df_from_total_dict(
                 percentiles=percentiles,
                 error_scale=error_scale,
             )
-            rows.append({"property": type_, "atom": atom, "units": units, **metrics})
+            rows.append(
+                {
+                    "property": type_,
+                    "atom": atom,
+                    "element": get_characters(atom),
+                    "units": units,
+                    **metrics,
+                }
+            )
 
     metrics_df = pd.DataFrame(rows)
 
@@ -230,6 +247,45 @@ def metrics_df_from_total_dict(
         metrics_df.to_csv(output_location, index=False)
 
     return metrics_df
+
+
+def write_metrics_per_element(
+    metrics_df: pd.DataFrame,
+    output_location: Union[str, Path],
+) -> List[Path]:
+    """Writes a separate metrics CSV for each element type, inserting the element
+    symbol into the file name, e.g. ``model_metrics.csv`` ->
+    ``model_metrics_C.csv``, ``model_metrics_H.csv``, ``model_metrics_O.csv``.
+
+    :param metrics_df: a metrics table as produced by
+        :func:`metrics_df_from_total_dict` or :func:`calculate_metrics_dataframe`.
+        If it has no ``element`` column, one is derived from the ``atom`` column.
+    :param output_location: base CSV path; the element symbol is inserted before
+        the extension for each written file.
+    :return: the list of CSV paths that were written (natsorted by element).
+    """
+
+    from natsort import natsorted
+
+    if metrics_df.empty:
+        return []
+
+    if "element" not in metrics_df.columns:
+        metrics_df = metrics_df.assign(
+            element=metrics_df["atom"].map(get_characters)
+        )
+
+    base_path = Path(output_location)
+    written: List[Path] = []
+    for element in natsorted(metrics_df["element"].unique()):
+        element_df = metrics_df[metrics_df["element"] == element]
+        out_path = base_path.with_name(
+            f"{base_path.stem}_{element}{base_path.suffix}"
+        )
+        element_df.to_csv(out_path, index=False)
+        written.append(out_path)
+
+    return written
 
 
 def calculate_metrics_from_ferebus_csvs(
