@@ -118,10 +118,6 @@ class SubmitMorfiFunctions:
     @staticmethod
     def select_basis_set():
         """Asks user to update the basis set."""
-        submit_morfi_menu_options.selected_basis_set = user_input_free_flow(
-            "Enter basis set: ", submit_morfi_menu_options.selected_basis_set
-        )
-
         current_default = submit_morfi_menu_options.selected_basis_set["default"]
 
         new_basis_set = user_input_free_flow(
