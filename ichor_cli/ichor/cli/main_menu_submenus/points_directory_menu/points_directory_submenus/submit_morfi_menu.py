@@ -129,8 +129,12 @@ class SubmitMorfiFunctions:
 
         try:
             atom_types = submit_morfi_menu_options.find_atoms()
-        except FileNotFoundError as e:
-            print(e)
+        except FileNotFoundError as error:
+            print(
+                f"Error: {error}\n"
+                "Please select a valid PointsDirectory path before selecting a basis set."
+            )
+            input("\nPress Enter to continue...")
             return
 
         while True:
@@ -154,9 +158,7 @@ class SubmitMorfiFunctions:
 
             if application_choice in {
                 "2",
-                "one",
                 "atom",
-                "one atom",
             }:
                 SubmitMorfiFunctions.select_atom_basis_set(
                     new_basis_set,
@@ -168,7 +170,6 @@ class SubmitMorfiFunctions:
                 "3",
                 "cancel",
                 "c",
-                "back",
             }:
                 print("Basis set update cancelled.")
                 return
@@ -187,14 +188,10 @@ class SubmitMorfiFunctions:
             selected_atom_input = input(
                 "\nAtoms found in PointsDirectory: "
                 f"{', '.join(atom_types)}\n"
-                "Enter atom type, or 'cancel': "
+                "Enter atom type, or q to quit: "
             ).strip()
 
-            if selected_atom_input.casefold() in {
-                "cancel",
-                "c",
-                "back",
-            }:
+            if selected_atom_input.casefold() in {"quit", "q"}:
                 print("Basis set update cancelled.")
                 return
 
