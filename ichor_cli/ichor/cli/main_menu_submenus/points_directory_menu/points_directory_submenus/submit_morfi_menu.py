@@ -16,12 +16,12 @@ from ichor.cli.useful_functions import (
 from ichor.core.files import PointsDirectory, PointsDirectoryParent
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main import submit_points_directory_to_gaussian
-from ichor.hpc.submission_commands import GaussianCommand
 
 AVAILABLE_GRIDS = {
     "coarse": [20, 20],
     "medium": [44, 70],
     "fine": [50, 100],
+    "very fine": [65, 150],
 }
 
 SUBMIT_MORFI_MENU_DESCRIPTION = MenuDescription(
@@ -30,7 +30,10 @@ SUBMIT_MORFI_MENU_DESCRIPTION = MenuDescription(
 )
 
 SUBMIT_MORFI_MENU_DEFAULTS = {
-    "default_basis_set": "cc-pwCVTZ",
+    "default_basis_set": {
+        "default": "cc-pwCVTZ",
+        "atoms": {},
+    },
     "default_ncores": 16,
     "default_ngeoms": 100,
     "default_grid": [44, 70],
@@ -41,7 +44,7 @@ SUBMIT_MORFI_MENU_DEFAULTS = {
 @dataclass
 class SubmitMorfiMenuOptions(MenuOptions):
 
-    selected_basis_set: str
+    selected_basis_set: dict
     selected_number_of_cores: int
     selected_number_of_geoms: int
     selected_grid: list[int]
@@ -80,10 +83,15 @@ class SubmitMorfiMenuOptions(MenuOptions):
 
         # Skip atom count and comment line
         for line in lines[2:]:
-            atom = line.split()[0]
+            parts = line.split()
 
-        if atom not in atom_types:
-            atom_types.append(atom)
+            if not parts:
+                continue
+
+            atom = parts[0]
+
+            if atom not in atom_types:
+                atom_types.append(atom)
 
         return atom_types
 
@@ -114,6 +122,99 @@ class SubmitMorfiFunctions:
             "Enter basis set: ", submit_morfi_menu_options.selected_basis_set
         )
 
+        current_default = submit_morfi_menu_options.selected_basis_set["default"]
+
+        new_basis_set = user_input_free_flow(
+            "Enter basis set: ",
+            current_default,
+        )
+
+        new_basis_set = new_basis_set.strip()
+
+        try:
+            atom_types = submit_morfi_menu_options.find_atoms()
+        except FileNotFoundError as e:
+            print(e)
+            return
+
+        while True:
+            application_choice = input(
+                f"\nNew basis set: {new_basis_set}\n"
+                "Apply basis set to:\n"
+                "1. All atoms\n"
+                "2. One atom type\n"
+                "3. Cancel\n"
+                "Select an option: "
+            ).strip()
+
+            if application_choice in {"1", "all", "a"}:
+                submit_morfi_menu_options.selected_basis_set["default"] = new_basis_set
+
+                # Applying to all atoms removes previous overrides.
+                submit_morfi_menu_options.selected_basis_set["atoms"].clear()
+
+                print(f"{new_basis_set} applied to all atoms.")
+                return
+
+            if application_choice in {
+                "2",
+                "one",
+                "atom",
+                "one atom",
+            }:
+                SubmitMorfiFunctions.select_atom_basis_set(
+                    new_basis_set,
+                    atom_types,
+                )
+                return
+
+            if application_choice in {
+                "3",
+                "cancel",
+                "c",
+                "back",
+            }:
+                print("Basis set update cancelled.")
+                return
+
+            print("Please enter 1, 2, or 3.")
+
+    @staticmethod
+    def select_atom_basis_set(
+        new_basis_set: str,
+        atom_types: list[str],
+    ):
+        """Apply a basis set to one atom type."""
+        available_atoms = {atom.casefold(): atom for atom in atom_types}
+
+        while True:
+            selected_atom_input = input(
+                "\nAtoms found in PointsDirectory: "
+                f"{', '.join(atom_types)}\n"
+                "Enter atom type, or 'cancel': "
+            ).strip()
+
+            if selected_atom_input.casefold() in {
+                "cancel",
+                "c",
+                "back",
+            }:
+                print("Basis set update cancelled.")
+                return
+
+            selected_atom = available_atoms.get(selected_atom_input.casefold())
+
+            if selected_atom is None:
+                print(f"Atom '{selected_atom_input}' was not found.")
+                continue
+
+            submit_morfi_menu_options.selected_basis_set["atoms"][
+                selected_atom
+            ] = new_basis_set
+
+            print(f"{new_basis_set} applied to {selected_atom}.")
+            return
+
     @staticmethod
     def select_number_of_cores():
         """Asks user to update the number of cores."""
@@ -138,23 +239,24 @@ class SubmitMorfiFunctions:
             "1": "coarse",
             "2": "medium",
             "3": "fine",
-            "4": "custom",
+            "4": "very fine",
+            "5": "custom",
         }
 
         while True:
             choice = input(
-                "Select grid:\n"
-                "1. Coarse (20-20)\n"
-                "2. Medium (44-70)\n"
-                "3. Fine (50-100)\n"
-                "4. Custom\n"
-                "Enter choice (1-4): "
+                "1. Coarse (20,20)\n"
+                "2. Medium (44,70)\n"
+                "3. Fine (65,150)\n"
+                "4. Very Fine (65,150)\n"
+                "5. Custom\n"
+                "Enter grid choice (1-5): "
             ).strip()
 
-            if choice in ("1", "2", "3"):
+            if choice in ("1", "2", "3", "4"):
                 break
 
-            elif choice == "4":
+            elif choice == "5":
                 while True:
                     try:
                         ang = int(input("Enter Angular grid size: "))
