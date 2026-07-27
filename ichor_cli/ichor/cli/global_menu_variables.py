@@ -25,3 +25,15 @@ SELECTED_DATABASE_PATH: Path = Path("").absolute()
 
 # FileConversion options
 SELECTED_INPUT_FILE_PATH: Path = Path("").absolute()
+
+# DL_FFLUX (DL_POLY) menu options
+# directory where the DL_FFLUX calculation will be set up and run
+SELECTED_DLPOLY_RUN_PATH: Path = Path("").absolute()
+# directory containing the trained models (usually one of the 6_MODEL/xxx subfolders)
+SELECTED_MODEL_DIRECTORY_PATH: Path = Path("").absolute()
+
+# DL_FFLUX robustness check (analysis menu) options
+# base directory in which the per-seed RUN* directories are created
+SELECTED_DLPOLY_ROBUSTNESS_PATH: Path = Path("").absolute()
+# diversity-sampled trajectory (.xyz) from which the seed geometries are taken (in order)
+SELECTED_DLPOLY_SEED_TRAJECTORY_PATH: Path = Path("").absolute()

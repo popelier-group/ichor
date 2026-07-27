@@ -1,7 +1,11 @@
 from dataclasses import dataclass
 
-from consolemenu.items import FunctionItem
+from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
+from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus import (
+    robustness_menu,
+    ROBUSTNESS_MENU_DESCRIPTION,
+)
 from ichor.cli.menu_description import MenuDescription
 
 from ichor.cli.menu_options import MenuOptions
@@ -132,6 +136,7 @@ analysis_menu_items = [
         "Center xyz on atoms.",
         AnalysisFunctions.give_xyz_file_and_center_trajectory_on_atom,
     ),
+    SubmenuItem(ROBUSTNESS_MENU_DESCRIPTION.title, robustness_menu, analysis_menu),
 ]
 
 add_items_to_menu(analysis_menu, analysis_menu_items)

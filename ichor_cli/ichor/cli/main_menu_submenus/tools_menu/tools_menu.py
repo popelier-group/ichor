@@ -3,8 +3,12 @@ from pathlib import Path
 from typing import Union
 
 import ichor.cli.global_menu_variables
-from consolemenu.items import FunctionItem
+from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
+from ichor.cli.main_menu_submenus.tools_menu.tools_submenus import (
+    dl_fflux_menu,
+    DL_FFLUX_MENU_DESCRIPTION,
+)
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import user_input_path
@@ -89,6 +93,7 @@ tools_menu_items = [
         "Submit check PointDirectory to compute.",
         ToolsMenuFunctions.submit_check_gaussian_and_aimall,
     ),
+    SubmenuItem(DL_FFLUX_MENU_DESCRIPTION.title, dl_fflux_menu, tools_menu),
 ]
 
 add_items_to_menu(tools_menu, tools_menu_items)

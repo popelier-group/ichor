@@ -34,6 +34,8 @@ class DlPolyControl(WriteFile):
         stats_every=1,
         job_time=10000000,
         close_time=20000,
+        fflux_cluster="L1",
+        fflux_print="0 1",
     ):
 
         super().__init__(path)
@@ -56,6 +58,10 @@ class DlPolyControl(WriteFile):
         self.stats_every = stats_every
         self.job_time = job_time
         self.close_time = close_time
+        # FFLUX-specific directives. Newer DL_FFLUX builds keep these in a separate
+        # FFLUX.in file, so set to None to omit them from the CONTROL file.
+        self.fflux_cluster = fflux_cluster
+        self.fflux_print = fflux_print
 
     # TODO: implement reading for dlpoly control file
     # def _read_file(self):
@@ -88,7 +94,8 @@ class DlPolyControl(WriteFile):
         write_str += f"rvdw    {self.rvdw}\n"
         write_str += "vdw direct\n"
         write_str += "vdw shift\n"
-        write_str += "fflux cluster L1\n"
+        if self.fflux_cluster is not None:
+            write_str += f"fflux cluster {self.fflux_cluster}\n"
         write_str += "\n"
         write_str += f"dump  {self.dump}\n"
         write_str += (
@@ -96,7 +103,8 @@ class DlPolyControl(WriteFile):
         )
         write_str += f"print every {self.print_every}\n"
         write_str += f"stats every {self.stats_every}\n"
-        write_str += "fflux print 0 1\n"
+        if self.fflux_print is not None:
+            write_str += f"fflux print {self.fflux_print}\n"
         write_str += f"job time {self.job_time}\n"
         write_str += f"close time {self.close_time}\n"
         write_str += "finish\n"

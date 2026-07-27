@@ -1,0 +1,50 @@
+Title: GLUTATHIONE
+# This is a generic CONTROL file. Please adjust to your requirement.
+# Directives which are commented are some useful options.
+
+ensemble nvt hoover 0.025
+temperature 300
+#pressure 0.001
+
+#Restart Options
+#restart noscale
+
+#perform zero temperature run (really set to 10K)
+#zero
+# optimise distance 0.000001
+
+# Cap forces during equilibration, in unit kT/angstrom.
+# (useful if your system is far from equilibrium)
+#cap 100.0
+
+# Increase array size per domain
+# densvar
+
+# Bypass checking restrictions and reporting
+#no index
+#no strict
+#no topolgy
+#no vdw
+
+timestep 0.00025
+steps 2000000
+#scale 100 
+
+#spme sum 0.00001 50 50 50
+cutoff  8.0
+rvdw    8.0
+vdw direct
+vdw shift
+# Need these for bond contraints
+#mxshak 100
+#shake 1.0e-6
+
+# Continue MD simulation
+#restart
+dump  1000
+traj 0 1 0
+print every 1
+stats every 1
+job time 10000000
+close time 20000
+finish
