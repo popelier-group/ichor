@@ -14,6 +14,10 @@ from ichor.cli.main_menu_submenus.initial_structure_menu import (
     initial_structure_menu,
     INITIAL_STRUCTURE_MENU_DESCRIPTION,
 )
+from ichor.cli.main_menu_submenus.fflux_calculations_menu import (
+    fflux_calculations_menu,
+    FFLUX_CALCULATIONS_MENU_DESCRIPTION,
+)
 from ichor.cli.main_menu_submenus.points_directory_menu import (
     points_directory_menu,
     POINTS_DIRECTORY_MENU_DESCRIPTION,
@@ -95,6 +99,11 @@ main_menu_items = [
         POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu
     ),
     SubmenuItem(TRAINING_MENU_DESCRIPTION.title, training_menu, main_menu),
+    SubmenuItem(
+        FFLUX_CALCULATIONS_MENU_DESCRIPTION.title,
+        fflux_calculations_menu,
+        main_menu,
+    ),
     SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
     SubmenuItem(TOOLS_MENU_DESCRIPTION.title, tools_menu, main_menu),
 ]

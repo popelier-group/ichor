@@ -3,8 +3,6 @@ from dataclasses import dataclass
 from consolemenu.items import SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.tools_menu.tools_submenus import (
-    dl_fflux_menu,
-    DL_FFLUX_MENU_DESCRIPTION,
     points_directory_tools_menu,
     POINTS_DIRECTORY_TOOLS_MENU_DESCRIPTION,
 )
@@ -47,7 +45,6 @@ tools_menu_items = [
         points_directory_tools_menu,
         tools_menu,
     ),
-    SubmenuItem(DL_FFLUX_MENU_DESCRIPTION.title, dl_fflux_menu, tools_menu),
 ]
 
 add_items_to_menu(tools_menu, tools_menu_items)
