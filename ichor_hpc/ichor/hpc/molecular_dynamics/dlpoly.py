@@ -1,6 +1,6 @@
 import shutil
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 import ichor.hpc.global_variables
 
@@ -121,12 +121,16 @@ def submit_dlpoly_fflux(
     ncores: int = 1,
     electrostatics: str = "cluster",
     electrostatics_level: int = 3,
+    executable_path: Optional[Union[str, Path]] = None,
 ) -> JobID:
     """Sets up and submits a DL_FFLUX (FFLUX-modified DL_POLY) calculation to a compute node.
 
     See :func:`write_dlpoly_fflux_setup` for a description of the setup arguments.
 
     :param ncores: The number of cores to use for the DL_FFLUX job, defaults to 1.
+    :param executable_path: An optional path to the DL_FFLUX (DLPOLY.Z) executable which
+        overrides the configured ``software.dlpoly.executable_path``. If ``None`` (default),
+        the configured executable path is used.
     :return: An object containing information for the submitted job.
     :rtype: ichor.hpc.batch_system.jobs.JobID
     """
@@ -146,7 +150,7 @@ def submit_dlpoly_fflux(
     with SubmissionScript(
         ichor.hpc.global_variables.SCRIPT_NAMES["dlpoly"], ncores=ncores
     ) as submission_script:
-        submission_script.add_command(DlpolyCommand(None, run_path))
+        submission_script.add_command(DlpolyCommand(executable_path, run_path))
 
     return submission_script.submit()
 
@@ -163,6 +167,7 @@ def submit_dlpoly_fflux_robustness(
     ncores: int = 1,
     electrostatics: str = "cluster",
     electrostatics_level: int = 3,
+    executable_path: Optional[Union[str, Path]] = None,
 ) -> JobID:
     """Sets up and submits a DL_FFLUX model-robustness check.
 
@@ -187,6 +192,9 @@ def submit_dlpoly_fflux_robustness(
     :param electrostatics: The electrostatics model written to FFLUX.in when the models
         contain multipole moment data, defaults to ``"cluster"``.
     :param electrostatics_level: The multipole expansion level (L1-L5), defaults to 3.
+    :param executable_path: An optional path to the DL_FFLUX (DLPOLY.Z) executable which
+        overrides the configured ``software.dlpoly.executable_path``. If ``None`` (default),
+        the configured executable path is used.
     :return: An object containing information for the submitted (array) job.
     :rtype: ichor.hpc.batch_system.jobs.JobID
     """
@@ -229,6 +237,6 @@ def submit_dlpoly_fflux_robustness(
         ichor.hpc.global_variables.SCRIPT_NAMES["dlpoly"], ncores=ncores
     ) as submission_script:
         for run_path in run_paths:
-            submission_script.add_command(DlpolyCommand(None, run_path))
+            submission_script.add_command(DlpolyCommand(executable_path, run_path))
 
     return submission_script.submit()

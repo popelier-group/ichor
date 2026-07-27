@@ -28,6 +28,8 @@ ROBUSTNESS_MENU_DEFAULTS = {
     "default_timestep": 0.001,
     "default_number_of_timesteps": 500,
     "default_number_of_cores": 1,
+    # empty string means "use the executable path from the config"
+    "default_executable_path": "",
 }
 
 ROBUSTNESS_MENU_DESCRIPTION = MenuDescription(
@@ -54,6 +56,8 @@ class RobustnessMenuOptions(MenuOptions):
     selected_number_of_timesteps: int
     # computational resources
     selected_number_of_cores: int
+    # optional override of the configured DL_FFLUX (DLPOLY.Z) executable path
+    selected_executable_path: str
 
     def check_selected_model_directory_path(self) -> Union[str, None]:
         """Checks whether the given model directory exists and is a directory."""
@@ -85,6 +89,7 @@ robustness_menu_options = RobustnessMenuOptions(
     ROBUSTNESS_MENU_DEFAULTS["default_timestep"],
     ROBUSTNESS_MENU_DEFAULTS["default_number_of_timesteps"],
     ROBUSTNESS_MENU_DEFAULTS["default_number_of_cores"],
+    ROBUSTNESS_MENU_DEFAULTS["default_executable_path"],
 )
 
 
@@ -173,6 +178,15 @@ class RobustnessMenuFunctions:
         )
 
     @staticmethod
+    def select_executable_path():
+        """Select an optional DL_FFLUX (DLPOLY.Z) executable path that overrides the
+        path configured in ichor_config.yaml. Leave blank to use the configured path."""
+        robustness_menu_options.selected_executable_path = user_input_free_flow(
+            "Enter DL_FFLUX executable path (blank = use config): ",
+            robustness_menu_options.selected_executable_path,
+        )
+
+    @staticmethod
     def submit_robustness_to_compute():
         """Sets up one RUN* directory per seed geometry and submits them as a job array."""
 
@@ -186,6 +200,7 @@ class RobustnessMenuFunctions:
             timestep=robustness_menu_options.selected_timestep,
             nsteps=robustness_menu_options.selected_number_of_timesteps,
             ncores=robustness_menu_options.selected_number_of_cores,
+            executable_path=robustness_menu_options.selected_executable_path or None,
         )
         answer = ""
         user_input_free_flow(
@@ -245,6 +260,10 @@ robustness_menu_items = [
     FunctionItem(
         "Select number of cores",
         RobustnessMenuFunctions.select_number_of_cores,
+    ),
+    FunctionItem(
+        "Select DL_FFLUX executable path (optional override)",
+        RobustnessMenuFunctions.select_executable_path,
     ),
     FunctionItem(
         "Set up and submit DL_FFLUX robustness check to compute",

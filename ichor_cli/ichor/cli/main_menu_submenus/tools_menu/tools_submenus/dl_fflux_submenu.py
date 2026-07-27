@@ -27,6 +27,8 @@ DL_FFLUX_MENU_DEFAULTS = {
     "default_timestep": 0.001,
     "default_number_of_timesteps": 500,
     "default_number_of_cores": 1,
+    # empty string means "use the executable path from the config"
+    "default_executable_path": "",
 }
 
 DL_FFLUX_MENU_DESCRIPTION = MenuDescription(
@@ -50,6 +52,8 @@ class DLFFLUXMenuOptions(MenuOptions):
     selected_number_of_timesteps: int
     # computational resources
     selected_number_of_cores: int
+    # optional override of the configured DL_FFLUX (DLPOLY.Z) executable path
+    selected_executable_path: str
 
     def check_selected_model_directory_path(self) -> Union[str, None]:
         """Checks whether the given model directory exists and is a directory."""
@@ -80,6 +84,7 @@ dl_fflux_menu_options = DLFFLUXMenuOptions(
     DL_FFLUX_MENU_DEFAULTS["default_timestep"],
     DL_FFLUX_MENU_DEFAULTS["default_number_of_timesteps"],
     DL_FFLUX_MENU_DEFAULTS["default_number_of_cores"],
+    DL_FFLUX_MENU_DEFAULTS["default_executable_path"],
 )
 
 
@@ -158,6 +163,15 @@ class DLFFLUXMenuFunctions:
         )
 
     @staticmethod
+    def select_executable_path():
+        """Select an optional DL_FFLUX (DLPOLY.Z) executable path that overrides the
+        path configured in ichor_config.yaml. Leave blank to use the configured path."""
+        dl_fflux_menu_options.selected_executable_path = user_input_free_flow(
+            "Enter DL_FFLUX executable path (blank = use config): ",
+            dl_fflux_menu_options.selected_executable_path,
+        )
+
+    @staticmethod
     def submit_dl_fflux_to_compute():
         """Sets up the DL_FFLUX directory and submits the job to a compute node."""
 
@@ -170,6 +184,7 @@ class DLFFLUXMenuFunctions:
             timestep=dl_fflux_menu_options.selected_timestep,
             nsteps=dl_fflux_menu_options.selected_number_of_timesteps,
             ncores=dl_fflux_menu_options.selected_number_of_cores,
+            executable_path=dl_fflux_menu_options.selected_executable_path or None,
         )
         answer = ""
         user_input_free_flow("DL_FFLUX SUBMITTED. Press enter to continue: ", answer)
@@ -221,6 +236,10 @@ dl_fflux_menu_items = [
     FunctionItem(
         "Select number of cores",
         DLFFLUXMenuFunctions.select_number_of_cores,
+    ),
+    FunctionItem(
+        "Select DL_FFLUX executable path (optional override)",
+        DLFFLUXMenuFunctions.select_executable_path,
     ),
     FunctionItem(
         "Set up and submit DL_FFLUX job to compute",
