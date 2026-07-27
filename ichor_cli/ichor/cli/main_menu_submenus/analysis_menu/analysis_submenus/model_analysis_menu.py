@@ -10,11 +10,11 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    user_input_bool,
     user_input_free_flow,
     user_input_path,
 )
 from ichor.core.analysis.model_metrics import (
-    calculate_metrics_from_ferebus_csvs,
     metrics_df_from_total_dict,
     write_metrics_per_element,
 )
@@ -23,6 +23,9 @@ from ichor.core.analysis.s_curves.compact_s_curves import (
     plot_with_matplotlib,
     simplified_write_to_excel,
     true_predicted_from_ferebus_csvs,
+    write_s_curves_to_csv,
+    write_s_curves_to_csv_per_element,
+    write_s_curves_to_excel_per_element,
 )
 from ichor.core.files.ferebus import ExtractModelsScript
 from ichor.core.models import Models
@@ -42,14 +45,8 @@ MODEL_ANALYSIS_MENU_DESCRIPTION = MenuDescription(
 
 MODEL_ANALYSIS_MENU_DEFAULTS = {
     "default_models_path": ichor.cli.global_menu_variables.SELECTED_MODELS_PATH,
-    "default_test_csv_path": ichor.cli.global_menu_variables.SELECTED_TEST_CSV_PATH,
     "default_set_type": EXTERNAL_SET_TYPE,
 }
-
-# subfolder names used when held-out CSVs are co-located inside a model folder
-# (written there by the model-extraction step). Used to auto-fill the CSV path.
-TEST_SET_SUBFOLDER = "test_set"
-VALID_SET_SUBFOLDER = "valid_set"
 
 # analysis outputs (S-curves, plots, metrics) are written into this subfolder of
 # the model folder, to keep each model batch's results tidy
@@ -58,6 +55,7 @@ ANALYSIS_SUBFOLDER = "analysis"
 # output file names (fixed; identity comes from the analysis/ folder location)
 S_CURVES_EXCEL_NAME = "s-curves.xlsx"
 S_CURVES_PLOT_NAME = "s-curves.png"
+S_CURVES_CSV_NAME = "s-curves.csv"
 METRICS_CSV_NAME = "model_metrics.csv"
 
 
@@ -93,24 +91,10 @@ def _discover_seq_folders(root: Path) -> List[Path]:
     )
 
 
-def _find_colocated_csv_folder(models_path: Path) -> Optional[Path]:
-    """Returns the path to a co-located held-out CSV folder inside ``models_path``
-    (preferring ``test_set`` over ``valid_set``), or ``None`` if neither exists
-    with CSV files in it. CSVs may be nested in per-property subfolders, so the
-    search is recursive."""
-
-    for subfolder in (TEST_SET_SUBFOLDER, VALID_SET_SUBFOLDER):
-        candidate = models_path / subfolder
-        if candidate.is_dir() and any(candidate.rglob("*.csv")):
-            return candidate
-    return None
-
-
 # dataclass used to store the state of the model analysis menu
 @dataclass
 class ModelAnalysisMenuOptions(MenuOptions):
     selected_models_path: Path
-    selected_test_csv_path: Path
     selected_set_type: str
 
     def check_selected_models_path(self):
@@ -121,15 +105,6 @@ class ModelAnalysisMenuOptions(MenuOptions):
         if not Models.check_path(models_path):
             return f"Current path {models_path} does not contain any .model files."
 
-    def check_selected_test_csv_path(self):
-        """Checks whether the selected CSV folder contains any .csv files (searched
-        recursively, since FEREBUS CSVs live in per-property subfolders)."""
-        csv_path = Path(self.selected_test_csv_path)
-        if not csv_path.is_dir():
-            return "Current CSV path is not a directory."
-        if not any(csv_path.rglob("*.csv")):
-            return f"Current path {csv_path} does not contain any .csv files."
-
 
 # initialize dataclass for storing information for the menu
 model_analysis_menu_options = ModelAnalysisMenuOptions(
@@ -137,18 +112,13 @@ model_analysis_menu_options = ModelAnalysisMenuOptions(
 )
 
 
-def _csv_inputs_are_valid() -> bool:
-    """Returns True if the models path and the test CSV folder are both valid,
-    otherwise prints why and returns False."""
+def _inputs_are_valid() -> bool:
+    """Returns True if the models path is valid, otherwise prints why and returns
+    False."""
 
     models_error = model_analysis_menu_options.check_selected_models_path()
     if models_error:
         user_input_free_flow(f"{models_error} Press enter to continue: ")
-        return False
-
-    csv_error = model_analysis_menu_options.check_selected_test_csv_path()
-    if csv_error:
-        user_input_free_flow(f"{csv_error} Press enter to continue: ")
         return False
 
     return True
@@ -156,15 +126,16 @@ def _csv_inputs_are_valid() -> bool:
 
 def _get_models_and_csv_files():
     """Builds the ``Models`` instance and the list of held-out CSV file paths from
-    the currently selected models path and CSV folder. CSVs are searched
-    recursively (they live in per-property subfolders) and filtered to the
-    selected held-out split (external or internal validation)."""
+    the currently selected models path. The held-out CSVs are co-located under the
+    model folder (in ``test_set``/``valid_set`` subfolders, written there by the
+    extract step), so they are found by searching the model folder recursively and
+    filtering to the selected held-out split (external or internal validation)."""
 
-    models = Models(Path(model_analysis_menu_options.selected_models_path))
+    models_root = Path(model_analysis_menu_options.selected_models_path)
+    models = Models(models_root)
 
     set_type = model_analysis_menu_options.selected_set_type
-    csv_root = Path(model_analysis_menu_options.selected_test_csv_path)
-    csv_files = sorted(csv_root.rglob(f"*_{set_type}.csv"))
+    csv_files = sorted(models_root.rglob(f"*_{set_type}.csv"))
 
     return models, csv_files
 
@@ -218,8 +189,7 @@ def _error_dict_from_total_dict(total_dict: dict) -> dict:
     to the ``{property: {atom: {"error": array}}}`` form the S-curve plotters need."""
     return {
         property_name: {
-            atom: {"error": atom_data["error"]}
-            for atom, atom_data in atom_dict.items()
+            atom: {"error": atom_data["error"]} for atom, atom_data in atom_dict.items()
         }
         for property_name, atom_dict in total_dict.items()
     }
@@ -240,12 +210,43 @@ def _report_saved_plots(saved_files):
         )
 
 
+def _prompt_s_curve_format() -> str:
+    """Asks the user which S-curve output format to produce. Returns one of
+    ``"excel"``, ``"matplotlib"`` or ``"csv"`` (defaulting to Excel)."""
+    answer = user_input_free_flow(
+        "Output format - (e)xcel workbook / (m)atplotlib images / (c)sv data only? "
+        "[default excel]: "
+    )
+    if answer is not None:
+        first = answer.strip().lower()[:1]
+        if first == "m":
+            return "matplotlib"
+        if first == "c":
+            return "csv"
+    return "excel"
+
+
+def _report_written_files(written, noun: str):
+    """Tells the user how many output files were written (and an example), or that
+    nothing was written."""
+    if written:
+        user_input_free_flow(
+            f"{len(written)} {noun} written "
+            f"(e.g. {Path(written[0]).absolute()}). Press enter to continue: "
+        )
+    else:
+        user_input_free_flow(
+            f"No {noun} written (no data). Press enter to continue: "
+        )
+
+
 def _warn_no_csv_files():
     """Warns the user that no CSV files matched the selected split."""
     user_input_free_flow(
         f"No '{model_analysis_menu_options.selected_set_type}' CSV files found "
-        f"under {model_analysis_menu_options.selected_test_csv_path}. "
-        "Check the CSV folder and split. Press enter to continue: "
+        f"under {model_analysis_menu_options.selected_models_path}. "
+        "Check that the held-out CSVs are co-located with the models and that the "
+        "split is correct. Press enter to continue: "
     )
 
 
@@ -254,7 +255,7 @@ def _prepare_ferebus_analysis():
     ``total_dict`` of true/predicted/error values. Returns ``(models, total_dict)``
     or ``None`` if inputs are invalid or no CSVs matched the selected split."""
 
-    if not _csv_inputs_are_valid():
+    if not _inputs_are_valid():
         return None
 
     models, csv_files = _get_models_and_csv_files()
@@ -322,42 +323,16 @@ class ModelAnalysisFunctions:
 
     @staticmethod
     def select_models_directory():
-        """Asks the user for the directory containing ``.model`` files. If that
-        folder contains co-located held-out CSVs (in a ``test_set`` or
-        ``valid_set`` subfolder), the test CSV path is auto-filled to it."""
+        """Asks the user for the directory containing ``.model`` files. The held-out
+        CSVs are co-located under this folder (in ``test_set``/``valid_set``
+        subfolders, written there by the extract step) and are found automatically,
+        so no separate CSV folder needs to be selected."""
         models_path = user_input_path("Enter path to models directory: ")
         ichor.cli.global_menu_variables.SELECTED_MODELS_PATH = Path(
             models_path
         ).absolute()
         model_analysis_menu_options.selected_models_path = (
             ichor.cli.global_menu_variables.SELECTED_MODELS_PATH
-        )
-
-        # auto-fill the test CSV folder if held-out CSVs are co-located with the
-        # models (see _find_colocated_csv_folder)
-        colocated_csv_folder = _find_colocated_csv_folder(
-            ichor.cli.global_menu_variables.SELECTED_MODELS_PATH
-        )
-        if colocated_csv_folder is not None:
-            ichor.cli.global_menu_variables.SELECTED_TEST_CSV_PATH = (
-                colocated_csv_folder
-            )
-            model_analysis_menu_options.selected_test_csv_path = colocated_csv_folder
-            print(f"Auto-selected co-located CSV folder: {colocated_csv_folder}")
-
-    @staticmethod
-    def select_test_csv_directory():
-        """Asks the user for the folder of held-out CSV files. This can be a model
-        folder's ``test_set``/``valid_set`` subfolder, or a ``5_TRAINING`` SEQ
-        folder; CSVs are searched recursively and filtered by the selected split."""
-        csv_path = user_input_path(
-            "Enter path to held-out CSV folder (searched recursively): "
-        )
-        ichor.cli.global_menu_variables.SELECTED_TEST_CSV_PATH = Path(
-            csv_path
-        ).absolute()
-        model_analysis_menu_options.selected_test_csv_path = (
-            ichor.cli.global_menu_variables.SELECTED_TEST_CSV_PATH
         )
 
     @staticmethod
@@ -374,105 +349,79 @@ class ModelAnalysisFunctions:
             model_analysis_menu_options.selected_set_type = EXTERNAL_SET_TYPE
 
     @staticmethod
-    def make_s_curves_excel_from_csvs():
-        """Makes an Excel workbook of S-curves from the selected models and the
-        held-out FEREBUS CSVs of the selected split."""
+    def make_s_curves():
+        """Makes S-curves from the selected models and the held-out FEREBUS CSVs of
+        the selected split. Prompts at runtime for the output format (Excel workbook
+        / matplotlib images / CSV data only) and whether to also write a
+        per-element-type breakdown (a separate set of files for each element)."""
 
         result = _prepare_ferebus_analysis()
         if result is None:
             return
         _, total_dict = result
 
-        output_name = _analysis_output_path(S_CURVES_EXCEL_NAME)
-        simplified_write_to_excel(total_dict, output_name)
-        user_input_free_flow(
-            f"S-curves written to {Path(output_name).absolute()}. "
-            "Press enter to continue: "
+        fmt = _prompt_s_curve_format()
+        per_element = user_input_bool(
+            "Also write a per-element-type breakdown? (y/n) [default no]: ",
+            default=False,
         )
 
-    @staticmethod
-    def make_s_curves_plot_from_csvs():
-        """Saves matplotlib S-curve images from the selected models and the held-out
-        FEREBUS CSVs of the selected split - one separate image file per property."""
+        if fmt == "excel":
+            output_name = _analysis_output_path(S_CURVES_EXCEL_NAME)
+            simplified_write_to_excel(total_dict, output_name)
+            written = [output_name]
+            if per_element:
+                written += write_s_curves_to_excel_per_element(
+                    total_dict, output_name
+                )
+            _report_written_files(written, "S-curve workbook(s)")
 
-        result = _prepare_ferebus_analysis()
-        if result is None:
-            return
-        _, total_dict = result
+        elif fmt == "csv":
+            output_name = _analysis_output_path(S_CURVES_CSV_NAME)
+            written = write_s_curves_to_csv(total_dict, saved_name=output_name)
+            if per_element:
+                written += write_s_curves_to_csv_per_element(
+                    total_dict, saved_name=output_name
+                )
+            _report_written_files(written, "S-curve CSV(s)")
 
-        # the plotter only needs the errors for each atom/property
-        error_dict = _error_dict_from_total_dict(total_dict)
-
-        output_name = _analysis_output_path(S_CURVES_PLOT_NAME)
-        saved_files = plot_with_matplotlib(error_dict, saved_name=output_name)
-        _report_saved_plots(saved_files)
-
-    @staticmethod
-    def make_s_curves_plot_per_element_from_csvs():
-        """Saves matplotlib S-curve images grouped by element type - a separate
-        file for each element (and property), containing only that element's atoms,
-        e.g. ``s-curves_C_iqa.png``, ``s-curves_H_iqa.png``."""
-
-        result = _prepare_ferebus_analysis()
-        if result is None:
-            return
-        _, total_dict = result
-
-        error_dict = _error_dict_from_total_dict(total_dict)
-
-        output_name = _analysis_output_path(S_CURVES_PLOT_NAME)
-        saved_files = plot_s_curves_per_element(error_dict, saved_name=output_name)
-        _report_saved_plots(saved_files)
+        else:  # matplotlib
+            output_name = _analysis_output_path(S_CURVES_PLOT_NAME)
+            written = plot_with_matplotlib(total_dict, saved_name=output_name)
+            if per_element:
+                written += plot_s_curves_per_element(
+                    total_dict, saved_name=output_name
+                )
+            _report_saved_plots(written)
 
     @staticmethod
-    def extract_metrics_from_csvs():
+    def extract_metrics():
         """Writes a CSV of quality metrics (RMSE, MAE, R2, max error and error
         percentiles) per atom/property from the selected models and the held-out
-        FEREBUS CSVs of the selected split. Also prints the table."""
-
-        if not _csv_inputs_are_valid():
-            return
-
-        models, csv_files = _get_models_and_csv_files()
-        if not csv_files:
-            _warn_no_csv_files()
-            return
-
-        output_name = _analysis_output_path(METRICS_CSV_NAME)
-        metrics_df = calculate_metrics_from_ferebus_csvs(
-            csv_files_list=csv_files,
-            models=models,
-            output_location=output_name,
-        )
-        print(metrics_df.to_string(index=False))
-        user_input_free_flow(
-            f"Metrics written to {Path(output_name).absolute()}. "
-            "Press enter to continue: "
-        )
-
-    @staticmethod
-    def extract_metrics_per_element_from_csvs():
-        """Writes a separate quality-metrics CSV for each element type (RMSE, MAE,
-        R2, max error and error percentiles) from the selected models and the
-        held-out FEREBUS CSVs of the selected split, e.g. ``model_metrics_C.csv``,
-        ``model_metrics_H.csv``. Also prints the combined table."""
+        FEREBUS CSVs of the selected split. Prints the table, and prompts whether to
+        also write a per-element-type breakdown (a separate CSV for each element,
+        e.g. ``model_metrics_C.csv``, ``model_metrics_H.csv``)."""
 
         result = _prepare_ferebus_analysis()
         if result is None:
             return
         _, total_dict = result
 
-        metrics_df = metrics_df_from_total_dict(total_dict)
+        output_name = _analysis_output_path(METRICS_CSV_NAME)
+        metrics_df = metrics_df_from_total_dict(
+            total_dict, output_location=output_name
+        )
         print(metrics_df.to_string(index=False))
 
-        output_name = _analysis_output_path(METRICS_CSV_NAME)
-        written = write_metrics_per_element(metrics_df, output_name)
-        user_input_free_flow(
-            f"{len(written)} per-element metrics CSV(s) written "
-            f"(e.g. {Path(written[0]).absolute()}). Press enter to continue: "
-            if written
-            else "No metrics written (no data). Press enter to continue: "
+        written = [output_name]
+        per_element = user_input_bool(
+            "Also write a per-element-type breakdown? (y/n) [default no]: ",
+            default=False,
         )
+        if per_element:
+            written += write_metrics_per_element(metrics_df, output_name)
+
+        _report_written_files(written, "metrics CSV(s)")
 
     @staticmethod
     def run_batch_analysis():
@@ -547,7 +496,7 @@ class ModelAnalysisFunctions:
 # make menu items
 model_analysis_menu_items = [
     FunctionItem(
-        "Extract models + held-out CSVs from a completed run into 6_MODELS",
+        "Extract models from a completed run",
         ModelAnalysisFunctions.extract_models_from_run,
     ),
     FunctionItem(
@@ -555,33 +504,17 @@ model_analysis_menu_items = [
         ModelAnalysisFunctions.select_models_directory,
     ),
     FunctionItem(
-        "Select held-out CSV folder",
-        ModelAnalysisFunctions.select_test_csv_directory,
-    ),
-    FunctionItem(
         "Select held-out split: external/test or internal/valid",
         ModelAnalysisFunctions.select_set_type,
     ),
     # analysis of the selected model folder using its held-out CSVs
     FunctionItem(
-        "Make S-curves (Excel workbook)",
-        ModelAnalysisFunctions.make_s_curves_excel_from_csvs,
-    ),
-    FunctionItem(
-        "Make S-curves (matplotlib image)",
-        ModelAnalysisFunctions.make_s_curves_plot_from_csvs,
-    ),
-    FunctionItem(
-        "Make S-curves per element type (matplotlib image)",
-        ModelAnalysisFunctions.make_s_curves_plot_per_element_from_csvs,
+        "Make S-curves (choose Excel / matplotlib / CSV at runtime)",
+        ModelAnalysisFunctions.make_s_curves,
     ),
     FunctionItem(
         "Extract quality metrics (CSV)",
-        ModelAnalysisFunctions.extract_metrics_from_csvs,
-    ),
-    FunctionItem(
-        "Extract quality metrics per element type (CSV)",
-        ModelAnalysisFunctions.extract_metrics_per_element_from_csvs,
+        ModelAnalysisFunctions.extract_metrics,
     ),
     # Batch: run analysis on every model folder under the selected path
     FunctionItem(

@@ -28,4 +28,3 @@ SELECTED_INPUT_FILE_PATH: Path = Path("").absolute()
 
 # Model-analysis menu options
 SELECTED_MODELS_PATH: Path = Path("").absolute()
-SELECTED_TEST_CSV_PATH: Path = Path("").absolute()

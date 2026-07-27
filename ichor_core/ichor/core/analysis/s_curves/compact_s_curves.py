@@ -987,6 +987,141 @@ def plot_s_curves_per_element(
     return saved_files
 
 
+def _merge_total_dicts(total_dict: Union[List[dict], dict]) -> dict:
+    """Accepts a nested ``{property: {atom: data}}`` dict or a list of such dicts
+    (legacy), returning a single merged dict."""
+    if isinstance(total_dict, (list, tuple)):
+        merged: dict = {}
+        for d in total_dict:
+            merged.update(d)
+        return merged
+    return total_dict
+
+
+def write_s_curves_to_csv(
+    total_dict: Union[List[dict], dict],
+    saved_name: Union[str, Path] = "s-curves.csv",
+) -> List[Path]:
+    """Writes the S-curve data (sorted absolute prediction error vs cumulative
+    percentage of points) to plain CSV files - a separate file per property, named
+    like :func:`plot_with_matplotlib` (e.g. ``s-curves.csv`` -> ``s-curves_iqa.csv``,
+    ``s-curves_q00.csv``). Each atom contributes two columns, ``<atom>_error`` (the
+    sorted absolute error) and ``<atom>_%`` (the cumulative percentage), so the file
+    holds exactly the numbers behind the plotted S-curves. Atoms with fewer points
+    leave the tail of their columns blank.
+
+    :param total_dict: a nested dict ``{property: {atom: {"error": array}}}`` (or the
+        full ``{"true", "predicted", "error"}`` dict, or an atom mapping directly to
+        an array of errors), as consumed by :func:`plot_with_matplotlib`; a list of
+        such dicts is merged.
+    :param saved_name: base output file name; the property name is inserted before
+        the ``.csv`` extension for each file.
+    :return: the list of file paths that were written (empty if there was no data).
+    """
+
+    total_dict = _merge_total_dicts(total_dict)
+
+    base_path = Path(saved_name)
+    property_names = natsorted(total_dict.keys(), key=ignore_alpha)
+    saved_files: List[Path] = []
+
+    for property_name in tqdm(property_names, desc="Writing S-curve CSVs"):
+        inner_dict = total_dict[property_name]
+        atom_names = natsorted(inner_dict.keys(), key=ignore_alpha)
+
+        columns: "OrderedDict[str, pd.Series]" = OrderedDict()
+        for an in atom_names:
+            atom_data = inner_dict[an]
+            # support {"error": array}, the full {"true", "predicted", "error"} dict,
+            # or an atom that maps directly to an array of errors
+            if isinstance(atom_data, dict):
+                array = atom_data.get("error")
+            else:
+                array = atom_data
+            if array is None:
+                continue
+
+            array_sorted = np.sort(np.absolute(array))
+            perc = percentile(array_sorted.shape[0])
+            columns[f"{an}_error"] = pd.Series(array_sorted)
+            columns[f"{an}_%"] = pd.Series(perc)
+
+        if not columns:
+            continue
+
+        # pd.Series columns of differing length align on index, padding the shorter
+        # atoms' tails with NaN (written as blank cells)
+        df = pd.DataFrame(columns)
+        out_path = base_path.with_name(
+            f"{base_path.stem}_{property_name}{base_path.suffix}"
+        )
+        df.to_csv(out_path, index=False)
+        saved_files.append(out_path)
+
+    return saved_files
+
+
+def write_s_curves_to_csv_per_element(
+    total_dict: Union[List[dict], dict],
+    saved_name: Union[str, Path] = "s-curves.csv",
+) -> List[Path]:
+    """Like :func:`write_s_curves_to_csv` but writes a separate file per element
+    type (each holding only that element's atoms), inserting the element symbol into
+    the file name, e.g. ``s-curves_C_iqa.csv``, ``s-curves_H_iqa.csv``.
+
+    :param total_dict: nested dict as consumed by :func:`write_s_curves_to_csv`.
+    :param saved_name: base output file name; the element symbol and property name
+        are inserted before the extension for each file.
+    :return: the list of file paths that were written.
+    """
+
+    total_dict = _merge_total_dicts(total_dict)
+
+    base_path = Path(saved_name)
+    saved_files: List[Path] = []
+    for element, element_dict in group_total_dict_by_element(total_dict).items():
+        element_saved_name = base_path.with_name(
+            f"{base_path.stem}_{element}{base_path.suffix}"
+        )
+        saved_files.extend(
+            write_s_curves_to_csv(element_dict, saved_name=element_saved_name)
+        )
+    return saved_files
+
+
+def write_s_curves_to_excel_per_element(
+    total_dict: Union[List[dict], dict],
+    saved_name: Union[str, Path] = "s-curves.xlsx",
+    **kwargs,
+) -> List[Path]:
+    """Writes a separate S-curve Excel workbook per element type (each holding only
+    that element's atoms), inserting the element symbol into the file name, e.g.
+    ``s-curves_C.xlsx``, ``s-curves_H.xlsx``. Each workbook has one sheet per
+    property, as produced by :func:`simplified_write_to_excel`.
+
+    :param total_dict: the full nested dict ``{property: {atom: {"true",
+        "predicted", "error"}}}`` (the Excel writer needs true/predicted, not just
+        errors); a list of such dicts is merged.
+    :param saved_name: base output file name; the element symbol is inserted before
+        the ``.xlsx`` extension for each file.
+    :param kwargs: any other keyword arguments accepted by
+        :func:`simplified_write_to_excel`.
+    :return: the list of workbook paths that were written.
+    """
+
+    total_dict = _merge_total_dicts(total_dict)
+
+    base_path = Path(saved_name)
+    saved_files: List[Path] = []
+    for element, element_dict in group_total_dict_by_element(total_dict).items():
+        element_saved_name = base_path.with_name(
+            f"{base_path.stem}_{element}{base_path.suffix}"
+        )
+        simplified_write_to_excel(element_dict, element_saved_name, **kwargs)
+        saved_files.append(element_saved_name)
+    return saved_files
+
+
 def plot_with_matplotlib_simple(
     total_dict: dict,
     x_axis_name: str = "Prediction Error / kJ mol$^{-1}$",
