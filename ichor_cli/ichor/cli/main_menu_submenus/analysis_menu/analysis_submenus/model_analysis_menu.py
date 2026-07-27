@@ -59,6 +59,15 @@ S_CURVES_CSV_NAME = "s-curves.csv"
 METRICS_CSV_NAME = "model_metrics.csv"
 
 
+def _pause(message: str = ""):
+    """Shows ``message`` (if any) and then waits for the user to press enter. The
+    "Press enter to continue" prompt is always put on its own line so it is clear
+    that user interaction is needed."""
+    if message:
+        print(message)
+    user_input_free_flow("Press enter to continue: ")
+
+
 def _discover_seq_folders(root: Path) -> List[Path]:
     """Finds SEQ folders (containing trained models) under ``root``. A SEQ folder
     is a directory whose parent is a ``TRAIN-*`` folder and which contains at least
@@ -118,7 +127,7 @@ def _inputs_are_valid() -> bool:
 
     models_error = model_analysis_menu_options.check_selected_models_path()
     if models_error:
-        user_input_free_flow(f"{models_error} Press enter to continue: ")
+        _pause(models_error)
         return False
 
     return True
@@ -199,14 +208,14 @@ def _report_saved_plots(saved_files):
     """Tells the user how many per-property S-curve files were written."""
     if saved_files:
         first = Path(saved_files[0]).absolute()
-        user_input_free_flow(
+        _pause(
             f"{len(saved_files)} S-curve plot(s) written, one per property "
-            f"(e.g. {first}). Press enter to continue: "
+            f"(e.g. {first})."
         )
     else:
-        user_input_free_flow(
+        _pause(
             "No S-curve plots written (matplotlib may be missing or there was no "
-            "data). Press enter to continue: "
+            "data)."
         )
 
 
@@ -230,23 +239,20 @@ def _report_written_files(written, noun: str):
     """Tells the user how many output files were written (and an example), or that
     nothing was written."""
     if written:
-        user_input_free_flow(
-            f"{len(written)} {noun} written "
-            f"(e.g. {Path(written[0]).absolute()}). Press enter to continue: "
+        _pause(
+            f"{len(written)} {noun} written " f"(e.g. {Path(written[0]).absolute()})."
         )
     else:
-        user_input_free_flow(
-            f"No {noun} written (no data). Press enter to continue: "
-        )
+        _pause(f"No {noun} written (no data).")
 
 
 def _warn_no_csv_files():
     """Warns the user that no CSV files matched the selected split."""
-    user_input_free_flow(
+    _pause(
         f"No '{model_analysis_menu_options.selected_set_type}' CSV files found "
         f"under {model_analysis_menu_options.selected_models_path}. "
         "Check that the held-out CSVs are co-located with the models and that the "
-        "split is correct. Press enter to continue: "
+        "split is correct."
     )
 
 
@@ -282,10 +288,7 @@ class ModelAnalysisFunctions:
         seq_folders = _discover_seq_folders(Path(run_path).absolute())
 
         if not seq_folders:
-            user_input_free_flow(
-                f"No SEQ folders containing models found under {run_path}. "
-                "Press enter to continue: "
-            )
+            _pause(f"No SEQ folders containing models found under {run_path}.")
             return
 
         print(f"Found {len(seq_folders)} SEQ folder(s) with models.")
@@ -316,9 +319,9 @@ class ModelAnalysisFunctions:
                 print(f"Extraction failed for {seq_folder}: {err}")
                 failed += 1
 
-        user_input_free_flow(
-            f"Extraction finished: {succeeded} succeeded, {failed} failed. "
-            "Models and held-out CSVs copied into 6_MODELS. Press enter to continue: "
+        _pause(
+            f"Extraction finished: {succeeded} succeeded, {failed} failed.\n"
+            "Models and held-out CSVs copied into 6_MODELS."
         )
 
     @staticmethod
@@ -371,9 +374,7 @@ class ModelAnalysisFunctions:
             simplified_write_to_excel(total_dict, output_name)
             written = [output_name]
             if per_element:
-                written += write_s_curves_to_excel_per_element(
-                    total_dict, output_name
-                )
+                written += write_s_curves_to_excel_per_element(total_dict, output_name)
             _report_written_files(written, "S-curve workbook(s)")
 
         elif fmt == "csv":
@@ -389,9 +390,7 @@ class ModelAnalysisFunctions:
             output_name = _analysis_output_path(S_CURVES_PLOT_NAME)
             written = plot_with_matplotlib(total_dict, saved_name=output_name)
             if per_element:
-                written += plot_s_curves_per_element(
-                    total_dict, saved_name=output_name
-                )
+                written += plot_s_curves_per_element(total_dict, saved_name=output_name)
             _report_saved_plots(written)
 
     @staticmethod
@@ -408,9 +407,7 @@ class ModelAnalysisFunctions:
         _, total_dict = result
 
         output_name = _analysis_output_path(METRICS_CSV_NAME)
-        metrics_df = metrics_df_from_total_dict(
-            total_dict, output_location=output_name
-        )
+        metrics_df = metrics_df_from_total_dict(total_dict, output_location=output_name)
         print(metrics_df.to_string(index=False))
 
         written = [output_name]
@@ -439,10 +436,7 @@ class ModelAnalysisFunctions:
         root = Path(model_analysis_menu_options.selected_models_path)
         model_folders = _discover_model_folders(root)
         if not model_folders:
-            user_input_free_flow(
-                f"No model folders (containing .model files) found under {root}. "
-                "Press enter to continue: "
-            )
+            _pause(f"No model folders (containing .model files) found under {root}.")
             return
 
         set_type = model_analysis_menu_options.selected_set_type
@@ -486,10 +480,9 @@ class ModelAnalysisFunctions:
 
             analysed += 1
 
-        user_input_free_flow(
+        _pause(
             f"Batch analysis complete: {analysed} analysed, {skipped} skipped. "
-            "Outputs are prefixed with each batch identifier. "
-            "Press enter to continue: "
+            "Outputs are prefixed with each batch identifier."
         )
 
 
@@ -518,7 +511,7 @@ model_analysis_menu_items = [
     ),
     # Batch: run analysis on every model folder under the selected path
     FunctionItem(
-        "[Batch] Run all analysis on every model folder under the selected path",
+        "[Batch] Run all analysis under the selected path",
         ModelAnalysisFunctions.run_batch_analysis,
     ),
 ]
