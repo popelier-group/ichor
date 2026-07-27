@@ -55,14 +55,31 @@ def write_dlpoly_fflux_setup(
     run_path = Path(run_path)
     mkdir(run_path)
 
-    # read the starting geometry which is written to the CONFIG file
+    # read the starting geometry which is written to the CONFIG file. A DL_FFLUX run
+    # starts from a single geometry (one molecule, matching the single-molecule FIELD
+    # file), so if the provided xyz contains multiple geometries only the first is used.
     trajectory = Trajectory(starting_geometry)
+    if len(trajectory) > 1:
+        ichor.hpc.global_variables.LOGGER.warning(
+            f"The starting geometry '{starting_geometry}' contains {len(trajectory)} "
+            "geometries; only the first one will be used for the DL_FFLUX CONFIG file."
+        )
+    # a single-geometry trajectory so that CONFIG matches the FIELD file
+    starting_trajectory = trajectory[0:1]
     atoms = trajectory[0]
 
     # the models define the chemical system name, which is used to label atoms in the
     # CONFIG file so that DL_FFLUX picks up the correct model file for each atom
     models = Models(model_directory)
-    system_name = models[0].system_name
+    # DL_FFLUX locates model files by their FILENAME (e.g. "BZAMID05_iqa_O1.model"), so
+    # the system name used to label atoms in the CONFIG/FIELD files must match the
+    # filename prefix. This can differ from the model's internal "name" field, so derive
+    # it from the filename layout: <system>_<property>_<atom>.model
+    first_model_stem_tokens = models[0].path.stem.split("_")
+    if len(first_model_stem_tokens) >= 3:
+        system_name = "_".join(first_model_stem_tokens[:-2])
+    else:
+        system_name = models[0].system_name
 
     # the electrostatics directive is only meaningful when the models contain multipole
     # moment data (anything other than the iqa energy). For iqa-only models it is omitted.
@@ -83,7 +100,7 @@ def write_dlpoly_fflux_setup(
 
     DlPolyConfig(
         system_name=system_name,
-        trajectory=trajectory,
+        trajectory=starting_trajectory,
         path=run_path / "CONFIG",
     ).write()
 
