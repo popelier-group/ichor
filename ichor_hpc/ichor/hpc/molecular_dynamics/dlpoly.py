@@ -69,17 +69,20 @@ def write_dlpoly_fflux_setup(
     atoms = trajectory[0]
 
     # the models define the chemical system name, which is used to label atoms in the
-    # CONFIG file so that DL_FFLUX picks up the correct model file for each atom
+    # CONFIG file so that DL_FFLUX picks up the correct model file for each atom.
     models = Models(model_directory)
-    # DL_FFLUX locates model files by their FILENAME (e.g. "BZAMID05_iqa_O1.model"), so
-    # the system name used to label atoms in the CONFIG/FIELD files must match the
-    # filename prefix. This can differ from the model's internal "name" field, so derive
-    # it from the filename layout: <system>_<property>_<atom>.model
-    first_model_stem_tokens = models[0].path.stem.split("_")
-    if len(first_model_stem_tokens) >= 3:
-        system_name = "_".join(first_model_stem_tokens[:-2])
+    # DL_FFLUX reconstructs each model's filename from the CONFIG atom label by inserting
+    # the property (e.g. "iqa") as the SECOND "_"-delimited token, i.e. it assumes the
+    # system name is a single token with no underscores. Model files whose system name
+    # contains underscores (e.g. "BZAMID05_MOL_MTD_OUT0_iqa_O1.model") would be looked up
+    # under the wrong name, so build an underscore-free system name and copy the models
+    # under matching filenames (see the model copy below).
+    first_tokens = models[0].path.stem.split("_")
+    if len(first_tokens) >= 3:
+        full_system_name = "_".join(first_tokens[:-2])
     else:
-        system_name = models[0].system_name
+        full_system_name = models[0].system_name
+    system_name = full_system_name.replace("_", "")
 
     # the electrostatics directive is only meaningful when the models contain multipole
     # moment data (anything other than the iqa energy). For iqa-only models it is omitted.
@@ -117,12 +120,17 @@ def write_dlpoly_fflux_setup(
         electrostatics_level=electrostatics_level,
     ).write()
 
-    # copy the model files into a "model_krig" subdirectory, which is where
-    # DL_FFLUX looks for the trained models
+    # copy the model files into a "model_krig" subdirectory (where DL_FFLUX looks for the
+    # trained models), renaming them so the system part is the single underscore-free
+    # token used in the CONFIG atom labels: <system_name>_<property>_<atom>.model
     model_krig_dir = run_path / "model_krig"
     mkdir(model_krig_dir)
     for model in models:
-        shutil.copy2(model.path, model_krig_dir / model.path.name)
+        tokens = model.path.stem.split("_")
+        # filename layout is <system...>_<property>_<atom>.model
+        prop, atom = tokens[-2], tokens[-1]
+        new_name = f"{system_name}_{prop}_{atom}{model.path.suffix}"
+        shutil.copy2(model.path, model_krig_dir / new_name)
 
     return run_path
 
