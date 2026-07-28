@@ -140,14 +140,25 @@ def write_dlpoly_fflux_setup(
     ).write()
     progress.update()
 
-    # copy the model files into a "model_krig" subdirectory, which is where DL_FFLUX looks
-    # for the trained models. DL_FFLUX identifies each model by its internal name/atom
-    # fields (not the filename), so the files are copied under their original names.
+    # copy the model files into a "model_krig" subdirectory (where DL_FFLUX looks for the
+    # trained models). DL_FFLUX *matches* a model to an atom by the model's internal
+    # "<name>_<atom>" (handled above via the CONFIG labels), but it *opens* the model file
+    # under a name built by inserting the property token after the FIRST token of the
+    # system name, e.g. system "BZAMID05_MOL_MTD_OUT0", property "iqa", atom "O1" ->
+    # "BZAMID05_iqa_MOL_MTD_OUT0_O1.model". So copy each model under the name DL_FFLUX will
+    # open, which may differ from the model's original (FEREBUS) filename.
     progress.set_description("Copying model files")
     model_krig_dir = run_path / "model_krig"
     mkdir(model_krig_dir)
+    head, _, system_rest = system_name.partition("_")
     for model in models:
-        shutil.copy2(model.path, model_krig_dir / model.path.name)
+        if system_rest:
+            new_name = (
+                f"{head}_{model.prop}_{system_rest}_{model.atom_name}{model.path.suffix}"
+            )
+        else:
+            new_name = f"{head}_{model.prop}_{model.atom_name}{model.path.suffix}"
+        shutil.copy2(model.path, model_krig_dir / new_name)
         progress.update()
 
     progress.set_description("DL_FFLUX setup complete")
