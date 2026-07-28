@@ -597,9 +597,10 @@ _S_CURVE_MULTIPOLE_X_LABEL = "Prediction Error / a.u."
 # CPK / Jmol-style element colours so that atoms of the same element share a base
 # colour across the S-curve plots (oxygen red, nitrogen blue, carbon black, etc.).
 # A few colours are darkened relative to the classic CPK values so they stay
-# visible against a white plot background.
+# visible against a white plot background. Hydrogen departs from CPK entirely: as
+# white/grey it was hard to tell from carbon black, so it is given a hue of its own.
 ELEMENT_COLORS = {
-    "H": "#B0B0B0",  # white in CPK -> light grey so it is visible on white
+    "H": "#12B0C0",  # white in CPK -> teal, so H is not confused with carbon black
     "C": "#000000",  # black
     "N": "#3050F8",  # blue
     "O": "#FF0D0D",  # red
@@ -662,13 +663,12 @@ def _element_shades(base_hex: str, n: int) -> List[str]:
 
     h, lightness, s = colorsys.rgb_to_hls(*mcolors.to_rgb(base_hex))
     # spread lightness in a band centred on the base colour's lightness, so dark
-    # bases (e.g. carbon) stay dark and light bases (e.g. hydrogen) stay light and
-    # the two do not collapse onto the same greys. The band is shifted (not just
-    # clamped) to keep its full width inside a range visible on a white background.
-    # Achromatic elements (carbon black, hydrogen grey) use a narrower band so
-    # their greyscale shades stay in separate dark/light ranges and do not cross
-    # over; coloured elements use a wider band so their shades are easy to tell
-    # apart (hue keeps them distinct from the greys regardless).
+    # bases stay dark and light bases stay light and the two do not collapse onto
+    # the same shades. The band is shifted (not just clamped) to keep its full
+    # width inside a range visible on a white background. Achromatic elements
+    # (carbon black) use a narrower band so their greyscale shades stay in a
+    # single dark range; coloured elements use a wider band so their shades are
+    # easy to tell apart (hue keeps them distinct from the greys regardless).
     span = 0.26 if s < 0.12 else 0.40
     floor, ceil = 0.15, 0.85
     lo, hi = lightness - span / 2, lightness + span / 2
