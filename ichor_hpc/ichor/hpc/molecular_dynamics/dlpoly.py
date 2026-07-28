@@ -16,6 +16,7 @@ from ichor.core.models import Models
 from ichor.hpc.batch_system.jobs import JobID
 from ichor.hpc.submission_commands import DlpolyCommand
 from ichor.hpc.submission_script import SubmissionScript
+from tqdm import tqdm
 
 
 def write_dlpoly_fflux_setup(
@@ -28,6 +29,7 @@ def write_dlpoly_fflux_setup(
     nsteps: int = 500,
     electrostatics: str = "cluster",
     electrostatics_level: int = 3,
+    progress_bar: bool = True,
 ) -> Path:
     """Sets up a directory from which a DL_FFLUX (FFLUX-modified DL_POLY) calculation
     can be run. This writes out the DL_POLY input files (CONTROL, CONFIG, FIELD),
@@ -49,11 +51,23 @@ def write_dlpoly_fflux_setup(
         ``"cluster"``. Ignored when the models only contain ``iqa`` (energy) data.
     :param electrostatics_level: The multipole expansion level (L1-L5) for the
         electrostatics directive, defaults to 3. Ignored when there is no multipole data.
+    :param progress_bar: Whether to show a progress bar while the setup is written out,
+        defaults to True. Set to False when calling this in a loop which already has its
+        own progress bar (see :func:`submit_dlpoly_fflux_robustness`).
     :return: The path to the run directory which has been set up.
     """
 
     run_path = Path(run_path)
     mkdir(run_path)
+
+    # the progress bar tracks reading the inputs, writing each of the four DL_POLY/FFLUX
+    # input files, and copying the model files. The number of models is not known until
+    # they have been read, so the total is extended once that is the case.
+    progress = tqdm(
+        total=5,
+        desc="Reading DL_FFLUX inputs",
+        disable=not progress_bar,
+    )
 
     # read the starting geometry which is written to the CONFIG file. A DL_FFLUX run
     # starts from a single geometry (one molecule, matching the single-molecule FIELD
@@ -71,18 +85,16 @@ def write_dlpoly_fflux_setup(
     # the models define the chemical system name, which is used to label atoms in the
     # CONFIG file so that DL_FFLUX picks up the correct model file for each atom.
     models = Models(model_directory)
-    # DL_FFLUX reconstructs each model's filename from the CONFIG atom label by inserting
-    # the property (e.g. "iqa") as the SECOND "_"-delimited token, i.e. it assumes the
-    # system name is a single token with no underscores. Model files whose system name
-    # contains underscores (e.g. "BZAMID05_MOL_MTD_OUT0_iqa_O1.model") would be looked up
-    # under the wrong name, so build an underscore-free system name and copy the models
-    # under matching filenames (see the model copy below).
-    first_tokens = models[0].path.stem.split("_")
-    if len(first_tokens) >= 3:
-        full_system_name = "_".join(first_tokens[:-2])
-    else:
-        full_system_name = models[0].system_name
-    system_name = full_system_name.replace("_", "")
+    # one extra step per model file which has to be copied into the run directory
+    progress.total = progress.total + len(models)
+    progress.update()
+    # DL_FFLUX pairs each CONFIG atom label with a model by matching it against
+    # "<SystemName>_<AtomName>" built from the INTERNAL fields of each model file (the
+    # "name" and "atom" lines - see fflux_read_models.f90). The CONFIG atom labels must
+    # therefore use the model's internal system name verbatim (underscores and all);
+    # otherwise no model is associated to the atom and DL_FFLUX segfaults on a null
+    # pointer. ichor and DL_FFLUX read this from the same "name" line, so they agree.
+    system_name = models[0].system_name
 
     # the electrostatics directive is only meaningful when the models contain multipole
     # moment data (anything other than the iqa energy). For iqa-only models it is omitted.
@@ -90,6 +102,7 @@ def write_dlpoly_fflux_setup(
 
     # FFLUX-specific settings live in FFLUX.in, so the inline fflux directives are
     # omitted from the CONTROL file (fflux_cluster / fflux_print set to None)
+    progress.set_description("Writing CONTROL file")
     DlPolyControl(
         system_name=system_name,
         path=run_path / "CONTROL",
@@ -100,37 +113,45 @@ def write_dlpoly_fflux_setup(
         fflux_cluster=None,
         fflux_print=None,
     ).write()
+    progress.update()
 
+    progress.set_description("Writing CONFIG file")
     DlPolyConfig(
         system_name=system_name,
         trajectory=starting_trajectory,
         path=run_path / "CONFIG",
     ).write()
+    progress.update()
 
+    progress.set_description("Writing FIELD file")
     DlPolyField(
         system_name=system_name,
         atoms=atoms,
         path=run_path / "FIELD",
     ).write()
+    progress.update()
 
+    progress.set_description("Writing FFLUX.in file")
     DlPolyFFLUXInput(
         path=run_path / "FFLUX.in",
         title=system_name,
         electrostatics=electrostatics if has_multipole_data else None,
         electrostatics_level=electrostatics_level,
     ).write()
+    progress.update()
 
-    # copy the model files into a "model_krig" subdirectory (where DL_FFLUX looks for the
-    # trained models), renaming them so the system part is the single underscore-free
-    # token used in the CONFIG atom labels: <system_name>_<property>_<atom>.model
+    # copy the model files into a "model_krig" subdirectory, which is where DL_FFLUX looks
+    # for the trained models. DL_FFLUX identifies each model by its internal name/atom
+    # fields (not the filename), so the files are copied under their original names.
+    progress.set_description("Copying model files")
     model_krig_dir = run_path / "model_krig"
     mkdir(model_krig_dir)
     for model in models:
-        tokens = model.path.stem.split("_")
-        # filename layout is <system...>_<property>_<atom>.model
-        prop, atom = tokens[-2], tokens[-1]
-        new_name = f"{system_name}_{prop}_{atom}{model.path.suffix}"
-        shutil.copy2(model.path, model_krig_dir / new_name)
+        shutil.copy2(model.path, model_krig_dir / model.path.name)
+        progress.update()
+
+    progress.set_description("DL_FFLUX setup complete")
+    progress.close()
 
     return run_path
 
@@ -232,7 +253,8 @@ def submit_dlpoly_fflux_robustness(
     nseeds = min(nseeds, len(trajectory))
 
     run_paths = []
-    for i in range(nseeds):
+    # one progress bar over the seeds rather than a separate bar per run directory
+    for i in tqdm(range(nseeds), desc="Setting up DL_FFLUX run directories"):
         run_path = base_path / f"RUN{i}"
         mkdir(run_path)
 
@@ -253,6 +275,7 @@ def submit_dlpoly_fflux_robustness(
             nsteps=nsteps,
             electrostatics=electrostatics,
             electrostatics_level=electrostatics_level,
+            progress_bar=False,
         )
         run_paths.append(run_path)
 
