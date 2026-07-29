@@ -26,6 +26,10 @@ class DlPolyFFLUXInput(WriteFile):
         should only be set when the models contain multipole moment data.
     :param electrostatics_level: The electrostatics multipole expansion level (L1-L5),
         defaults to 3. Only used when ``electrostatics`` is not ``None``.
+    :param electrostatics_cutoff: The electrostatics cutoff radius (in Angstrom) written on
+        the ``cut dipole`` / ``cut quadrupole`` lines, defaults to 8.0. These lines are only
+        active when ``electrostatics`` is not ``None``. Octupole and hexadecapole moments
+        have no separate cutoff and reuse the quadrupole cutoff.
     """
 
     _filetype = ""
@@ -40,6 +44,7 @@ class DlPolyFFLUXInput(WriteFile):
         print_every: int = 1,
         electrostatics: Optional[str] = None,
         electrostatics_level: int = 3,
+        electrostatics_cutoff: float = 8.0,
     ):
 
         super().__init__(path)
@@ -51,6 +56,7 @@ class DlPolyFFLUXInput(WriteFile):
         self.print_every = print_every
         self.electrostatics = electrostatics
         self.electrostatics_level = electrostatics_level
+        self.electrostatics_cutoff = electrostatics_cutoff
 
     def _write_file(self, path: Path, *args, **kwargs):
 
@@ -60,6 +66,8 @@ class DlPolyFFLUXInput(WriteFile):
         force_prefix = "" if self.print_force else "#"
         ewald_prefix = "" if self.electrostatics == "ewald" else "#"
         cluster_prefix = "" if self.electrostatics == "cluster" else "#"
+        # the electrostatics cutoff lines are active whenever electrostatics are on
+        cut_prefix = "" if self.electrostatics is not None else "#"
         lvl = self.electrostatics_level
 
         write_str = ""
@@ -87,9 +95,11 @@ class DlPolyFFLUXInput(WriteFile):
         write_str += "# Cluster electrostatics L1-L5\n"
         write_str += f"{cluster_prefix}cluster L{lvl}\n"
         write_str += "\n"
+        # octupole/hexadecapole have no separate cutoff directive; they use the quadrupole
+        # cutoff, so only the dipole and quadrupole cutoff lines are written
         write_str += "# Set electrostatics cutoff radius\n"
-        write_str += "#cut dipole 8.0\n"
-        write_str += "#cut quadrupole 8.0\n"
+        write_str += f"{cut_prefix}cut dipole {self.electrostatics_cutoff}\n"
+        write_str += f"{cut_prefix}cut quadrupole {self.electrostatics_cutoff}\n"
         write_str += "\n"
         write_str += "# Calculate forces numerically\n"
         write_str += "#numerical\n"

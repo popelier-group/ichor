@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 from ichor.core.atoms import Atom, Atoms
@@ -128,6 +128,7 @@ class DlPolyField(WriteFile):
         atoms: Atoms,
         path: Union[Path, str] = Path("FIELD"),
         nummols=1,
+        multipolar: Optional[int] = None,
     ):
 
         super().__init__(path)
@@ -135,6 +136,9 @@ class DlPolyField(WriteFile):
         self.system_name = system_name
         self.atoms = atoms
         self.nummols = nummols
+        # highest multipole interaction order (L') for FFLUX electrostatics, written as a
+        # "Multipolar <L'>" line. None (default) omits the line, i.e. a pure-IQA run.
+        self.multipolar = multipolar
 
     # TODO: implement reading for dlpoly field file
     # def _read_file(self):
@@ -148,6 +152,9 @@ class DlPolyField(WriteFile):
 
         str_to_write += "DL_FIELD v3.00\n"
         str_to_write += "Units kJ/mol\n"
+        # multipole electrostatics interaction order (omitted for a pure-IQA run)
+        if self.multipolar is not None:
+            str_to_write += f"Multipolar {self.multipolar}\n"
         str_to_write += "Molecular types 1\n"
         str_to_write += f"{self.system_name}\n"
         str_to_write += f"nummols {self.nummols}\n"

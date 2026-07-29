@@ -1,3 +1,4 @@
+import re
 import shutil
 from pathlib import Path
 from typing import Optional, Union
@@ -27,8 +28,8 @@ def write_dlpoly_fflux_setup(
     temperature: int = 1,
     timestep: float = 0.001,
     nsteps: int = 500,
-    electrostatics: str = "cluster",
-    electrostatics_level: int = 3,
+    electrostatics: str = "ewald",
+    electrostatics_level: Optional[int] = None,
     progress_bar: bool = True,
 ) -> Path:
     """Sets up a directory from which a DL_FFLUX (FFLUX-modified DL_POLY) calculation
@@ -47,10 +48,13 @@ def write_dlpoly_fflux_setup(
     :param timestep: The timestep (in ps) of the simulation, defaults to 0.001.
     :param nsteps: The number of timesteps to run the simulation for, defaults to 500.
     :param electrostatics: The electrostatics model written to FFLUX.in when the models
-        contain multipole moment data, either ``"cluster"`` or ``"ewald"``, defaults to
-        ``"cluster"``. Ignored when the models only contain ``iqa`` (energy) data.
+        contain multipole moment data, either ``"ewald"`` or ``"cluster"``, defaults to
+        ``"ewald"``. Ignored when the models only contain ``iqa`` (energy) data.
     :param electrostatics_level: The multipole expansion level (L1-L5) for the
-        electrostatics directive, defaults to 3. Ignored when there is no multipole data.
+        electrostatics directive. If ``None`` (default), it is auto-detected from the
+        highest multipole rank present in the models (rank ``l`` maps to level ``L(l+1)``,
+        so models up to hexadecapole ``q4x`` give ``L5``). Ignored when there is no
+        multipole data.
     :param progress_bar: Whether to show a progress bar while the setup is written out,
         defaults to True. Set to False when calling this in a loop which already has its
         own progress bar (see :func:`submit_dlpoly_fflux_robustness`).
@@ -96,9 +100,24 @@ def write_dlpoly_fflux_setup(
     # pointer. ichor and DL_FFLUX read this from the same "name" line, so they agree.
     system_name = models[0].system_name
 
-    # the electrostatics directive is only meaningful when the models contain multipole
-    # moment data (anything other than the iqa energy). For iqa-only models it is omitted.
-    has_multipole_data = any(prop != "iqa" for prop in models.types)
+    # Electrostatics are only switched on when the models contain multipole moment data.
+    # Multipole model properties are named q<l><m> (e.g. "q00" -> rank 0, "q44s" -> rank
+    # 4). The highest rank present is the interaction order L', which controls two lines:
+    #   - a "Multipolar L'" line in the FIELD file
+    #   - an "ewald L(L'+1)" line in FFLUX.in
+    # e.g. quadrupole-quadrupole (L'=2) -> "Multipolar 2" + "ewald L3"; a pure-IQA run
+    # (no multipole models) omits both lines.
+    multipole_ranks = [
+        int(match.group(1))
+        for prop in models.types
+        for match in [re.match(r"q(\d)", prop)]
+        if match
+    ]
+    has_multipole_data = len(multipole_ranks) > 0
+    multipolar_order = max(multipole_ranks) if has_multipole_data else None
+    if electrostatics_level is None:
+        # ewald level is L' + 1 (e.g. L'=2 quadrupole -> ewald L3)
+        electrostatics_level = (multipolar_order + 1) if has_multipole_data else 3
 
     # FFLUX-specific settings live in FFLUX.in, so the inline fflux directives are
     # omitted from the CONTROL file (fflux_cluster / fflux_print set to None)
@@ -128,6 +147,7 @@ def write_dlpoly_fflux_setup(
         system_name=system_name,
         atoms=atoms,
         path=run_path / "FIELD",
+        multipolar=multipolar_order,
     ).write()
     progress.update()
 
@@ -176,8 +196,8 @@ def submit_dlpoly_fflux(
     timestep: float = 0.001,
     nsteps: int = 500,
     ncores: int = 1,
-    electrostatics: str = "cluster",
-    electrostatics_level: int = 3,
+    electrostatics: str = "ewald",
+    electrostatics_level: Optional[int] = None,
     executable_path: Optional[Union[str, Path]] = None,
 ) -> JobID:
     """Sets up and submits a DL_FFLUX (FFLUX-modified DL_POLY) calculation to a compute node.
@@ -222,8 +242,8 @@ def submit_dlpoly_fflux_robustness(
     timestep: float = 0.001,
     nsteps: int = 500,
     ncores: int = 1,
-    electrostatics: str = "cluster",
-    electrostatics_level: int = 3,
+    electrostatics: str = "ewald",
+    electrostatics_level: Optional[int] = None,
     executable_path: Optional[Union[str, Path]] = None,
 ) -> JobID:
     """Sets up and submits a DL_FFLUX model-robustness check.
@@ -247,8 +267,9 @@ def submit_dlpoly_fflux_robustness(
     :param nsteps: The number of timesteps to run each simulation for, defaults to 500.
     :param ncores: The number of cores to use per run, defaults to 1.
     :param electrostatics: The electrostatics model written to FFLUX.in when the models
-        contain multipole moment data, defaults to ``"cluster"``.
-    :param electrostatics_level: The multipole expansion level (L1-L5), defaults to 3.
+        contain multipole moment data, defaults to ``"ewald"``.
+    :param electrostatics_level: The multipole expansion level (L1-L5). If ``None``
+        (default), it is auto-detected from the highest multipole rank present in the models.
     :param executable_path: An optional path to the DL_FFLUX (DLPOLY.Z) executable which
         overrides the configured ``software.dlpoly.executable_path``. If ``None`` (default),
         the configured executable path is used.
