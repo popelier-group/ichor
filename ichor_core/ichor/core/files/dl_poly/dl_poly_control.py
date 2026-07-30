@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 from ichor.core.files.file import WriteFile
 
@@ -36,6 +37,7 @@ class DlPolyControl(WriteFile):
         close_time=20000,
         fflux_cluster="L1",
         fflux_print="0 1",
+        spme_sum: Optional[str] = None,
     ):
 
         super().__init__(path)
@@ -62,6 +64,10 @@ class DlPolyControl(WriteFile):
         # FFLUX.in file, so set to None to omit them from the CONTROL file.
         self.fflux_cluster = fflux_cluster
         self.fflux_print = fflux_print
+        # SPME Ewald summation settings, written as "spme sum <spme_sum>" (e.g.
+        # "0.00001 50 50 50" = precision + FFT grid). Required for multipole electrostatics
+        # runs so DL_POLY sets up a non-zero FFT grid; None omits the line.
+        self.spme_sum = spme_sum
 
     # TODO: implement reading for dlpoly control file
     # def _read_file(self):
@@ -90,6 +96,9 @@ class DlPolyControl(WriteFile):
         # rescale system temperature every n steps during equilibration
         write_str += f"scale {self.scale}\n"
         write_str += "\n"
+        # SPME Ewald summation (precision + FFT grid) for multipole electrostatics runs
+        if self.spme_sum is not None:
+            write_str += f"spme sum {self.spme_sum}\n"
         write_str += f"cutoff  {self.cutoff}\n"
         write_str += f"rvdw    {self.rvdw}\n"
         write_str += "vdw direct\n"

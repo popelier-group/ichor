@@ -31,6 +31,7 @@ def write_dlpoly_fflux_setup(
     nsteps: int = 500,
     electrostatics: str = "ewald",
     electrostatics_level: Optional[int] = None,
+    cell_size: float = 50.0,
     progress_bar: bool = True,
 ) -> Path:
     """Sets up a directory from which a DL_FFLUX (FFLUX-modified DL_POLY) calculation
@@ -56,6 +57,9 @@ def write_dlpoly_fflux_setup(
         highest multipole rank present in the models (rank ``l`` maps to level ``L(l+1)``,
         so models up to hexadecapole ``q4x`` give ``L5``). Ignored when there is no
         multipole data.
+    :param cell_size: The size (in Angstrom) of the cubic simulation cell written to the
+        CONFIG file, defaults to 50.0. Also used to size the SPME Ewald FFT grid for
+        multipole runs (~1 grid point per Angstrom).
     :param progress_bar: Whether to show a progress bar while the setup is written out,
         defaults to True. Set to False when calling this in a loop which already has its
         own progress bar (see :func:`submit_dlpoly_fflux_robustness`).
@@ -120,6 +124,16 @@ def write_dlpoly_fflux_setup(
         # ewald level is L' + 1 (e.g. L'=2 quadrupole -> ewald L3)
         electrostatics_level = (multipolar_order + 1) if has_multipole_data else 3
 
+    # a multipole (ewald) run needs the SPME Ewald summation set up in CONTROL, otherwise
+    # DL_POLY's FFT grid is 0 and it divides by zero in parallel_fft. The FFT grid is set
+    # to roughly one point per Angstrom of the (cubic) cell, rounded up to an even number.
+    spme_sum = None
+    if has_multipole_data:
+        grid = max(int(cell_size), 2)
+        if grid % 2 != 0:
+            grid += 1
+        spme_sum = f"0.00001 {grid} {grid} {grid}"
+
     # FFLUX-specific settings live in FFLUX.in, so the inline fflux directives are
     # omitted from the CONTROL file (fflux_cluster / fflux_print set to None)
     progress.set_description("Writing CONTROL file")
@@ -132,6 +146,7 @@ def write_dlpoly_fflux_setup(
         steps=nsteps,
         fflux_cluster=None,
         fflux_print=None,
+        spme_sum=spme_sum,
     ).write()
     progress.update()
 
@@ -140,6 +155,7 @@ def write_dlpoly_fflux_setup(
         system_name=system_name,
         trajectory=starting_trajectory,
         path=run_path / "CONFIG",
+        cell_size=cell_size,
     ).write()
     progress.update()
 
@@ -211,6 +227,7 @@ def submit_dlpoly_fflux(
     ncores: int = 1,
     electrostatics: str = "ewald",
     electrostatics_level: Optional[int] = None,
+    cell_size: float = 50.0,
     executable_path: Optional[Union[str, Path]] = None,
 ) -> JobID:
     """Sets up and submits a DL_FFLUX (FFLUX-modified DL_POLY) calculation to a compute node.
@@ -235,6 +252,7 @@ def submit_dlpoly_fflux(
         nsteps=nsteps,
         electrostatics=electrostatics,
         electrostatics_level=electrostatics_level,
+        cell_size=cell_size,
     )
 
     with SubmissionScript(
@@ -257,6 +275,7 @@ def submit_dlpoly_fflux_robustness(
     ncores: int = 1,
     electrostatics: str = "ewald",
     electrostatics_level: Optional[int] = None,
+    cell_size: float = 50.0,
     executable_path: Optional[Union[str, Path]] = None,
 ) -> JobID:
     """Sets up and submits a DL_FFLUX model-robustness check.
@@ -320,6 +339,7 @@ def submit_dlpoly_fflux_robustness(
             nsteps=nsteps,
             electrostatics=electrostatics,
             electrostatics_level=electrostatics_level,
+            cell_size=cell_size,
             progress_bar=False,
         )
         run_paths.append(run_path)
