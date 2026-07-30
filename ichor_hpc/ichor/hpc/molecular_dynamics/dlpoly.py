@@ -12,6 +12,7 @@ from ichor.core.files.dl_poly import (
     DlPolyControl,
     DlPolyFFLUXInput,
     DlPolyField,
+    DlPolyMpoles,
 )
 from ichor.core.models import Models
 from ichor.hpc.batch_system.jobs import JobID
@@ -159,6 +160,18 @@ def write_dlpoly_fflux_setup(
         electrostatics_level=electrostatics_level,
     ).write()
     progress.update()
+
+    # a multipole run also needs an MPOLES file so DL_POLY can allocate the multipole
+    # moment arrays (the values are dummies overwritten by the FFLUX predictions)
+    if has_multipole_data:
+        progress.total = progress.total + 1
+        progress.set_description("Writing MPOLES file")
+        DlPolyMpoles(
+            system_name=system_name,
+            atoms=atoms,
+            path=run_path / "MPOLES",
+        ).write()
+        progress.update()
 
     # copy the model files into a "model_krig" subdirectory (where DL_FFLUX looks for the
     # trained models). DL_FFLUX *matches* a model to an atom by the model's internal
