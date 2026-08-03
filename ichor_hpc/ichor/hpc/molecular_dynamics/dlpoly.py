@@ -1,6 +1,5 @@
 import math
 import re
-import shutil
 from pathlib import Path
 from typing import Optional, Union
 
@@ -21,6 +20,42 @@ from ichor.hpc.batch_system.jobs import JobID
 from ichor.hpc.submission_commands import DlpolyCommand
 from ichor.hpc.submission_script import SubmissionScript
 from tqdm import tqdm
+
+
+def _copy_model_with_clean_system_name(
+    src_path: Path,
+    dst_path: Path,
+    system_name: str,
+    clean_system_name: str,
+) -> None:
+    """Copy a FEREBUS ``.model`` file, rewriting the system name on its ``[system]``
+    ``name`` line to an underscore-free version.
+
+    The FFLUX model reader (``fflux_read_models.f90``) reconstructs the model *file name*
+    it opens for the data read from the ``SystemName`` it parses out of this ``name`` line,
+    so the value has to agree with the (underscore-free) copied file name and the CONFIG
+    atom labels. Everything else in the file (dimensions, ALF, kernels, weights, training
+    data) is copied verbatim.
+
+    :param src_path: The original ``.model`` file to copy.
+    :param dst_path: The destination path (already carrying the underscore-free name).
+    :param system_name: The original system name (with underscores) as it appears on the
+        model file's ``name`` line.
+    :param clean_system_name: The underscore-free system name to write in its place.
+    """
+    lines = src_path.read_text().splitlines(keepends=True)
+    for idx, line in enumerate(lines):
+        stripped = line.strip()
+        # the "[system]" section's name line, e.g. "name BZAMID05_MOL_MTD_OUT0"
+        if (
+            stripped.startswith("name ")
+            and stripped[len("name ") :].strip() == system_name
+        ):
+            prefix = line[: len(line) - len(line.lstrip())]
+            suffix = "\n" if line.endswith("\n") else ""
+            lines[idx] = f"{prefix}name {clean_system_name}{suffix}"
+            break
+    dst_path.write_text("".join(lines))
 
 
 def write_dlpoly_fflux_setup(
@@ -125,12 +160,24 @@ def write_dlpoly_fflux_setup(
     progress.total = progress.total + len(models)
     progress.update()
     # DL_FFLUX pairs each CONFIG atom label with a model by matching it against
-    # "<SystemName>_<AtomName>" built from the INTERNAL fields of each model file (the
-    # "name" and "atom" lines - see fflux_read_models.f90). The CONFIG atom labels must
-    # therefore use the model's internal system name verbatim (underscores and all);
-    # otherwise no model is associated to the atom and DL_FFLUX segfaults on a null
-    # pointer. ichor and DL_FFLUX read this from the same "name" line, so they agree.
+    # "<SystemName>_<AtomName>" built from the model file's "name"/"atom" lines
+    # (see fflux_read_models.f90), so the CONFIG labels must use the same system name.
     system_name = models[0].system_name
+
+    # The FFLUX model reader reconstructs each model *file name* in two inconsistent ways:
+    #   - the metadata read inserts the property after the FIRST underscore of the CONFIG
+    #     label  ->  "<first_token>_iqa_<rest>_<atom>.model"
+    #   - the data read (mean/kernel/weights) builds it as
+    #     "<SystemName>_iqa_<atom>.model"  (SystemName read from the file's "name" line)
+    # When the system name itself contains underscores (e.g. "BZAMID05_MOL_MTD_OUT0") these
+    # disagree, so the data-read open silently fails (it is IOSTAT-guarded), nPredPerAtm
+    # stays 0, and the mean/kernel/weights are never read -> every IQA energy and force is
+    # exactly 0.0 and the molecule flies apart. Removing the underscores makes both
+    # constructions collapse to the standard "<system>_<prop>_<atom>.model", so use an
+    # underscore-free system name consistently: in the CONFIG atom labels, the copied model
+    # file names, AND each model file's own "name" line (which the reader parses back into
+    # the file name).
+    clean_system_name = system_name.replace("_", "")
 
     # Electrostatics are only switched on when the models contain multipole moment data.
     # Multipole model properties are named q<l><m> (e.g. "q00" -> rank 0, "q44s" -> rank
@@ -165,7 +212,7 @@ def write_dlpoly_fflux_setup(
     # omitted from the CONTROL file (fflux_cluster / fflux_print set to None)
     progress.set_description("Writing CONTROL file")
     DlPolyControl(
-        system_name=system_name,
+        system_name=clean_system_name,
         path=run_path / "CONTROL",
         ensemble=ensemble,
         temperature=temperature,
@@ -181,7 +228,7 @@ def write_dlpoly_fflux_setup(
 
     progress.set_description("Writing CONFIG file")
     DlPolyConfig(
-        system_name=system_name,
+        system_name=clean_system_name,
         trajectory=starting_trajectory,
         path=run_path / "CONFIG",
         cell_size=cell_size,
@@ -190,7 +237,7 @@ def write_dlpoly_fflux_setup(
 
     progress.set_description("Writing FIELD file")
     DlPolyField(
-        system_name=system_name,
+        system_name=clean_system_name,
         atoms=atoms,
         path=run_path / "FIELD",
         multipolar=multipolar_order,
@@ -200,7 +247,7 @@ def write_dlpoly_fflux_setup(
     progress.set_description("Writing FFLUX.in file")
     DlPolyFFLUXInput(
         path=run_path / "FFLUX.in",
-        title=system_name,
+        title=clean_system_name,
         electrostatics=electrostatics if has_multipole_data else None,
         electrostatics_level=electrostatics_level,
         electrostatics_cutoff=cutoff,
@@ -213,31 +260,32 @@ def write_dlpoly_fflux_setup(
         progress.total = progress.total + 1
         progress.set_description("Writing MPOLES file")
         DlPolyMpoles(
-            system_name=system_name,
+            system_name=clean_system_name,
             atoms=atoms,
             path=run_path / "MPOLES",
         ).write()
         progress.update()
 
     # copy the model files into a "model_krig" subdirectory (where DL_FFLUX looks for the
-    # trained models). DL_FFLUX *matches* a model to an atom by the model's internal
-    # "<name>_<atom>" (handled above via the CONFIG labels), but it *opens* the model file
-    # under a name built by inserting the property token after the FIRST token of the
-    # system name, e.g. system "BZAMID05_MOL_MTD_OUT0", property "iqa", atom "O1" ->
-    # "BZAMID05_iqa_MOL_MTD_OUT0_O1.model". So copy each model under the name DL_FFLUX will
-    # open, which may differ from the model's original (FEREBUS) filename.
+    # trained models), named in the standard FFLUX layout "<system>_<prop>_<atom>.model"
+    # (property token right after the system name). With the underscore-free system name the
+    # reader's metadata-read and data-read filename constructions agree on this name, so the
+    # mean/kernel/weights are actually read. Each file's own "name" line is rewritten to the
+    # underscore-free system name too, because the reader parses that line back into the file
+    # name it opens for the data read.
     progress.set_description("Copying model files")
     model_krig_dir = run_path / "model_krig"
     mkdir(model_krig_dir)
-    head, _, system_rest = system_name.partition("_")
     for model in models:
-        if system_rest:
-            new_name = (
-                f"{head}_{model.prop}_{system_rest}_{model.atom_name}{model.path.suffix}"
-            )
-        else:
-            new_name = f"{head}_{model.prop}_{model.atom_name}{model.path.suffix}"
-        shutil.copy2(model.path, model_krig_dir / new_name)
+        new_name = (
+            f"{clean_system_name}_{model.prop}_{model.atom_name}{model.path.suffix}"
+        )
+        _copy_model_with_clean_system_name(
+            model.path,
+            model_krig_dir / new_name,
+            system_name,
+            clean_system_name,
+        )
         progress.update()
 
     progress.set_description("DL_FFLUX setup complete")
