@@ -38,6 +38,7 @@ class DlPolyControl(WriteFile):
         fflux_cluster="L1",
         fflux_print="0 1",
         spme_sum: Optional[str] = None,
+        cap: Optional[float] = None,
     ):
 
         super().__init__(path)
@@ -68,6 +69,10 @@ class DlPolyControl(WriteFile):
         # "0.00001 50 50 50" = precision + FFT grid). Required for multipole electrostatics
         # runs so DL_POLY sets up a non-zero FFT grid; None omits the line.
         self.spme_sum = spme_sum
+        # Force cap (in kT/Angstrom) applied during equilibration, written as "cap <cap>".
+        # Useful to keep a system far from equilibrium (e.g. an FFLUX run with inaccurate
+        # models) from exploding; None omits the line.
+        self.cap = cap
 
     # TODO: implement reading for dlpoly control file
     # def _read_file(self):
@@ -95,6 +100,10 @@ class DlPolyControl(WriteFile):
         write_str += f"steps {self.steps}\n"
         # rescale system temperature every n steps during equilibration
         write_str += f"scale {self.scale}\n"
+        # cap forces (kT/Angstrom) during equilibration to stop a far-from-equilibrium
+        # system (e.g. inaccurate FFLUX models) from exploding
+        if self.cap is not None:
+            write_str += f"cap {self.cap}\n"
         write_str += "\n"
         # SPME Ewald summation (precision + FFT grid) for multipole electrostatics runs
         if self.spme_sum is not None:

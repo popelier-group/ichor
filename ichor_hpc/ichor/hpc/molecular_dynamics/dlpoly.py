@@ -70,6 +70,7 @@ def write_dlpoly_fflux_setup(
     electrostatics_level: Optional[int] = None,
     cell_size: float = 50.0,
     cutoff: Optional[float] = None,
+    cap: Optional[float] = None,
     progress_bar: bool = True,
 ) -> Path:
     """Sets up a directory from which a DL_FFLUX (FFLUX-modified DL_POLY) calculation
@@ -104,6 +105,9 @@ def write_dlpoly_fflux_setup(
         it is derived from the starting geometry as the largest interatomic distance plus a
         margin, so the whole molecule fits inside the cutoff. FFLUX builds the intramolecular
         interaction cluster within this cutoff and aborts if any atom lies outside it.
+    :param cap: Optional force cap (in kT/Angstrom) applied during equilibration, written as
+        a ``cap`` line in CONTROL. Useful to stop a far-from-equilibrium run (e.g. one using
+        inaccurate FFLUX models) from exploding. ``None`` (default) omits the line.
     :param progress_bar: Whether to show a progress bar while the setup is written out,
         defaults to True. Set to False when calling this in a loop which already has its
         own progress bar (see :func:`submit_dlpoly_fflux_robustness`).
@@ -223,6 +227,7 @@ def write_dlpoly_fflux_setup(
         fflux_cluster=None,
         fflux_print=None,
         spme_sum=spme_sum,
+        cap=cap,
     ).write()
     progress.update()
 
@@ -307,6 +312,7 @@ def submit_dlpoly_fflux(
     electrostatics_level: Optional[int] = None,
     cell_size: float = 50.0,
     cutoff: Optional[float] = None,
+    cap: Optional[float] = None,
     executable_path: Optional[Union[str, Path]] = None,
 ) -> JobID:
     """Sets up and submits a DL_FFLUX (FFLUX-modified DL_POLY) calculation to a compute node.
@@ -333,6 +339,7 @@ def submit_dlpoly_fflux(
         electrostatics_level=electrostatics_level,
         cell_size=cell_size,
         cutoff=cutoff,
+        cap=cap,
     )
 
     with SubmissionScript(
@@ -357,6 +364,7 @@ def submit_dlpoly_fflux_robustness(
     electrostatics_level: Optional[int] = None,
     cell_size: float = 50.0,
     cutoff: Optional[float] = None,
+    cap: Optional[float] = None,
     executable_path: Optional[Union[str, Path]] = None,
 ) -> JobID:
     """Sets up and submits a DL_FFLUX model-robustness check.
@@ -422,6 +430,7 @@ def submit_dlpoly_fflux_robustness(
             electrostatics_level=electrostatics_level,
             cell_size=cell_size,
             cutoff=cutoff,
+            cap=cap,
             progress_bar=False,
         )
         run_paths.append(run_path)

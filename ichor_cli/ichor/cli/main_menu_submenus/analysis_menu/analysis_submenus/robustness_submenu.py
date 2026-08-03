@@ -27,6 +27,8 @@ ROBUSTNESS_MENU_DEFAULTS = {
     "default_temperature": 300,
     "default_timestep": 0.001,
     "default_number_of_timesteps": 500,
+    # force cap (kT/Angstrom) applied during equilibration; 0.0 disables it
+    "default_force_cap": 0.0,
     "default_number_of_cores": 1,
     # empty string means "use the executable path from the config"
     "default_executable_path": "",
@@ -54,6 +56,8 @@ class RobustnessMenuOptions(MenuOptions):
     selected_temperature: int
     selected_timestep: float
     selected_number_of_timesteps: int
+    # force cap (kT/Angstrom) applied during equilibration; 0.0 disables it
+    selected_force_cap: float
     # computational resources
     selected_number_of_cores: int
     # optional override of the configured DL_FFLUX (DLPOLY.Z) executable path
@@ -88,6 +92,7 @@ robustness_menu_options = RobustnessMenuOptions(
     ROBUSTNESS_MENU_DEFAULTS["default_temperature"],
     ROBUSTNESS_MENU_DEFAULTS["default_timestep"],
     ROBUSTNESS_MENU_DEFAULTS["default_number_of_timesteps"],
+    ROBUSTNESS_MENU_DEFAULTS["default_force_cap"],
     ROBUSTNESS_MENU_DEFAULTS["default_number_of_cores"],
     ROBUSTNESS_MENU_DEFAULTS["default_executable_path"],
 )
@@ -170,6 +175,16 @@ class RobustnessMenuFunctions:
         )
 
     @staticmethod
+    def select_force_cap():
+        """Select the force cap (in kT/Angstrom) applied during equilibration. This keeps a
+        far-from-equilibrium run (e.g. one using inaccurate FFLUX models) from exploding.
+        Enter 0 to disable force capping."""
+        robustness_menu_options.selected_force_cap = user_input_float(
+            "Select force cap in kT/Angstrom (0 = disabled): ",
+            robustness_menu_options.selected_force_cap,
+        )
+
+    @staticmethod
     def select_number_of_cores():
         """Select the number of cores to use per run."""
         robustness_menu_options.selected_number_of_cores = user_input_int(
@@ -199,6 +214,7 @@ class RobustnessMenuFunctions:
             temperature=robustness_menu_options.selected_temperature,
             timestep=robustness_menu_options.selected_timestep,
             nsteps=robustness_menu_options.selected_number_of_timesteps,
+            cap=robustness_menu_options.selected_force_cap or None,
             ncores=robustness_menu_options.selected_number_of_cores,
             executable_path=robustness_menu_options.selected_executable_path or None,
         )
@@ -256,6 +272,10 @@ robustness_menu_items = [
     FunctionItem(
         "Select number of timesteps",
         RobustnessMenuFunctions.select_number_of_timesteps,
+    ),
+    FunctionItem(
+        "Select force cap (kT/Angstrom, 0 = disabled)",
+        RobustnessMenuFunctions.select_force_cap,
     ),
     FunctionItem(
         "Select number of cores",
