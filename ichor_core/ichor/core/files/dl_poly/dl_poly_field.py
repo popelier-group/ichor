@@ -129,6 +129,7 @@ class DlPolyField(WriteFile):
         path: Union[Path, str] = Path("FIELD"),
         nummols=1,
         multipolar: Optional[int] = None,
+        all_pairs_bonds: bool = False,
     ):
 
         super().__init__(path)
@@ -139,6 +140,13 @@ class DlPolyField(WriteFile):
         # highest multipole interaction order (L') for FFLUX electrostatics, written as a
         # "Multipolar <L'>" line. None (default) omits the line, i.e. a pure-IQA run.
         self.multipolar = multipolar
+        # when True, list EVERY intramolecular atom pair as a (zero-constant) bond instead of
+        # just the chemically bonded pairs + angles + dihedrals. This puts all intramolecular
+        # pairs on DL_POLY's exclusion list, which is required for FFLUX multipole runs so the
+        # explicit multipole electrostatics act only BETWEEN molecules (the intramolecular
+        # energy is already in the IQA models). Otherwise distant intramolecular pairs get
+        # spurious multipole interactions that diverge as atoms approach.
+        self.all_pairs_bonds = all_pairs_bonds
 
     # TODO: implement reading for dlpoly field file
     # def _read_file(self):
@@ -146,7 +154,18 @@ class DlPolyField(WriteFile):
 
     def _write_file(self, path: Path):
 
-        bonds, angles, dihedrals = get_internal_feature_indices(self.atoms)
+        if self.all_pairs_bonds:
+            # every intramolecular pair as a zero-constant "bond" -> DL_POLY excludes all
+            # intramolecular pairs from the nonbonded (multipole) electrostatics. No angle or
+            # dihedral terms are needed since every pair is already covered by a bond.
+            natoms = len(self.atoms)
+            bonds = [
+                (i, j) for i in range(1, natoms + 1) for j in range(i + 1, natoms + 1)
+            ]
+            angles = []
+            dihedrals = []
+        else:
+            bonds, angles, dihedrals = get_internal_feature_indices(self.atoms)
 
         str_to_write = ""
 

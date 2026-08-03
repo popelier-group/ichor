@@ -246,6 +246,11 @@ def write_dlpoly_fflux_setup(
         atoms=atoms,
         path=run_path / "FIELD",
         multipolar=multipolar_order,
+        # for multipole runs, exclude ALL intramolecular pairs from the electrostatics
+        # (FFLUX handles the intramolecular energy via the IQA models) - otherwise the
+        # explicit multipole electrostatics double-counts intramolecular interactions and
+        # diverges as atoms approach, blowing up the trajectory.
+        all_pairs_bonds=has_multipole_data,
     ).write()
     progress.update()
 
