@@ -1,6 +1,42 @@
 from pathlib import Path
+from typing import Dict, Optional, Union
 
 from ichor.core.files.file import WriteFile
+
+
+def read_dlpoly_control_settings(path: Union[str, Path]) -> Dict[str, str]:
+    """Reads the directives of a DL_POLY CONTROL file.
+
+    This is a light-weight reader for looking up individual settings of a finished (or
+    set up) calculation, e.g. how many timesteps it was meant to run for::
+
+        settings = read_dlpoly_control_settings(run_path / "CONTROL")
+        nsteps = int(settings["steps"])
+        timestep = float(settings["timestep"])
+
+    :param path: Path to the CONTROL file.
+    :return: A dictionary mapping the first word of each directive (lower cased) to the
+        rest of its line, e.g. ``{"timestep": "0.001", "steps": "500",
+        "ensemble": "nvt hoover 0.04"}``. The title line, comments, blank lines and the
+        closing ``finish`` are skipped. Directives sharing a first word (such as
+        ``print every`` and ``stats every``) therefore share a key, of which the last
+        occurrence in the file wins.
+    """
+
+    settings = {}
+
+    with open(path, "r") as f:
+        for i, line in enumerate(f):
+            record = line.split()
+            # the first line of a CONTROL file is its title, not a directive
+            if i == 0 or not record:
+                continue
+            keyword = record[0].lower()
+            if keyword.startswith("#") or keyword == "finish":
+                continue
+            settings[keyword] = " ".join(record[1:])
+
+    return settings
 
 
 class DlPolyControl(WriteFile):
@@ -34,6 +70,10 @@ class DlPolyControl(WriteFile):
         stats_every=1,
         job_time=10000000,
         close_time=20000,
+        fflux_cluster="L1",
+        fflux_print="0 1",
+        spme_sum: Optional[str] = None,
+        cap: Optional[float] = None,
     ):
 
         super().__init__(path)
@@ -56,6 +96,18 @@ class DlPolyControl(WriteFile):
         self.stats_every = stats_every
         self.job_time = job_time
         self.close_time = close_time
+        # FFLUX-specific directives. Newer DL_FFLUX builds keep these in a separate
+        # FFLUX.in file, so set to None to omit them from the CONTROL file.
+        self.fflux_cluster = fflux_cluster
+        self.fflux_print = fflux_print
+        # SPME Ewald summation settings, written as "spme sum <spme_sum>" (e.g.
+        # "0.00001 50 50 50" = precision + FFT grid). Required for multipole electrostatics
+        # runs so DL_POLY sets up a non-zero FFT grid; None omits the line.
+        self.spme_sum = spme_sum
+        # Force cap (in kT/Angstrom) applied during equilibration, written as "cap <cap>".
+        # Useful to keep a system far from equilibrium (e.g. an FFLUX run with inaccurate
+        # models) from exploding; None omits the line.
+        self.cap = cap
 
     # TODO: implement reading for dlpoly control file
     # def _read_file(self):
@@ -83,12 +135,20 @@ class DlPolyControl(WriteFile):
         write_str += f"steps {self.steps}\n"
         # rescale system temperature every n steps during equilibration
         write_str += f"scale {self.scale}\n"
+        # cap forces (kT/Angstrom) during equilibration to stop a far-from-equilibrium
+        # system (e.g. inaccurate FFLUX models) from exploding
+        if self.cap is not None:
+            write_str += f"cap {self.cap}\n"
         write_str += "\n"
+        # SPME Ewald summation (precision + FFT grid) for multipole electrostatics runs
+        if self.spme_sum is not None:
+            write_str += f"spme sum {self.spme_sum}\n"
         write_str += f"cutoff  {self.cutoff}\n"
         write_str += f"rvdw    {self.rvdw}\n"
         write_str += "vdw direct\n"
         write_str += "vdw shift\n"
-        write_str += "fflux cluster L1\n"
+        if self.fflux_cluster is not None:
+            write_str += f"fflux cluster {self.fflux_cluster}\n"
         write_str += "\n"
         write_str += f"dump  {self.dump}\n"
         write_str += (
@@ -96,7 +156,8 @@ class DlPolyControl(WriteFile):
         )
         write_str += f"print every {self.print_every}\n"
         write_str += f"stats every {self.stats_every}\n"
-        write_str += "fflux print 0 1\n"
+        if self.fflux_print is not None:
+            write_str += f"fflux print {self.fflux_print}\n"
         write_str += f"job time {self.job_time}\n"
         write_str += f"close time {self.close_time}\n"
         write_str += "finish\n"

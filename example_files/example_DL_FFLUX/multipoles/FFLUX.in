@@ -1,0 +1,41 @@
+Optional title 
+
+# Write IQA_ENERGY and IQA_FORCES files. Default: false
+#print energy
+#print force
+
+# Specify start and frequency of printing the FFLUX file. FFLUX file is always written.
+print start 0
+print every 1
+
+# Enable delta learning
+#delta
+
+# Ewald electrostatics L1-L5
+ewald L3
+# Cluster electrostatics L1-L5
+#cluster L3 
+
+# Set electrostatics cutoff radius
+cut dipole 8.0
+cut quadrupole 8.0
+
+# Calculate forces numerically 
+#numerical
+# Specify the displacement in the numerical force calculation. Default: 0.0001
+#numerical h 1.0e-6 # or just h 1.0e-6
+# Numerical forces by forward difference instead of central difference. Not yet implemented
+#numerical forward # or just forward 
+
+# Write the DIPOLE file. Specify printing start and frequency 
+#dipole
+#dipole print start 0
+#dipole print every 1
+
+# Electrostatic convergence test option
+#conv
+
+#[model assignment]
+#1 WATER_O1
+#2 WATER_H2
+#3 WATER_H3

@@ -242,6 +242,7 @@ SCRIPT_NAMES = ScriptNames(
         "pd_to_database": "pd_to_database.sh",
         "calculate_features": "calculate_features.sh",
         "center_trajectory": "center_trajectory.sh",
+        "stability_check": "stability_check.sh",
         "diversity_sampling": "diversity_sampling.sh",
         "datasets": "datasets_prep.sh",
         "gaussian": "GAUSSIAN.sh",
