@@ -1,3 +1,9 @@
+"""The DL_FFLUX robustness menu, which is split into the two halves of a robustness
+check: setting up and submitting the runs, and checking the finished runs for broken
+bonds. The only thing the two halves share is the base directory holding the runs, which
+is why that is the one option living on the top level menu.
+"""
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Union
@@ -29,7 +35,7 @@ ROBUSTNESS_ENSEMBLES = ["nvt", "nve"]
 ROBUSTNESS_RUN_DIRECTORY_GLOB = "RUN*"
 
 # TODO: possibly make this be read from a file
-ROBUSTNESS_MENU_DEFAULTS = {
+ROBUSTNESS_SETUP_MENU_DEFAULTS = {
     "default_number_of_seeds": 10,
     "default_ensemble": "nvt",
     "default_temperature": 300,
@@ -42,28 +48,66 @@ ROBUSTNESS_MENU_DEFAULTS = {
     "default_number_of_cores": 1,
     # empty string means "use the executable path from the config"
     "default_executable_path": "",
-    # stability check of the finished runs
+}
+
+STABILITY_MENU_DEFAULTS = {
     # how often (in timesteps) each trajectory is scanned in the first (cheap) pass
-    "default_stability_stride": 1000,
+    "default_stride": 1000,
     # a bond counts as exploded when longer than this factor times its reference length
     "default_explosion_factor": 1.35,
     # a bond counts as imploded when shorter than its reference length over this factor
     "default_implosion_factor": 1.50,
-    "default_stability_report_name": "STABILITY-REPORT.txt",
-    "default_submit_stability_on_compute": False,
+    # number of timesteps the runs were meant to last for; 0 = use the longest run
+    "default_max_timesteps": 0,
+    # length of one timestep (ps), used to convert stabilities into times
+    "default_timestep_length": 0.001,
+    "default_report_name": "STABILITY-REPORT.txt",
+    "default_number_of_cores": 1,
+    "default_submit_on_compute": False,
 }
 
 ROBUSTNESS_MENU_DESCRIPTION = MenuDescription(
     "DL_FFLUX Robustness Menu",
     subtitle="Use this to run DL_FFLUX simulations from diverse seed geometries "
-    "to check model robustness (e.g. explosions / implosions).",
+    "and to check how stable they are (e.g. explosions / implosions).",
+)
+
+ROBUSTNESS_SETUP_MENU_DESCRIPTION = MenuDescription(
+    "DL_FFLUX Robustness Setup Menu",
+    subtitle="Set up and submit one DL_FFLUX simulation per seed geometry.",
+)
+
+DL_POLY_PARAMETERS_MENU_DESCRIPTION = MenuDescription(
+    "DL_POLY Parameters Menu",
+    subtitle="Change the DL_POLY simulation parameters for the robustness check.",
+)
+
+STABILITY_MENU_DESCRIPTION = MenuDescription(
+    "DL_FFLUX Stability Check Menu",
+    subtitle="Check finished DL_FFLUX runs for broken bonds and write a "
+    "stability report.",
 )
 
 
 @dataclass
 class RobustnessMenuOptions(MenuOptions):
-    # base directory in which the per-seed RUN* directories are created
+    """Options shared by both halves of a robustness check."""
+
+    # base directory in which the per-seed RUN* directories are created and,
+    # afterwards, in which the finished runs are looked for
     selected_dlpoly_robustness_path: Path
+
+    def check_selected_dlpoly_robustness_path(self) -> Union[str, None]:
+        """Checks whether the given robustness base path is a directory."""
+        base_path = Path(self.selected_dlpoly_robustness_path)
+        if base_path.exists() and not base_path.is_dir():
+            return f"Current robustness base path: {base_path} is not a directory."
+
+
+@dataclass
+class RobustnessSetupMenuOptions(MenuOptions):
+    """Options used when setting up and submitting the runs."""
+
     # location of the trained models (usually one of the 6_MODEL/xxx subfolders)
     selected_model_directory_path: Path
     # diversity-sampled trajectory (.xyz) from which the seed geometries are taken
@@ -83,14 +127,6 @@ class RobustnessMenuOptions(MenuOptions):
     selected_number_of_cores: int
     # optional override of the configured DL_FFLUX (DLPOLY.Z) executable path
     selected_executable_path: str
-    # stability check of the finished runs
-    # reference (usually optimised) geometry defining the intact bond lengths
-    selected_reference_geometry_path: Path
-    selected_stability_stride: int
-    selected_explosion_factor: float
-    selected_implosion_factor: float
-    selected_stability_report_name: str
-    selected_submit_stability_on_compute: bool
 
     def check_selected_model_directory_path(self) -> Union[str, None]:
         """Checks whether the given model directory exists and is a directory."""
@@ -112,6 +148,25 @@ class RobustnessMenuOptions(MenuOptions):
                 f"Current seed trajectory path: {traj_path} might not be a .xyz file."
             )
 
+
+@dataclass
+class StabilityCheckMenuOptions(MenuOptions):
+    """Options used when checking the finished runs for broken bonds."""
+
+    # reference (usually optimised) geometry defining the intact bond lengths
+    selected_reference_geometry_path: Path
+    # timesteps between the checks of the first pass over each trajectory
+    selected_stride: int
+    selected_explosion_factor: float
+    selected_implosion_factor: float
+    # number of timesteps the runs were meant to last for; 0 = use the longest run
+    selected_max_timesteps: int
+    # length of one timestep (ps), used to convert stabilities into times
+    selected_timestep_length: float
+    selected_report_name: str
+    selected_number_of_cores: int
+    selected_submit_on_compute: bool
+
     def check_selected_reference_geometry_path(self) -> Union[str, None]:
         """Checks whether the given reference geometry exists and is a .xyz / .gjf file."""
         reference_path = Path(self.selected_reference_geometry_path)
@@ -126,36 +181,46 @@ class RobustnessMenuOptions(MenuOptions):
             )
 
 
-# initialize dataclass for storing information for menu
+# initialize dataclasses for storing information for the menus
 robustness_menu_options = RobustnessMenuOptions(
     ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH,
+)
+
+robustness_setup_menu_options = RobustnessSetupMenuOptions(
     ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH,
     ichor.cli.global_menu_variables.SELECTED_DLPOLY_SEED_TRAJECTORY_PATH,
-    ROBUSTNESS_MENU_DEFAULTS["default_number_of_seeds"],
-    ROBUSTNESS_MENU_DEFAULTS["default_ensemble"],
-    ROBUSTNESS_MENU_DEFAULTS["default_temperature"],
-    ROBUSTNESS_MENU_DEFAULTS["default_timestep"],
-    ROBUSTNESS_MENU_DEFAULTS["default_number_of_timesteps"],
-    ROBUSTNESS_MENU_DEFAULTS["default_cutoff"],
-    ROBUSTNESS_MENU_DEFAULTS["default_force_cap"],
-    ROBUSTNESS_MENU_DEFAULTS["default_number_of_cores"],
-    ROBUSTNESS_MENU_DEFAULTS["default_executable_path"],
+    ROBUSTNESS_SETUP_MENU_DEFAULTS["default_number_of_seeds"],
+    ROBUSTNESS_SETUP_MENU_DEFAULTS["default_ensemble"],
+    ROBUSTNESS_SETUP_MENU_DEFAULTS["default_temperature"],
+    ROBUSTNESS_SETUP_MENU_DEFAULTS["default_timestep"],
+    ROBUSTNESS_SETUP_MENU_DEFAULTS["default_number_of_timesteps"],
+    ROBUSTNESS_SETUP_MENU_DEFAULTS["default_cutoff"],
+    ROBUSTNESS_SETUP_MENU_DEFAULTS["default_force_cap"],
+    ROBUSTNESS_SETUP_MENU_DEFAULTS["default_number_of_cores"],
+    ROBUSTNESS_SETUP_MENU_DEFAULTS["default_executable_path"],
+)
+
+stability_check_menu_options = StabilityCheckMenuOptions(
     ichor.cli.global_menu_variables.SELECTED_DLPOLY_REFERENCE_GEOMETRY_PATH,
-    ROBUSTNESS_MENU_DEFAULTS["default_stability_stride"],
-    ROBUSTNESS_MENU_DEFAULTS["default_explosion_factor"],
-    ROBUSTNESS_MENU_DEFAULTS["default_implosion_factor"],
-    ROBUSTNESS_MENU_DEFAULTS["default_stability_report_name"],
-    ROBUSTNESS_MENU_DEFAULTS["default_submit_stability_on_compute"],
+    STABILITY_MENU_DEFAULTS["default_stride"],
+    STABILITY_MENU_DEFAULTS["default_explosion_factor"],
+    STABILITY_MENU_DEFAULTS["default_implosion_factor"],
+    STABILITY_MENU_DEFAULTS["default_max_timesteps"],
+    STABILITY_MENU_DEFAULTS["default_timestep_length"],
+    STABILITY_MENU_DEFAULTS["default_report_name"],
+    STABILITY_MENU_DEFAULTS["default_number_of_cores"],
+    STABILITY_MENU_DEFAULTS["default_submit_on_compute"],
 )
 
 
-# class with static methods for each menu item that calls a function.
+# classes with static methods for each menu item that calls a function.
 class RobustnessMenuFunctions:
-    """Functions that run when menu items are selected"""
+    """Functions that run when items of the top level robustness menu are selected"""
 
     @staticmethod
     def select_robustness_path():
-        """Select the base directory in which the per-seed RUN* directories are created."""
+        """Select the base directory in which the per-seed RUN* directories are created
+        (and in which the finished runs are looked for by the stability check)."""
         base_path = user_input_path("Enter robustness base path: ")
         ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH = Path(
             base_path
@@ -164,6 +229,10 @@ class RobustnessMenuFunctions:
             ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH
         )
 
+
+class RobustnessSetupMenuFunctions:
+    """Functions that run when items of the robustness setup menu are selected"""
+
     @staticmethod
     def select_model_directory_path():
         """Select the directory containing the trained models (e.g. a 6_MODEL/xxx subfolder)."""
@@ -171,7 +240,7 @@ class RobustnessMenuFunctions:
         ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH = Path(
             model_path
         ).absolute()
-        robustness_menu_options.selected_model_directory_path = (
+        robustness_setup_menu_options.selected_model_directory_path = (
             ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH
         )
 
@@ -182,47 +251,47 @@ class RobustnessMenuFunctions:
         ichor.cli.global_menu_variables.SELECTED_DLPOLY_SEED_TRAJECTORY_PATH = Path(
             traj_path
         ).absolute()
-        robustness_menu_options.selected_seed_trajectory_path = (
+        robustness_setup_menu_options.selected_seed_trajectory_path = (
             ichor.cli.global_menu_variables.SELECTED_DLPOLY_SEED_TRAJECTORY_PATH
         )
 
     @staticmethod
     def select_number_of_seeds():
         """Select how many seed geometries (taken in order) to run."""
-        robustness_menu_options.selected_number_of_seeds = user_input_int(
+        robustness_setup_menu_options.selected_number_of_seeds = user_input_int(
             "Select number of seed geometries: ",
-            robustness_menu_options.selected_number_of_seeds,
+            robustness_setup_menu_options.selected_number_of_seeds,
         )
 
     @staticmethod
     def select_ensemble():
         """Select the DL_POLY ensemble (NVT or NVE)."""
-        robustness_menu_options.selected_ensemble = user_input_restricted(
+        robustness_setup_menu_options.selected_ensemble = user_input_restricted(
             ROBUSTNESS_ENSEMBLES,
             "Select ensemble: ",
-            robustness_menu_options.selected_ensemble,
+            robustness_setup_menu_options.selected_ensemble,
         )
 
     @staticmethod
     def select_temperature():
         """Select the temperature of the simulations."""
-        robustness_menu_options.selected_temperature = user_input_int(
-            "Select temperature: ", robustness_menu_options.selected_temperature
+        robustness_setup_menu_options.selected_temperature = user_input_int(
+            "Select temperature: ", robustness_setup_menu_options.selected_temperature
         )
 
     @staticmethod
     def select_timestep():
         """Select the timestep (in ps) of the simulations."""
-        robustness_menu_options.selected_timestep = user_input_float(
-            "Select timestep (ps): ", robustness_menu_options.selected_timestep
+        robustness_setup_menu_options.selected_timestep = user_input_float(
+            "Select timestep (ps): ", robustness_setup_menu_options.selected_timestep
         )
 
     @staticmethod
     def select_number_of_timesteps():
         """Select the number of timesteps of the simulations."""
-        robustness_menu_options.selected_number_of_timesteps = user_input_int(
+        robustness_setup_menu_options.selected_number_of_timesteps = user_input_int(
             "Select number of timesteps: ",
-            robustness_menu_options.selected_number_of_timesteps,
+            robustness_setup_menu_options.selected_number_of_timesteps,
         )
 
     @staticmethod
@@ -231,9 +300,9 @@ class RobustnessMenuFunctions:
         FFLUX.in electrostatics cut directives. Enter 0 to auto-derive it from the geometry
         (largest interatomic distance + margin), which is a good default for a single molecule
         or small cluster; set an explicit value (e.g. 8-12) for condensed-phase boxes."""
-        robustness_menu_options.selected_cutoff = user_input_float(
+        robustness_setup_menu_options.selected_cutoff = user_input_float(
             "Select real-space cutoff in Angstrom (0 = auto from geometry): ",
-            robustness_menu_options.selected_cutoff,
+            robustness_setup_menu_options.selected_cutoff,
         )
 
     @staticmethod
@@ -241,27 +310,59 @@ class RobustnessMenuFunctions:
         """Select the force cap (in kT/Angstrom) applied during equilibration. This keeps a
         far-from-equilibrium run (e.g. one using inaccurate FFLUX models) from exploding.
         Enter 0 to disable force capping."""
-        robustness_menu_options.selected_force_cap = user_input_float(
+        robustness_setup_menu_options.selected_force_cap = user_input_float(
             "Select force cap in kT/Angstrom (0 = disabled): ",
-            robustness_menu_options.selected_force_cap,
+            robustness_setup_menu_options.selected_force_cap,
         )
 
     @staticmethod
     def select_number_of_cores():
         """Select the number of cores to use per run."""
-        robustness_menu_options.selected_number_of_cores = user_input_int(
+        robustness_setup_menu_options.selected_number_of_cores = user_input_int(
             "Select number of cores: ",
-            robustness_menu_options.selected_number_of_cores,
+            robustness_setup_menu_options.selected_number_of_cores,
         )
 
     @staticmethod
     def select_executable_path():
         """Select an optional DL_FFLUX (DLPOLY.Z) executable path that overrides the
         path configured in ichor_config.yaml. Leave blank to use the configured path."""
-        robustness_menu_options.selected_executable_path = user_input_free_flow(
+        robustness_setup_menu_options.selected_executable_path = user_input_free_flow(
             "Enter DL_FFLUX executable path (blank = use config): ",
-            robustness_menu_options.selected_executable_path,
+            robustness_setup_menu_options.selected_executable_path,
         )
+
+    @staticmethod
+    def submit_robustness_to_compute():
+        """Sets up one RUN* directory per seed geometry and submits them as a job array."""
+
+        submit_dlpoly_fflux_robustness(
+            base_path=ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH,
+            model_directory=ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH,
+            seed_trajectory=ichor.cli.global_menu_variables.SELECTED_DLPOLY_SEED_TRAJECTORY_PATH,  # noqa: E501
+            nseeds=robustness_setup_menu_options.selected_number_of_seeds,
+            ensemble=robustness_setup_menu_options.selected_ensemble,
+            temperature=robustness_setup_menu_options.selected_temperature,
+            timestep=robustness_setup_menu_options.selected_timestep,
+            nsteps=robustness_setup_menu_options.selected_number_of_timesteps,
+            cutoff=robustness_setup_menu_options.selected_cutoff or None,
+            cap=robustness_setup_menu_options.selected_force_cap or None,
+            ncores=robustness_setup_menu_options.selected_number_of_cores,
+            executable_path=robustness_setup_menu_options.selected_executable_path
+            or None,
+        )
+        answer = ""
+        user_input_free_flow(
+            "DL_FFLUX ROBUSTNESS CHECK SUBMITTED. Press enter to continue: ", answer
+        )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            "DL_FFLUX robustness check job submitted"
+        )
+
+
+class StabilityCheckMenuFunctions:
+    """Functions that run when items of the stability check menu are selected"""
 
     @staticmethod
     def select_reference_geometry_path():
@@ -273,73 +374,73 @@ class RobustnessMenuFunctions:
         ichor.cli.global_menu_variables.SELECTED_DLPOLY_REFERENCE_GEOMETRY_PATH = Path(
             reference_path
         ).absolute()
-        robustness_menu_options.selected_reference_geometry_path = (
+        stability_check_menu_options.selected_reference_geometry_path = (
             ichor.cli.global_menu_variables.SELECTED_DLPOLY_REFERENCE_GEOMETRY_PATH
         )
 
     @staticmethod
-    def select_stability_stride():
+    def select_stride():
         """Select how often (in timesteps) each trajectory is checked in the first pass
         of the stability check. A crash is then located exactly by rescanning only the
         (at most one stride long) window in which it must have happened, so a large
         stride makes checking long, stable runs much cheaper."""
-        robustness_menu_options.selected_stability_stride = user_input_int(
+        stability_check_menu_options.selected_stride = user_input_int(
             "Select stability check stride (timesteps): ",
-            robustness_menu_options.selected_stability_stride,
+            stability_check_menu_options.selected_stride,
         )
 
     @staticmethod
     def select_explosion_factor():
         """Select the factor above which a bond counts as exploded, i.e. a bond is
         broken when it is longer than this factor times its reference bond length."""
-        robustness_menu_options.selected_explosion_factor = user_input_float(
+        stability_check_menu_options.selected_explosion_factor = user_input_float(
             "Select explosion factor (bond longer than factor * reference): ",
-            robustness_menu_options.selected_explosion_factor,
+            stability_check_menu_options.selected_explosion_factor,
         )
 
     @staticmethod
     def select_implosion_factor():
         """Select the factor below which a bond counts as imploded, i.e. a bond is
         broken when it is shorter than its reference bond length divided by this factor."""
-        robustness_menu_options.selected_implosion_factor = user_input_float(
+        stability_check_menu_options.selected_implosion_factor = user_input_float(
             "Select implosion factor (bond shorter than reference / factor): ",
-            robustness_menu_options.selected_implosion_factor,
+            stability_check_menu_options.selected_implosion_factor,
         )
 
     @staticmethod
-    def select_stability_report_name():
+    def select_max_timesteps():
+        """Select the number of timesteps the runs were meant to last for, which is what
+        the robustness is measured against (a robustness of 1 means every run survived
+        for all of them). Enter 0 to use the longest run in the set instead."""
+        stability_check_menu_options.selected_max_timesteps = user_input_int(
+            "Select number of timesteps the runs were set up with (0 = longest run): ",
+            stability_check_menu_options.selected_max_timesteps,
+        )
+
+    @staticmethod
+    def select_timestep_length():
+        """Select the timestep (in ps) the simulations were run with, which is used to
+        convert the stability of each run into a time."""
+        stability_check_menu_options.selected_timestep_length = user_input_float(
+            "Select timestep (ps) the runs were made with: ",
+            stability_check_menu_options.selected_timestep_length,
+        )
+
+    @staticmethod
+    def select_report_name():
         """Select the name of the stability report file, which is written into the
         robustness base path."""
-        robustness_menu_options.selected_stability_report_name = user_input_free_flow(
+        stability_check_menu_options.selected_report_name = user_input_free_flow(
             "Enter stability report file name: ",
-            robustness_menu_options.selected_stability_report_name,
+            stability_check_menu_options.selected_report_name,
         )
 
     @staticmethod
-    def submit_robustness_to_compute():
-        """Sets up one RUN* directory per seed geometry and submits them as a job array."""
-
-        submit_dlpoly_fflux_robustness(
-            base_path=ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH,
-            model_directory=ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH,
-            seed_trajectory=ichor.cli.global_menu_variables.SELECTED_DLPOLY_SEED_TRAJECTORY_PATH,  # noqa: E501
-            nseeds=robustness_menu_options.selected_number_of_seeds,
-            ensemble=robustness_menu_options.selected_ensemble,
-            temperature=robustness_menu_options.selected_temperature,
-            timestep=robustness_menu_options.selected_timestep,
-            nsteps=robustness_menu_options.selected_number_of_timesteps,
-            cutoff=robustness_menu_options.selected_cutoff or None,
-            cap=robustness_menu_options.selected_force_cap or None,
-            ncores=robustness_menu_options.selected_number_of_cores,
-            executable_path=robustness_menu_options.selected_executable_path or None,
-        )
-        answer = ""
-        user_input_free_flow(
-            "DL_FFLUX ROBUSTNESS CHECK SUBMITTED. Press enter to continue: ", answer
-        )
-        # update logger
-        ichor.hpc.global_variables.LOGGER.info(
-            "DL_FFLUX robustness check job submitted"
+    def select_number_of_cores():
+        """Select the number of cores to use if the check is run on a compute node."""
+        stability_check_menu_options.selected_number_of_cores = user_input_int(
+            "Select number of cores: ",
+            stability_check_menu_options.selected_number_of_cores,
         )
 
     @staticmethod
@@ -354,17 +455,17 @@ class RobustnessMenuFunctions:
             ichor.cli.global_menu_variables.SELECTED_DLPOLY_REFERENCE_GEOMETRY_PATH
         )
         report_path = (
-            Path(base_path) / robustness_menu_options.selected_stability_report_name
+            Path(base_path) / stability_check_menu_options.selected_report_name
         )
-        # the runs are meant to last for the number of timesteps they were set up with,
-        # which is what the robustness is measured against
-        max_timesteps = robustness_menu_options.selected_number_of_timesteps
+        # 0 means the runs' intended length is unknown, so measure the robustness
+        # against the longest run instead
+        max_timesteps = stability_check_menu_options.selected_max_timesteps or None
 
         submit_on_compute = user_input_bool(
             "Submit to compute node (yes/no): ",
-            robustness_menu_options.selected_submit_stability_on_compute,
+            stability_check_menu_options.selected_submit_on_compute,
         )
-        robustness_menu_options.selected_submit_stability_on_compute = submit_on_compute
+        stability_check_menu_options.selected_submit_on_compute = submit_on_compute
 
         if submit_on_compute:
 
@@ -373,12 +474,12 @@ class RobustnessMenuFunctions:
                 reference_geometry=reference_geometry,
                 report_path=report_path,
                 run_directory_glob=ROBUSTNESS_RUN_DIRECTORY_GLOB,
-                stride=robustness_menu_options.selected_stability_stride,
-                explosion_factor=robustness_menu_options.selected_explosion_factor,
-                implosion_factor=robustness_menu_options.selected_implosion_factor,
+                stride=stability_check_menu_options.selected_stride,
+                explosion_factor=stability_check_menu_options.selected_explosion_factor,
+                implosion_factor=stability_check_menu_options.selected_implosion_factor,
                 max_timesteps=max_timesteps,
-                timestep=robustness_menu_options.selected_timestep,
-                ncores=robustness_menu_options.selected_number_of_cores,
+                timestep=stability_check_menu_options.selected_timestep_length,
+                ncores=stability_check_menu_options.selected_number_of_cores,
             )
             ichor.hpc.global_variables.LOGGER.info(
                 "DL_FFLUX stability check job submitted"
@@ -405,14 +506,14 @@ class RobustnessMenuFunctions:
             stability_check = DlpolyStabilityCheck(
                 reference_geometry,
                 run_directories,
-                stride=robustness_menu_options.selected_stability_stride,
-                explosion_factor=robustness_menu_options.selected_explosion_factor,
-                implosion_factor=robustness_menu_options.selected_implosion_factor,
+                stride=stability_check_menu_options.selected_stride,
+                explosion_factor=stability_check_menu_options.selected_explosion_factor,
+                implosion_factor=stability_check_menu_options.selected_implosion_factor,
             )
             stability_check.write_report(
                 report_path,
                 max_timesteps=max_timesteps,
-                timestep_length=robustness_menu_options.selected_timestep,
+                timestep_length=stability_check_menu_options.selected_timestep_length,
             )
 
             nstable = sum(1 for r in stability_check.results if not r.crashed)
@@ -426,13 +527,14 @@ class RobustnessMenuFunctions:
                 f"robustness: {robustness:.4f}"
             )
             user_input_free_flow(
-                f"STABILITY REPORT WRITTEN TO {report_path}. "
-                "Press enter to continue: ",
+                f"STABILITY REPORT WRITTEN TO {report_path}. Press enter to continue: ",
                 "",
             )
 
 
-# initialize menu
+# initialize menus
+# the top level menu only holds the option both halves need (the base path) and the two
+# submenus, one per half of a robustness check
 robustness_menu = ConsoleMenu(
     this_menu_options=robustness_menu_options,
     title=ROBUSTNESS_MENU_DESCRIPTION.title,
@@ -442,14 +544,19 @@ robustness_menu = ConsoleMenu(
     show_exit_option=ROBUSTNESS_MENU_DESCRIPTION.show_exit_option,
 )
 
-# submenu grouping the DL_POLY simulation parameters, to keep the main robustness menu short.
-# It has no options dataclass of its own (its functions edit the shared robustness_menu_options,
-# which is displayed via the parent robustness menu's prologue), so the submit function keeps
-# reading the same values.
-DL_POLY_PARAMETERS_MENU_DESCRIPTION = MenuDescription(
-    "DL_POLY Parameters Menu",
-    subtitle="Change the DL_POLY simulation parameters for the robustness check.",
+robustness_setup_menu = ConsoleMenu(
+    this_menu_options=robustness_setup_menu_options,
+    title=ROBUSTNESS_SETUP_MENU_DESCRIPTION.title,
+    subtitle=ROBUSTNESS_SETUP_MENU_DESCRIPTION.subtitle,
+    prologue_text=ROBUSTNESS_SETUP_MENU_DESCRIPTION.prologue_description_text,
+    epilogue_text=ROBUSTNESS_SETUP_MENU_DESCRIPTION.epilogue_description_text,
+    show_exit_option=ROBUSTNESS_SETUP_MENU_DESCRIPTION.show_exit_option,
 )
+
+# submenu grouping the DL_POLY simulation parameters, to keep the setup menu short.
+# It has no options dataclass of its own (its functions edit the setup menu options,
+# which are displayed via the parent setup menu's prologue), so the submit function
+# keeps reading the same values.
 dl_poly_parameters_menu = ConsoleMenu(
     title=DL_POLY_PARAMETERS_MENU_DESCRIPTION.title,
     subtitle=DL_POLY_PARAMETERS_MENU_DESCRIPTION.subtitle,
@@ -457,116 +564,133 @@ dl_poly_parameters_menu = ConsoleMenu(
     epilogue_text=DL_POLY_PARAMETERS_MENU_DESCRIPTION.epilogue_description_text,
     show_exit_option=DL_POLY_PARAMETERS_MENU_DESCRIPTION.show_exit_option,
 )
+
+stability_check_menu = ConsoleMenu(
+    this_menu_options=stability_check_menu_options,
+    title=STABILITY_MENU_DESCRIPTION.title,
+    subtitle=STABILITY_MENU_DESCRIPTION.subtitle,
+    prologue_text=STABILITY_MENU_DESCRIPTION.prologue_description_text,
+    epilogue_text=STABILITY_MENU_DESCRIPTION.epilogue_description_text,
+    show_exit_option=STABILITY_MENU_DESCRIPTION.show_exit_option,
+)
+
+# make menu items
+# can use lambda functions to change text of options as well :)
 dl_poly_parameters_menu_items = [
     FunctionItem(
         "Select ensemble (NVT / NVE)",
-        RobustnessMenuFunctions.select_ensemble,
+        RobustnessSetupMenuFunctions.select_ensemble,
     ),
     FunctionItem(
         "Select simulation temperature",
-        RobustnessMenuFunctions.select_temperature,
+        RobustnessSetupMenuFunctions.select_temperature,
     ),
     FunctionItem(
         "Select timestep",
-        RobustnessMenuFunctions.select_timestep,
+        RobustnessSetupMenuFunctions.select_timestep,
     ),
     FunctionItem(
         "Select number of timesteps",
-        RobustnessMenuFunctions.select_number_of_timesteps,
+        RobustnessSetupMenuFunctions.select_number_of_timesteps,
     ),
     FunctionItem(
         "Select real-space cutoff (Angstrom, 0 = auto)",
-        RobustnessMenuFunctions.select_cutoff,
+        RobustnessSetupMenuFunctions.select_cutoff,
     ),
     FunctionItem(
         "Select force cap (kT/Angstrom, 0 = disabled)",
-        RobustnessMenuFunctions.select_force_cap,
+        RobustnessSetupMenuFunctions.select_force_cap,
     ),
 ]
 add_items_to_menu(dl_poly_parameters_menu, dl_poly_parameters_menu_items)
 
-# submenu grouping the parameters of the stability check of the finished runs. Like the
-# DL_POLY parameters menu it has no options dataclass of its own, its functions edit the
-# shared robustness_menu_options.
-STABILITY_PARAMETERS_MENU_DESCRIPTION = MenuDescription(
-    "Stability Check Parameters Menu",
-    subtitle="Change the parameters of the stability check of the finished runs.",
-)
-stability_parameters_menu = ConsoleMenu(
-    title=STABILITY_PARAMETERS_MENU_DESCRIPTION.title,
-    subtitle=STABILITY_PARAMETERS_MENU_DESCRIPTION.subtitle,
-    prologue_text=STABILITY_PARAMETERS_MENU_DESCRIPTION.prologue_description_text,
-    epilogue_text=STABILITY_PARAMETERS_MENU_DESCRIPTION.epilogue_description_text,
-    show_exit_option=STABILITY_PARAMETERS_MENU_DESCRIPTION.show_exit_option,
-)
-stability_parameters_menu_items = [
+robustness_setup_menu_items = [
+    FunctionItem(
+        "Select model directory (e.g. a 6_MODEL/xxx subfolder)",
+        RobustnessSetupMenuFunctions.select_model_directory_path,
+    ),
+    FunctionItem(
+        "Select seed trajectory (.xyz diversity-sampled set)",
+        RobustnessSetupMenuFunctions.select_seed_trajectory_path,
+    ),
+    FunctionItem(
+        "Select number of seed geometries",
+        RobustnessSetupMenuFunctions.select_number_of_seeds,
+    ),
+    SubmenuItem(
+        "Change DL_POLY parameters (ensemble, temperature, timestep, cutoff, cap)",
+        dl_poly_parameters_menu,
+        robustness_setup_menu,
+    ),
+    FunctionItem(
+        "Select number of cores",
+        RobustnessSetupMenuFunctions.select_number_of_cores,
+    ),
+    FunctionItem(
+        "Select DL_FFLUX executable path (optional override)",
+        RobustnessSetupMenuFunctions.select_executable_path,
+    ),
+    FunctionItem(
+        "Set up and submit DL_FFLUX robustness check to compute",
+        RobustnessSetupMenuFunctions.submit_robustness_to_compute,
+    ),
+]
+add_items_to_menu(robustness_setup_menu, robustness_setup_menu_items)
+
+stability_check_menu_items = [
+    FunctionItem(
+        "Select reference geometry (.xyz / .gjf, usually the optimised geometry)",
+        StabilityCheckMenuFunctions.select_reference_geometry_path,
+    ),
     FunctionItem(
         "Select stride (timesteps between checks)",
-        RobustnessMenuFunctions.select_stability_stride,
+        StabilityCheckMenuFunctions.select_stride,
     ),
     FunctionItem(
         "Select explosion factor",
-        RobustnessMenuFunctions.select_explosion_factor,
+        StabilityCheckMenuFunctions.select_explosion_factor,
     ),
     FunctionItem(
         "Select implosion factor",
-        RobustnessMenuFunctions.select_implosion_factor,
+        StabilityCheckMenuFunctions.select_implosion_factor,
+    ),
+    FunctionItem(
+        "Select number of timesteps the runs were set up with (0 = longest run)",
+        StabilityCheckMenuFunctions.select_max_timesteps,
+    ),
+    FunctionItem(
+        "Select timestep the runs were made with",
+        StabilityCheckMenuFunctions.select_timestep_length,
     ),
     FunctionItem(
         "Select stability report file name",
-        RobustnessMenuFunctions.select_stability_report_name,
+        StabilityCheckMenuFunctions.select_report_name,
+    ),
+    FunctionItem(
+        "Select number of cores",
+        StabilityCheckMenuFunctions.select_number_of_cores,
+    ),
+    FunctionItem(
+        "Check stability of finished runs (writes stability report)",
+        StabilityCheckMenuFunctions.check_stability_of_runs,
     ),
 ]
-add_items_to_menu(stability_parameters_menu, stability_parameters_menu_items)
+add_items_to_menu(stability_check_menu, stability_check_menu_items)
 
-# make menu items
-# can use lambda functions to change text of options as well :)
 robustness_menu_items = [
     FunctionItem(
         "Select robustness base path",
         RobustnessMenuFunctions.select_robustness_path,
     ),
-    FunctionItem(
-        "Select model directory (e.g. a 6_MODEL/xxx subfolder)",
-        RobustnessMenuFunctions.select_model_directory_path,
-    ),
-    FunctionItem(
-        "Select seed trajectory (.xyz diversity-sampled set)",
-        RobustnessMenuFunctions.select_seed_trajectory_path,
-    ),
-    FunctionItem(
-        "Select number of seed geometries",
-        RobustnessMenuFunctions.select_number_of_seeds,
-    ),
     SubmenuItem(
-        "Change DL_POLY parameters (ensemble, temperature, timestep, cutoff, cap)",
-        dl_poly_parameters_menu,
+        ROBUSTNESS_SETUP_MENU_DESCRIPTION.title,
+        robustness_setup_menu,
         robustness_menu,
     ),
-    FunctionItem(
-        "Select number of cores",
-        RobustnessMenuFunctions.select_number_of_cores,
-    ),
-    FunctionItem(
-        "Select DL_FFLUX executable path (optional override)",
-        RobustnessMenuFunctions.select_executable_path,
-    ),
-    FunctionItem(
-        "Set up and submit DL_FFLUX robustness check to compute",
-        RobustnessMenuFunctions.submit_robustness_to_compute,
-    ),
-    FunctionItem(
-        "Select reference geometry for stability check (.xyz / .gjf)",
-        RobustnessMenuFunctions.select_reference_geometry_path,
-    ),
     SubmenuItem(
-        "Change stability check parameters (stride, explosion / implosion factors)",
-        stability_parameters_menu,
+        STABILITY_MENU_DESCRIPTION.title,
+        stability_check_menu,
         robustness_menu,
-    ),
-    FunctionItem(
-        "Check stability of finished runs (writes stability report)",
-        RobustnessMenuFunctions.check_stability_of_runs,
     ),
 ]
 

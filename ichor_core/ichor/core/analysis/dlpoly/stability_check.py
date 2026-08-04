@@ -68,6 +68,12 @@ class DlpolyStabilityCheck:
     breakage must have happened, so that the exact timestep can be reported. This keeps
     the cost of checking a stable, multi-million timestep run down to a single cheap pass.
 
+    .. note::
+        A bond which breaks and heals again entirely within one stride is not seen by the
+        first pass, so the stride should be well below the length of the runs. Runs
+        shorter than two strides are checked timestep by timestep instead, as they are
+        cheap enough to do so.
+
     :param reference_geometry: Path to the reference geometry (``.xyz`` or ``.gjf``),
         usually the optimised geometry of the molecule. Its connectivity and bond lengths
         define what "intact" means, and its atom ordering must match the runs.
@@ -206,6 +212,7 @@ class DlpolyStabilityCheck:
 
         # first (cheap) pass: check every stride-th timestep and the final timestep
         first_broken_stride_timestep = None
+        first_broken_stride_bonds = []
         last_clean_stride_timestep = 0
         last_timestep = None
         last_coordinates = None
@@ -219,8 +226,10 @@ class DlpolyStabilityCheck:
                 continue
             if timestep % self.stride != 0:
                 continue
-            if self.broken_bonds_in_geometry(coordinates):
+            broken_bonds = self.broken_bonds_in_geometry(coordinates)
+            if broken_bonds:
                 first_broken_stride_timestep = timestep
+                first_broken_stride_bonds = broken_bonds
             else:
                 last_clean_stride_timestep = timestep
 
@@ -230,6 +239,20 @@ class DlpolyStabilityCheck:
         broken_at_end = bool(self.broken_bonds_in_geometry(last_coordinates))
 
         if first_broken_stride_timestep is None and not broken_at_end:
+
+            # a run shorter than a couple of strides is hardly checked by the first pass
+            # at all (a 500 timestep run checked with a stride of 1000 is only looked at
+            # on its first and last timestep), so a bond that broke and healed again in
+            # between would be missed. Such a run is short enough to just check in full.
+            if last_timestep < 2 * self.stride:
+                crash_timestep, broken_bonds = self._find_first_broken_timestep(
+                    history_path, (last_clean_stride_timestep, last_timestep)
+                )
+                if crash_timestep is not None:
+                    return self._crashed_run_stability(
+                        run_name, last_timestep, crash_timestep, broken_bonds, False
+                    )
+
             return RunStability(
                 run=run_name,
                 last_timestep=last_timestep,
@@ -248,15 +271,31 @@ class DlpolyStabilityCheck:
             history_path, window
         )
 
-        # can only happen if the HISTORY file changed underneath us or is corrupted in
-        # the window; fall back on what the first pass found
+        # nothing found in the window means the geometry was already broken at its lower
+        # end (i.e. at the very first timestep of the run) or the HISTORY file is
+        # corrupted there, so fall back on what the first pass found
         if crash_timestep is None:
-            crash_timestep = (
-                first_broken_stride_timestep
-                if first_broken_stride_timestep is not None
-                else last_timestep
-            )
-            broken_bonds = self.broken_bonds_in_geometry(last_coordinates)
+            if first_broken_stride_timestep is not None:
+                crash_timestep = first_broken_stride_timestep
+                broken_bonds = first_broken_stride_bonds
+            else:
+                crash_timestep = last_timestep
+                broken_bonds = self.broken_bonds_in_geometry(last_coordinates)
+
+        return self._crashed_run_stability(
+            run_name, last_timestep, crash_timestep, broken_bonds, broken_at_end
+        )
+
+    def _crashed_run_stability(
+        self,
+        run_name: str,
+        last_timestep: int,
+        crash_timestep: int,
+        broken_bonds: List[Tuple[int, int, float, str]],
+        broken_at_end: bool,
+    ) -> RunStability:
+        """Builds the result of a run which broke a bond, reporting the first of the
+        bonds that broke at ``crash_timestep``."""
 
         i, j, bond_length, status = broken_bonds[0]
 
