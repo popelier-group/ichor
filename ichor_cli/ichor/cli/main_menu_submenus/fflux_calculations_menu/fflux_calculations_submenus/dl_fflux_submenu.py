@@ -4,7 +4,7 @@ from typing import Union
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
-from consolemenu.items import FunctionItem
+from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
@@ -26,6 +26,8 @@ DL_FFLUX_MENU_DEFAULTS = {
     "default_temperature": 300,
     "default_timestep": 0.001,
     "default_number_of_timesteps": 500,
+    # real-space cutoff (Angstrom); 0.0 = auto (derived from the geometry)
+    "default_cutoff": 0.0,
     # force cap (kT/Angstrom) applied during equilibration; 0.0 disables it
     "default_force_cap": 0.0,
     "default_number_of_cores": 1,
@@ -37,6 +39,8 @@ DL_FFLUX_MENU_DESCRIPTION = MenuDescription(
     "DL_FFLUX Menu",
     subtitle="Use this to set up and submit a DL_FFLUX (FFLUX-based DL_POLY) calculation.",
 )
+
+# TODO: Check about dimer calculations - how to support this?
 
 
 @dataclass
@@ -52,6 +56,8 @@ class DLFFLUXMenuOptions(MenuOptions):
     selected_temperature: int
     selected_timestep: float
     selected_number_of_timesteps: int
+    # real-space cutoff (Angstrom); 0.0 = auto (derived from the geometry)
+    selected_cutoff: float
     # force cap (kT/Angstrom) applied during equilibration; 0.0 disables it
     selected_force_cap: float
     # computational resources
@@ -75,7 +81,9 @@ class DLFFLUXMenuOptions(MenuOptions):
         elif not xyz_path.is_file():
             return f"Current starting geometry path: {xyz_path} is not a file."
         elif xyz_path.suffix != ".xyz":
-            return f"Current starting geometry path: {xyz_path} might not be a .xyz file."
+            return (
+                f"Current starting geometry path: {xyz_path} might not be a .xyz file."
+            )
 
 
 # initialize dataclass for storing information for menu
@@ -87,6 +95,7 @@ dl_fflux_menu_options = DLFFLUXMenuOptions(
     DL_FFLUX_MENU_DEFAULTS["default_temperature"],
     DL_FFLUX_MENU_DEFAULTS["default_timestep"],
     DL_FFLUX_MENU_DEFAULTS["default_number_of_timesteps"],
+    DL_FFLUX_MENU_DEFAULTS["default_cutoff"],
     DL_FFLUX_MENU_DEFAULTS["default_force_cap"],
     DL_FFLUX_MENU_DEFAULTS["default_number_of_cores"],
     DL_FFLUX_MENU_DEFAULTS["default_executable_path"],
@@ -160,6 +169,17 @@ class DLFFLUXMenuFunctions:
         )
 
     @staticmethod
+    def select_cutoff():
+        """Select the real-space cutoff (in Angstrom) for the CONTROL cutoff/rvdw and the
+        FFLUX.in electrostatics cut directives. Enter 0 to auto-derive it from the geometry
+        (largest interatomic distance + margin), which is a good default for a single molecule
+        or small cluster; set an explicit value (e.g. 8-12) for condensed-phase boxes."""
+        dl_fflux_menu_options.selected_cutoff = user_input_float(
+            "Select real-space cutoff in Angstrom (0 = auto from geometry): ",
+            dl_fflux_menu_options.selected_cutoff,
+        )
+
+    @staticmethod
     def select_force_cap():
         """Select the force cap (in kT/Angstrom) applied during equilibration. This keeps a
         far-from-equilibrium run (e.g. one using inaccurate FFLUX models) from exploding.
@@ -198,6 +218,7 @@ class DLFFLUXMenuFunctions:
             temperature=dl_fflux_menu_options.selected_temperature,
             timestep=dl_fflux_menu_options.selected_timestep,
             nsteps=dl_fflux_menu_options.selected_number_of_timesteps,
+            cutoff=dl_fflux_menu_options.selected_cutoff or None,
             cap=dl_fflux_menu_options.selected_force_cap or None,
             ncores=dl_fflux_menu_options.selected_number_of_cores,
             executable_path=dl_fflux_menu_options.selected_executable_path or None,
@@ -218,21 +239,22 @@ dl_fflux_menu = ConsoleMenu(
     show_exit_option=DL_FFLUX_MENU_DESCRIPTION.show_exit_option,
 )
 
-# make menu items
-# can use lambda functions to change text of options as well :)
-dl_fflux_menu_items = [
-    FunctionItem(
-        "Select DL_FFLUX run path",
-        DLFFLUXMenuFunctions.select_dlpoly_run_path,
-    ),
-    FunctionItem(
-        "Select model directory (e.g. a 6_MODEL/xxx subfolder)",
-        DLFFLUXMenuFunctions.select_model_directory_path,
-    ),
-    FunctionItem(
-        "Select starting geometry (.xyz)",
-        DLFFLUXMenuFunctions.select_xyz,
-    ),
+# submenu grouping the DL_POLY simulation parameters, to keep the main DL_FFLUX menu short.
+# It has no options dataclass of its own (its functions edit the shared dl_fflux_menu_options,
+# which is displayed via the parent DL_FFLUX menu's prologue), so the submit function keeps
+# reading the same values.
+DL_POLY_PARAMETERS_MENU_DESCRIPTION = MenuDescription(
+    "DL_POLY Parameters Menu",
+    subtitle="Change the DL_POLY simulation parameters for the DL_FFLUX calculation.",
+)
+dl_poly_parameters_menu = ConsoleMenu(
+    title=DL_POLY_PARAMETERS_MENU_DESCRIPTION.title,
+    subtitle=DL_POLY_PARAMETERS_MENU_DESCRIPTION.subtitle,
+    prologue_text=DL_POLY_PARAMETERS_MENU_DESCRIPTION.prologue_description_text,
+    epilogue_text=DL_POLY_PARAMETERS_MENU_DESCRIPTION.epilogue_description_text,
+    show_exit_option=DL_POLY_PARAMETERS_MENU_DESCRIPTION.show_exit_option,
+)
+dl_poly_parameters_menu_items = [
     FunctionItem(
         "Select ensemble (NVT / NVE)",
         DLFFLUXMenuFunctions.select_ensemble,
@@ -250,8 +272,35 @@ dl_fflux_menu_items = [
         DLFFLUXMenuFunctions.select_number_of_timesteps,
     ),
     FunctionItem(
+        "Select real-space cutoff (Angstrom, 0 = auto)",
+        DLFFLUXMenuFunctions.select_cutoff,
+    ),
+    FunctionItem(
         "Select force cap (kT/Angstrom, 0 = disabled)",
         DLFFLUXMenuFunctions.select_force_cap,
+    ),
+]
+add_items_to_menu(dl_poly_parameters_menu, dl_poly_parameters_menu_items)
+
+# make menu items
+# can use lambda functions to change text of options as well :)
+dl_fflux_menu_items = [
+    FunctionItem(
+        "Select DL_FFLUX run path",
+        DLFFLUXMenuFunctions.select_dlpoly_run_path,
+    ),
+    FunctionItem(
+        "Select model directory (e.g. a 6_MODEL/xxx subfolder)",
+        DLFFLUXMenuFunctions.select_model_directory_path,
+    ),
+    FunctionItem(
+        "Select starting geometry (.xyz)",
+        DLFFLUXMenuFunctions.select_xyz,
+    ),
+    SubmenuItem(
+        "Change DL_POLY parameters (ensemble, temperature, timestep, cutoff, cap)",
+        dl_poly_parameters_menu,
+        dl_fflux_menu,
     ),
     FunctionItem(
         "Select number of cores",

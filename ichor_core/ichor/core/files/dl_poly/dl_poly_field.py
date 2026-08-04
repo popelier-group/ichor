@@ -140,13 +140,45 @@ class DlPolyField(WriteFile):
         # highest multipole interaction order (L') for FFLUX electrostatics, written as a
         # "Multipolar <L'>" line. None (default) omits the line, i.e. a pure-IQA run.
         self.multipolar = multipolar
-        # when True, list EVERY intramolecular atom pair as a (zero-constant) bond instead of
-        # just the chemically bonded pairs + angles + dihedrals. This puts all intramolecular
-        # pairs on DL_POLY's exclusion list, which is required for FFLUX multipole runs so the
-        # explicit multipole electrostatics act only BETWEEN molecules (the intramolecular
-        # energy is already in the IQA models). Otherwise distant intramolecular pairs get
-        # spurious multipole interactions that diverge as atoms approach.
+        # when True, list every INTRA-molecular atom pair as a (zero-constant) bond instead
+        # of just the chemically bonded pairs + angles + dihedrals. "Intra-molecular" means
+        # within each molecule (connected component of the connectivity graph): all pairs
+        # inside a molecule are bonded/excluded, but pairs BETWEEN molecules are left active.
+        # This puts every intramolecular pair on DL_POLY's exclusion list, which is required
+        # for FFLUX multipole runs so the explicit multipole electrostatics act only BETWEEN
+        # molecules (the intramolecular energy is already in the IQA models). Otherwise
+        # distant intramolecular pairs get spurious multipole interactions that diverge as
+        # atoms approach. For a single molecule this is simply every pair; for a cluster
+        # (e.g. a water n-mer) it is every pair within each molecule, keeping the crucial
+        # inter-molecular electrostatics (e.g. hydrogen bonds) intact.
         self.all_pairs_bonds = all_pairs_bonds
+
+    def _molecule_atom_indices(self) -> List[List[int]]:
+        """Group the (0-based) atom indices into molecules, i.e. connected components of the
+        connectivity graph. Used to build the per-molecule intramolecular exclusion bonds."""
+        connectivity = np.array(
+            self.atoms.connectivity(default_connectivity_calculator)
+        )
+        natoms = len(self.atoms)
+        seen = [False] * natoms
+        components = []
+        for start in range(natoms):
+            if seen[start]:
+                continue
+            # depth-first search over the connectivity matrix to collect one molecule
+            stack = [start]
+            component = []
+            while stack:
+                atom_index = stack.pop()
+                if seen[atom_index]:
+                    continue
+                seen[atom_index] = True
+                component.append(atom_index)
+                for other in range(natoms):
+                    if connectivity[atom_index, other] and not seen[other]:
+                        stack.append(other)
+            components.append(sorted(component))
+        return components
 
     # TODO: implement reading for dlpoly field file
     # def _read_file(self):
@@ -155,13 +187,17 @@ class DlPolyField(WriteFile):
     def _write_file(self, path: Path):
 
         if self.all_pairs_bonds:
-            # every intramolecular pair as a zero-constant "bond" -> DL_POLY excludes all
-            # intramolecular pairs from the nonbonded (multipole) electrostatics. No angle or
-            # dihedral terms are needed since every pair is already covered by a bond.
-            natoms = len(self.atoms)
-            bonds = [
-                (i, j) for i in range(1, natoms + 1) for j in range(i + 1, natoms + 1)
-            ]
+            # every pair WITHIN each molecule (connected component) as a zero-constant "bond"
+            # -> DL_POLY excludes all intra-molecular pairs from the nonbonded (multipole)
+            # electrostatics, while inter-molecular pairs stay active. No angle or dihedral
+            # terms are needed since every intramolecular pair is already covered by a bond.
+            bonds = []
+            for component in self._molecule_atom_indices():
+                for a in range(len(component)):
+                    for b in range(a + 1, len(component)):
+                        # DL_POLY atom indices are 1-based
+                        bonds.append((component[a] + 1, component[b] + 1))
+            bonds.sort()
             angles = []
             dihedrals = []
         else:
