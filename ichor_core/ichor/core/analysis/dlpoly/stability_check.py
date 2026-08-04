@@ -243,10 +243,11 @@ class DlpolyStabilityCheck:
             # a run shorter than a couple of strides is hardly checked by the first pass
             # at all (a 500 timestep run checked with a stride of 1000 is only looked at
             # on its first and last timestep), so a bond that broke and healed again in
-            # between would be missed. Such a run is short enough to just check in full.
+            # between would be missed. Such a run is short enough to just check in full,
+            # i.e. from the timestep after the (always checked) first one to the end.
             if last_timestep < 2 * self.stride:
                 crash_timestep, broken_bonds = self._find_first_broken_timestep(
-                    history_path, (last_clean_stride_timestep, last_timestep)
+                    history_path, (0, last_timestep)
                 )
                 if crash_timestep is not None:
                     return self._crashed_run_stability(

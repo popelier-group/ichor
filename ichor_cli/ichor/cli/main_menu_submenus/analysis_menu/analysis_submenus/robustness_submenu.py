@@ -164,7 +164,6 @@ class StabilityCheckMenuOptions(MenuOptions):
     # length of one timestep (ps), used to convert stabilities into times
     selected_timestep_length: float
     selected_report_name: str
-    selected_number_of_cores: int
     selected_submit_on_compute: bool
 
     def check_selected_reference_geometry_path(self) -> Union[str, None]:
@@ -208,9 +207,13 @@ stability_check_menu_options = StabilityCheckMenuOptions(
     STABILITY_MENU_DEFAULTS["default_max_timesteps"],
     STABILITY_MENU_DEFAULTS["default_timestep_length"],
     STABILITY_MENU_DEFAULTS["default_report_name"],
-    STABILITY_MENU_DEFAULTS["default_number_of_cores"],
     STABILITY_MENU_DEFAULTS["default_submit_on_compute"],
 )
+
+# the number of cores is only used when the check is submitted to a compute node, so it is
+# asked for as part of submitting rather than taking up a permanent menu option. The last
+# answer is remembered as the default for the next time.
+stability_check_number_of_cores = STABILITY_MENU_DEFAULTS["default_number_of_cores"]
 
 
 # classes with static methods for each menu item that calls a function.
@@ -436,14 +439,6 @@ class StabilityCheckMenuFunctions:
         )
 
     @staticmethod
-    def select_number_of_cores():
-        """Select the number of cores to use if the check is run on a compute node."""
-        stability_check_menu_options.selected_number_of_cores = user_input_int(
-            "Select number of cores: ",
-            stability_check_menu_options.selected_number_of_cores,
-        )
-
-    @staticmethod
     def check_stability_of_runs():
         """Checks the finished runs in the robustness base path for broken bonds
         (explosions / implosions) and writes a stability report containing, for every
@@ -469,6 +464,12 @@ class StabilityCheckMenuFunctions:
 
         if submit_on_compute:
 
+            # only the compute node job needs to know how many cores to ask for
+            global stability_check_number_of_cores
+            stability_check_number_of_cores = user_input_int(
+                "Select number of cores: ", stability_check_number_of_cores
+            )
+
             submit_dlpoly_fflux_stability_check(
                 base_path=base_path,
                 reference_geometry=reference_geometry,
@@ -479,7 +480,7 @@ class StabilityCheckMenuFunctions:
                 implosion_factor=stability_check_menu_options.selected_implosion_factor,
                 max_timesteps=max_timesteps,
                 timestep=stability_check_menu_options.selected_timestep_length,
-                ncores=stability_check_menu_options.selected_number_of_cores,
+                ncores=stability_check_number_of_cores,
             )
             ichor.hpc.global_variables.LOGGER.info(
                 "DL_FFLUX stability check job submitted"
@@ -665,10 +666,6 @@ stability_check_menu_items = [
     FunctionItem(
         "Select stability report file name",
         StabilityCheckMenuFunctions.select_report_name,
-    ),
-    FunctionItem(
-        "Select number of cores",
-        StabilityCheckMenuFunctions.select_number_of_cores,
     ),
     FunctionItem(
         "Check stability of finished runs (writes stability report)",
