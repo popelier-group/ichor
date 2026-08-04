@@ -9,9 +9,15 @@ from ichor.hpc.main.ferebus import (
     write_pyferebus_input_script,
 )
 from ichor.hpc.main.gaussian import (
+    submit_gaussian_output_to_xyz,
     submit_gjfs,
     submit_points_directory_to_gaussian,
     submit_single_gaussian_xyz,
+)
+from ichor.hpc.main.opt import (
+    read_single_geometry,
+    setup_single_geometry_optimisation_directory,
+    single_geometry_optimisation_directory,
 )
 from ichor.hpc.main.orca import submit_points_directory_to_orca
 
@@ -19,6 +25,10 @@ __all__ = [
     "submit_points_directory_to_aimall",
     "submit_points_directory_to_gaussian",
     "submit_single_gaussian_xyz",
+    "submit_gaussian_output_to_xyz",
+    "single_geometry_optimisation_directory",
+    "setup_single_geometry_optimisation_directory",
+    "read_single_geometry",
     "submit_gjfs",
     "submit_make_csvs_from_database",
     "submit_points_directory_to_orca",

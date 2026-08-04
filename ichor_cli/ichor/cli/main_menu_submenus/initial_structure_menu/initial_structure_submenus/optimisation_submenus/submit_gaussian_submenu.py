@@ -13,20 +13,28 @@ from ichor.cli.useful_functions import (
     user_input_int,
     user_input_path,
 )
-from ichor.hpc.main.gaussian import submit_gjfs, submit_single_gaussian_xyz
+from ichor.core.files import GaussianOutput
+from ichor.hpc.main.gaussian import (
+    submit_gaussian_output_to_xyz,
+    submit_gjfs,
+    submit_single_gaussian_xyz,
+)
+from ichor.hpc.main.opt import single_geometry_optimisation_directory
 
 
 SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
     "Submit Gaussian Menu",
-    subtitle="Use this menu to optimise a single geometry with Gaussian.\n",
+    subtitle="Use this menu to optimise a single geometry with Gaussian.\n"
+    "Everything is written to one directory, 1_OPTIMISED_GEOMS/<system name>_gaussian,\n"
+    "which will contain the optimised geometry as <system name>_optimised.xyz.\n",
 )
 
 SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
     "default_method": "b3lyp",
     "default_basis_set": "6-31+g(d,p)",
     "default_number_of_cores": 2,
-    "default_overwrite_existing_gjfs": False,
-    "default_gjf": "",
+    "default_overwrite_existing": False,
+    "default_gjf_path": "",
 }
 
 
@@ -36,8 +44,8 @@ class SubmitGaussianMenuOptions(MenuOptions):
     selected_method: str
     selected_basis_set: str
     selected_number_of_cores: int
-    selected_overwrite_existing_gjfs: bool
-    selected_gjf: str
+    selected_overwrite_existing: bool
+    selected_gjf_path: str
 
 
 # initialize dataclass for storing information for menu
@@ -83,11 +91,11 @@ class SubmitGaussianFunctions:
         )
 
     @staticmethod
-    def select_overwrite_existing_gjfs():
-        """Asks user whether or not to overwrite existing gjfs"""
-        submit_gaussian_menu_options.selected_overwrite_existing_gjfs = user_input_bool(
-            "Overwrite existing gjfs (yes/no): ",
-            submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
+    def select_overwrite_existing():
+        """Asks user whether or not to overwrite an existing optimisation directory"""
+        submit_gaussian_menu_options.selected_overwrite_existing = user_input_bool(
+            "Overwrite existing optimisation directory (yes/no): ",
+            submit_gaussian_menu_options.selected_overwrite_existing,
         )
 
     @staticmethod
@@ -98,12 +106,12 @@ class SubmitGaussianFunctions:
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
-            submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
+            submit_gaussian_menu_options.selected_overwrite_existing,
         )
 
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
 
-        submit_single_gaussian_xyz(
+        job_id = submit_single_gaussian_xyz(
             input_xyz_path=xyz_path,
             ncores=ncores,
             keywords=keywords,
@@ -113,12 +121,28 @@ class SubmitGaussianFunctions:
         )
 
         answer = ""
+
+        # nothing was submitted because the optimisation directory already exists
+        if job_id is None:
+            user_input_free_flow(
+                "GAUSSIAN OPTIMISATION NOT SUBMITTED, SEE MESSAGE ABOVE. "
+                "Press enter to continue: ",
+                answer,
+            )
+            return
+
+        optimisation_dir = single_geometry_optimisation_directory(
+            xyz_path.stem, "gaussian"
+        )
         user_input_free_flow(
-            "GAUSSIAN OPTIMISATION SUBMITTED. Press enter to continue: ", answer
+            f"GAUSSIAN OPTIMISATION SUBMITTED. The optimised geometry is going to be written to "
+            f"{optimisation_dir / f'{xyz_path.stem}_optimised.xyz'} once the job has finished. "
+            "Press enter to continue: ",
+            answer,
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"Gaussian optimisation job submitted for {xyz_path}"
+            f"Gaussian optimisation job submitted for {xyz_path}, results in {optimisation_dir}"
         )
 
     @staticmethod
@@ -129,14 +153,29 @@ class SubmitGaussianFunctions:
         submit_gaussian_menu_options.selected_gjf_path = (
             ichor.cli.global_menu_variables.SELECTED_GJF_PATH
         )
-        gjf_list = []
-        gjf_list.append(submit_gaussian_menu_options.selected_gjf_path)
+        gjf_path = ichor.cli.global_menu_variables.SELECTED_GJF_PATH
         ncores = submit_gaussian_menu_options.selected_number_of_cores
-        submit_gjfs(gjf_list, force_calculate_wfn=False, ncores=ncores)
+        job_id = submit_gjfs([gjf_path], force_calculate_wfn=False, ncores=ncores)
+
+        # write out the final geometry as an xyz file next to the gjf file
+        # once the Gaussian job it comes from has finished
+        optimised_xyz_path = gjf_path.with_name(f"{gjf_path.stem}_optimised.xyz")
+        submit_gaussian_output_to_xyz(
+            gaussian_output_path=gjf_path.with_suffix(GaussianOutput.get_filetype()),
+            xyz_path=optimised_xyz_path,
+            hold=job_id,
+        )
+
+        answer = ""
+        user_input_free_flow(
+            f"GAUSSIAN JOB SUBMITTED. The final geometry is going to be written to "
+            f"{optimised_xyz_path} once the job has finished. Press enter to continue: ",
+            answer,
+        )
 
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"Gaussian optimisation job submitted for {submit_gaussian_menu_options.selected_gjf_path}"
+            f"Gaussian optimisation job submitted for {gjf_path}"
         )
 
 
@@ -156,8 +195,8 @@ submit_gaussian_menu_items = [
         SubmitGaussianFunctions.select_number_of_cores,
     ),
     FunctionItem(
-        "Overwrite GJF files (if any are already present)",
-        SubmitGaussianFunctions.select_overwrite_existing_gjfs,
+        "Overwrite existing optimisation directory (if one is already present)",
+        SubmitGaussianFunctions.select_overwrite_existing,
     ),
     FunctionItem(
         "SUBMIT to Gaussian",

@@ -34,7 +34,7 @@ class XTB(WriteFile, File):
         self.max_iterations: int = max_iterations
         self.fmax: float = fmax
 
-    def set_write_defaults_if_needed(
+    def _set_write_defaults_if_needed(
         self,
     ):  # Used Bienfait's script inputs for defaults for now
         self.method = self.method or "GFN2-xTB"

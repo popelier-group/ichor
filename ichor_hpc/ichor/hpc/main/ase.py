@@ -1,12 +1,14 @@
-import shutil
 from pathlib import Path
 from typing import List, Optional, Union
 
 import ichor.hpc.global_variables
-from ichor.core.common.io import mkdir
 
-from ichor.core.files import PointsDirectory, Trajectory, XTB
+from ichor.core.files import PointsDirectory, XTB, XYZ
 from ichor.hpc.batch_system import JobID
+from ichor.hpc.main.opt import (
+    read_single_geometry,
+    setup_single_geometry_optimisation_directory,
+)
 from ichor.hpc.submission_commands import PythonCommand
 from ichor.hpc.submission_script import SubmissionScript
 
@@ -14,7 +16,7 @@ from ichor.hpc.submission_script import SubmissionScript
 def submit_single_ase_xyz(
     input_xyz_path: Union[str, Path],
     ncores=2,
-    method="GFN2-xT",
+    method="GFN2-xTB",
     solvent="none",
     electronic_temperature=300,
     max_iterations=2048,
@@ -23,48 +25,64 @@ def submit_single_ase_xyz(
     hold: JobID = None,
     **kwargs,
 ) -> Optional[JobID]:
+    """Optimises the single geometry contained in the given .xyz file with ASE.
 
-    input_xyz_traj = Trajectory(input_xyz_path)
-    opt_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
-    mkdir(opt_dir)
+    Everything is written to one flat directory, `optimised_geoms/SYSTEM_NAME_ase`,
+    which will contain the input geometry, the python script that is ran, the
+    optimiser trajectory and log, as well as the optimised geometry
+    (`SYSTEM_NAME_optimised.xyz`).
+
+    :param input_xyz_path: Path to a .xyz file containing the geometry to optimise
+    :param ncores: Number of cores to run the optimisation with, defaults to 2
+    :param method: The method the calculator is to use, defaults to "GFN2-xTB"
+    :param solvent: The solvent the calculator is to use, defaults to "none"
+    :param electronic_temperature: Electronic temperature to use, defaults to 300
+    :param max_iterations: Maximum number of calculator iterations, defaults to 2048
+    :param fmax: Max force at which the optimiser stops, defaults to 0.01
+    :param overwrite: Whether to overwrite an existing optimisation
+        directory for this system, defaults to False
+    :param hold: An optional JobID for which the job is to hold, defaults to None
+    :return: The JobID of the submitted job or None if nothing was submitted
+    """
+
+    input_xyz_path = Path(input_xyz_path)
     system_name = input_xyz_path.stem
-    traj_dir = input_xyz_traj.to_dir(system_name, every=1, center=False)
-    opt_path = Path(opt_dir / traj_dir.name)
 
-    try:
-        shutil.move(traj_dir, opt_dir)
-    except FileExistsError:
-        if overwrite:
-            try:
-                rm_path = opt_path
-                shutil.rmtree(rm_path)
-                shutil.move(traj_dir, opt_dir)
-            except FileNotFoundError:
-                print("FILE DOES NOT EXIST FOR OVERWRITE. RUNNING AS NORMAL")
-                pass
-        else:
-            shutil.rmtree(traj_dir)
-            print("ERROR, FILE EXISTS AND OVERWRITE WAS NOT SELECTED. ABORTING")
-            return
+    optimisation_dir = setup_single_geometry_optimisation_directory(
+        input_xyz_path, "ase", overwrite
+    )
+    if optimisation_dir is None:
+        return None
 
-    opt_path = Path(opt_dir / traj_dir.name)
+    # write the geometry to optimise into the optimisation directory,
+    # so that everything the job needs and produces is in the one directory
+    input_geometry_path = optimisation_dir / (system_name + XYZ.get_filetype())
+    XYZ(input_geometry_path, atoms=read_single_geometry(input_xyz_path)).write()
 
-    submit_points_directory_to_ase(
-        points_directory=opt_path,
-        input_xyz_path=input_xyz_path,
-        ncores=ncores,
+    xtb = XTB(
+        optimisation_dir / f"{system_name}_opt{XTB.get_filetype()}",
+        input_xtb_path=input_geometry_path,
+        input_xyz_path=input_geometry_path,
+        output_xyz_path=optimisation_dir / f"{system_name}_optimised.xyz",
+        traj_path=input_geometry_path.with_suffix(".traj"),
+        log_path=input_geometry_path.with_suffix(".log"),
         method=method,
         solvent=solvent,
         electronic_temperature=electronic_temperature,
         max_iterations=max_iterations,
         fmax=fmax,
+        **kwargs,
+    )
+    xtb.write()
+
+    return submit_xtb(
+        [xtb.path],
+        ncores=ncores,
         hold=hold,
         outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
-        / input_xyz_path.name
-        / "ASE",
+        / f"{system_name}_ase_opt",
         errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-        / input_xyz_path.name
-        / "ASE",
+        / f"{system_name}_ase_opt",
     )
 
 

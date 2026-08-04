@@ -17,10 +17,43 @@ from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasAtoms, HasData
 
 
+def _read_orientation_block(f) -> Atoms:
+    """Reads the geometry of an orientation block (`Input orientation:` or
+    `Standard orientation:`) of a Gaussian output file.
+
+    :param f: An open Gaussian output file, positioned on the line which
+        announces the orientation block.
+    :return: The `Atoms` instance contained in the block.
+    """
+
+    # skip the four header lines of the block before the atom lines start
+    for _ in range(4):
+        next(f)
+
+    block_atoms = Atoms()
+    line = next(f)
+
+    # read until the closing ------ line of the block
+    while "--------------------" not in line:
+        split = line.split()
+        atom_type = nuclear_charge2type[int(split[1])]
+        coords = map(float, split[-3:])
+        block_atoms.append(Atom(atom_type, *coords))
+        line = next(f)
+
+    return block_atoms
+
+
 class GaussianOutput(ReadFile, HasAtoms, HasData):
     """Wraps around a .gaussianoutput file that is the output of Gaussian.
     This file contains coordinates (in Angstroms),
     forces, as well as molecular multipole moments.
+
+    .. note::
+        Gaussian writes out one geometry per step of a job, so for a geometry
+        optimisation only the last geometry (i.e. the optimised one) is kept.
+        Use `optimisation_converged` to check that the optimisation actually
+        finished before using that geometry.
 
     :param path: Path object or string to the .gaussianoutput file that are Gaussian output files
     """
@@ -42,6 +75,8 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
         self.traceless_molecular_quadrupole: TracelessMolecularQuadrupole = FileContents
         self.molecular_octupole: MolecularOctupole = FileContents
         self.molecular_hexadecapole: MolecularHexadecapole = FileContents
+        # only meaningful for optimisation jobs, False for any other job type
+        self.optimisation_converged: bool = FileContents
         super(ReadFile, self).__init__(path)
 
     @property
@@ -79,7 +114,10 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
         FileState of the file is FileState.Unread"""
 
         atoms = Atoms()
+        # only used if the file does not contain any input orientation blocks
+        standard_orientation_atoms = Atoms()
         forces = {}
+        optimisation_converged = False
 
         with open(self.path, "r") as f:
 
@@ -94,22 +132,17 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
 
                 elif "Input orientation:" in line:
 
-                    line = next(f)
-                    line = next(f)
-                    line = next(f)
-                    line = next(f)
-                    line = next(f)
+                    # a job writes one block per step (e.g. one per step of an
+                    # optimisation), so overwrite to end up with the last geometry
+                    atoms = _read_orientation_block(f)
 
-                    # we should be at the first line that has an atom here
-                    # read until we reach another ------ line
-                    while "--------------------" not in line:
+                elif "Standard orientation:" in line:
 
-                        split = line.split()
-                        atomic_num = int(split[1])
-                        atom_type = nuclear_charge2type[atomic_num]
-                        coords = map(float, split[-3:])
-                        atoms.append(Atom(atom_type, *coords))
-                        line = next(f)
+                    standard_orientation_atoms = _read_orientation_block(f)
+
+                elif "Optimization completed" in line:
+
+                    optimisation_converged = True
 
                 elif "Forces (Hartrees/Bohr)" in line:
 
@@ -188,4 +221,7 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
                     self.molecular_hexadecapole = MolecularHexadecapole(*values)
 
         self.global_forces = forces
-        self.atoms = atoms
+        # the input orientation is not printed by every Gaussian job/version,
+        # in which case the standard orientation is the only geometry available
+        self.atoms = atoms or standard_orientation_atoms
+        self.optimisation_converged = optimisation_converged

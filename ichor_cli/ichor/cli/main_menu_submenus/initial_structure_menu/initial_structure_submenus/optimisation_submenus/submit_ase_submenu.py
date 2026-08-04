@@ -14,11 +14,14 @@ from ichor.cli.useful_functions import (
     user_input_int,
 )
 from ichor.hpc.main.ase import submit_single_ase_xyz
+from ichor.hpc.main.opt import single_geometry_optimisation_directory
 
 
 SUBMIT_ASE_MENU_DESCRIPTION = MenuDescription(
     "Submit ASE Menu",
-    subtitle="Use this menu to optimise a single geometry with ASE.\n",
+    subtitle="Use this menu to optimise a single geometry with ASE.\n"
+    "Everything is written to one directory, 1_OPTIMISED_GEOMS/<system name>_ase,\n"
+    "which will contain the optimised geometry as <system name>_optimised.xyz.\n",
 )
 
 SUBMIT_ASE_MENU_DEFAULTS = {
@@ -28,7 +31,7 @@ SUBMIT_ASE_MENU_DEFAULTS = {
     "default_electronic_temperature": 300,
     "default_max_iterations": 2048,
     "default_fmax": 0.01,
-    "overwite_existing": False,
+    "default_overwrite": False,
 }
 
 
@@ -64,21 +67,25 @@ class SubmitAseFunctions:
 
     @staticmethod
     def select_number_of_cores():
-        """Asks user to update the basis set."""
-        submit_ase_menu_options.selected_number_of_cores = user_input_int(
+        """Asks user to update the number of cores for submission."""
+        submit_ase_menu_options.selected_ncores = user_input_int(
             "Enter number of cores: ",
-            submit_ase_menu_options.selected_number_of_cores,
+            submit_ase_menu_options.selected_ncores,
+        )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            f"Optimisation number of cores selected {submit_ase_menu_options.selected_ncores}"
         )
 
     @staticmethod
     def select_solvent():
         """Asks user to update the solvent choice."""
         submit_ase_menu_options.selected_solvent = user_input_free_flow(
-            "Enter solvent choice: ", submit_ase_menu_options.solvent
+            "Enter solvent choice: ", submit_ase_menu_options.selected_solvent
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"Optimisation solvent selected {submit_ase_menu_options.solvent}"
+            f"Optimisation solvent selected {submit_ase_menu_options.selected_solvent}"
         )
 
     @staticmethod
@@ -148,7 +155,7 @@ class SubmitAseFunctions:
 
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
 
-        submit_single_ase_xyz(
+        job_id = submit_single_ase_xyz(
             input_xyz_path=xyz_path,
             method=method,
             ncores=ncores,
@@ -159,12 +166,26 @@ class SubmitAseFunctions:
             overwrite=overwrite,
         )
         answer = ""
+
+        # nothing was submitted because the optimisation directory already exists
+        if job_id is None:
+            user_input_free_flow(
+                "ASE OPTIMISATION NOT SUBMITTED, SEE MESSAGE ABOVE. "
+                "Press enter to continue: ",
+                answer,
+            )
+            return
+
+        optimisation_dir = single_geometry_optimisation_directory(xyz_path.stem, "ase")
         user_input_free_flow(
-            "ASE OPTIMISATION SUBMITTED. Press enter to continue: ", answer
+            f"ASE OPTIMISATION SUBMITTED. The optimised geometry is going to be written to "
+            f"{optimisation_dir / f'{xyz_path.stem}_optimised.xyz'} once the job has finished. "
+            "Press enter to continue: ",
+            answer,
         )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
-            f"ASE optimisation job submitted for {xyz_path}"
+            f"ASE optimisation job submitted for {xyz_path}, results in {optimisation_dir}"
         )
 
 

@@ -1,14 +1,19 @@
-import shutil
 from pathlib import Path
 from typing import List, Optional, Union
 
 import ichor.hpc.global_variables
-from ichor.core.common.io import mkdir
 
-from ichor.core.files import GJF, PointsDirectory, Trajectory, WFN
+from ichor.core.files import GaussianOutput, GJF, PointsDirectory, WFN
 from ichor.hpc.batch_system import JobID
+from ichor.hpc.main.opt import (
+    read_single_geometry,
+    setup_single_geometry_optimisation_directory,
+)
 from ichor.hpc.submission_commands import GaussianCommand
 from ichor.hpc.submission_script import SubmissionScript
+from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
+    submit_free_flow_python_command_on_compute,
+)
 from tqdm import tqdm
 
 
@@ -22,47 +27,122 @@ def submit_single_gaussian_xyz(
     hold: JobID = None,
     **kwargs,
 ) -> Optional[JobID]:
+    """Optimises the single geometry contained in the given .xyz file with Gaussian.
 
-    input_xyz_traj = Trajectory(input_xyz_path)
-    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
-    opt_dir = Path(ichor.hpc.global_variables.FILE_STRUCTURE["optimised_geoms"])
+    Everything is written to one flat directory, `optimised_geoms/SYSTEM_NAME_gaussian`,
+    which will contain the Gaussian input (.gjf), the Gaussian output (.gau), and the
+    optimised geometry (`SYSTEM_NAME_optimised.xyz`). The .xyz file is written by a
+    follow-up job which is held until the Gaussian job has finished, so no separate
+    file conversion step is needed.
+
+    :param input_xyz_path: Path to a .xyz file containing the geometry to optimise
+    :param ncores: Number of cores to run Gaussian with, defaults to 2
+    :param keywords: Gaussian keywords to write to the .gjf file, defaults to ["opt"]
+    :param method: The method Gaussian is to use, defaults to "b3lyp"
+    :param basis_set: The basis set Gaussian is to use, defaults to "6-31+g(d,p)"
+    :param overwrite_existing: Whether to overwrite an existing optimisation
+        directory for this system, defaults to False
+    :param hold: An optional JobID for which the Gaussian job is to hold, defaults to None
+    :return: The JobID of the Gaussian job or None if nothing was submitted
+    """
+
+    input_xyz_path = Path(input_xyz_path)
     system_name = input_xyz_path.stem
 
-    traj_dir = input_xyz_traj.to_dir(system_name, every=1, center=False)
-    opt_path = Path(opt_dir / traj_dir.name)
+    optimisation_dir = setup_single_geometry_optimisation_directory(
+        input_xyz_path, "gaussian", overwrite_existing
+    )
+    if optimisation_dir is None:
+        return None
 
-    try:
-        shutil.move(traj_dir, opt_dir)
-    except FileExistsError:
-        if overwrite_existing:
-            try:
-                rm_path = opt_path
-                shutil.rmtree(rm_path)
-                shutil.move(traj_dir, opt_dir)
-            except FileNotFoundError:
-                print("FILE DOES NOT EXIST FOR OVERWRITE. RUNNING AS NORMAL")
-                pass
-
-        else:
-            shutil.rmtree(traj_dir)
-            print("ERROR, FILE EXISTS AND OVERWRITE WAS NOT SELECTED. ABORTING")
-            return
-
-    opt_path = Path(opt_dir / traj_dir.name)
-    submit_points_directory_to_gaussian(
-        points_directory=opt_path,
-        overwrite_existing=False,
-        force_calculate_wfn=False,
-        ncores=ncores,
+    gjf = GJF(
+        optimisation_dir / (system_name + GJF.get_filetype()),
         method=method,
         basis_set=basis_set,
-        outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
-        / input_xyz_path.name
-        / "GAUSSIAN",
-        errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-        / input_xyz_path.name
-        / "GAUSSIAN",
         keywords=keywords,
+        **kwargs,
+    )
+    gjf.atoms = read_single_geometry(input_xyz_path)
+    gjf.write()
+
+    outputs_dir_path = (
+        ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
+        / f"{system_name}_gaussian_opt"
+    )
+    errors_dir_path = (
+        ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
+        / f"{system_name}_gaussian_opt"
+    )
+
+    gaussian_job_id = submit_gjfs(
+        [gjf.path],
+        force_calculate_wfn=False,
+        script_name=ichor.hpc.global_variables.SCRIPT_NAMES["opt"]["gaussian"],
+        ncores=ncores,
+        hold=hold,
+        outputs_dir_path=outputs_dir_path,
+        errors_dir_path=errors_dir_path,
+    )
+
+    # the name of the output file Gaussian is given by GaussianCommand
+    submit_gaussian_output_to_xyz(
+        gaussian_output_path=gjf.path.with_suffix(GaussianOutput.get_filetype()),
+        xyz_path=optimisation_dir / f"{system_name}_optimised.xyz",
+        hold=gaussian_job_id,
+        outputs_dir_path=outputs_dir_path,
+        errors_dir_path=errors_dir_path,
+    )
+
+    return gaussian_job_id
+
+
+def submit_gaussian_output_to_xyz(
+    gaussian_output_path: Union[str, Path],
+    xyz_path: Union[str, Path],
+    hold: Optional[JobID] = None,
+    ncores: int = 1,
+    outputs_dir_path: Optional[Path] = None,
+    errors_dir_path: Optional[Path] = None,
+) -> Optional[JobID]:
+    """Submits a job which writes the last geometry of a Gaussian output file
+    (i.e. the optimised geometry of an optimisation) out as a .xyz file.
+
+    This is usually held on the Gaussian job which produces the output file, so that
+    the optimised geometry is written out as soon as Gaussian is done with it.
+
+    :param gaussian_output_path: Path of the Gaussian output (.gau) file to read
+    :param xyz_path: Path of the .xyz file to write the geometry to
+    :param hold: An optional JobID for which this job is to hold, defaults to None
+    :param ncores: Number of cores to run the job with, defaults to 1
+    :param outputs_dir_path: Optional path to the directory where stdout is written
+    :param errors_dir_path: Optional path to the directory where stderr is written
+    :return: The JobID of the submitted job
+    """
+
+    gaussian_output_path = Path(gaussian_output_path).absolute()
+    xyz_path = Path(xyz_path).absolute()
+
+    text_list = []
+    # make the python command that will be written in the submit script
+    # it will get executed as `python -c python_code_to_execute...`
+    text_list.append("from ichor.core.files import GaussianOutput, XYZ")
+    text_list.append(f"gaussian_output = GaussianOutput('{gaussian_output_path}')")
+    text_list.append("atoms = gaussian_output.atoms")
+    # if Gaussian did not produce a geometry (e.g. it crashed), then say so
+    # instead of writing out an empty xyz file
+    text_list.append(
+        f"print('Gaussian optimisation converged:', gaussian_output.optimisation_converged) if atoms "
+        f"else print('No geometry found in {gaussian_output_path}, no xyz file written.')"
+    )
+    text_list.append(f"XYZ('{xyz_path}', atoms=atoms).write() if atoms else None")
+
+    return submit_free_flow_python_command_on_compute(
+        text_list,
+        ichor.hpc.global_variables.SCRIPT_NAMES["opt"]["convert"],
+        ncores=ncores,
+        hold=hold,
+        outputs_dir_path=outputs_dir_path,
+        errors_dir_path=errors_dir_path,
     )
 
 
