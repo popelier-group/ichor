@@ -493,26 +493,22 @@ class DlpolyStabilityCheck:
             "mean": sum(times) / len(times),
         }
 
-    def write_report(
+    def report(
         self,
-        path: Union[str, Path] = "STABILITY-REPORT.txt",
         max_timesteps: Optional[int] = None,
         timestep_length: float = 0.001,
-    ) -> Path:
-        """Writes a human readable stability report.
+    ) -> str:
+        """Builds a human readable stability report.
 
         The report contains one line per run (the timestep at which it broke, if it did,
         and which bond went first), a summary of which bonds break most often, and the
         overall robustness and stability times.
 
-        :param path: Path of the report file, defaults to ``"STABILITY-REPORT.txt"``.
         :param max_timesteps: The number of timesteps each run was meant to last for,
             used for the robustness. If None (default), the longest run is used.
         :param timestep_length: The length of one timestep in ps, defaults to 0.001.
-        :return: The path the report was written to.
+        :return: The report as a string.
         """
-
-        path = Path(path)
 
         lines = [
             f"{'RUN':>10} {'STEPS':>10} {'BOND':>12} {'BOND-LENGTH':>16}"
@@ -561,7 +557,26 @@ class DlpolyStabilityCheck:
         lines.append(f"{'Max.Stab(ps)':>15} {times['max']:>12.4f}")
         lines.append(f"{'Mean.Stab(ps)':>15} {times['mean']:>12.4f}")
 
+        return "\n".join(lines) + "\n"
+
+    def write_report(
+        self,
+        path: Union[str, Path] = "STABILITY-REPORT.txt",
+        max_timesteps: Optional[int] = None,
+        timestep_length: float = 0.001,
+    ) -> Path:
+        """Writes the report of :meth:`report` to a file.
+
+        :param path: Path of the report file, defaults to ``"STABILITY-REPORT.txt"``.
+        :param max_timesteps: The number of timesteps each run was meant to last for,
+            used for the robustness. If None (default), the longest run is used.
+        :param timestep_length: The length of one timestep in ps, defaults to 0.001.
+        :return: The path the report was written to.
+        """
+
+        path = Path(path)
+
         with open(path, "w") as f:
-            f.write("\n".join(lines) + "\n")
+            f.write(self.report(max_timesteps, timestep_length))
 
         return path

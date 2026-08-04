@@ -4,6 +4,7 @@ bonds. The only thing the two halves share is the base directory holding the run
 is why that is the one option living on the top level menu.
 """
 
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Union
@@ -52,7 +53,9 @@ ROBUSTNESS_SETUP_MENU_DEFAULTS = {
 }
 
 STABILITY_MENU_DEFAULTS = {
-    # how often (in timesteps) each trajectory is scanned in the first (cheap) pass
+    # how often (in timesteps) each trajectory is scanned in the first (cheap) pass. This
+    # is only a fallback: the stride is normally derived from the length of the runs, see
+    # default_stride_for()
     "default_stride": 1000,
     # a bond counts as exploded when longer than this factor times its reference length
     "default_explosion_factor": 1.35,
@@ -156,7 +159,8 @@ class StabilityCheckMenuOptions(MenuOptions):
 
     # reference (usually optimised) geometry defining the intact bond lengths
     selected_reference_geometry_path: Path
-    # timesteps between the checks of the first pass over each trajectory
+    # timesteps between the checks of the first pass over each trajectory, derived from
+    # the length of the runs unless the user picks a value
     selected_stride: int
     selected_explosion_factor: float
     selected_implosion_factor: float
@@ -216,6 +220,29 @@ stability_check_menu_options = StabilityCheckMenuOptions(
 # answer is remembered as the default for the next time.
 stability_check_number_of_cores = STABILITY_MENU_DEFAULTS["default_number_of_cores"]
 
+# the stride is derived from the length of the runs unless the user picks one by hand, in
+# which case their choice is kept even when a different set of runs is loaded afterwards
+stability_check_stride_overridden = False
+
+
+def default_stride_for(number_of_timesteps: int) -> int:
+    """Returns the stride to check runs of the given length with.
+
+    Checking a run parses roughly ``number_of_timesteps / stride`` geometries in the
+    first pass and, if something broke, up to ``stride`` more in the rescan of the window
+    the breakage happened in. That total is smallest for a stride of the square root of
+    the length of the run, which is what is used here. It also keeps the window in which
+    a bond can break and heal again unseen small relative to the run.
+
+    :param number_of_timesteps: The number of timesteps the runs last for. If this is not
+        known (0), the menu default is returned instead.
+    """
+
+    if number_of_timesteps <= 0:
+        return STABILITY_MENU_DEFAULTS["default_stride"]
+
+    return max(1, math.isqrt(number_of_timesteps))
+
 
 def read_run_settings_from_control(base_path: Path) -> bool:
     """Fills in the stability check settings that the runs themselves already know from
@@ -241,6 +268,10 @@ def read_run_settings_from_control(base_path: Path) -> bool:
             stability_check_menu_options.selected_timestep_length = float(
                 settings["timestep"]
             )
+            if not stability_check_stride_overridden:
+                stability_check_menu_options.selected_stride = default_stride_for(
+                    stability_check_menu_options.selected_max_timesteps
+                )
         except (OSError, KeyError, ValueError):
             # an unreadable or unexpected CONTROL file is not worth failing over, the
             # settings can still be given by hand
@@ -439,11 +470,24 @@ class StabilityCheckMenuFunctions:
         """Select how often (in timesteps) each trajectory is checked in the first pass
         of the stability check. A crash is then located exactly by rescanning only the
         (at most one stride long) window in which it must have happened, so a large
-        stride makes checking long, stable runs much cheaper."""
-        stability_check_menu_options.selected_stride = user_input_int(
-            "Select stability check stride (timesteps): ",
+        stride makes checking long, stable runs much cheaper.
+
+        The stride is derived from the length of the runs (see :func:`default_stride_for`)
+        unless it is given here, in which case the given value is kept for any further
+        runs that are loaded. Entering 0 goes back to deriving it."""
+        global stability_check_stride_overridden
+
+        stride = user_input_int(
+            "Select stability check stride (timesteps, 0 = derive from run length): ",
             stability_check_menu_options.selected_stride,
         )
+        derived_stride = default_stride_for(
+            stability_check_menu_options.selected_max_timesteps
+        )
+        # a stride which is (or is asked to be) the derived one is not an override, so
+        # loading a different set of runs later is still free to update it
+        stability_check_stride_overridden = bool(stride) and stride != derived_stride
+        stability_check_menu_options.selected_stride = stride or derived_stride
 
     @staticmethod
     def select_explosion_factor():
@@ -474,6 +518,11 @@ class StabilityCheckMenuFunctions:
             "Select number of timesteps the runs were set up with (0 = longest run): ",
             stability_check_menu_options.selected_max_timesteps,
         )
+        # the stride follows the length of the runs unless it was picked by hand
+        if not stability_check_stride_overridden:
+            stability_check_menu_options.selected_stride = default_stride_for(
+                stability_check_menu_options.selected_max_timesteps
+            )
 
     @staticmethod
     def select_timestep_length():
@@ -571,6 +620,16 @@ class StabilityCheckMenuFunctions:
                 report_path,
                 max_timesteps=max_timesteps,
                 timestep_length=stability_check_menu_options.selected_timestep_length,
+            )
+
+            # show the report as well as writing it, so the runs can be looked over
+            # without having to open the file
+            print()
+            print(
+                stability_check.report(
+                    max_timesteps=max_timesteps,
+                    timestep_length=stability_check_menu_options.selected_timestep_length,
+                )
             )
 
             nstable = sum(1 for r in stability_check.results if not r.crashed)
@@ -700,7 +759,7 @@ stability_check_menu_items = [
         StabilityCheckMenuFunctions.select_reference_geometry_path,
     ),
     FunctionItem(
-        "Select stride (timesteps between checks)",
+        "Override stride (timesteps between checks, 0 = derive from run length)",
         StabilityCheckMenuFunctions.select_stride,
     ),
     FunctionItem(
