@@ -12,10 +12,11 @@ from ichor.core.files.dl_poly import (
     DlPolyFFLUXInput,
     DlPolyField,
     DlPolyHistory,
-    DlPolyMpoles,
     DlPolyIQAEnergies,
     DlPolyIQAForces,
+    DlPolyMpoles,
     FFLUXDirectory,
+    read_dlpoly_control_settings,
 )
 
 # gaussian files
@@ -66,6 +67,7 @@ __all__ = [
     "DlPolyIQAEnergies",
     "DlPolyIQAForces",
     "FFLUXDirectory",
+    "read_dlpoly_control_settings",
     "PandoraInput",
     "PointDirectory",
     "PointsDirectory",

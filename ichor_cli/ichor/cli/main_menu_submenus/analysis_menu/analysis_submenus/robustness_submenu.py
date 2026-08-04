@@ -23,6 +23,7 @@ from ichor.cli.useful_functions import (
     user_input_restricted,
 )
 from ichor.core.analysis import DlpolyStabilityCheck
+from ichor.core.files import read_dlpoly_control_settings
 from ichor.hpc.molecular_dynamics import (
     submit_dlpoly_fflux_robustness,
     submit_dlpoly_fflux_stability_check,
@@ -216,6 +217,40 @@ stability_check_menu_options = StabilityCheckMenuOptions(
 stability_check_number_of_cores = STABILITY_MENU_DEFAULTS["default_number_of_cores"]
 
 
+def read_run_settings_from_control(base_path: Path) -> bool:
+    """Fills in the stability check settings that the runs themselves already know from
+    the CONTROL file of the first run found under the given base path, so that they do
+    not have to be typed in again when an existing robustness directory is loaded.
+
+    :param base_path: The robustness base path holding the run directories.
+    :return: True if a CONTROL file was read, False if there was none to read (e.g. the
+        runs have not been set up yet), in which case the settings are left alone.
+    """
+
+    for run_directory in sorted(Path(base_path).glob(ROBUSTNESS_RUN_DIRECTORY_GLOB)):
+
+        control_path = run_directory / "CONTROL"
+        if not control_path.is_file():
+            continue
+
+        try:
+            settings = read_dlpoly_control_settings(control_path)
+            # "steps" is the number of timesteps the run was set up to last for, which is
+            # what the robustness of the runs is measured against
+            stability_check_menu_options.selected_max_timesteps = int(settings["steps"])
+            stability_check_menu_options.selected_timestep_length = float(
+                settings["timestep"]
+            )
+        except (OSError, KeyError, ValueError):
+            # an unreadable or unexpected CONTROL file is not worth failing over, the
+            # settings can still be given by hand
+            return False
+
+        return True
+
+    return False
+
+
 # classes with static methods for each menu item that calls a function.
 class RobustnessMenuFunctions:
     """Functions that run when items of the top level robustness menu are selected"""
@@ -223,7 +258,9 @@ class RobustnessMenuFunctions:
     @staticmethod
     def select_robustness_path():
         """Select the base directory in which the per-seed RUN* directories are created
-        (and in which the finished runs are looked for by the stability check)."""
+        (and in which the finished runs are looked for by the stability check). If the
+        directory already holds runs, the number of timesteps and the timestep of the
+        stability check are read from the CONTROL file of the first of them."""
         base_path = user_input_path("Enter robustness base path: ")
         ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH = Path(
             base_path
@@ -231,6 +268,17 @@ class RobustnessMenuFunctions:
         robustness_menu_options.selected_dlpoly_robustness_path = (
             ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH
         )
+
+        if read_run_settings_from_control(
+            ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH
+        ):
+            user_input_free_flow(
+                "Read "
+                f"{stability_check_menu_options.selected_max_timesteps} timesteps of "
+                f"{stability_check_menu_options.selected_timestep_length} ps from the "
+                "CONTROL file of the existing runs. Press enter to continue: ",
+                "",
+            )
 
 
 class RobustnessSetupMenuFunctions:
@@ -354,6 +402,11 @@ class RobustnessSetupMenuFunctions:
             executable_path=robustness_setup_menu_options.selected_executable_path
             or None,
         )
+        # the runs now exist, so the stability check can take the settings it shares with
+        # them (how long they run for) straight from the CONTROL files just written
+        read_run_settings_from_control(
+            ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH
+        )
         answer = ""
         user_input_free_flow(
             "DL_FFLUX ROBUSTNESS CHECK SUBMITTED. Press enter to continue: ", answer
@@ -414,7 +467,9 @@ class StabilityCheckMenuFunctions:
     def select_max_timesteps():
         """Select the number of timesteps the runs were meant to last for, which is what
         the robustness is measured against (a robustness of 1 means every run survived
-        for all of them). Enter 0 to use the longest run in the set instead."""
+        for all of them). Enter 0 to use the longest run in the set instead. This is read
+        from the runs' CONTROL file when the base path is selected, so it only has to be
+        given by hand for runs that were not set up through this menu."""
         stability_check_menu_options.selected_max_timesteps = user_input_int(
             "Select number of timesteps the runs were set up with (0 = longest run): ",
             stability_check_menu_options.selected_max_timesteps,
@@ -423,7 +478,8 @@ class StabilityCheckMenuFunctions:
     @staticmethod
     def select_timestep_length():
         """Select the timestep (in ps) the simulations were run with, which is used to
-        convert the stability of each run into a time."""
+        convert the stability of each run into a time. Like the number of timesteps, this
+        is read from the runs' CONTROL file when the base path is selected."""
         stability_check_menu_options.selected_timestep_length = user_input_float(
             "Select timestep (ps) the runs were made with: ",
             stability_check_menu_options.selected_timestep_length,
@@ -656,11 +712,11 @@ stability_check_menu_items = [
         StabilityCheckMenuFunctions.select_implosion_factor,
     ),
     FunctionItem(
-        "Select number of timesteps the runs were set up with (0 = longest run)",
+        "Override number of timesteps the runs were set up with (0 = longest run)",
         StabilityCheckMenuFunctions.select_max_timesteps,
     ),
     FunctionItem(
-        "Select timestep the runs were made with",
+        "Override timestep the runs were made with",
         StabilityCheckMenuFunctions.select_timestep_length,
     ),
     FunctionItem(
