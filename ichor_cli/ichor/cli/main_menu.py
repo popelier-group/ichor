@@ -10,13 +10,13 @@ from ichor.cli.main_menu_submenus.analysis_menu import (
     analysis_menu,
     ANALYSIS_MENU_DESCRIPTION,
 )
-from ichor.cli.main_menu_submenus.initial_structure_menu import (
-    initial_structure_menu,
-    INITIAL_STRUCTURE_MENU_DESCRIPTION,
-)
 from ichor.cli.main_menu_submenus.fflux_calculations_menu import (
     fflux_calculations_menu,
     FFLUX_CALCULATIONS_MENU_DESCRIPTION,
+)
+from ichor.cli.main_menu_submenus.initial_structure_menu import (
+    initial_structure_menu,
+    INITIAL_STRUCTURE_MENU_DESCRIPTION,
 )
 from ichor.cli.main_menu_submenus.points_directory_menu import (
     points_directory_menu,

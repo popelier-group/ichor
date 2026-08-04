@@ -23,7 +23,9 @@ class ExtractModelsScript(WriteFile, File):
     def _write_file(self, path: Path, *args, **kwargs):
 
         # set up template for polus script
-        extract_models_script_template = Template(textwrap.dedent("""
+        extract_models_script_template = Template(
+            textwrap.dedent(
+                """
             import os
             import shutil
             import glob
@@ -120,7 +122,9 @@ class ExtractModelsScript(WriteFile, File):
 
             if __name__ == "__main__":
                 main()
-        """))
+        """
+            )
+        )
 
         script_text = extract_models_script_template.substitute()
 

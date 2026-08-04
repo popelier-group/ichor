@@ -309,17 +309,13 @@ def write_metrics_per_element(
         return []
 
     if "element" not in metrics_df.columns:
-        metrics_df = metrics_df.assign(
-            element=metrics_df["atom"].map(get_characters)
-        )
+        metrics_df = metrics_df.assign(element=metrics_df["atom"].map(get_characters))
 
     base_path = Path(output_location)
     written: List[Path] = []
     for element in natsorted(metrics_df["element"].unique()):
         element_df = metrics_df[metrics_df["element"] == element]
-        out_path = base_path.with_name(
-            f"{base_path.stem}_{element}{base_path.suffix}"
-        )
+        out_path = base_path.with_name(f"{base_path.stem}_{element}{base_path.suffix}")
         append_average_rows(element_df).to_csv(out_path, index=False)
         written.append(out_path)
 

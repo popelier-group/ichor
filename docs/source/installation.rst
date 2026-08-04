@@ -12,6 +12,21 @@ To install ichor, simply do
 This will install all the packages in editable mode, so that any changes to the source code will
 be available to the user directly.
 
+.. warning::
+
+    The ``xtb`` package is only published on PyPI for CPython ``3.11`` and older, so
+    ``pip install -e ichor_core`` skips it on Python ``3.12+``. ichor itself does not
+    import ``xtb`` -- it is only needed by the ASE optimisation and metadynamics
+    scripts that ichor generates. If you run those on Python ``3.12+``, install it
+    into the environment that executes them with
+
+    .. code-block:: text
+
+        conda install -c conda-forge xtb-python
+
+    Alternatively, use a Python ``3.11`` environment, where ``pip`` installs ``xtb``
+    automatically along with ``ichor_core``.
+
 +++++++++++++++++++++++++++++++++
 Setting up ichor_config.yaml file
 +++++++++++++++++++++++++++++++++

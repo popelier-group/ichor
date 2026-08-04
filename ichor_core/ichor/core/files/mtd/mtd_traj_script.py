@@ -88,7 +88,7 @@ class MtdTrajScript(WriteFile, File):
             grid_min_list.append("-pi")
             grid_max_list.append("pi")
             grid_bin_list.append(200)
-            suffix = f".HILLS{i+1}"
+            suffix = f".HILLS{i + 1}"
             hills_file_list.append(self.input_xyz_path.with_suffix(suffix))
 
         self.hills_file = self.hills_file or hills_file_list
@@ -154,9 +154,9 @@ class MtdTrajScript(WriteFile, File):
             for i in range(len(self.collective_variables)):
                 group_line += self.build_group_str(self.collective_variables[i], i + 1)
                 cv_line += self.build_cv_str(
-                    self.collective_variables[i], i + 1, f"g{i+1}"
+                    self.collective_variables[i], i + 1, f"g{i + 1}"
                 )
-                arg_list.append(f"m{i+1}")
+                arg_list.append(f"m{i + 1}")
             arg_str = ",".join(str(i) for i in arg_list)
             sigma_str = ",".join(str(i) for i in self.sigma)
             grid_min_str = ",".join(str(i) for i in self.grid_min)

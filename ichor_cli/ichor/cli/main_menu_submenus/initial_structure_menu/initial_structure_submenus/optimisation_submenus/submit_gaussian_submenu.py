@@ -21,12 +21,10 @@ from ichor.hpc.main.gaussian import (
 )
 from ichor.hpc.main.opt import single_geometry_optimisation_directory
 
-
 SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
     "Submit Gaussian Menu",
     subtitle="Use this menu to optimise a single geometry with Gaussian.\n"
-    "Everything is written to one directory, 1_OPTIMISED_GEOMS/<system name>_gaussian,\n"
-    "which will contain the optimised geometry as <system name>_optimised.xyz.\n",
+    "Once optimised, the file will be converted to .xyz for further analysis. \n",
 )
 
 SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
@@ -101,7 +99,7 @@ class SubmitGaussianFunctions:
     @staticmethod
     def xyz_to_gaussian_on_compute():
         """Converts a single xyz to gjf and submit to Gaussian on compute."""
-        (keywords, method, basis_set, ncores, overwrite_existing) = (
+        keywords, method, basis_set, ncores, overwrite_existing = (
             ["opt"],
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
@@ -135,8 +133,8 @@ class SubmitGaussianFunctions:
             xyz_path.stem, "gaussian"
         )
         user_input_free_flow(
-            f"GAUSSIAN OPTIMISATION SUBMITTED. The optimised geometry is going to be written to "
-            f"{optimisation_dir / f'{xyz_path.stem}_optimised.xyz'} once the job has finished. "
+            f"GAUSSIAN OPTIMISATION SUBMITTED. The optimised geometry will be written to "
+            f"{optimisation_dir / f'{xyz_path.stem}_optimised.xyz'} "
             "Press enter to continue: ",
             answer,
         )

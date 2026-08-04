@@ -16,12 +16,10 @@ from ichor.cli.useful_functions import (
 from ichor.hpc.main.ase import submit_single_ase_xyz
 from ichor.hpc.main.opt import single_geometry_optimisation_directory
 
-
 SUBMIT_ASE_MENU_DESCRIPTION = MenuDescription(
     "Submit ASE Menu",
     subtitle="Use this menu to optimise a single geometry with ASE.\n"
-    "Everything is written to one directory, 1_OPTIMISED_GEOMS/<system name>_ase,\n"
-    "which will contain the optimised geometry as <system name>_optimised.xyz.\n",
+    "The optimised geometry will be written as .xyz for further analysis. \n",
 )
 
 SUBMIT_ASE_MENU_DEFAULTS = {
@@ -178,8 +176,8 @@ class SubmitAseFunctions:
 
         optimisation_dir = single_geometry_optimisation_directory(xyz_path.stem, "ase")
         user_input_free_flow(
-            f"ASE OPTIMISATION SUBMITTED. The optimised geometry is going to be written to "
-            f"{optimisation_dir / f'{xyz_path.stem}_optimised.xyz'} once the job has finished. "
+            f"ASE OPTIMISATION SUBMITTED. The optimised geometry will be written to "
+            f"{optimisation_dir / f'{xyz_path.stem}_optimised.xyz'} "
             "Press enter to continue: ",
             answer,
         )
