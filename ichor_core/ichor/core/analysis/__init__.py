@@ -1,3 +1,4 @@
+from ichor.core.analysis.dlpoly import DlpolyStabilityCheck, RunStability
 from ichor.core.analysis.model_metrics import (
     calculate_metrics_dataframe,
     calculate_metrics_from_csv_files,
@@ -17,4 +18,6 @@ __all__ = [
     "calculate_metrics_from_ferebus_csvs",
     "metrics_df_from_total_dict",
     "get_true_predicted_dicts",
+    "DlpolyStabilityCheck",
+    "RunStability",
 ]

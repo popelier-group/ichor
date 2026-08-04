@@ -12,7 +12,6 @@ from ichor.hpc.submission_command import SubmissionCommand
 
 
 class GaussianCommand(SubmissionCommand):
-
     """
     A class which is used to add Gaussian-related commands to a submission script.
     It is used to write the submission script line where Gaussian modules are loaded.
@@ -100,6 +99,6 @@ class GaussianCommand(SubmissionCommand):
         # variables[0] ${arr1[$SGE_TASK_ID-1]}, variables[1] ${arr2[$SGE_TASK_ID-1]}
         cmd = f"export GAUSS_SCRDIR=$(dirname {variables[0]})"
         cmd += f"\n{self.total_gaussian_memory()}"
+        cmd += "\nexport GAUSS_PDEF=$SLURM_NTASKS"
         cmd += f"\n{GaussianCommand.command} {variables[0]} {variables[1]}"
-
         return cmd

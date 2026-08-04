@@ -2,6 +2,10 @@ from dataclasses import dataclass
 
 from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
+from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus import (
+    robustness_menu,
+    ROBUSTNESS_MENU_DESCRIPTION,
+)
 from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus.model_analysis_menu import (  # noqa: E501
     model_analysis_menu,
     MODEL_ANALYSIS_MENU_DESCRIPTION,
@@ -141,6 +145,7 @@ analysis_menu_items = [
         model_analysis_menu,
         analysis_menu,
     ),
+    SubmenuItem(ROBUSTNESS_MENU_DESCRIPTION.title, robustness_menu, analysis_menu),
 ]
 
 add_items_to_menu(analysis_menu, analysis_menu_items)

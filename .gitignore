@@ -36,5 +36,6 @@ dist
 test.*
 .pytest_cache
 output.txt
+.__*.lock
 docs/build
 Dockerfile

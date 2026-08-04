@@ -26,6 +26,8 @@ csf3:
       data_path: "/opt/apps/apps/intel-17.0/cp2k/6.1.0/data"
 
     dlpoly:
+      # set this to the full path of your compiled DL_FFLUX (DLPOLY.Z) executable
+      executable_path: "/mnt/iusers01/pp01/mbdxpah2/DL_FFLUX/DLPOLY.Z"
       modules: ["compilers/intel/18.0.3"]
 
     orca:
@@ -71,6 +73,8 @@ csf4:
       data_path: "/opt/software/RI/apps/CP2K/6.1-iomkl-2020.02/data"
 
     dlpoly:
+      # set this to the full path of your compiled DL_FFLUX (DLPOLY.Z) executable
+      executable_path: "/mnt/iusers01/pp01/mbdxpah2/DL_FFLUX/DLPOLY.Z"
       modules: ["iomkl/2020.02"]
 
     orca:
@@ -113,6 +117,8 @@ ffluxlab:
       data_path: "/home/modules/apps/cp2k/6.1.0/data"
 
     dlpoly:
+      # set this to the full path of your compiled DL_FFLUX (DLPOLY.Z) executable
+      executable_path: "DLPOLY.Z"
       modules: ["mpi/intel/18.0.3"]
 
     pandora:

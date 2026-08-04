@@ -133,6 +133,10 @@ class ConsoleMenu(OriginalConsoleMenu):
         )
         # add the strings that each parent gives
         for p_options in self.parent_menu_options:
+            # a parent menu may not define any options (this_menu_options is None), e.g. the
+            # Analysis menu; skip those so we don't call None()
+            if p_options is None:
+                continue
             # the __call__ method of a MenuOption just makes it into a string which can be printed to the prologue
             # (a parent menu may have no options, i.e. this_menu_options is None, so guard against that)
             if p_options:
