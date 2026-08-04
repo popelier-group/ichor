@@ -19,6 +19,9 @@ from ichor.core.models import Models
 from ichor.hpc.batch_system.jobs import JobID
 from ichor.hpc.submission_commands import DlpolyCommand
 from ichor.hpc.submission_script import SubmissionScript
+from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
+    submit_free_flow_python_command_on_compute,
+)
 from tqdm import tqdm
 
 
@@ -449,3 +452,65 @@ def submit_dlpoly_fflux_robustness(
             submission_script.add_command(DlpolyCommand(executable_path, run_path))
 
     return submission_script.submit()
+
+
+def submit_dlpoly_fflux_stability_check(
+    base_path: Union[str, Path],
+    reference_geometry: Union[str, Path],
+    report_path: Union[str, Path] = "STABILITY-REPORT.txt",
+    run_directory_glob: str = "RUN*",
+    stride: int = 1000,
+    explosion_factor: float = 1.35,
+    implosion_factor: float = 1.5,
+    max_timesteps: Optional[int] = None,
+    timestep: float = 0.001,
+    ncores: int = 1,
+) -> JobID:
+    """Submits a stability check of finished DL_FFLUX runs to a compute node.
+
+    The HISTORY files of a robustness check are usually far too large to be analysed
+    comfortably on a login node, so the analysis (see
+    :class:`ichor.core.analysis.DlpolyStabilityCheck`) can be run as a job instead.
+
+    :param base_path: Directory containing the run directories to check.
+    :param reference_geometry: Path to the reference geometry (``.xyz`` or ``.gjf``),
+        usually the optimised geometry, whose bond lengths define an intact molecule.
+    :param report_path: Path of the report file to write, defaults to
+        ``"STABILITY-REPORT.txt"``.
+    :param run_directory_glob: Glob matching the run directories inside ``base_path``,
+        defaults to ``"RUN*"``.
+    :param stride: How often (in timesteps) each trajectory is checked in the first
+        pass, defaults to 1000.
+    :param explosion_factor: A bond counts as exploded when it is longer than this factor
+        times its reference length, defaults to 1.35.
+    :param implosion_factor: A bond counts as imploded when it is shorter than its
+        reference length divided by this factor, defaults to 1.5.
+    :param max_timesteps: The number of timesteps each run was meant to last for, used
+        for the robustness. If None (default), the longest run in the set is used.
+    :param timestep: The timestep (in ps) the simulations were run with, used to convert
+        stabilities into times, defaults to 0.001.
+    :param ncores: The number of cores to use for the job, defaults to 1.
+    :return: An object containing information for the submitted job.
+    :rtype: ichor.hpc.batch_system.jobs.JobID
+    """
+
+    base_path = Path(base_path).absolute()
+    reference_geometry = Path(reference_geometry).absolute()
+
+    # this gets executed as `python -c ...` on the compute node
+    text_list = [
+        "from pathlib import Path",
+        "from ichor.core.analysis import DlpolyStabilityCheck",
+        f"runs = sorted(Path(r'{base_path}').glob('{run_directory_glob}'))",
+        "check = DlpolyStabilityCheck("
+        f"r'{reference_geometry}', runs, stride={stride},"
+        f" explosion_factor={explosion_factor}, implosion_factor={implosion_factor})",
+        f"check.write_report(r'{Path(report_path).absolute()}',"
+        f" max_timesteps={max_timesteps}, timestep_length={timestep})",
+    ]
+
+    return submit_free_flow_python_command_on_compute(
+        text_list,
+        ichor.hpc.global_variables.SCRIPT_NAMES["stability_check"],
+        ncores=ncores,
+    )

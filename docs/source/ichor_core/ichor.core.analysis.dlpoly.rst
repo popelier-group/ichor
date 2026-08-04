@@ -36,6 +36,14 @@ ichor.core.analysis.dlpoly.plot\_energy module
    :undoc-members:
    :show-inheritance:
 
+ichor.core.analysis.dlpoly.stability\_check module
+---------------------------------------------------
+
+.. automodule:: ichor.core.analysis.dlpoly.stability_check
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ichor.core.analysis.dlpoly.true\_vs\_predicted module
 -----------------------------------------------------
 

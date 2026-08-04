@@ -37,3 +37,6 @@ SELECTED_MODEL_DIRECTORY_PATH: Path = Path("").absolute()
 SELECTED_DLPOLY_ROBUSTNESS_PATH: Path = Path("").absolute()
 # diversity-sampled trajectory (.xyz) from which the seed geometries are taken (in order)
 SELECTED_DLPOLY_SEED_TRAJECTORY_PATH: Path = Path("").absolute()
+# reference (usually optimised) geometry whose bond lengths define an intact molecule,
+# used by the stability check of the finished runs
+SELECTED_DLPOLY_REFERENCE_GEOMETRY_PATH: Path = Path("").absolute()
