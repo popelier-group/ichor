@@ -16,6 +16,7 @@ class DiversityScript(WriteFile, File):
         output_dir: Union[Path, str],
         filename: Union[Path, str],
         system_name: Optional[str] = None,
+        system_name_caps: Optional[str] = None,
         weights_vector: Optional[str] = None,
         group_average: bool = False,
         write_ferebus_inputs: bool = False,
@@ -32,6 +33,7 @@ class DiversityScript(WriteFile, File):
         self.output_dir = Path(output_dir)
         self.filename = Path(filename)
         self.system_name: str = system_name
+        self.system_name_caps: str = system_name_caps
         self.weights_vector: str = weights_vector
         self.group_average: bool = group_average
         self.write_ferebus_inputs: bool = write_ferebus_inputs
@@ -45,8 +47,8 @@ class DiversityScript(WriteFile, File):
     def set_write_defaults_if_needed(
         self,
     ):
-        # TODO: ADD OPTION FOR USER TO CHANGE DEFAULT SYSTEM NAME
         self.system_name = self.system_name or "molecule"
+        self.system_name_caps = self.system_name_caps or self.system_name.upper()
         self.output_dir = self.output_dir or Path.cwd()
         self.weights_vector = self.weights_vector or "HL1:1"
         self.chunk_size = self.chunk_size or 500
@@ -88,11 +90,11 @@ class DiversityScript(WriteFile, File):
         job.Execute()
         
         # Convex hull analysis
-        input_path = output_dir / "$system_name-SAMPLE-$sample_size.xyz"
+        input_path = output_dir / "$system_name_caps-SAMPLE-$sample_size.xyz"
         analysis = ConvexHullAnalysis()
 
         df = analysis.df_from_path(str(input_path))
-        df.to_csv(output_dir / "$system_name-$sample_size.csv
+        df.to_csv(output_dir / "$system_name_caps-$sample_size.csv")
         """))
 
         # subsitute template values into script
