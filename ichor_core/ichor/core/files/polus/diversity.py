@@ -100,6 +100,7 @@ class DiversityScript(WriteFile, File):
         # subsitute template values into script
         script_text = diversity_script_template.substitute(
             system_name=self.system_name,
+            system_name_caps=self.system_name_caps,
             weights_vector=self.weights_vector,
             group_average=self.group_average,
             write_ferebus_inputs=self.write_ferebus_inputs,
