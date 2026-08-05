@@ -68,8 +68,6 @@ class DiversityScript(WriteFile, File):
         import numpy as np
         import pandas as pd
 
-        output_dir = Path("$output_dir")
-
         # Start Polus sampling job
         job = DIVSampler(
             systemName="$system_name",
@@ -82,7 +80,7 @@ class DiversityScript(WriteFile, File):
             parallel=$parallel,
             autoStop=$auto_stop,
             seedGeom="$seed_geom",
-            outputDir="output_dir",
+            outputDir="$output_dir",
             filename="$filename",
             sampleSize=[$sample_size],
         )
@@ -90,11 +88,11 @@ class DiversityScript(WriteFile, File):
         job.Execute()
         
         # Convex hull analysis
-        input_path = output_dir / "$system_name_caps-SAMPLE-$sample_size.xyz"
+        input_path = Path("$output_dir") / "$system_name_caps-SAMPLE-$sample_size.xyz"
         analysis = ConvexHullAnalysis()
 
         df = analysis.df_from_path(str(input_path))
-        df.to_csv(output_dir / "$system_name_caps-$sample_size.csv")
+        df.to_csv(Path("$output_dir") / "$system_name_caps-$sample_size.csv")
         """))
 
         # subsitute template values into script
