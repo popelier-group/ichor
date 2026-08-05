@@ -58,13 +58,17 @@ class DiversityScript(WriteFile, File):
         self.set_write_defaults_if_needed()
 
         # set up template for polus script
-        diversity_script_template = Template(
-            textwrap.dedent(
-                """
+        diversity_script_template = Template(textwrap.dedent("""
+        from ichor.core.analysis import ConvexHullAnalysis
+        from pathlib import Path
         from polus.trajectories.commons import File
         from polus.trajectories.diversity import DIVSampler
         import numpy as np
+        import pandas as pd
 
+        output_dir = Path("$output_dir")
+
+        # Start Polus sampling job
         job = DIVSampler(
             systemName="$system_name",
             weightsVector="$weights_vector",
@@ -76,15 +80,20 @@ class DiversityScript(WriteFile, File):
             parallel=$parallel,
             autoStop=$auto_stop,
             seedGeom="$seed_geom",
-            outputDir="$output_dir",
+            outputDir="output_dir",
             filename="$filename",
             sampleSize=[$sample_size],
         )
 
         job.Execute()
-        """
-            )
-        )
+        
+        # Convex hull analysis
+        input_path = output_dir / "$system_name-SAMPLE-$sample_size.xyz"
+        analysis = ConvexHullAnalysis()
+
+        df = analysis.df_from_path(str(input_path))
+        df.to_csv(output_dir / "$system_name-$sample_size.csv
+        """))
 
         # subsitute template values into script
         script_text = diversity_script_template.substitute(
