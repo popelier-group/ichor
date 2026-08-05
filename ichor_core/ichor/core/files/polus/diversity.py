@@ -92,7 +92,7 @@ class DiversityScript(WriteFile, File):
         analysis = ConvexHullAnalysis()
 
         df = analysis.df_from_path(str(input_path))
-        df.to_csv(Path("$output_dir") / "$system_name_caps-$sample_size.csv")
+        df.to_csv(Path("$output_dir") / "$system_name_caps-$sample_size-CONVEX-HULLS.csv")
         """))
 
         # subsitute template values into script
