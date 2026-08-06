@@ -15,17 +15,23 @@ be available to the user directly.
 .. warning::
 
     The ``xtb`` package is only published on PyPI for CPython ``3.11`` and older, so
-    ``pip install -e ichor_core`` skips it on Python ``3.12+``. ichor itself does not
-    import ``xtb`` -- it is only needed by the ASE optimisation and metadynamics
-    scripts that ichor generates. If you run those on Python ``3.12+``, install it
-    into the environment that executes them with
+    ``pip install -e ichor_core`` skips it on Python ``3.12+``. ichor itself never
+    imports ``xtb``, so the install and the rest of ichor work fine -- but the ASE
+    optimisation and metadynamics jobs will fail at *run* time with
+    ``ModuleNotFoundError: No module named 'xtb'`` in their error file.
 
-    .. code-block:: text
+    These jobs run in **ichor's own environment** (the submission script activates
+    whatever ``venv``/``conda`` environment ichor was launched from, and loads no
+    modules), so ``xtb`` must be importable *there*. Putting ``xtb-python`` in a
+    separate conda environment does not help -- nothing activates it.
 
-        conda install -c conda-forge xtb-python
+    On Python ``3.12+`` your options are therefore:
 
-    Alternatively, use a Python ``3.11`` environment, where ``pip`` installs ``xtb``
-    automatically along with ``ichor_core``.
+    * Install ichor into a **conda** environment and add xtb to that same environment
+      with ``conda install -c conda-forge xtb-python``.
+    * Use a Python ``3.11`` environment, where ``pip`` installs ``xtb`` automatically
+      alongside ``ichor_core``. This is the only option if ichor lives in a ``venv``,
+      as conda-forge packages cannot be pip-installed.
 
 +++++++++++++++++++++++++++++++++
 Setting up ichor_config.yaml file

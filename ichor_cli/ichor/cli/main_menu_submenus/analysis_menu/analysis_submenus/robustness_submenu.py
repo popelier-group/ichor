@@ -4,6 +4,9 @@ bonds. The only thing the two halves share is the base directory holding the run
 is why that is the one option living on the top level menu.
 """
 
+# TODO: add single point menu setup
+# TODO: symlink models instead of copy
+
 import math
 from dataclasses import dataclass
 from pathlib import Path
@@ -381,7 +384,8 @@ class RobustnessSetupMenuFunctions:
         """Select the real-space cutoff (in Angstrom) for the CONTROL cutoff/rvdw and the
         FFLUX.in electrostatics cut directives. Enter 0 to auto-derive it from the geometry
         (largest interatomic distance + margin), which is a good default for a single molecule
-        or small cluster; set an explicit value (e.g. 8-12) for condensed-phase boxes."""
+        or small cluster; set an explicit value (e.g. 8-12) for condensed-phase boxes.
+        """
         robustness_setup_menu_options.selected_cutoff = user_input_float(
             "Select real-space cutoff in Angstrom (0 = auto from geometry): ",
             robustness_setup_menu_options.selected_cutoff,
@@ -501,7 +505,8 @@ class StabilityCheckMenuFunctions:
     @staticmethod
     def select_implosion_factor():
         """Select the factor below which a bond counts as imploded, i.e. a bond is
-        broken when it is shorter than its reference bond length divided by this factor."""
+        broken when it is shorter than its reference bond length divided by this factor.
+        """
         stability_check_menu_options.selected_implosion_factor = user_input_float(
             "Select implosion factor (bond shorter than reference / factor): ",
             stability_check_menu_options.selected_implosion_factor,

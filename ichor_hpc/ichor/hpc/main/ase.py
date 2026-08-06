@@ -11,6 +11,7 @@ from ichor.hpc.main.opt import (
 )
 from ichor.hpc.submission_commands import PythonCommand
 from ichor.hpc.submission_script import SubmissionScript
+from ichor.hpc.useful_functions import check_xtb_is_installed
 
 
 def submit_single_ase_xyz(
@@ -42,8 +43,14 @@ def submit_single_ase_xyz(
     :param overwrite: Whether to overwrite an existing optimisation
         directory for this system, defaults to False
     :param hold: An optional JobID for which the job is to hold, defaults to None
+    :raises XTBNotFound: If xtb is not installed in the environment ichor is running from
     :return: The JobID of the submitted job or None if nothing was submitted
     """
+
+    # checked before the optimisation directory is made, so that a run that cannot
+    # possibly work does not leave a directory behind which the next run would
+    # then refuse to overwrite
+    check_xtb_is_installed()
 
     input_xyz_path = Path(input_xyz_path)
     system_name = input_xyz_path.stem
@@ -185,8 +192,14 @@ def submit_xtb(
     :script_name: Path to write submission script out to defaults to ichor.hpc.global_variables.SCRIPT_NAMES["gaussian"]
     :param hold: An optional JobID for which this job to hold.
         This is used in auto-run to hold this job for the previous job to finish, defaults to None
+    :raises XTBNotFound: If xtb is not installed in the environment ichor is running from
     :return: The JobID of this job given by the submission system.
     """
+
+    # every generated script imports xtb and is ran in ichor's own environment, so if it
+    # is not installed there then all of these jobs would fail once they reach a compute
+    # node. Checked here as well as in the callers as this is the common choke point.
+    check_xtb_is_installed()
 
     # make a SubmissionScript instance which is going to contain all the jobs that are going to be ran
     # the submission_script object can be accessed even after the context manager

@@ -15,6 +15,7 @@ from ichor.cli.useful_functions import (
 )
 from ichor.hpc.main.ase import submit_single_ase_xyz
 from ichor.hpc.main.opt import single_geometry_optimisation_directory
+from ichor.hpc.useful_functions import XTBNotFound
 
 SUBMIT_ASE_MENU_DESCRIPTION = MenuDescription(
     "Submit ASE Menu",
@@ -153,17 +154,30 @@ class SubmitAseFunctions:
 
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
 
-        job_id = submit_single_ase_xyz(
-            input_xyz_path=xyz_path,
-            method=method,
-            ncores=ncores,
-            solvent=solvent,
-            electronic_temperature=electronic_temperature,
-            max_iterations=max_iterations,
-            fmax=fmax,
-            overwrite=overwrite,
-        )
         answer = ""
+
+        # xtb is not installed in the environment the submitted job would activate,
+        # so nothing is submitted as every job would fail on the compute node
+        try:
+            job_id = submit_single_ase_xyz(
+                input_xyz_path=xyz_path,
+                method=method,
+                ncores=ncores,
+                solvent=solvent,
+                electronic_temperature=electronic_temperature,
+                max_iterations=max_iterations,
+                fmax=fmax,
+                overwrite=overwrite,
+            )
+        except XTBNotFound as e:
+            ichor.hpc.global_variables.LOGGER.error(
+                f"ASE optimisation not submitted: {e}"
+            )
+            user_input_free_flow(
+                f"ASE OPTIMISATION NOT SUBMITTED. {e} Press enter to continue: ",
+                answer,
+            )
+            return
 
         # nothing was submitted because the optimisation directory already exists
         if job_id is None:
