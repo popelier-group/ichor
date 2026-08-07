@@ -7,6 +7,8 @@ from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus import (
     MODEL_ANALYSIS_MENU_DESCRIPTION,
     robustness_menu,
     ROBUSTNESS_MENU_DESCRIPTION,
+    SINGLE_POINT_MENU_DESCRIPTION,
+    single_point_menu,
 )
 from ichor.cli.menu_description import MenuDescription
 
@@ -144,6 +146,7 @@ analysis_menu_items = [
         analysis_menu,
     ),
     SubmenuItem(ROBUSTNESS_MENU_DESCRIPTION.title, robustness_menu, analysis_menu),
+    SubmenuItem(SINGLE_POINT_MENU_DESCRIPTION.title, single_point_menu, analysis_menu),
 ]
 
 add_items_to_menu(analysis_menu, analysis_menu_items)

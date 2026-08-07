@@ -5,7 +5,6 @@ is why that is the one option living on the top level menu.
 """
 
 # TODO: add single point menu setup
-# TODO: symlink models instead of copy
 
 import math
 from dataclasses import dataclass
@@ -292,7 +291,9 @@ class RobustnessMenuFunctions:
     @staticmethod
     def select_robustness_path():
         """Select the base directory in which the per-seed RUN* directories are created
-        (and in which the finished runs are looked for by the stability check). If the
+        (and in which the finished runs are looked for by the stability check). The models
+        are copied into this directory once and linked to by every run, so a base path
+        which already holds runs can only be used again with the same models. If the
         directory already holds runs, the number of timesteps and the timestep of the
         stability check are read from the CONTROL file of the first of them."""
         base_path = user_input_path("Enter robustness base path: ")
@@ -420,23 +421,35 @@ class RobustnessSetupMenuFunctions:
 
     @staticmethod
     def submit_robustness_to_compute():
-        """Sets up one RUN* directory per seed geometry and submits them as a job array."""
+        """Sets up one RUN* directory per seed geometry, all linking to the one copy of the
+        models kept in the base path, and submits them as a job array."""
 
-        submit_dlpoly_fflux_robustness(
-            base_path=ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH,
-            model_directory=ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH,
-            seed_trajectory=ichor.cli.global_menu_variables.SELECTED_DLPOLY_SEED_TRAJECTORY_PATH,  # noqa: E501
-            nseeds=robustness_setup_menu_options.selected_number_of_seeds,
-            ensemble=robustness_setup_menu_options.selected_ensemble,
-            temperature=robustness_setup_menu_options.selected_temperature,
-            timestep=robustness_setup_menu_options.selected_timestep,
-            nsteps=robustness_setup_menu_options.selected_number_of_timesteps,
-            cutoff=robustness_setup_menu_options.selected_cutoff or None,
-            cap=robustness_setup_menu_options.selected_force_cap or None,
-            ncores=robustness_setup_menu_options.selected_number_of_cores,
-            executable_path=robustness_setup_menu_options.selected_executable_path
-            or None,
-        )
+        try:
+            submit_dlpoly_fflux_robustness(
+                base_path=ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH,
+                model_directory=ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH,  # noqa: E501
+                seed_trajectory=ichor.cli.global_menu_variables.SELECTED_DLPOLY_SEED_TRAJECTORY_PATH,  # noqa: E501
+                nseeds=robustness_setup_menu_options.selected_number_of_seeds,
+                ensemble=robustness_setup_menu_options.selected_ensemble,
+                temperature=robustness_setup_menu_options.selected_temperature,
+                timestep=robustness_setup_menu_options.selected_timestep,
+                nsteps=robustness_setup_menu_options.selected_number_of_timesteps,
+                cutoff=robustness_setup_menu_options.selected_cutoff or None,
+                cap=robustness_setup_menu_options.selected_force_cap or None,
+                ncores=robustness_setup_menu_options.selected_number_of_cores,
+                executable_path=robustness_setup_menu_options.selected_executable_path
+                or None,
+            )
+        except ValueError as error:
+            # e.g. the base path already holds runs sharing a different set of models,
+            # which is worth saying rather than crashing out of the menu with a traceback
+            ichor.hpc.global_variables.LOGGER.error(
+                f"DL_FFLUX robustness check not submitted: {error}"
+            )
+            user_input_free_flow(
+                f"ROBUSTNESS CHECK NOT SUBMITTED: {error} Press enter to continue: ", ""
+            )
+            return
         # the runs now exist, so the stability check can take the settings it shares with
         # them (how long they run for) straight from the CONTROL files just written
         read_run_settings_from_control(

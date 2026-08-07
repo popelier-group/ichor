@@ -15,6 +15,45 @@ from ichor.core.files.file import FileState, ReadFile, WriteFile
 from tqdm import tqdm
 
 
+def count_geometries_in_xyz(path: Union[str, Path]) -> int:
+    """Counts the geometries (timesteps) in a .xyz file without reading them in.
+
+    A trajectory can hold hundreds of thousands of geometries, so this is meant for the
+    cases where only the number of them is wanted (e.g. to show how many geometries a
+    file has, or to check a number given by a user against it) and reading the whole
+    file into a :class:`Trajectory` would be wasteful.
+
+    Every geometry in a .xyz file is a block of ``natoms + 2`` lines (the number of atoms,
+    a comment line - which may well be empty - and one line per atom), so the blocks are
+    stepped over rather than read. An incomplete block at the end of the file (e.g. a
+    trajectory of a run which is still going) is not counted.
+
+    :param path: Path to the .xyz file.
+    :return: The number of geometries in the file (0 if it is empty).
+    """
+
+    ngeometries = 0
+
+    with open(path, "r") as f:
+        while True:
+            line = f.readline()
+            # an empty string (rather than a newline) is the end of the file
+            if not line:
+                break
+            # blank lines between geometries are not part of a block
+            if not line.strip():
+                continue
+            natoms = int(line)
+            # step over the comment line and the one line per atom which follow it
+            for _ in range(natoms + 1):
+                if not f.readline():
+                    # the file ran out mid-geometry, so this block does not count
+                    return ngeometries
+            ngeometries += 1
+
+    return ngeometries
+
+
 class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     """
     Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the

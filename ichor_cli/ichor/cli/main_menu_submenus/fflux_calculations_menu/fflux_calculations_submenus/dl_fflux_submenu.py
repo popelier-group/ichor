@@ -45,7 +45,8 @@ DL_FFLUX_MENU_DESCRIPTION = MenuDescription(
 
 @dataclass
 class DLFFLUXMenuOptions(MenuOptions):
-    # location where the DL_FFLUX calculation is set up and run
+    # base directory the DL_FFLUX calculation is set up under; each submitted calculation
+    # gets its own RUN<i> directory inside it, all sharing one copy of the models
     selected_dlpoly_run_path: Path
     # location of the trained models (usually one of the 6_MODEL/xxx subfolders)
     selected_model_directory_path: Path
@@ -108,7 +109,11 @@ class DLFFLUXMenuFunctions:
 
     @staticmethod
     def select_dlpoly_run_path():
-        """Select the directory in which the DL_FFLUX calculation is set up and run."""
+        """Select the base directory the DL_FFLUX calculation is set up under. The
+        calculation is set up in its own RUN<i> directory inside it (RUN0 for the first,
+        RUN1 for the next, ...), all of which share the one copy of the models kept in the
+        base directory, so submitting several calculations with the same path here adds a
+        run instead of overwriting the previous one."""
         run_path = user_input_path("Enter DL_FFLUX run path: ")
         ichor.cli.global_menu_variables.SELECTED_DLPOLY_RUN_PATH = Path(
             run_path
@@ -208,21 +213,33 @@ class DLFFLUXMenuFunctions:
 
     @staticmethod
     def submit_dl_fflux_to_compute():
-        """Sets up the DL_FFLUX directory and submits the job to a compute node."""
+        """Sets up a RUN<i> directory under the DL_FFLUX run path and submits the job to a
+        compute node."""
 
-        submit_dlpoly_fflux(
-            run_path=ichor.cli.global_menu_variables.SELECTED_DLPOLY_RUN_PATH,
-            model_directory=ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH,
-            starting_geometry=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
-            ensemble=dl_fflux_menu_options.selected_ensemble,
-            temperature=dl_fflux_menu_options.selected_temperature,
-            timestep=dl_fflux_menu_options.selected_timestep,
-            nsteps=dl_fflux_menu_options.selected_number_of_timesteps,
-            cutoff=dl_fflux_menu_options.selected_cutoff or None,
-            cap=dl_fflux_menu_options.selected_force_cap or None,
-            ncores=dl_fflux_menu_options.selected_number_of_cores,
-            executable_path=dl_fflux_menu_options.selected_executable_path or None,
-        )
+        try:
+            submit_dlpoly_fflux(
+                base_path=ichor.cli.global_menu_variables.SELECTED_DLPOLY_RUN_PATH,
+                model_directory=ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH,  # noqa: E501
+                starting_geometry=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
+                ensemble=dl_fflux_menu_options.selected_ensemble,
+                temperature=dl_fflux_menu_options.selected_temperature,
+                timestep=dl_fflux_menu_options.selected_timestep,
+                nsteps=dl_fflux_menu_options.selected_number_of_timesteps,
+                cutoff=dl_fflux_menu_options.selected_cutoff or None,
+                cap=dl_fflux_menu_options.selected_force_cap or None,
+                ncores=dl_fflux_menu_options.selected_number_of_cores,
+                executable_path=dl_fflux_menu_options.selected_executable_path or None,
+            )
+        except ValueError as error:
+            # e.g. the run path already holds runs sharing a different set of models,
+            # which is worth saying rather than crashing out of the menu with a traceback
+            ichor.hpc.global_variables.LOGGER.error(
+                f"DL_FFLUX job not submitted: {error}"
+            )
+            user_input_free_flow(
+                f"DL_FFLUX NOT SUBMITTED: {error} Press enter to continue: ", ""
+            )
+            return
         answer = ""
         user_input_free_flow("DL_FFLUX SUBMITTED. Press enter to continue: ", answer)
         # update logger
@@ -286,7 +303,7 @@ add_items_to_menu(dl_poly_parameters_menu, dl_poly_parameters_menu_items)
 # can use lambda functions to change text of options as well :)
 dl_fflux_menu_items = [
     FunctionItem(
-        "Select DL_FFLUX run path",
+        "Select DL_FFLUX run path (RUN0, RUN1, ... are created inside it)",
         DLFFLUXMenuFunctions.select_dlpoly_run_path,
     ),
     FunctionItem(

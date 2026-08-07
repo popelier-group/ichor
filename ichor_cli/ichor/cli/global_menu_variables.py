@@ -43,3 +43,9 @@ SELECTED_DLPOLY_SEED_TRAJECTORY_PATH: Path = Path("").absolute()
 # reference (usually optimised) geometry whose bond lengths define an intact molecule,
 # used by the stability check of the finished runs
 SELECTED_DLPOLY_REFERENCE_GEOMETRY_PATH: Path = Path("").absolute()
+
+# DL_FFLUX single point calculations (analysis menu) options
+# base directory in which the per-geometry POINT* directories are created
+SELECTED_DLPOLY_SINGLE_POINT_PATH: Path = Path("").absolute()
+# .xyz file holding the geometries to calculate single points for
+SELECTED_DLPOLY_SINGLE_POINT_TRAJECTORY_PATH: Path = Path("").absolute()
