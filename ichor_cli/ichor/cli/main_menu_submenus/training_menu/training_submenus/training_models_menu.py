@@ -207,9 +207,8 @@ class SubmitTrainingFunctions:
             )
 
         answer = ""
-        user_input_free_flow(
-            "MODEL TRAINING JOB SUBMITTED. Press enter to continue: ", answer
-        )
+        print("MODEL TRAINING JOB SUBMITTED.")
+        user_input_free_flow("Press enter to continue: ", answer)
         # update logger
         ichor.hpc.global_variables.LOGGER.info("Training models job submitted")
 

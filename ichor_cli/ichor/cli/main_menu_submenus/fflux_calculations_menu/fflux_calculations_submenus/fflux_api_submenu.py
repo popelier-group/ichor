@@ -28,10 +28,8 @@ class FFLUXAPIMenuFunctions:
     def placeholder():
         """Placeholder for the FFLUX_API functionality, which is not yet implemented."""
         answer = ""
-        user_input_free_flow(
-            "The FFLUX_API menu is not implemented yet. Press enter to continue: ",
-            answer,
-        )
+        print("The FFLUX_API menu is not implemented yet.")
+        user_input_free_flow("Press enter to continue: ", answer)
 
 
 # initialize menu

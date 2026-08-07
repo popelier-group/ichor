@@ -79,10 +79,8 @@ class TrajSplitFunctions:
 
         traj.to_dir(system_name, every, to_center, parent_path)
         answer = ""
-        user_input_free_flow(
-            "TRAJECTORY SPLIT INTO SINGLE POINTS DIRECTORY. Press enter to continue: ",
-            answer,
-        )
+        print("TRAJECTORY SPLIT INTO SINGLE POINTS DIRECTORY.")
+        user_input_free_flow("Press enter to continue: ", answer)
 
     @staticmethod
     def split_trajectory_into_many_points_directories():
@@ -117,10 +115,8 @@ class TrajSplitFunctions:
 
         traj.to_dirs(system_name, nsplit, every, to_center, parent_path)
         answer = ""
-        user_input_free_flow(
-            "TRAJECTORY SPLIT INTO MULTIPLE POINTS DIRECTORIES. Press enter to continue: ",
-            answer,
-        )
+        print("TRAJECTORY SPLIT INTO MULTIPLE POINTS DIRECTORIES.")
+        user_input_free_flow("Press enter to continue: ", answer)
 
 
 # initialize menu

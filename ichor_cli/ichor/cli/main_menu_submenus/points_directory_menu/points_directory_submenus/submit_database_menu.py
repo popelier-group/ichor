@@ -154,9 +154,8 @@ class SubmitDatabaseFunctions:
                 func = getattr(pointdir, str_database_method)
                 func(print_missing_data=True)
         answer = ""
-        user_input_free_flow(
-            "DATABASE COMPUTATION SUBMITTED. Press enter to continue: ", answer
-        )
+        print("DATABASE COMPUTATION SUBMITTED.")
+        user_input_free_flow("Press enter to continue: ", answer)
 
 
 # make menu items

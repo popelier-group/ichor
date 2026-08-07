@@ -180,9 +180,8 @@ class SubmitCSVSFunctions:
                 calculate_feature_forces=calculate_feature_forces,
             )
         answer = ""
-        user_input_free_flow(
-            "DATABASE CSV EXTRACT SUBMITTED. Press enter to continue: ", answer
-        )
+        print("DATABASE CSV EXTRACT SUBMITTED.")
+        user_input_free_flow("Press enter to continue: ", answer)
 
 
 # make menu items

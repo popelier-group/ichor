@@ -294,7 +294,8 @@ class FileConversionFunctions:
             format=file_conversion_menu_options.selected_output_file_format,
         )
         answer = ""
-        user_input_free_flow("FILE CONVERTED. Press enter to continue: ", answer)
+        print("FILE CONVERTED.")
+        user_input_free_flow("Press enter to continue: ", answer)
         # update logger
         ichor.hpc.global_variables.LOGGER.info(f"Output file written to {output_path}")
 

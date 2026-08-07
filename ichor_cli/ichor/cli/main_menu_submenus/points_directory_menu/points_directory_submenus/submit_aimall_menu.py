@@ -176,9 +176,8 @@ class SubmitAIMALLFunctions:
                 / "AIMALL",
             )
         answer = ""
-        user_input_free_flow(
-            "AIMALL COMPUTATION SUBMITTED. Press enter to continue: ", answer
-        )
+        print("AIMALL COMPUTATION SUBMITTED.")
+        user_input_free_flow("Press enter to continue: ", answer)
 
 
 # make menu items

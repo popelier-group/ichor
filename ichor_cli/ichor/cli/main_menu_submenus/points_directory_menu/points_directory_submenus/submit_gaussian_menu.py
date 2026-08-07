@@ -196,10 +196,8 @@ class SubmitGaussianFunctions:
                 / "GAUSSIAN",
             )
         answer = ""
-        user_input_free_flow(
-            "GAUSSIAN WAVEFUNCTION COMPUTATION SUBMITTED. Press enter to continue: ",
-            answer,
-        )
+        print("GAUSSIAN WAVEFUNCTION COMPUTATION SUBMITTED.")
+        user_input_free_flow("Press enter to continue: ", answer)
 
 
 # make menu items

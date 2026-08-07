@@ -122,9 +122,8 @@ class SubmitDiversityFunctions:
         )
 
         answer = ""
-        user_input_free_flow(
-            "DIVERSITY SAMPLING SUBMITTED. Press enter to continue: ", answer
-        )
+        print("DIVERSITY SAMPLING SUBMITTED.")
+        user_input_free_flow("Press enter to continue: ", answer)
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             f"Diversity sampling job submitted for {xyz_path}"

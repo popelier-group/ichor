@@ -122,22 +122,18 @@ class SubmitGaussianFunctions:
 
         # nothing was submitted because the optimisation directory already exists
         if job_id is None:
-            user_input_free_flow(
-                "GAUSSIAN OPTIMISATION NOT SUBMITTED, SEE MESSAGE ABOVE. "
-                "Press enter to continue: ",
-                answer,
-            )
+            print("GAUSSIAN OPTIMISATION NOT SUBMITTED, SEE MESSAGE ABOVE.")
+            user_input_free_flow("Press enter to continue: ", answer)
             return
 
         optimisation_dir = single_geometry_optimisation_directory(
             xyz_path.stem, "gaussian"
         )
-        user_input_free_flow(
-            f"GAUSSIAN OPTIMISATION SUBMITTED. The optimised geometry will be written to "
-            f"{optimisation_dir / f'{xyz_path.stem}_optimised.xyz'} "
-            "Press enter to continue: ",
-            answer,
+        print(
+            "GAUSSIAN OPTIMISATION SUBMITTED. The optimised geometry will be written to "
+            f"{optimisation_dir / f'{xyz_path.stem}_optimised.xyz'}"
         )
+        user_input_free_flow("Press enter to continue: ", answer)
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             f"Gaussian optimisation job submitted for {xyz_path}, results in {optimisation_dir}"
@@ -165,11 +161,11 @@ class SubmitGaussianFunctions:
         )
 
         answer = ""
-        user_input_free_flow(
-            f"GAUSSIAN JOB SUBMITTED. The final geometry is going to be written to "
-            f"{optimised_xyz_path} once the job has finished. Press enter to continue: ",
-            answer,
+        print(
+            "GAUSSIAN JOB SUBMITTED. The final geometry is going to be written to "
+            f"{optimised_xyz_path} once the job has finished."
         )
+        user_input_free_flow("Press enter to continue: ", answer)
 
         # update logger
         ichor.hpc.global_variables.LOGGER.info(

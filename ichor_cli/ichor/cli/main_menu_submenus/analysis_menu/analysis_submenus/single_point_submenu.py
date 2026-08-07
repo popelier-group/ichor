@@ -225,14 +225,12 @@ class SinglePointMenuFunctions:
             ichor.hpc.global_variables.LOGGER.error(
                 f"DL_FFLUX single points not submitted: {error}"
             )
-            user_input_free_flow(
-                f"SINGLE POINTS NOT SUBMITTED: {error} Press enter to continue: ", ""
-            )
+            print(f"SINGLE POINTS NOT SUBMITTED: {error}")
+            user_input_free_flow("Press enter to continue: ", "")
             return
 
-        user_input_free_flow(
-            "DL_FFLUX SINGLE POINTS SUBMITTED. Press enter to continue: ", ""
-        )
+        print("DL_FFLUX SINGLE POINTS SUBMITTED.")
+        user_input_free_flow("Press enter to continue: ", "")
         # update logger
         ichor.hpc.global_variables.LOGGER.info("DL_FFLUX single point jobs submitted")
 

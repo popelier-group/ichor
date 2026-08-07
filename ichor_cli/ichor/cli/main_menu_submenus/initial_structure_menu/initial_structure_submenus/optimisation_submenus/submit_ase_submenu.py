@@ -173,28 +173,22 @@ class SubmitAseFunctions:
             ichor.hpc.global_variables.LOGGER.error(
                 f"ASE optimisation not submitted: {e}"
             )
-            user_input_free_flow(
-                f"ASE OPTIMISATION NOT SUBMITTED. {e} Press enter to continue: ",
-                answer,
-            )
+            print(f"ASE OPTIMISATION NOT SUBMITTED. {e}")
+            user_input_free_flow("Press enter to continue: ", answer)
             return
 
         # nothing was submitted because the optimisation directory already exists
         if job_id is None:
-            user_input_free_flow(
-                "ASE OPTIMISATION NOT SUBMITTED, SEE MESSAGE ABOVE. "
-                "Press enter to continue: ",
-                answer,
-            )
+            print("ASE OPTIMISATION NOT SUBMITTED, SEE MESSAGE ABOVE.")
+            user_input_free_flow("Press enter to continue: ", answer)
             return
 
         optimisation_dir = single_geometry_optimisation_directory(xyz_path.stem, "ase")
-        user_input_free_flow(
-            f"ASE OPTIMISATION SUBMITTED. The optimised geometry will be written to "
-            f"{optimisation_dir / f'{xyz_path.stem}_optimised.xyz'} "
-            "Press enter to continue: ",
-            answer,
+        print(
+            "ASE OPTIMISATION SUBMITTED. The optimised geometry will be written to "
+            f"{optimisation_dir / f'{xyz_path.stem}_optimised.xyz'}"
         )
+        user_input_free_flow("Press enter to continue: ", answer)
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             f"ASE optimisation job submitted for {xyz_path}, results in {optimisation_dir}"

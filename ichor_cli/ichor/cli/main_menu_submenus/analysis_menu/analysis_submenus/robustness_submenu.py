@@ -307,13 +307,13 @@ class RobustnessMenuFunctions:
         if read_run_settings_from_control(
             ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH
         ):
-            user_input_free_flow(
+            print(
                 "Read "
                 f"{stability_check_menu_options.selected_max_timesteps} timesteps of "
                 f"{stability_check_menu_options.selected_timestep_length} ps from the "
-                "CONTROL file of the existing runs. Press enter to continue: ",
-                "",
+                "CONTROL file of the existing runs."
             )
+            user_input_free_flow("Press enter to continue: ", "")
 
 
 class RobustnessSetupMenuFunctions:
@@ -446,9 +446,8 @@ class RobustnessSetupMenuFunctions:
             ichor.hpc.global_variables.LOGGER.error(
                 f"DL_FFLUX robustness check not submitted: {error}"
             )
-            user_input_free_flow(
-                f"ROBUSTNESS CHECK NOT SUBMITTED: {error} Press enter to continue: ", ""
-            )
+            print(f"ROBUSTNESS CHECK NOT SUBMITTED: {error}")
+            user_input_free_flow("Press enter to continue: ", "")
             return
         # the runs now exist, so the stability check can take the settings it shares with
         # them (how long they run for) straight from the CONTROL files just written
@@ -456,9 +455,8 @@ class RobustnessSetupMenuFunctions:
             ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH
         )
         answer = ""
-        user_input_free_flow(
-            "DL_FFLUX ROBUSTNESS CHECK SUBMITTED. Press enter to continue: ", answer
-        )
+        print("DL_FFLUX ROBUSTNESS CHECK SUBMITTED.")
+        user_input_free_flow("Press enter to continue: ", answer)
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             "DL_FFLUX robustness check job submitted"
@@ -608,9 +606,8 @@ class StabilityCheckMenuFunctions:
             ichor.hpc.global_variables.LOGGER.info(
                 "DL_FFLUX stability check job submitted"
             )
-            user_input_free_flow(
-                "DL_FFLUX STABILITY CHECK SUBMITTED. Press enter to continue: ", ""
-            )
+            print("DL_FFLUX STABILITY CHECK SUBMITTED.")
+            user_input_free_flow("Press enter to continue: ", "")
 
         else:
 
@@ -618,11 +615,11 @@ class StabilityCheckMenuFunctions:
                 Path(base_path).glob(ROBUSTNESS_RUN_DIRECTORY_GLOB)
             )
             if not run_directories:
-                user_input_free_flow(
+                print(
                     f"No {ROBUSTNESS_RUN_DIRECTORY_GLOB} directories found in "
-                    f"{base_path}. Press enter to continue: ",
-                    "",
+                    f"{base_path}."
                 )
+                user_input_free_flow("Press enter to continue: ", "")
                 return
 
             print(f"Checking {len(run_directories)} runs, this might take a while...")
@@ -660,10 +657,8 @@ class StabilityCheckMenuFunctions:
                 f"DL_FFLUX stability check written to {report_path}, "
                 f"robustness: {robustness:.4f}"
             )
-            user_input_free_flow(
-                f"STABILITY REPORT WRITTEN TO {report_path}. Press enter to continue: ",
-                "",
-            )
+            print(f"STABILITY REPORT WRITTEN TO {report_path}.")
+            user_input_free_flow("Press enter to continue: ", "")
 
 
 # initialize menus

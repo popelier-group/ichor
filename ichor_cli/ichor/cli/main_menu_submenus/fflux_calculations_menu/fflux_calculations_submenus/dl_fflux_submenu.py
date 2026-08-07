@@ -236,12 +236,12 @@ class DLFFLUXMenuFunctions:
             ichor.hpc.global_variables.LOGGER.error(
                 f"DL_FFLUX job not submitted: {error}"
             )
-            user_input_free_flow(
-                f"DL_FFLUX NOT SUBMITTED: {error} Press enter to continue: ", ""
-            )
+            print(f"DL_FFLUX NOT SUBMITTED: {error}")
+            user_input_free_flow("Press enter to continue: ", "")
             return
         answer = ""
-        user_input_free_flow("DL_FFLUX SUBMITTED. Press enter to continue: ", answer)
+        print("DL_FFLUX SUBMITTED.")
+        user_input_free_flow("Press enter to continue: ", answer)
         # update logger
         ichor.hpc.global_variables.LOGGER.info("DL_FFLUX job submitted")
 

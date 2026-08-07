@@ -128,7 +128,8 @@ class CP2KMenuFunctions:
             ncores=ncores,
         )
         answer = ""
-        user_input_free_flow("CP2K SUBMITTED. Press enter to continue: ", answer)
+        print("CP2K SUBMITTED.")
+        user_input_free_flow("Press enter to continue: ", answer)
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             "CP2K trajectory generation job submitted"
