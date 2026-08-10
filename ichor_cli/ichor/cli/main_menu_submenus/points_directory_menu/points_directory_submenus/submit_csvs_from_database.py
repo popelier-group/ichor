@@ -8,8 +8,8 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_bool,
-    user_input_free_flow,
     user_input_int,
     user_input_path,
     user_input_restricted,
@@ -21,7 +21,10 @@ from ichor.core.database.query_database import (
 )
 
 from ichor.hpc.main import submit_make_csvs_from_database
-from ichor.hpc.main.database import AVAILABLE_DATABASE_FORMATS
+from ichor.hpc.main.database import (
+    AVAILABLE_DATABASE_FORMATS,
+    processed_csvs_directory,
+)
 
 SUBMIT_CSVS_MENU_DESCRIPTION = MenuDescription(
     "Database Processing Menu",
@@ -154,6 +157,24 @@ class SubmitCSVSFunctions:
         float_integration_error = 100000000.0
         float_difference_iqa_wfn = 10000000.0
 
+        # the csv files are written into a folder named after the database, one csv per
+        # atom and property, which is the layout the training menu expects
+        csv_details = {
+            "Database": db_path,
+            "Database format": db_type,
+            "Rotate multipole moments": rotate_multipole_moments,
+            "Calculate feature forces": calculate_feature_forces,
+            "CPU cores": f"{ncores} (the csvs are made one atom per core)",
+        }
+        csv_notes = [
+            "One csv file is written per atom and per property, holding the features "
+            "of every geometry alongside the property value that a model will be "
+            "trained to predict.",
+            "The whole database is exported: the integration error and IQA/wfn energy "
+            "difference filters are effectively switched off, so any filtering of bad "
+            "points has to be done afterwards.",
+        ]
+
         if not submit_on_compute:
             alf = get_alf_from_first_db_geometry(db_path, db_type)
             write_processed_data_for_atoms_parallel(
@@ -167,21 +188,52 @@ class SubmitCSVSFunctions:
                 calc_forces=calculate_feature_forces,
             )
 
-        # if running on compute
-        else:
-            submit_make_csvs_from_database(
-                db_path,
-                db_type,
-                ncores=ncores,
-                alf=None,
-                float_difference_iqa_wfn=float_difference_iqa_wfn,
-                float_integration_error=float_integration_error,
-                rotate_multipole_moments=rotate_multipole_moments,
-                calculate_feature_forces=calculate_feature_forces,
+            print_summary_and_pause(
+                "DATABASE CSV FILES WRITTEN",
+                {
+                    **csv_details,
+                    # the login node run uses the default output folder of
+                    # write_processed_data_for_atoms_parallel, next to where ichor runs
+                    "csv folder": Path.cwd() / "processed_csvs",
+                    "Ran on": "login node (not submitted)",
+                },
+                csv_notes
+                + [
+                    "The csvs were made here and now rather than on a compute node, so "
+                    "they are already finished and can be used by the training menu.",
+                ],
             )
-        answer = ""
-        print("DATABASE CSV EXTRACT SUBMITTED.")
-        user_input_free_flow("Press enter to continue: ", answer)
+            return
+
+        # if running on compute
+        job_id = submit_make_csvs_from_database(
+            db_path,
+            db_type,
+            ncores=ncores,
+            alf=None,
+            float_difference_iqa_wfn=float_difference_iqa_wfn,
+            float_integration_error=float_integration_error,
+            rotate_multipole_moments=rotate_multipole_moments,
+            calculate_feature_forces=calculate_feature_forces,
+        )
+
+        print_summary_and_pause(
+            "DATABASE CSV EXTRACTION SUBMITTED",
+            {
+                **csv_details,
+                # the folder submit_make_csvs_from_database writes into
+                "csv folder": processed_csvs_directory(db_path),
+                "Job ID": job_id.id if job_id else "not available",
+                "Ran on": "compute node",
+            },
+            csv_notes
+            + [
+                "The job is now queued, so it will not start immediately and this menu "
+                "does not wait for it. Check on it with your batch system's queue "
+                "command (e.g. qstat / squeue), then point the training menu at the "
+                "csv files it writes.",
+            ],
+        )
 
 
 # make menu items

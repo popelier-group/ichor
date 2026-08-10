@@ -10,8 +10,8 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_float,
-    user_input_free_flow,
     user_input_int,
     user_input_path,
     user_input_restricted,
@@ -166,7 +166,31 @@ class SubmitTrainingFunctions:
 
     @staticmethod
     def submit_training_on_compute():
-        for job_details_path in submit_training_menu_options.selected_train_folders:
+        train_folders = submit_training_menu_options.selected_train_folders
+
+        if not train_folders:
+            print_summary_and_pause(
+                "MODEL TRAINING NOT SUBMITTED",
+                {
+                    "Input directory": (
+                        submit_training_menu_options.selected_input_directory_path
+                    )
+                },
+                [
+                    "No training folders are selected, so there is nothing to train. "
+                    "Use the option which finds the FEREBUS subdirectories to pick up "
+                    "the training folders under the input directory first.",
+                    "Those folders are the ones made by the data preparation menu, "
+                    "each holding the training, validation and test files of one "
+                    "training set size.",
+                ],
+            )
+            return
+
+        # the directory ichor is running in, so that it can be restored afterwards
+        original_working_directory = Path.cwd()
+
+        for job_details_path in train_folders:
             workdir = job_details_path.parent  # SEQ-XX-25-25 folder
             print(f"\n=== Running pyferebus in {workdir} ===")
             # Change into the working directory
@@ -206,9 +230,38 @@ class SubmitTrainingFunctions:
                 ["python3", pyferebus_input_script.name], cwd=workdir, check=True
             )
 
-        answer = ""
-        print("MODEL TRAINING JOB SUBMITTED.")
-        user_input_free_flow("Press enter to continue: ", answer)
+        # os.chdir above leaves ichor in the last training folder otherwise, which makes
+        # every later menu write its output somewhere unexpected
+        os.chdir(original_working_directory)
+
+        print_summary_and_pause(
+            "MODEL TRAINING JOBS SUBMITTED",
+            {
+                "Input directory": (
+                    submit_training_menu_options.selected_input_directory_path
+                ),
+                "Training folders": f"{len(train_folders)} (one job per folder)",
+                "Kernel": submit_training_menu_options.selected_kernel,
+                "Mean type": submit_training_menu_options.selected_mean_type,
+                "Max iterations": submit_training_menu_options.selected_max_iter,
+                "Huber delta": submit_training_menu_options.selected_huber_delta,
+                "GWO cycles": submit_training_menu_options.selected_gwo_cycles,
+                "CPU cores per job": (
+                    submit_training_menu_options.selected_number_of_cores
+                ),
+            },
+            [
+                "One pyferebus job has been submitted per training folder, each "
+                "training a GPR model for every atom and property of that training set "
+                "size.",
+                "The jobs are now queued on compute nodes, so they will not start "
+                "immediately and this menu does not wait for them. Check on them with "
+                "your batch system's queue command (e.g. qstat / squeue).",
+                "The trained .model files are written into the training folders "
+                "themselves. Once they are there, the model analysis menu makes "
+                "S-curves and quality metrics from them.",
+            ],
+        )
         # update logger
         ichor.hpc.global_variables.LOGGER.info("Training models job submitted")
 

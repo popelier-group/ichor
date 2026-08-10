@@ -10,7 +10,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
-    user_input_free_flow,
+    print_summary_and_pause,
     user_input_path,
     user_input_restricted,
 )
@@ -293,9 +293,27 @@ class FileConversionFunctions:
             images=loaded_atoms,
             format=file_conversion_menu_options.selected_output_file_format,
         )
-        answer = ""
-        print("FILE CONVERTED.")
-        user_input_free_flow("Press enter to continue: ", answer)
+        # ase reads a single structure as an Atoms object and a trajectory as a list of
+        # them, so the length is only meaningful for the latter
+        ngeometries = len(loaded_atoms) if isinstance(loaded_atoms, list) else 1
+
+        print_summary_and_pause(
+            "FILE CONVERTED",
+            {
+                "Input file": input_path,
+                "Output file": output_path,
+                "Output format": file_conversion_menu_options.selected_output_file_format,
+                "Geometries": f"{ngeometries:,}",
+            },
+            [
+                "The converted file is written next to the input file with the same "
+                "name and the new extension, so an input file which already had that "
+                "extension has been overwritten.",
+                "The conversion is done with ASE, which carries over the atoms and "
+                "their coordinates; anything the output format has no place for (e.g. "
+                "calculator settings) is not kept.",
+            ],
+        )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(f"Output file written to {output_path}")
 

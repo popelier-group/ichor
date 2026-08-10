@@ -9,6 +9,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_float,
     user_input_free_flow,
     user_input_int,
@@ -217,7 +218,7 @@ class DLFFLUXMenuFunctions:
         compute node."""
 
         try:
-            submit_dlpoly_fflux(
+            job_id = submit_dlpoly_fflux(
                 base_path=ichor.cli.global_menu_variables.SELECTED_DLPOLY_RUN_PATH,
                 model_directory=ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH,  # noqa: E501
                 starting_geometry=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
@@ -236,12 +237,67 @@ class DLFFLUXMenuFunctions:
             ichor.hpc.global_variables.LOGGER.error(
                 f"DL_FFLUX job not submitted: {error}"
             )
-            print(f"DL_FFLUX NOT SUBMITTED: {error}")
-            user_input_free_flow("Press enter to continue: ", "")
+            print_summary_and_pause(
+                "DL_FFLUX JOB NOT SUBMITTED",
+                {
+                    "Run path": (
+                        ichor.cli.global_menu_variables.SELECTED_DLPOLY_RUN_PATH
+                    ),
+                    "Model directory": (
+                        ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH
+                    ),
+                    "Reason": error,
+                },
+                [
+                    "Every run under one run path shares the single copy of the models "
+                    "kept there, so a run path can only be reused with the models it "
+                    "already holds. Pick an empty (or new) run path to use a different "
+                    "set of models.",
+                ],
+            )
             return
-        answer = ""
-        print("DL_FFLUX SUBMITTED.")
-        user_input_free_flow("Press enter to continue: ", answer)
+
+        nsteps = dl_fflux_menu_options.selected_number_of_timesteps
+        timestep = dl_fflux_menu_options.selected_timestep
+        cutoff = dl_fflux_menu_options.selected_cutoff
+        force_cap = dl_fflux_menu_options.selected_force_cap
+
+        print_summary_and_pause(
+            "DL_FFLUX JOB SUBMITTED",
+            {
+                "Run path": ichor.cli.global_menu_variables.SELECTED_DLPOLY_RUN_PATH,
+                "Model directory": (
+                    ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH
+                ),
+                "Starting geometry": ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
+                "Job ID": job_id.id if job_id else "not available",
+                "Ensemble": dl_fflux_menu_options.selected_ensemble.upper(),
+                "Temperature": f"{dl_fflux_menu_options.selected_temperature} K",
+                "Timestep": f"{timestep} ps",
+                "Timesteps": f"{nsteps:,}",
+                "Simulated time": f"{nsteps * timestep:,.3f} ps",
+                "Cutoff": (
+                    f"{cutoff} Angstrom" if cutoff else "auto (from the geometry)"
+                ),
+                "Force cap": (f"{force_cap} kT/Angstrom" if force_cap else "disabled"),
+                "CPU cores": dl_fflux_menu_options.selected_number_of_cores,
+                "Executable": (
+                    dl_fflux_menu_options.selected_executable_path or "from config"
+                ),
+            },
+            [
+                "The calculation has been set up in its own RUN<i> directory under the "
+                "run path, next to the shared copy of the models; submitting again "
+                "with the same run path adds another run rather than overwriting this "
+                "one.",
+                "The job is now queued on a compute node, so it will not start "
+                "immediately and this menu does not wait for it. Check on it with your "
+                "batch system's queue command (e.g. qstat / squeue).",
+                "DL_FFLUX writes its trajectory (HISTORY) and energies (STATIS) into "
+                "the run directory; the analysis menu's stability check reads those to "
+                "tell you whether the run stayed intact.",
+            ],
+        )
         # update logger
         ichor.hpc.global_variables.LOGGER.info("DL_FFLUX job submitted")
 

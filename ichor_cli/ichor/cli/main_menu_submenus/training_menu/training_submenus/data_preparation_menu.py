@@ -8,8 +8,8 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_float,
-    user_input_free_flow,
     user_input_int,
     user_input_path,
 )
@@ -282,37 +282,72 @@ class SubmitDataPrepFunctions:
         input_path = Path(ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH)
         has_csv = any(input_path.glob("*.csv"))
 
-        if has_csv:
-            script_path, system_dir = write_dataset_prep(
-                outlier_input_dir=input_path,
-                q00_threshold=q00_threshold,
-                props=props,
-                train_size=train_size,
-                val_size=val_size,
-                test_size=test_size,
+        if not has_csv:
+            print_summary_and_pause(
+                "DATASET SPLITTING JOB NOT SUBMITTED",
+                {"Input directory": input_path},
+                [
+                    "No csv files were found in the directory selected, so there is "
+                    "nothing to split into training, validation and test sets.",
+                    "The input directory is the folder of per-atom csv files made by "
+                    "'Make csvs from database' in the points directory menu (usually a "
+                    "*_processed_csvs folder), not the database or PointsDirectory "
+                    "itself.",
+                ],
             )
+            return
 
-            submit_polus(
-                input_script=script_path,
-                script_name=ichor.hpc.global_variables.SCRIPT_NAMES["datasets"],
-                cwd=system_dir,
-                ncores=ncores,
-            )
+        script_path, system_dir = write_dataset_prep(
+            outlier_input_dir=input_path,
+            q00_threshold=q00_threshold,
+            props=props,
+            train_size=train_size,
+            val_size=val_size,
+            test_size=test_size,
+        )
 
-            answer = ""
-            print("DATASET SPLITTING JOB SUBMITTED.")
-            user_input_free_flow("Press enter to continue: ", answer)
-            # update logger
-            ichor.hpc.global_variables.LOGGER.info(
-                "Data preparation for machine learning job submitted"
-            )
-        else:
-            answer = ""
-            print(
-                "No input CSV files for atoms and features found. "
-                "Please select a folder containing data."
-            )
-            user_input_free_flow("Press enter to continue: ", answer)
+        job_id = submit_polus(
+            input_script=script_path,
+            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["datasets"],
+            cwd=system_dir,
+            ncores=ncores,
+        )
+
+        train_sizes = (
+            ", ".join(str(size) for size in train_size)
+            if isinstance(train_size, (list, tuple))
+            else str(train_size)
+        )
+
+        print_summary_and_pause(
+            "DATASET SPLITTING JOB SUBMITTED",
+            {
+                "Input csv directory": input_path,
+                "Dataset directory": system_dir,
+                "Job ID": job_id.id if job_id else "not available",
+                "Properties": ", ".join(props),
+                "Training set size(s)": train_sizes,
+                "Validation set size": val_size,
+                "Test set size": test_size,
+                "q00 outlier threshold": q00_threshold,
+                "CPU cores": ncores,
+            },
+            [
+                "The job filters out points whose q00 is further than the threshold "
+                "from the mean, then splits what is left into training, validation and "
+                "test sets, one set of files per atom and property.",
+                "Giving several training set sizes builds a separate training folder "
+                "for each of them, which is what a learning curve is made from.",
+                "The job is now queued on a compute node, so it will not start "
+                "immediately and this menu does not wait for it. Check on it with your "
+                "batch system's queue command (e.g. qstat / squeue), then point the "
+                "model training menu at the dataset directory above.",
+            ],
+        )
+        # update logger
+        ichor.hpc.global_variables.LOGGER.info(
+            "Data preparation for machine learning job submitted"
+        )
 
 
 # make menu items

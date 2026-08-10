@@ -17,6 +17,22 @@ AVAILABLE_DATABASE_FORMATS = {
 }
 
 
+def processed_csvs_directory(db_path: Path) -> Path:
+    """Returns the directory that the processed csv files of a database are written to,
+    which sits next to the database itself and is named after the system.
+
+    :param db_path: Path to the database (a .sqlite file or a json database directory).
+    :return: The path of the directory holding the per-atom csv files.
+    """
+
+    # find system name from the database name, stripping whichever suffix it carries
+    system_name = db_path.name
+    for suffix in (".pointsdir", ".pointsdirparent", ".sqlite"):
+        system_name = system_name.removesuffix(suffix)
+
+    return db_path.parent / f"0_{system_name}_processed_csvs"
+
+
 def submit_make_database(
     points_dir_path: Path,
     database_format: str = "sqlite",
@@ -104,16 +120,8 @@ def submit_make_csvs_from_database(
         moments, defaults to True
     :param calculate_feature_forces: Whether or not to calculate ALF forces, defaults to False
     """
-    # path to save database
-    parent_path = db_path.parent
-    # find system name from parent folder
-    system_name = db_path.name
-    # strip pointsdir
-    for suffix in (".pointsdir", ".pointsdirparent", ".sqlite"):
-        system_name = system_name.removesuffix(suffix)
-    # append system name to processed csvs
-    csvs_dir_name = "0_" + system_name + "_processed_csvs"
-    csvs_path = Path(parent_path / csvs_dir_name)
+    # path to save the processed csvs to, next to the database itself
+    csvs_path = processed_csvs_directory(db_path)
 
     # if no alf is given, then automatically calculate it
     if not alf:

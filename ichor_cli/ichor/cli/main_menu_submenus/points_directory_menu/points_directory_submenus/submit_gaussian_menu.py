@@ -9,6 +9,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_bool,
     user_input_free_flow,
     user_input_int,
@@ -145,40 +146,20 @@ class SubmitGaussianFunctions:
             )
         )
 
+        points_directory_path = (
+            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+        )
+
         # if containing many PointsDirectory
         if is_parent_directory_to_many_points_directories:
-
-            for (
-                d
-            ) in (
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.iterdir()
-            ):
-
-                pd = PointsDirectory(d)
-
-                submit_points_directory_to_gaussian(
-                    points_directory=pd,
-                    overwrite_existing=overwrite_existing,
-                    force_calculate_wfn=force_calculate_wfn,
-                    ncores=ncores,
-                    method=method,
-                    basis_set=basis_set,
-                    link0=link0,
-                    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
-                        "outputs"
-                    ]
-                    / pd.path.name
-                    / "GAUSSIAN",
-                    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-                    / pd.path.name
-                    / "GAUSSIAN",
-                )
-
+            points_directories = [
+                PointsDirectory(d) for d in points_directory_path.iterdir()
+            ]
         # if containing one PointsDirectory
         else:
-            pd = PointsDirectory(
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-            )
+            points_directories = [PointsDirectory(points_directory_path)]
+
+        for pd in points_directories:
 
             submit_points_directory_to_gaussian(
                 points_directory=pd,
@@ -195,9 +176,36 @@ class SubmitGaussianFunctions:
                 / pd.path.name
                 / "GAUSSIAN",
             )
-        answer = ""
-        print("GAUSSIAN WAVEFUNCTION COMPUTATION SUBMITTED.")
-        user_input_free_flow("Press enter to continue: ", answer)
+
+        # one job array per PointsDirectory, with one task per point in it
+        npoints = sum(len(pd) for pd in points_directories)
+
+        print_summary_and_pause(
+            "GAUSSIAN WAVEFUNCTION CALCULATIONS SUBMITTED",
+            {
+                "PointsDirectory": points_directory_path,
+                "Job arrays": f"{len(points_directories)} "
+                f"({'many PointsDirectory-ies' if is_parent_directory_to_many_points_directories else 'one PointsDirectory'})",  # noqa: E501
+                "Geometries": f"{npoints:,}",
+                "Method": method,
+                "Basis set": basis_set,
+                "CPU cores per point": ncores,
+                "Memory per point": f"{mem} GB",
+                "Overwrite existing gjfs": overwrite_existing,
+                "Recalculate existing wfns": force_calculate_wfn,
+            },
+            [
+                "A gjf file has been written for every geometry and submitted as a job "
+                "array, so the points are calculated in parallel as the queue allows. "
+                "Check on them with your batch system's queue command (e.g. qstat / "
+                "squeue).",
+                "Each point's wfn file is written next to its gjf inside the "
+                "PointsDirectory; stdout and stderr go to the GAUSSIAN subfolders of "
+                "the outputs and errors directories.",
+                "Once the wavefunctions are there, use the AIMAll menu to get the "
+                "atomic properties out of them.",
+            ],
+        )
 
 
 # make menu items

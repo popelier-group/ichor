@@ -8,6 +8,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_bool,
     user_input_float,
     user_input_free_flow,
@@ -153,8 +154,7 @@ class SubmitAseFunctions:
         )
 
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
-
-        answer = ""
+        optimisation_dir = single_geometry_optimisation_directory(xyz_path.stem, "ase")
 
         # xtb is not installed in the environment the submitted job would activate,
         # so nothing is submitted as every job would fail on the compute node
@@ -173,22 +173,66 @@ class SubmitAseFunctions:
             ichor.hpc.global_variables.LOGGER.error(
                 f"ASE optimisation not submitted: {e}"
             )
-            print(f"ASE OPTIMISATION NOT SUBMITTED. {e}")
-            user_input_free_flow("Press enter to continue: ", answer)
+            print_summary_and_pause(
+                "ASE OPTIMISATION NOT SUBMITTED",
+                {"Structure": xyz_path, "Reason": e},
+                [
+                    "The optimisation runs xtb through ASE on the compute node, and "
+                    "xtb was not found in the environment the job would activate, so "
+                    "every job would have failed. Nothing has been submitted.",
+                    "Install xtb into that environment (or use the Gaussian "
+                    "optimisation menu instead) and try again.",
+                ],
+            )
             return
 
         # nothing was submitted because the optimisation directory already exists
         if job_id is None:
-            print("ASE OPTIMISATION NOT SUBMITTED, SEE MESSAGE ABOVE.")
-            user_input_free_flow("Press enter to continue: ", answer)
+            print_summary_and_pause(
+                "ASE OPTIMISATION NOT SUBMITTED",
+                {
+                    "Structure": xyz_path,
+                    "Optimisation directory": optimisation_dir,
+                },
+                [
+                    "The optimisation directory already exists and overwriting was not "
+                    "selected, so the existing optimisation has been left alone and "
+                    "nothing was submitted.",
+                    "Either select the overwrite option to replace it, or move/rename "
+                    "the existing directory to keep both.",
+                ],
+            )
             return
 
-        optimisation_dir = single_geometry_optimisation_directory(xyz_path.stem, "ase")
-        print(
-            "ASE OPTIMISATION SUBMITTED. The optimised geometry will be written to "
-            f"{optimisation_dir / f'{xyz_path.stem}_optimised.xyz'}"
+        print_summary_and_pause(
+            "ASE OPTIMISATION SUBMITTED",
+            {
+                "Structure": xyz_path,
+                "Optimisation directory": optimisation_dir,
+                "Optimised geometry": (
+                    optimisation_dir / f"{xyz_path.stem}_optimised.xyz"
+                ),
+                "Job ID": job_id.id if job_id else "not available",
+                "Method": method,
+                "Solvent": solvent,
+                "Electronic temperature": f"{electronic_temperature} K",
+                "Max iterations": max_iterations,
+                "Force convergence": f"{fmax} eV/Angstrom",
+                "CPU cores": ncores,
+                "Overwrite existing": overwrite,
+            },
+            [
+                "The geometry is optimised with xtb through ASE, which is quick but "
+                "semi-empirical; use the Gaussian optimisation menu if you need a "
+                "geometry at the same level of theory as the reference calculations.",
+                "The job is now queued on a compute node, so it will not start "
+                "immediately and this menu does not wait for it. Check on it with your "
+                "batch system's queue command (e.g. qstat / squeue).",
+                "The optimised geometry is written to the file above once the job has "
+                "finished, and is what the trajectory creation menus should then be "
+                "pointed at.",
+            ],
         )
-        user_input_free_flow("Press enter to continue: ", answer)
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             f"ASE optimisation job submitted for {xyz_path}, results in {optimisation_dir}"

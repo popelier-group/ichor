@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
@@ -8,10 +9,12 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_submenus.col_var_submenus.col_var_submenu import (
     col_var_menu,
     ColVarMenuFunctions,
+    describe_collective_variable,
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_bool,
     user_input_float,
     user_input_free_flow,
@@ -136,13 +139,19 @@ class MetadynamicsMenuFunctions:
     @staticmethod
     def submit_metadynamics_to_compute():
         """Asks for user input and submits metadynamics job to compute node."""
-        answer = ""
         # if no collective variables are defined then do nothing.
         if len(metadynamics_menu_options.collective_variables) == 0:
-            print(
-                "No collective variables loaded. At least one must be loaded for metadynamics."
+            print_summary_and_pause(
+                "METADYNAMICS JOB NOT SUBMITTED",
+                notes=[
+                    "No collective variables are loaded. A metadynamics simulation "
+                    "biases the system along its collective variables, so at least one "
+                    "must be defined before a job can be set up.",
+                    "Use 'Set up collective variables for metadynamics' to define a "
+                    "distance, angle or dihedral between atoms of the selected "
+                    "structure, then submit again.",
+                ],
             )
-            user_input_free_flow("Press enter to continue: ", answer)
             return
         # if they are present, then start the run for a metadynamics job
         else:
@@ -168,15 +177,70 @@ class MetadynamicsMenuFunctions:
                 calculator=calculator,
                 overwrite=overwrite,
             )
-            # check if there is actually a mtd job to submit
-            if mtd_script is not None:
-                submit_mtd(
-                    input_script=mtd_script,
-                    script_name=ichor.hpc.global_variables.SCRIPT_NAMES["mtd"],
-                    ncores=ncores,
+            xyz_path = ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
+            run_directory = (
+                Path(ichor.hpc.global_variables.FILE_STRUCTURE["metadynamics_traj"])
+                / xyz_path.stem
+            )
+
+            # check if there is actually a mtd job to submit. prep_mtd returns None when
+            # the run directory is already there and overwriting was not asked for
+            if mtd_script is None:
+                print_summary_and_pause(
+                    "METADYNAMICS JOB NOT SUBMITTED",
+                    {
+                        "Starting geometry": xyz_path,
+                        "Run directory": run_directory,
+                    },
+                    [
+                        "The run directory already contains a metadynamics setup for "
+                        "this structure and overwriting was not selected, so nothing "
+                        "has been submitted and the existing run has been left alone.",
+                        "Either select 'Select whether to overwrite existing "
+                        "calculation' to replace it, or move/rename the existing "
+                        "directory to keep both.",
+                    ],
                 )
-            print("MTD SUBMITTED.")
-            user_input_free_flow("Press enter to continue: ", answer)
+                return
+
+            job_id = submit_mtd(
+                input_script=mtd_script,
+                script_name=ichor.hpc.global_variables.SCRIPT_NAMES["mtd"],
+                ncores=ncores,
+            )
+
+            # describe the collective variables by type and the atoms they involve,
+            # as they are what makes this run different from a plain MD run
+            collective_variables = ", ".join(
+                describe_collective_variable(cv) for cv in col_vars
+            )
+
+            print_summary_and_pause(
+                "METADYNAMICS JOB SUBMITTED",
+                {
+                    "Starting geometry": xyz_path,
+                    "Run directory": run_directory,
+                    "Job ID": job_id.id if job_id else "not available",
+                    "Collective variables": f"{len(col_vars)} ({collective_variables})",
+                    "Calculator": calculator,
+                    "Timestep": f"{timestep} fs",
+                    "MD timesteps": f"{md_runsteps:,}",
+                    "Calculator iterations": f"{iterations:,} (max per energy "
+                    "evaluation)",
+                    "Temperature": f"{temperature} K",
+                    "Bias factor": bias,
+                    "CPU cores": ncores,
+                    "Overwrite existing": overwrite,
+                },
+                [
+                    "The job is now queued on a compute node, so it will not start "
+                    "immediately and this menu does not wait for it. Check on it with "
+                    "your batch system's queue command (e.g. qstat / squeue).",
+                    "The PLUMED input, the trajectory and the accumulated bias "
+                    "(HILLS) are all written into the run directory above; the job's "
+                    "stdout and stderr end up in the outputs and errors directories.",
+                ],
+            )
             # update logger
             ichor.hpc.global_variables.LOGGER.info(
                 "Metadynamics trajectory generation job submitted"

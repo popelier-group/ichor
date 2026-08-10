@@ -8,6 +8,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_bool,
     user_input_free_flow,
     user_input_int,
@@ -118,22 +119,54 @@ class SubmitGaussianFunctions:
             overwrite_existing=overwrite_existing,
         )
 
-        answer = ""
-
-        # nothing was submitted because the optimisation directory already exists
-        if job_id is None:
-            print("GAUSSIAN OPTIMISATION NOT SUBMITTED, SEE MESSAGE ABOVE.")
-            user_input_free_flow("Press enter to continue: ", answer)
-            return
-
         optimisation_dir = single_geometry_optimisation_directory(
             xyz_path.stem, "gaussian"
         )
-        print(
-            "GAUSSIAN OPTIMISATION SUBMITTED. The optimised geometry will be written to "
-            f"{optimisation_dir / f'{xyz_path.stem}_optimised.xyz'}"
+
+        # nothing was submitted because the optimisation directory already exists
+        if job_id is None:
+            print_summary_and_pause(
+                "GAUSSIAN OPTIMISATION NOT SUBMITTED",
+                {
+                    "Structure": xyz_path,
+                    "Optimisation directory": optimisation_dir,
+                },
+                [
+                    "The optimisation directory already exists and overwriting was not "
+                    "selected, so the existing optimisation has been left alone and "
+                    "nothing was submitted.",
+                    "Either select the overwrite option to replace it, or move/rename "
+                    "the existing directory to keep both.",
+                ],
+            )
+            return
+
+        print_summary_and_pause(
+            "GAUSSIAN OPTIMISATION SUBMITTED",
+            {
+                "Structure": xyz_path,
+                "Optimisation directory": optimisation_dir,
+                "Optimised geometry": (
+                    optimisation_dir / f"{xyz_path.stem}_optimised.xyz"
+                ),
+                "Job ID": job_id.id if job_id else "not available",
+                "Method": method,
+                "Basis set": basis_set,
+                "Keywords": ", ".join(keywords),
+                "CPU cores": ncores,
+                "Overwrite existing": overwrite_existing,
+            },
+            [
+                "The xyz file has been converted to a gjf and submitted to Gaussian as "
+                "a geometry optimisation at the level of theory above.",
+                "The job is now queued on a compute node, so it will not start "
+                "immediately and this menu does not wait for it. Check on it with your "
+                "batch system's queue command (e.g. qstat / squeue).",
+                "The final geometry is written out as the xyz file above once the job "
+                "has finished, and is what the trajectory creation menus should then "
+                "be pointed at.",
+            ],
         )
-        user_input_free_flow("Press enter to continue: ", answer)
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             f"Gaussian optimisation job submitted for {xyz_path}, results in {optimisation_dir}"
@@ -160,12 +193,23 @@ class SubmitGaussianFunctions:
             hold=job_id,
         )
 
-        answer = ""
-        print(
-            "GAUSSIAN JOB SUBMITTED. The final geometry is going to be written to "
-            f"{optimised_xyz_path} once the job has finished."
+        print_summary_and_pause(
+            "GAUSSIAN JOB SUBMITTED",
+            {
+                "Input file": gjf_path,
+                "Optimised geometry": optimised_xyz_path,
+                "Job ID": job_id.id if job_id else "not available",
+                "CPU cores": ncores,
+            },
+            [
+                "The gjf file was submitted as it is, so the level of theory and the "
+                "keywords are whatever the file itself says, not the settings of this "
+                "menu.",
+                "A second job is held behind this one to write the final geometry out "
+                "as the xyz file above once Gaussian has finished, so both jobs will "
+                "show in your batch system's queue.",
+            ],
         )
-        user_input_free_flow("Press enter to continue: ", answer)
 
         # update logger
         ichor.hpc.global_variables.LOGGER.info(

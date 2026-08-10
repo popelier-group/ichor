@@ -4,7 +4,7 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_free_flow
+from ichor.cli.useful_functions import print_summary_and_pause
 
 FFLUX_API_MENU_DESCRIPTION = MenuDescription(
     "FFLUX_API Menu",
@@ -27,9 +27,15 @@ class FFLUXAPIMenuFunctions:
     @staticmethod
     def placeholder():
         """Placeholder for the FFLUX_API functionality, which is not yet implemented."""
-        answer = ""
-        print("The FFLUX_API menu is not implemented yet.")
-        user_input_free_flow("Press enter to continue: ", answer)
+        print_summary_and_pause(
+            "FFLUX_API NOT IMPLEMENTED YET",
+            notes=[
+                "This menu is a placeholder for running FFLUX calculations through the "
+                "FFLUX API, and nothing has been set up or submitted.",
+                "To run FFLUX calculations in the meantime, use the DL_FFLUX menu, "
+                "which sets up and submits FFLUX-based DL_POLY runs.",
+            ],
+        )
 
 
 # initialize menu

@@ -8,8 +8,8 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_bool,
-    user_input_free_flow,
     user_input_int,
     user_input_path,
     user_input_restricted,
@@ -130,32 +130,76 @@ class SubmitDatabaseFunctions:
         # so that the same code below is used with the respective methods
         str_database_method = AVAILABLE_DATABASE_FORMATS[database_format]
 
+        points_directory_path = (
+            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+        )
+        contents = (
+            "many PointsDirectory-ies"
+            if is_parent_directory_to_many_points_directories
+            else "one PointsDirectory"
+        )
+
         if submit_on_compute:
 
-            submit_make_database(
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH,
+            job_id = submit_make_database(
+                points_directory_path,
                 database_format,
                 ncores=ncores,
             )
 
-        else:
+            print_summary_and_pause(
+                "DATABASE JOB SUBMITTED",
+                {
+                    "PointsDirectory": points_directory_path,
+                    "Contents": contents,
+                    "Database format": database_format,
+                    "Database": points_directory_path / points_directory_path.stem,
+                    "Job ID": job_id.id if job_id else "not available",
+                    "CPU cores": ncores,
+                    "Ran on": "compute node",
+                },
+                [
+                    "The database collects the geometries and the Gaussian/AIMAll "
+                    "results of every point into one place, so it is worth running "
+                    "only once those calculations have finished; any point missing "
+                    "data is reported in the job's output.",
+                    "The job is now queued, so it will not start immediately and this "
+                    "menu does not wait for it. Check on it with your batch system's "
+                    "queue command (e.g. qstat / squeue).",
+                    "The database is written inside the PointsDirectory and named after "
+                    "it (with the format's own suffix). Use 'Make csvs from database' "
+                    "afterwards to get the training data out of it.",
+                ],
+            )
+            return
 
-            # pointsdirectory parent json on login
-            if is_parent_directory_to_many_points_directories:
-                pointsdirparent = PointsDirectoryParent(
-                    ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-                )
-                func = getattr(pointsdirparent, str_database_method)
-                func(print_missing_data=True)
-            else:
-                pointdir = PointsDirectory(
-                    ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-                )
-                func = getattr(pointdir, str_database_method)
-                func(print_missing_data=True)
-        answer = ""
-        print("DATABASE COMPUTATION SUBMITTED.")
-        user_input_free_flow("Press enter to continue: ", answer)
+        # pointsdirectory parent json on login
+        if is_parent_directory_to_many_points_directories:
+            pointsdirparent = PointsDirectoryParent(points_directory_path)
+            func = getattr(pointsdirparent, str_database_method)
+            database_path = func(print_missing_data=True)
+        else:
+            pointdir = PointsDirectory(points_directory_path)
+            func = getattr(pointdir, str_database_method)
+            database_path = func(print_missing_data=True)
+
+        print_summary_and_pause(
+            "DATABASE WRITTEN",
+            {
+                "PointsDirectory": points_directory_path,
+                "Contents": contents,
+                "Database format": database_format,
+                "Database": database_path if database_path else "see messages above",
+                "Ran on": "login node (not submitted)",
+            },
+            [
+                "The database was made here and now rather than on a compute node, so "
+                "it is already finished. Any point that was missing Gaussian or AIMAll "
+                "data is listed above.",
+                "Use 'Make csvs from database' to turn the database into the feature "
+                "and property csv files that model training reads.",
+            ],
+        )
 
 
 # make menu items

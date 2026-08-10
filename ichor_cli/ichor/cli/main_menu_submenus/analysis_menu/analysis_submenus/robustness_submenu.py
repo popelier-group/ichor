@@ -18,6 +18,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_bool,
     user_input_float,
     user_input_free_flow,
@@ -246,6 +247,42 @@ def default_stride_for(number_of_timesteps: int) -> int:
     return max(1, math.isqrt(number_of_timesteps))
 
 
+def stability_check_details(base_path: Path, reference_geometry: Path) -> dict:
+    """Returns the settings a stability check was made with, for showing back to the
+    user. Both halves (running it here and submitting it to a compute node) share these,
+    which is why they are gathered in one place.
+
+    :param base_path: The robustness base path holding the run directories.
+    :param reference_geometry: The geometry whose bond lengths the runs are judged
+        against.
+    :return: A dict of setting name to value, in the order they should be shown in.
+    """
+
+    max_timesteps = stability_check_menu_options.selected_max_timesteps
+    timestep_length = stability_check_menu_options.selected_timestep_length
+
+    return {
+        "Base path": base_path,
+        "Reference geometry": reference_geometry,
+        "Run length": (
+            f"{max_timesteps:,} timesteps of {timestep_length} ps"
+            if max_timesteps
+            else "unknown, measured against the longest run"
+        ),
+        "Scanned every": (
+            f"{stability_check_menu_options.selected_stride:,} timesteps"
+        ),
+        "Explosion factor": (
+            f"{stability_check_menu_options.selected_explosion_factor} "
+            "x the reference bond length"
+        ),
+        "Implosion factor": (
+            f"{stability_check_menu_options.selected_implosion_factor} "
+            "x shorter than the reference bond length"
+        ),
+    }
+
+
 def read_run_settings_from_control(base_path: Path) -> bool:
     """Fills in the stability check settings that the runs themselves already know from
     the CONTROL file of the first run found under the given base path, so that they do
@@ -307,13 +344,31 @@ class RobustnessMenuFunctions:
         if read_run_settings_from_control(
             ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH
         ):
-            print(
-                "Read "
-                f"{stability_check_menu_options.selected_max_timesteps} timesteps of "
-                f"{stability_check_menu_options.selected_timestep_length} ps from the "
-                "CONTROL file of the existing runs."
+            print_summary_and_pause(
+                "RUN SETTINGS READ FROM THE EXISTING RUNS",
+                {
+                    "Base path": (
+                        ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH
+                    ),
+                    "Timesteps": (
+                        f"{stability_check_menu_options.selected_max_timesteps:,}"
+                    ),
+                    "Timestep length": (
+                        f"{stability_check_menu_options.selected_timestep_length} ps"
+                    ),
+                    "Scanned every": (
+                        f"{stability_check_menu_options.selected_stride:,} timesteps"
+                    ),
+                },
+                [
+                    "The base path already holds runs, so the settings the stability "
+                    "check shares with them (how long they were meant to run for) have "
+                    "been taken from the CONTROL file of the first run rather than "
+                    "having to be typed in.",
+                    "The robustness of the runs is measured against that length, so it "
+                    "is worth checking these are the runs you meant to look at.",
+                ],
             )
-            user_input_free_flow("Press enter to continue: ", "")
 
 
 class RobustnessSetupMenuFunctions:
@@ -425,7 +480,7 @@ class RobustnessSetupMenuFunctions:
         models kept in the base path, and submits them as a job array."""
 
         try:
-            submit_dlpoly_fflux_robustness(
+            job_id = submit_dlpoly_fflux_robustness(
                 base_path=ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH,
                 model_directory=ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH,  # noqa: E501
                 seed_trajectory=ichor.cli.global_menu_variables.SELECTED_DLPOLY_SEED_TRAJECTORY_PATH,  # noqa: E501
@@ -446,17 +501,79 @@ class RobustnessSetupMenuFunctions:
             ichor.hpc.global_variables.LOGGER.error(
                 f"DL_FFLUX robustness check not submitted: {error}"
             )
-            print(f"ROBUSTNESS CHECK NOT SUBMITTED: {error}")
-            user_input_free_flow("Press enter to continue: ", "")
+            print_summary_and_pause(
+                "DL_FFLUX ROBUSTNESS CHECK NOT SUBMITTED",
+                {
+                    "Base path": (
+                        ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH
+                    ),
+                    "Model directory": (
+                        ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH
+                    ),
+                    "Reason": error,
+                },
+                [
+                    "Every run under one base path shares the single copy of the models "
+                    "kept there, so a base path can only be reused with the models it "
+                    "already holds. Pick an empty (or new) base path to check a "
+                    "different set of models.",
+                ],
+            )
             return
         # the runs now exist, so the stability check can take the settings it shares with
         # them (how long they run for) straight from the CONTROL files just written
         read_run_settings_from_control(
             ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH
         )
-        answer = ""
-        print("DL_FFLUX ROBUSTNESS CHECK SUBMITTED.")
-        user_input_free_flow("Press enter to continue: ", answer)
+
+        nsteps = robustness_setup_menu_options.selected_number_of_timesteps
+        timestep = robustness_setup_menu_options.selected_timestep
+        cutoff = robustness_setup_menu_options.selected_cutoff
+        force_cap = robustness_setup_menu_options.selected_force_cap
+
+        print_summary_and_pause(
+            "DL_FFLUX ROBUSTNESS CHECK SUBMITTED",
+            {
+                "Base path": (
+                    ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH
+                ),
+                "Model directory": (
+                    ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH
+                ),
+                "Seed trajectory": (
+                    ichor.cli.global_menu_variables.SELECTED_DLPOLY_SEED_TRAJECTORY_PATH
+                ),
+                "Job ID": job_id.id if job_id else "not available",
+                "Seed geometries": (
+                    f"{robustness_setup_menu_options.selected_number_of_seeds} "
+                    "(one RUN directory each)"
+                ),
+                "Ensemble": robustness_setup_menu_options.selected_ensemble.upper(),
+                "Temperature": (
+                    f"{robustness_setup_menu_options.selected_temperature} K"
+                ),
+                "Timestep": f"{timestep} ps",
+                "Timesteps": f"{nsteps:,}",
+                "Simulated time per run": f"{nsteps * timestep:,.3f} ps",
+                "Cutoff": (
+                    f"{cutoff} Angstrom" if cutoff else "auto (from the geometry)"
+                ),
+                "Force cap": (f"{force_cap} kT/Angstrom" if force_cap else "disabled"),
+                "CPU cores per run": (
+                    robustness_setup_menu_options.selected_number_of_cores
+                ),
+            },
+            [
+                "Each seed geometry runs its own simulation from a different part of "
+                "the configuration space, which is how the models are probed for runs "
+                "that explode or implode rather than staying intact.",
+                "All of the runs were submitted together as one job array, so check on "
+                "them with your batch system's queue command (e.g. qstat / squeue).",
+                "Once they have finished, use the stability check in this menu to turn "
+                "the runs into a robustness score; it has already picked up how long "
+                "the runs are from the CONTROL files just written.",
+            ],
+        )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             "DL_FFLUX robustness check job submitted"
@@ -591,7 +708,7 @@ class StabilityCheckMenuFunctions:
                 "Select number of cores: ", stability_check_number_of_cores
             )
 
-            submit_dlpoly_fflux_stability_check(
+            job_id = submit_dlpoly_fflux_stability_check(
                 base_path=base_path,
                 reference_geometry=reference_geometry,
                 report_path=report_path,
@@ -606,8 +723,24 @@ class StabilityCheckMenuFunctions:
             ichor.hpc.global_variables.LOGGER.info(
                 "DL_FFLUX stability check job submitted"
             )
-            print("DL_FFLUX STABILITY CHECK SUBMITTED.")
-            user_input_free_flow("Press enter to continue: ", "")
+            print_summary_and_pause(
+                "DL_FFLUX STABILITY CHECK SUBMITTED",
+                {
+                    **stability_check_details(base_path, reference_geometry),
+                    "Report": report_path,
+                    "Job ID": job_id.id if job_id else "not available",
+                    "CPU cores": stability_check_number_of_cores,
+                    "Ran on": "compute node",
+                },
+                [
+                    "Reading a long HISTORY file for every run takes a while, which is "
+                    "why this can be sent to a compute node instead of being done here.",
+                    "The job is now queued, so it will not start immediately and this "
+                    "menu does not wait for it. Check on it with your batch system's "
+                    "queue command (e.g. qstat / squeue); the report is written to the "
+                    "path above when it finishes.",
+                ],
+            )
 
         else:
 
@@ -615,11 +748,22 @@ class StabilityCheckMenuFunctions:
                 Path(base_path).glob(ROBUSTNESS_RUN_DIRECTORY_GLOB)
             )
             if not run_directories:
-                print(
-                    f"No {ROBUSTNESS_RUN_DIRECTORY_GLOB} directories found in "
-                    f"{base_path}."
+                print_summary_and_pause(
+                    "STABILITY CHECK NOT RUN",
+                    {
+                        "Base path": base_path,
+                        "Looked for": ROBUSTNESS_RUN_DIRECTORY_GLOB,
+                    },
+                    [
+                        "No run directories were found in the base path, so there is "
+                        "nothing to check.",
+                        "The base path has to be the one the robustness check was set "
+                        "up in, which holds one RUN directory per seed geometry. Note "
+                        "that single point calculations use POINT directories instead "
+                        "and are deliberately not picked up here, as they have no "
+                        "trajectory to be stable over.",
+                    ],
                 )
-                user_input_free_flow("Press enter to continue: ", "")
                 return
 
             print(f"Checking {len(run_directories)} runs, this might take a while...")
@@ -648,17 +792,30 @@ class StabilityCheckMenuFunctions:
             )
 
             nstable = sum(1 for r in stability_check.results if not r.crashed)
+            nruns = len(stability_check.results)
             robustness = stability_check.robustness(max_timesteps)
-            print(
-                f"{nstable} / {len(stability_check.results)} runs stayed intact, "
-                f"robustness: {robustness:.4f}"
-            )
             ichor.hpc.global_variables.LOGGER.info(
                 f"DL_FFLUX stability check written to {report_path}, "
                 f"robustness: {robustness:.4f}"
             )
-            print(f"STABILITY REPORT WRITTEN TO {report_path}.")
-            user_input_free_flow("Press enter to continue: ", "")
+            print_summary_and_pause(
+                "STABILITY REPORT WRITTEN",
+                {
+                    **stability_check_details(base_path, reference_geometry),
+                    "Report": report_path,
+                    "Runs checked": f"{nruns}",
+                    "Runs intact": f"{nstable} / {nruns}",
+                    "Robustness": f"{robustness:.4f}",
+                    "Ran on": "login node (not submitted)",
+                },
+                [
+                    "Robustness is the average fraction of the intended run length that "
+                    "the runs survived for, so 1.0000 means every run stayed intact the "
+                    "whole way through and a lower value means some broke early.",
+                    "The report printed above is also in the file, giving the timestep "
+                    "each run broke at and which bond went first.",
+                ],
+            )
 
 
 # initialize menus

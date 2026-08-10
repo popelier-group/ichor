@@ -1,11 +1,17 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 import ichor.cli.global_menu_variables
+import ichor.hpc.global_variables
 from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import user_input_free_flow, user_input_int
+from ichor.cli.useful_functions import (
+    print_summary_and_pause,
+    user_input_free_flow,
+    user_input_int,
+)
 from ichor.hpc.molecular_dynamics import submit_cp2k
 
 # TODO: possibly make this be read from a file
@@ -116,9 +122,11 @@ class CP2KMenuFunctions:
         spin_multiplicity = cp2k_menu_options.selected_spin_multiplicity
         ncores = cp2k_menu_options.selected_number_of_cores
 
-        submit_cp2k(
-            input_file=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
-            system_name=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH.stem,
+        xyz_path = ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
+
+        job_id = submit_cp2k(
+            input_file=xyz_path,
+            system_name=xyz_path.stem,
             temperature=temperature,
             nsteps=nsteps,
             method=method,
@@ -127,9 +135,34 @@ class CP2KMenuFunctions:
             spin_multiplicity=spin_multiplicity,
             ncores=ncores,
         )
-        answer = ""
-        print("CP2K SUBMITTED.")
-        user_input_free_flow("Press enter to continue: ", answer)
+
+        cp2k_directory = Path(ichor.hpc.global_variables.FILE_STRUCTURE["cp2k"])
+
+        print_summary_and_pause(
+            "CP2K JOB SUBMITTED",
+            {
+                "Starting geometry": xyz_path,
+                "System name": xyz_path.stem,
+                "CP2K directory": cp2k_directory,
+                "Input file": cp2k_directory / f"{xyz_path.stem}.inp",
+                "Job ID": job_id.id if job_id else "not available",
+                "Method": method,
+                "Basis set": basis_set,
+                "Temperature": f"{temperature} K",
+                "Timesteps": f"{nsteps:,}",
+                "Molecular charge": molecular_charge,
+                "Spin multiplicity": spin_multiplicity,
+                "CPU cores": ncores,
+            },
+            [
+                "The job is now queued on a compute node, so it will not start "
+                "immediately and this menu does not wait for it. Check on it with your "
+                "batch system's queue command (e.g. qstat / squeue).",
+                "CP2K writes its trajectory and restart files into the CP2K directory "
+                "above; the job's stdout and stderr end up in the outputs and errors "
+                "directories.",
+            ],
+        )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             "CP2K trajectory generation job submitted"

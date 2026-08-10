@@ -7,9 +7,9 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
+from ichor.cli.useful_functions import print_summary_and_pause
 from ichor.cli.useful_functions.user_input import (
     user_input_bool,
-    user_input_free_flow,
     user_input_int,
     user_input_path,
 )
@@ -77,10 +77,27 @@ class TrajSplitFunctions:
         system_name = ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH.stem
         parent_path = Path("4_PROPERTY_CALC")
 
-        traj.to_dir(system_name, every, to_center, parent_path)
-        answer = ""
-        print("TRAJECTORY SPLIT INTO SINGLE POINTS DIRECTORY.")
-        user_input_free_flow("Press enter to continue: ", answer)
+        points_directory_path = traj.to_dir(system_name, every, to_center, parent_path)
+
+        # every ith geometry of the trajectory becomes one point of the directory
+        ngeometries = len(range(0, len(traj), every))
+
+        print_summary_and_pause(
+            "TRAJECTORY SPLIT INTO A POINTSDIRECTORY",
+            {
+                "Trajectory": ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH,
+                "PointsDirectory": Path(points_directory_path).absolute(),
+                "Geometries in trajectory": f"{len(traj):,}",
+                "Geometries written": f"{ngeometries:,} (every {every})",
+                "Centroid subtracted": to_center,
+            },
+            [
+                "Each geometry now has its own point directory holding an xyz file, "
+                "which is what the Gaussian and AIMAll menus submit calculations for.",
+                "The PointsDirectory is created under 4_PROPERTY_CALC relative to "
+                "where ichor is running, not next to the trajectory file.",
+            ],
+        )
 
     @staticmethod
     def split_trajectory_into_many_points_directories():
@@ -113,10 +130,35 @@ class TrajSplitFunctions:
         # path for organising directories - will add to mkdir menu
         parent_path = Path("4_PROPERTY_CALC")
 
-        traj.to_dirs(system_name, nsplit, every, to_center, parent_path)
-        answer = ""
-        print("TRAJECTORY SPLIT INTO MULTIPLE POINTS DIRECTORIES.")
-        user_input_free_flow("Press enter to continue: ", answer)
+        parent_directory_path = traj.to_dirs(
+            system_name, nsplit, every, to_center, parent_path
+        )
+
+        # every ith geometry is written, and those are then chunked into directories of
+        # at most nsplit geometries each
+        ngeometries = len(range(0, len(traj), every))
+        ndirectories = -(-ngeometries // nsplit)
+
+        print_summary_and_pause(
+            "TRAJECTORY SPLIT INTO MULTIPLE POINTSDIRECTORY-IES",
+            {
+                "Trajectory": ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH,
+                "Parent directory": Path(parent_directory_path).absolute(),
+                "Geometries in trajectory": f"{len(traj):,}",
+                "Geometries written": f"{ngeometries:,} (every {every})",
+                "PointsDirectory-ies": f"{ndirectories:,} of up to {nsplit:,} "
+                "geometries each",
+                "Centroid subtracted": to_center,
+            },
+            [
+                "Splitting a long trajectory into several PointsDirectory-ies keeps "
+                "each job array down to a manageable size; the Gaussian, AIMAll and "
+                "database menus all accept the parent directory and work through every "
+                "PointsDirectory inside it.",
+                "The parent directory is created under 4_PROPERTY_CALC relative to "
+                "where ichor is running, not next to the trajectory file.",
+            ],
+        )
 
 
 # initialize menu

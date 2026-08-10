@@ -8,8 +8,8 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_bool,
-    user_input_free_flow,
     user_input_int,
 )
 from ichor.hpc.main.polus import submit_polus, write_diversity_sampling
@@ -115,15 +115,39 @@ class SubmitDiversityFunctions:
             chunk_size=chunk_size,
         )
 
-        submit_polus(
+        job_id = submit_polus(
             input_script=div_script,
             script_name=ichor.hpc.global_variables.SCRIPT_NAMES["diversity_sampling"],
             ncores=ncores,
         )
 
-        answer = ""
-        print("DIVERSITY SAMPLING SUBMITTED.")
-        user_input_free_flow("Press enter to continue: ", answer)
+        print_summary_and_pause(
+            "DIVERSITY SAMPLING JOB SUBMITTED",
+            {
+                "Trajectory": trajectory_path,
+                "Seed geometry": xyz_path,
+                # the input script sits in the folder the sampling writes its output to
+                "Run directory": Path(div_script).parent,
+                "Job ID": job_id.id if job_id else "not available",
+                "Sample size": f"{sample_size:,} geometries",
+                "Chunk size": f"{chunk_size:,} geometries per chunk",
+                "Weights vector": f"{weights_vector} "
+                f"({'heavy atoms only' if weights else 'all atoms, hydrogens included'})",
+                "CPU cores": ncores,
+            },
+            [
+                "Diversity sampling picks a spread-out subset of the trajectory, so "
+                "that the geometries which go on to expensive Gaussian and AIMAll "
+                "calculations cover the configuration space rather than repeating "
+                "similar structures.",
+                "The trajectory is compared in chunks to keep the distance matrix in "
+                "memory, so a smaller chunk size uses less memory but takes longer.",
+                "The job is now queued on a compute node, so it will not start "
+                "immediately and this menu does not wait for it. Check on it with your "
+                "batch system's queue command (e.g. qstat / squeue); the sampled "
+                "trajectory is written into the run directory above.",
+            ],
+        )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             f"Diversity sampling job submitted for {xyz_path}"

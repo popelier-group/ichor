@@ -9,6 +9,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_free_flow,
     user_input_int,
     user_input_path,
@@ -131,36 +132,19 @@ class SubmitAIMALLFunctions:
             )
         )
 
+        points_directory_path = (
+            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+        )
+
         # if containing many PointsDirectory
         if is_parent_directory_to_many_points_directories:
-
-            for (
-                d
-            ) in (
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.iterdir()
-            ):
-
-                pd = PointsDirectory(d)
-                submit_points_directory_to_aimall(
-                    points_directory=pd,
-                    method=method,
-                    ncores=ncores,
-                    naat=naat,
-                    encomp=encomp,
-                    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
-                        "outputs"
-                    ]
-                    / pd.path.name
-                    / "AIMALL",
-                    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-                    / pd.path.name
-                    / "AIMALL",
-                )
-
+            points_directories = [
+                PointsDirectory(d) for d in points_directory_path.iterdir()
+            ]
         else:
-            pd = PointsDirectory(
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-            )
+            points_directories = [PointsDirectory(points_directory_path)]
+
+        for pd in points_directories:
 
             submit_points_directory_to_aimall(
                 points_directory=pd,
@@ -175,9 +159,34 @@ class SubmitAIMALLFunctions:
                 / pd.path.name
                 / "AIMALL",
             )
-        answer = ""
-        print("AIMALL COMPUTATION SUBMITTED.")
-        user_input_free_flow("Press enter to continue: ", answer)
+
+        # one job array per PointsDirectory, with one task per point in it
+        npoints = sum(len(pd) for pd in points_directories)
+
+        print_summary_and_pause(
+            "AIMALL CALCULATIONS SUBMITTED",
+            {
+                "PointsDirectory": points_directory_path,
+                "Job arrays": f"{len(points_directories)} "
+                f"({'many PointsDirectory-ies' if is_parent_directory_to_many_points_directories else 'one PointsDirectory'})",  # noqa: E501
+                "Geometries": f"{npoints:,}",
+                "Method": method,
+                "naat setting": naat,
+                "encomp setting": encomp,
+                "CPU cores per point": ncores,
+            },
+            [
+                "AIMAll partitions each wavefunction into atomic basins, so every point "
+                "needs a wfn file from a finished Gaussian job; points without one are "
+                "skipped.",
+                "The results are written into a <point>_atomicfiles folder next to each "
+                "wfn inside the PointsDirectory; stdout and stderr go to the AIMALL "
+                "subfolders of the outputs and errors directories.",
+                "The calculations are submitted as a job array, so check on them with "
+                "your batch system's queue command (e.g. qstat / squeue). Once they "
+                "have finished, collect the atomic properties with the database menu.",
+            ],
+        )
 
 
 # make menu items

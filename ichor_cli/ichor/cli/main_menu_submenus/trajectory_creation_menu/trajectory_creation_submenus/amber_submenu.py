@@ -2,11 +2,13 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import ichor.cli.global_menu_variables
+import ichor.hpc.global_variables
 from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_float,
     user_input_free_flow,
     user_input_int,
@@ -120,18 +122,45 @@ class AmberMenuFunctions:
         dt = amber_menu_options.selected_dt
         ln_gamma = amber_menu_options.selected_ln_gamma
 
-        submit_amber(
-            input_file_path=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
+        xyz_path = ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
+
+        job_id = submit_amber(
+            input_file_path=xyz_path,
             temperature=temperature,
             nsteps=nsteps,
             write_coord_every=write_coord_every,
-            system_name=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH.stem,
+            system_name=xyz_path.stem,
             dt=dt,
             ln_gamma=ln_gamma,
         )
-        answer = ""
-        print("AMBER SUBMITTED.")
-        user_input_free_flow("Press enter to continue: ", answer)
+
+        amber_directory = Path(ichor.hpc.global_variables.FILE_STRUCTURE["amber"])
+
+        print_summary_and_pause(
+            "AMBER JOB SUBMITTED",
+            {
+                "Starting geometry": xyz_path,
+                "System name": xyz_path.stem,
+                "AMBER directory": amber_directory,
+                "Job ID": job_id.id if job_id else "not available",
+                "Temperature": f"{temperature} K",
+                "Timesteps": f"{nsteps:,}",
+                "Timestep length": f"{dt} ps",
+                "Simulated time": f"{nsteps * dt:,.1f} ps",
+                "Write coordinates": f"every {write_coord_every} timestep(s), "
+                f"~{nsteps // write_coord_every:,} geometries",
+                "Collision frequency": f"{ln_gamma} ps",
+            },
+            [
+                "The job is now queued on a compute node, so it will not start "
+                "immediately and this menu does not wait for it. Check on it with your "
+                "batch system's queue command (e.g. qstat / squeue).",
+                "The mol2 and md.in input files are in the AMBER directory above, and "
+                "the trajectory is written there as an mdcrd file. Use 'Convert mdcrd "
+                "to xyz' once the job has finished to turn it into a trajectory ichor "
+                "can split into a PointsDirectory.",
+            ],
+        )
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             "AMBER trajectory generation job submitted"
@@ -141,6 +170,7 @@ class AmberMenuFunctions:
     def xyz_from_mdcrd():
         amber_path, system_name, every = ask_user_for_mdcrd_paths()
 
+        mdcrd_file = prmtop_file = mdin_file = None
         for f in amber_path.iterdir():
             if f.stem == "mdcrd":
                 mdcrd_file = f
@@ -149,7 +179,52 @@ class AmberMenuFunctions:
             elif f.name == "md.in":
                 mdin_file = f
 
+        # all three are needed: the coordinates, the atom names, and the temperature
+        # that the output file is named after
+        missing = [
+            name
+            for name, found in (
+                ("mdcrd", mdcrd_file),
+                (".prmtop", prmtop_file),
+                ("md.in", mdin_file),
+            )
+            if found is None
+        ]
+        if missing:
+            print_summary_and_pause(
+                "TRAJECTORY NOT CONVERTED",
+                {
+                    "AMBER directory": amber_path,
+                    "Missing files": ", ".join(missing),
+                },
+                [
+                    "The conversion needs the mdcrd (coordinates), the .prmtop (atom "
+                    "names) and the md.in (temperature) files of a finished AMBER run, "
+                    "and the files above were not found in the directory given.",
+                    "Check that the AMBER job has finished and that the directory "
+                    "given is the one it ran in.",
+                ],
+            )
+            return
+
         mdcrd_to_xyz(mdcrd_file, prmtop_file, mdin_file, system_name, every)
+
+        print_summary_and_pause(
+            "TRAJECTORY CONVERTED TO XYZ",
+            {
+                "AMBER directory": amber_path,
+                "System name": system_name,
+                "Written every": f"{every} timestep(s)",
+                "Output file": f"{system_name}-amber<temperature>K.xyz in "
+                f"{Path.cwd()}",
+            },
+            [
+                "The mdcrd trajectory has been written out as an xyz trajectory, named "
+                "after the system and the temperature read from md.in.",
+                "This xyz file is what the points directory menu splits into a "
+                "PointsDirectory for Gaussian and AIMAll calculations.",
+            ],
+        )
 
 
 # initialize menu

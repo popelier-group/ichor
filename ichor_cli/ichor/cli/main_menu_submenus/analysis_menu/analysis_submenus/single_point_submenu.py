@@ -18,6 +18,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    print_summary_and_pause,
     user_input_float,
     user_input_free_flow,
     user_input_int,
@@ -207,7 +208,7 @@ class SinglePointMenuFunctions:
         models kept in the base path, and submits them as a job array."""
 
         try:
-            submit_dlpoly_fflux_single_points(
+            job_id = submit_dlpoly_fflux_single_points(
                 base_path=ichor.cli.global_menu_variables.SELECTED_DLPOLY_SINGLE_POINT_PATH,  # noqa: E501
                 model_directory=ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH,  # noqa: E501
                 trajectory_path=ichor.cli.global_menu_variables.SELECTED_DLPOLY_SINGLE_POINT_TRAJECTORY_PATH,  # noqa: E501
@@ -225,12 +226,66 @@ class SinglePointMenuFunctions:
             ichor.hpc.global_variables.LOGGER.error(
                 f"DL_FFLUX single points not submitted: {error}"
             )
-            print(f"SINGLE POINTS NOT SUBMITTED: {error}")
-            user_input_free_flow("Press enter to continue: ", "")
+            print_summary_and_pause(
+                "DL_FFLUX SINGLE POINTS NOT SUBMITTED",
+                {
+                    "Base path": (
+                        ichor.cli.global_menu_variables.SELECTED_DLPOLY_SINGLE_POINT_PATH  # noqa: E501
+                    ),
+                    "Model directory": (
+                        ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH
+                    ),
+                    "Reason": error,
+                },
+                [
+                    "Every calculation under one base path shares the single copy of "
+                    "the models kept there, so a base path can only be reused with the "
+                    "models it already holds. Pick an empty (or new) base path to use "
+                    "a different set of models.",
+                ],
+            )
             return
 
-        print("DL_FFLUX SINGLE POINTS SUBMITTED.")
-        user_input_free_flow("Press enter to continue: ", "")
+        ngeometries = single_point_menu_options.selected_number_of_geometries
+        cutoff = single_point_menu_options.selected_cutoff
+
+        print_summary_and_pause(
+            "DL_FFLUX SINGLE POINTS SUBMITTED",
+            {
+                "Base path": (
+                    ichor.cli.global_menu_variables.SELECTED_DLPOLY_SINGLE_POINT_PATH
+                ),
+                "Model directory": (
+                    ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH
+                ),
+                "Trajectory": (
+                    ichor.cli.global_menu_variables.SELECTED_DLPOLY_SINGLE_POINT_TRAJECTORY_PATH  # noqa: E501
+                ),
+                "Job ID": job_id.id if job_id else "not available",
+                "Geometries": (
+                    f"{ngeometries:,}" if ngeometries else "every geometry in the file"
+                ),
+                "Cutoff": (
+                    f"{cutoff} Angstrom" if cutoff else "auto (from the geometry)"
+                ),
+                "CPU cores per point": (
+                    single_point_menu_options.selected_number_of_cores
+                ),
+                "Executable": (
+                    single_point_menu_options.selected_executable_path or "from config"
+                ),
+            },
+            [
+                "No dynamics is run: each geometry gets its own POINT<i> directory and "
+                "a zero-timestep run, so DL_FFLUX simply evaluates the geometry it was "
+                "given and stops.",
+                "All of the points were submitted together as one job array, so check "
+                "on them with your batch system's queue command (e.g. qstat / squeue).",
+                "The FFLUX energies (and forces) of each geometry end up in its POINT "
+                "directory, which is what you compare against the Gaussian/AIMAll "
+                "values the geometries were labelled with.",
+            ],
+        )
         # update logger
         ichor.hpc.global_variables.LOGGER.info("DL_FFLUX single point jobs submitted")
 
