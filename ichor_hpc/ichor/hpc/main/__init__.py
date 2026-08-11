@@ -2,7 +2,7 @@ from ichor.hpc.main.aimall import submit_points_directory_to_aimall
 from ichor.hpc.main.check_for_missing_files import (
     submit_check_points_directory_for_missing_files,
 )
-from ichor.hpc.main.database import submit_make_csvs_from_database
+from ichor.hpc.main.database import submit_make_csvs_from_database, submit_make_database
 from ichor.hpc.main.ferebus import (
     find_and_setup_ferebus_subdirs,
     pyferebus_platform,
@@ -20,6 +20,7 @@ from ichor.hpc.main.opt import (
     setup_single_geometry_optimisation_directory,
     single_geometry_optimisation_directory,
 )
+from ichor.hpc.main.data_generation import submit_data_generation
 from ichor.hpc.main.orca import submit_points_directory_to_orca
 from ichor.hpc.main.overfitting import submit_overfitting_report
 
@@ -33,6 +34,7 @@ __all__ = [
     "read_single_geometry",
     "submit_gjfs",
     "submit_make_csvs_from_database",
+    "submit_make_database",
     "submit_points_directory_to_orca",
     "submit_check_points_directory_for_missing_files",
     "write_pyferebus_input_script",
@@ -40,4 +42,5 @@ __all__ = [
     "find_and_setup_ferebus_subdirs",
     "pyferebus_platform",
     "submit_overfitting_report",
+    "submit_data_generation",
 ]

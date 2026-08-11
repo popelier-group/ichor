@@ -10,6 +10,7 @@ from ichor.core.common.str import get_digits
 from ichor.core.files import WFN
 from ichor.hpc.global_variables import get_param_from_config
 from ichor.hpc.submission_command import SubmissionCommand
+from ichor.hpc.submission_commands.python_command import PythonCommand
 
 
 class UseTwoe(Enum):
@@ -192,6 +193,7 @@ class AIMAllCommand(SubmissionCommand):
         verifyw: str = "yes",
         saw: bool = False,
         autonnacps: bool = True,
+        method: Optional[str] = None,
     ):
 
         self.wfn_file = WFN(wfn_file_path)
@@ -233,6 +235,7 @@ class AIMAllCommand(SubmissionCommand):
         self.verifyw = VerifyW(verifyw)
         self.saw = saw
         self.autonnacps = autonnacps
+        self.method = method
 
     @property
     def data(self) -> List[str]:
@@ -326,6 +329,16 @@ class AIMAllCommand(SubmissionCommand):
         """Returns a string which is written out to the submission script file in
         order to run AIMALL correctly (with the appropriate settings)."""
 
-        cmd = f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
+        cmd = ""
+        if self.method:
+            # A workflow can be submitted before Gaussian has created the WFN.
+            # Amend the file on the compute node, immediately before AIMAll reads it.
+            cmd += PythonCommand.command + "\n"
+            cmd += (
+                'python3 -c "from ichor.core.files import WFN; '
+                f"w = WFN('{variables[0]}', method='{self.method}'); "
+                'w.read(); w.write()"\n'
+            )
+        cmd += f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
 
         return cmd
