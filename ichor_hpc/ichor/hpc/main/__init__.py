@@ -13,7 +13,7 @@ from ichor.hpc.main.gaussian import (
     submit_points_directory_to_gaussian,
     submit_single_gaussian_xyz,
 )
-from ichor.hpc.main.fflux_workflow import FFLUXWorkflowJobs, submit_fflux_workflow
+from ichor.hpc.main.data_generation import submit_data_generation
 from ichor.hpc.main.orca import submit_points_directory_to_orca
 
 __all__ = [
@@ -28,6 +28,5 @@ __all__ = [
     "write_pyferebus_input_script",
     "write_extract_models_script",
     "find_and_setup_ferebus_subdirs",
-    "FFLUXWorkflowJobs",
-    "submit_fflux_workflow",
+    "submit_data_generation",
 ]

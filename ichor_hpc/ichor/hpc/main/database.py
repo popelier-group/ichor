@@ -2,8 +2,6 @@ from pathlib import Path
 from typing import List
 
 from ichor.core.atoms import ALF
-from ichor.core.database import get_alf_from_first_db_geometry
-
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.global_variables import SCRIPT_NAMES
@@ -90,6 +88,8 @@ def submit_make_csvs_from_database(
     float_integration_error: float = 1e-3,
     rotate_multipole_moments: bool = True,
     calculate_feature_forces: bool = False,
+    hold: JobID = None,
+    script_name=SCRIPT_NAMES["calculate_features"],
 ):
     """Submits making of csv files from a databse to compute node.
     Note that the csv making code is parallelized per atom, meaning that
@@ -108,6 +108,8 @@ def submit_make_csvs_from_database(
     :param rotate_multipole_moments: Whether or not to rotate multipole
         moments, defaults to True
     :param calculate_feature_forces: Whether or not to calculate ALF forces, defaults to False
+    :param hold: optional scheduler job which must finish before CSV creation
+    :param script_name: path of the CSV-generation submission script
     """
     # path to save database
     parent_path = db_path.parent
@@ -120,10 +122,6 @@ def submit_make_csvs_from_database(
     csvs_dir_name = "0_" + system_name + "_processed_csvs"
     csvs_path = Path(parent_path / csvs_dir_name)
 
-    # if no alf is given, then automatically calculate it
-    if not alf:
-        alf = get_alf_from_first_db_geometry(db_path, db_type)
-
     text_list = []
     # make the python command that will be written in the submit script
     # it will get executed as `python -c python_code_to_execute...`
@@ -133,7 +131,16 @@ def submit_make_csvs_from_database(
     text_list.append("from pathlib import Path")
     text_list.append("from ichor.core.atoms import ALF")
     text_list.append(f"db_path = Path('{db_path.absolute()}')")
-    text_list.append(f"alf = {alf}")
+    if alf:
+        text_list.append(f"alf = {alf}")
+    else:
+        # The database may not exist yet when this dependent job is submitted.
+        text_list.append(
+            "from ichor.core.database import get_alf_from_first_db_geometry"
+        )
+        text_list.append(
+            f"alf = get_alf_from_first_db_geometry(db_path, '{db_type}')"
+        )
     str_part1 = (
         f"write_processed_data_for_atoms_parallel(db_path, '{db_type}', alf, {ncores},"
     )
@@ -146,6 +153,7 @@ def submit_make_csvs_from_database(
 
     return submit_free_flow_python_command_on_compute(
         text_list=text_list,
-        script_name=SCRIPT_NAMES["calculate_features"],
+        script_name=script_name,
         ncores=ncores,
+        hold=hold,
     )
