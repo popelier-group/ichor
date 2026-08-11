@@ -105,6 +105,7 @@ def submit_wfns(
     hold: Optional[JobID] = None,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
+    method: Optional[str] = None,
     **kwargs,
 ) -> Optional[JobID]:
     """Write out submission script and submit wavefunctions to AIMALL on a cluster.
@@ -114,6 +115,9 @@ def submit_wfns(
         These will be the atoms for which AIMALL computes properties.
     :param force: Whether or not to compute AIMALL for this wfn. If force is True, AIMALL will be ran again
     :param hold: An optional JobID to hold for. The AIMALL job will not run until that other job is finished.
+    :param method: If set, amend each WFN with this method at job runtime. This
+        allows an AIMAll script to be submitted before a dependent Gaussian job
+        has created its WFN files.
 
     """
     with SubmissionScript(
@@ -134,7 +138,12 @@ def submit_wfns(
 
                 submission_script.add_command(
                     AIMAllCommand(
-                        wfn, atoms=aimall_atoms, ncores=ncores, naat=naat, **kwargs
+                        wfn,
+                        atoms=aimall_atoms,
+                        ncores=ncores,
+                        naat=naat,
+                        method=method,
+                        **kwargs,
                     )
                 )
 

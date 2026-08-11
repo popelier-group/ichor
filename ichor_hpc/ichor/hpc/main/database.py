@@ -5,6 +5,7 @@ from ichor.core.atoms import ALF
 from ichor.core.database import get_alf_from_first_db_geometry
 
 from ichor.core.useful_functions import single_or_many_points_directories
+from ichor.hpc.batch_system import JobID
 from ichor.hpc.global_variables import SCRIPT_NAMES
 from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
     submit_free_flow_python_command_on_compute,
@@ -21,6 +22,8 @@ def submit_make_database(
     points_dir_path: Path,
     database_format: str = "sqlite",
     ncores: int = 1,
+    hold: JobID = None,
+    script_name=SCRIPT_NAMES["pd_to_database"],
 ):
     """Method for making a PointsDirectory or parent to PointsDirectory into a database.
     Infers if it is a PointsDirectory or PointsDirectoryParent based on the suffix of
@@ -29,6 +32,8 @@ def submit_make_database(
     :param points_dir_path: Path to PointsDirectory or parent to PointsDirectory-ies
     :param database_format: the format, currently sqlite and json are supported
     :param ncores: number of cores to use on compute node
+    :param hold: optional scheduler job which must finish before database creation
+    :param script_name: path of the database submission script
     """
 
     is_parent_directory_to_many_points_directories = single_or_many_points_directories(
@@ -57,7 +62,7 @@ def submit_make_database(
         )
 
         return submit_free_flow_python_command_on_compute(
-            text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
+            text_list, script_name, ncores=ncores, hold=hold
         )
 
     # if only one PointsDirectory to db
@@ -72,7 +77,7 @@ def submit_make_database(
         text_list.append(f"pd.{str_database_method}('{db_name}')")
 
         return submit_free_flow_python_command_on_compute(
-            text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
+            text_list, script_name, ncores=ncores, hold=hold
         )
 
 

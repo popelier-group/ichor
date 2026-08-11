@@ -17,7 +17,9 @@ def compile_strings_to_python_code(strings_list: List[str]) -> str:
     return ";".join(strings_list)
 
 
-def submit_free_flow_python_command_on_compute(text_list, script_name, ncores):
+def submit_free_flow_python_command_on_compute(
+    text_list, script_name, ncores, hold=None
+):
 
     final_cmd = compile_strings_to_python_code(text_list)
     py_cmd = FreeFlowPythonCommand(final_cmd)
@@ -25,4 +27,4 @@ def submit_free_flow_python_command_on_compute(text_list, script_name, ncores):
 
         submission_script.add_command(py_cmd)
 
-    return submission_script.submit()
+    return submission_script.submit(hold=hold)
