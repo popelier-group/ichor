@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 from ichor.core.atoms import ALF
-
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.global_variables import SCRIPT_NAMES
@@ -266,7 +265,8 @@ def submit_make_csvs_from_database(
     float_integration_error: float = 1e-3,
     rotate_multipole_moments: bool = True,
     calculate_feature_forces: bool = False,
-    hold: Optional[JobID] = None,
+    hold: JobID = None,
+    script_name=SCRIPT_NAMES["calculate_features"],
 ):
     """Submits making of csv files from a databse to compute node.
     Note that the csv making code is parallelized per atom, meaning that
@@ -285,12 +285,19 @@ def submit_make_csvs_from_database(
     :param rotate_multipole_moments: Whether or not to rotate multipole
         moments, defaults to True
     :param calculate_feature_forces: Whether or not to calculate ALF forces, defaults to False
-    :param hold: An optional JobID to hold for. The csv job will not start until that
-        other job has finished, which is how it is chained behind the job which makes the
-        database it reads.
+    :param hold: optional scheduler job which must finish before CSV creation
+    :param script_name: path of the CSV-generation submission script
     """
-    # path to save the processed csvs to, next to the database itself
-    csvs_path = processed_csvs_directory(db_path)
+    # path to save database
+    parent_path = db_path.parent
+    # find system name from parent folder
+    system_name = db_path.name
+    # strip pointsdir
+    for suffix in (".pointsdir", ".pointsdirparent", ".sqlite"):
+        system_name = system_name.removesuffix(suffix)
+    # append system name to processed csvs
+    csvs_dir_name = "0_" + system_name + "_processed_csvs"
+    csvs_path = Path(parent_path / csvs_dir_name)
 
     text_list = []
     # make the python command that will be written in the submit script
@@ -301,14 +308,10 @@ def submit_make_csvs_from_database(
     text_list.append("from pathlib import Path")
     text_list.append("from ichor.core.atoms import ALF")
     text_list.append(f"db_path = Path('{db_path.absolute()}')")
-
-    # the ALF is read from the first geometry of the database. When it is not given, that
-    # read is done by the job itself rather than here, as here is the login node at the
-    # time the job is submitted, which is before the database exists at all if this job is
-    # held on the one which makes it
     if alf:
         text_list.append(f"alf = {alf}")
     else:
+        # The database may not exist yet when this dependent job is submitted.
         text_list.append(
             "from ichor.core.database import get_alf_from_first_db_geometry"
         )
@@ -325,66 +328,7 @@ def submit_make_csvs_from_database(
 
     return submit_free_flow_python_command_on_compute(
         text_list=text_list,
-        script_name=SCRIPT_NAMES["calculate_features"],
+        script_name=script_name,
         ncores=ncores,
         hold=hold,
     )
-
-
-def submit_make_database_and_csvs(
-    points_dir_path: Path,
-    database_format: str = "sqlite",
-    ncores: int = 1,
-    csv_ncores: int = 4,
-    float_difference_iqa_wfn: float = 4.184,
-    float_integration_error: float = 1e-3,
-    rotate_multipole_moments: bool = True,
-    calculate_feature_forces: bool = False,
-) -> Tuple[Optional[JobID], Optional[JobID]]:
-    """Submits the two jobs which turn a PointsDirectory into the csv files that model
-    training reads: one which makes the database, and one which is held behind it and
-    makes the csvs out of that database.
-
-    The csv job is held on the database job by the batch system, so it does not start
-    until the database has been written. Nothing about the database is read here, at
-    submission time, as it does not exist yet: where it will be written is worked out from
-    the PointsDirectory (see :func:`database_path`) and the ALF is read by the csv job
-    itself once it starts.
-
-    :param points_dir_path: Path to PointsDirectory or parent to PointsDirectory-ies.
-    :param database_format: The format the database is written in, sqlite or json.
-    :param ncores: Number of cores the database job asks for. It reads the points one at a
-        time, so this is how it is given memory rather than a way of making it faster.
-    :param csv_ncores: Number of cores the csv job asks for. That job is parallelised per
-        atom, so the number of atoms in the system is the optimal choice.
-    :param float_difference_iqa_wfn: Absolute tolerance for difference of energy between
-        WFN and sum of IQA energies.
-    :param float_integration_error: Absolute tolerance for integration error.
-    :param rotate_multipole_moments: Whether or not to rotate multipole moments.
-    :param calculate_feature_forces: Whether or not to calculate ALF forces.
-    :return: (the JobID of the database job, the JobID of the csv job). The csv job is not
-        submitted, and is None, if the database job was not.
-    """
-
-    database_job_id = submit_make_database(
-        points_dir_path,
-        database_format,
-        ncores=ncores,
-    )
-
-    if not database_job_id:
-        return database_job_id, None
-
-    csvs_job_id = submit_make_csvs_from_database(
-        database_path(points_dir_path, database_format),
-        database_format,
-        ncores=csv_ncores,
-        alf=None,
-        float_difference_iqa_wfn=float_difference_iqa_wfn,
-        float_integration_error=float_integration_error,
-        rotate_multipole_moments=rotate_multipole_moments,
-        calculate_feature_forces=calculate_feature_forces,
-        hold=database_job_id,
-    )
-
-    return database_job_id, csvs_job_id

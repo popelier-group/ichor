@@ -8,21 +8,25 @@ import ichor.hpc.global_variables
 from ichor.core.files import PointsDirectory
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.main.aimall import submit_wfns
-from ichor.hpc.main.database import submit_make_database
+from ichor.hpc.main.database import (
+    submit_make_csvs_from_database,
+    submit_make_database,
+)
 from ichor.hpc.main.gaussian import submit_gjfs, write_gjfs
 
 
 @dataclass(frozen=True)
-class FFLUXWorkflowJobs:
-    """Paths and scheduler IDs produced by :func:`submit_fflux_workflow`."""
+class DataGeneration:
+    """Paths and scheduler IDs produced by :func:`submit_data_generation`."""
 
     points_directory: Path
     gaussian: Optional[JobID]
     aimall: Optional[JobID]
     database: Optional[JobID]
+    csvs: Optional[JobID]
 
 
-def submit_fflux_workflow(
+def submit_data_generation(
     input_path: Union[str, Path, PointsDirectory],
     system_name: Optional[str] = None,
     every: int = 1,
@@ -30,23 +34,26 @@ def submit_fflux_workflow(
     gaussian_ncores: int = 2,
     aimall_ncores: int = 2,
     database_ncores: int = 1,
+    csv_ncores: int = 1,
     method: str = "B3LYP",
     overwrite_existing_gjfs: bool = False,
     force_calculate_wfn: bool = False,
     force_calculate_ints: bool = False,
     gaussian_kwargs: Optional[Dict[str, Any]] = None,
     aimall_kwargs: Optional[Dict[str, Any]] = None,
-) -> FFLUXWorkflowJobs:
-    """Create/accept a points directory and submit three dependent jobs.
+    csv_kwargs: Optional[Dict[str, Any]] = None,
+) -> DataGeneration:
+    """Create/accept a points directory and submit four dependent jobs.
 
     ``input_path`` may be an existing ``.pointsdir`` directory or an XYZ
     trajectory.  Separate scripts are submitted for Gaussian, AIMAll, and
-    database creation, so no single allocation spans the whole workflow.
-    AIMAll is held for Gaussian and the database is held for AIMAll.
+    database creation, and CSV creation, so no single allocation spans the
+    whole workflow. Each stage is held for the preceding stage.
     """
 
     gaussian_kwargs = dict(gaussian_kwargs or {})
     aimall_kwargs = dict(aimall_kwargs or {})
+    csv_kwargs = dict(csv_kwargs or {})
 
     if isinstance(input_path, PointsDirectory):
         points = input_path
@@ -94,5 +101,15 @@ def submit_fflux_workflow(
         hold=aimall_job,
         script_name=ichor.hpc.global_variables.SCRIPT_NAMES["pd_to_database"],
     )
+    database_path = points.path / points.path.stem
+    database_path = database_path.with_suffix(".sqlite")
+    csv_job = submit_make_csvs_from_database(
+        database_path,
+        db_type="sqlite",
+        ncores=csv_ncores,
+        hold=database_job,
+        script_name=ichor.hpc.global_variables.SCRIPT_NAMES["calculate_features"],
+        **csv_kwargs,
+    )
 
-    return FFLUXWorkflowJobs(points.path, gaussian_job, aimall_job, database_job)
+    return DataGeneration(points.path, gaussian_job, aimall_job, database_job, csv_job)
