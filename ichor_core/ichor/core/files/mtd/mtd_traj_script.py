@@ -5,6 +5,46 @@ from typing import Optional, Union
 
 from ichor.core.files.file import File, WriteFile
 
+# the number of geometries a run writes out if it is not asked for a different number
+DEFAULT_NUMBER_OF_GEOMETRIES = 10000
+
+# the number of timesteps a run lasts for if it is not given a different length
+DEFAULT_MD_RUNSTEPS = 10000
+
+
+def geometry_write_interval(md_runsteps: int, number_of_geometries: int) -> int:
+    """Returns how many timesteps apart the geometries of an MD run are written out, so
+    that ``number_of_geometries`` of them are written over the whole run.
+
+    The interval is always at least 1 (every timestep written). Asking for more geometries
+    than there are timesteps, or for none at all, would otherwise give an interval of 0,
+    which ASE does not read as "every timestep" and which would leave the run with no
+    trajectory to convert into an xyz file at the end.
+
+    :param md_runsteps: The number of timesteps the run lasts for.
+    :param number_of_geometries: The number of geometries wanted from the whole run.
+    :return: The number of timesteps between geometries being written out.
+    """
+
+    if md_runsteps < 1 or number_of_geometries < 1:
+        return 1
+
+    return max(1, md_runsteps // number_of_geometries)
+
+
+def number_of_geometries_written(md_runsteps: int, md_interval: int) -> int:
+    """Returns roughly how many geometries a run of ``md_runsteps`` timesteps writes out
+    when one is written every ``md_interval`` timesteps. Whether the starting geometry is
+    written as well depends on the ASE version, so this is only ever within one of the
+    number of geometries the finished trajectory actually holds.
+
+    :param md_runsteps: The number of timesteps the run lasts for.
+    :param md_interval: The number of timesteps between geometries being written out.
+    :return: The approximate number of geometries the run writes out.
+    """
+
+    return max(1, md_runsteps // max(1, md_interval))
+
 
 class MtdTrajScript(WriteFile, File):
     _filetype = ".py"
@@ -113,9 +153,16 @@ class MtdTrajScript(WriteFile, File):
         self.md_timestep = self.md_timestep or 1.0
         self.md_friction = self.md_friction or 0.01
         self.md_communication = self.md_communication or "world"
-        self.md_runsteps = self.md_runsteps or 10000
-        self.md_freq_out = self.md_freq_out or 10000
-        self.md_interval = self.md_interval or int(self.md_runsteps / self.md_freq_out)
+        self.md_runsteps = self.md_runsteps or DEFAULT_MD_RUNSTEPS
+        # md_freq_out is the number of geometries wanted out of the whole run, which the
+        # interval between writes is worked out from (see geometry_write_interval)
+        self.md_freq_out = self.md_freq_out or DEFAULT_NUMBER_OF_GEOMETRIES
+        self.md_interval = self.md_interval or geometry_write_interval(
+            self.md_runsteps, self.md_freq_out
+        )
+        # an interval given directly (rather than worked out from md_freq_out) is clamped
+        # as well, as an interval below 1 writes no trajectory out at all
+        self.md_interval = max(1, self.md_interval)
 
     def build_cv_str(self, cv, num, group):
         if group == "":

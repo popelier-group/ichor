@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Union
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
@@ -20,12 +21,19 @@ from ichor.cli.useful_functions import (
     user_input_free_flow,
     user_input_int,
 )
+from ichor.core.files.mtd import (
+    DEFAULT_MD_RUNSTEPS,
+    DEFAULT_NUMBER_OF_GEOMETRIES,
+    geometry_write_interval,
+    number_of_geometries_written,
+)
 from ichor.hpc.molecular_dynamics import prep_mtd, submit_mtd
 
 METADYNAMICS_MENU_DEFAULTS = {
     "default_collective_variables": [],
     "default_timestep": 0.005,
-    "default_md_runstep": 10000,
+    "default_md_runstep": DEFAULT_MD_RUNSTEPS,
+    "default_number_of_geometries_to_write": DEFAULT_NUMBER_OF_GEOMETRIES,
     "default_bias_factor": 5,
     "default_number_of_iterations": 1024,
     "default_temperature": 300,
@@ -45,12 +53,34 @@ class MetadynamicsMenuOptions(MenuOptions):
     collective_variables: list
     selected_timestep: float
     selected_md_runsteps: int
+    # how many geometries the whole run writes out, which the interval between writes is
+    # worked out from rather than being set directly
+    selected_number_of_geometries_to_write: int
     selected_bias: float
     selected_number_of_iterations: int
     selected_temperature: float
     selected_calculator: str
     overwrite: bool
     ncores: int
+
+    def check_number_of_geometries_to_write(self) -> Union[str, None]:
+        """Warns when the settings cannot give the number of geometries asked for, as a
+        run can write out at most one geometry per timestep."""
+
+        if self.selected_number_of_geometries_to_write < 1:
+            return (
+                "Number of geometries to write out must be at least 1, otherwise the "
+                "run produces no trajectory."
+            )
+        if self.selected_md_runsteps < 1:
+            return "Number of MD timesteps must be at least 1."
+        if self.selected_number_of_geometries_to_write > self.selected_md_runsteps:
+            return (
+                f"Only {self.selected_md_runsteps} geometries can be written out from "
+                f"{self.selected_md_runsteps} MD timesteps, so every timestep will be "
+                f"written rather than the {self.selected_number_of_geometries_to_write} "
+                "asked for."
+            )
 
 
 metadynamics_menu_options = MetadynamicsMenuOptions(
@@ -78,7 +108,25 @@ class MetadynamicsMenuFunctions:
         Select how many timesteps to run the MD calculation for.
         """
         metadynamics_menu_options.selected_md_runsteps = user_input_int(
-            "Number of MD timesteps: ", metadynamics_menu_options.selected_md_runsteps
+            "Number of MD timesteps: ",
+            metadynamics_menu_options.selected_md_runsteps,
+            minimum=1,
+        )
+
+    @staticmethod
+    def select_number_of_geometries_to_write():
+        """
+        Select how many geometries the run writes out in total. The geometries are spread
+        evenly over the run: a run of 100,000 timesteps asked for 10,000 geometries writes
+        one out every 10 timesteps. Asking for at least as many geometries as there are
+        timesteps writes every timestep out, which is as often as a run can be sampled.
+        """
+        metadynamics_menu_options.selected_number_of_geometries_to_write = (
+            user_input_int(
+                "Number of geometries to write out: ",
+                metadynamics_menu_options.selected_number_of_geometries_to_write,
+                minimum=1,
+            )
         )
 
     @staticmethod
@@ -99,6 +147,7 @@ class MetadynamicsMenuFunctions:
         metadynamics_menu_options.selected_number_of_iterations = user_input_int(
             "Set number of simulation iterations: ",
             metadynamics_menu_options.selected_number_of_iterations,
+            minimum=1,
         )
 
     @staticmethod
@@ -133,7 +182,7 @@ class MetadynamicsMenuFunctions:
         Select how many cores required to run job.
         """
         metadynamics_menu_options.ncores = user_input_int(
-            "Number of CPU cores: ", metadynamics_menu_options.ncores
+            "Number of CPU cores: ", metadynamics_menu_options.ncores, minimum=1
         )
 
     @staticmethod
@@ -158,6 +207,9 @@ class MetadynamicsMenuFunctions:
             col_vars = metadynamics_menu_options.collective_variables
             timestep = metadynamics_menu_options.selected_timestep
             md_runsteps = metadynamics_menu_options.selected_md_runsteps
+            number_of_geometries = (
+                metadynamics_menu_options.selected_number_of_geometries_to_write
+            )
             bias = metadynamics_menu_options.selected_bias
             iterations = metadynamics_menu_options.selected_number_of_iterations
             temperature = metadynamics_menu_options.selected_temperature
@@ -170,6 +222,7 @@ class MetadynamicsMenuFunctions:
                 collective_variables=col_vars,
                 timestep=timestep,
                 md_runsteps=md_runsteps,
+                md_freq_out=number_of_geometries,
                 bias_factor=bias,
                 iterations=iterations,
                 temperature=temperature,
@@ -215,6 +268,36 @@ class MetadynamicsMenuFunctions:
                 describe_collective_variable(cv) for cv in col_vars
             )
 
+            # work out what the run will actually do with the number of geometries asked
+            # for, which is not the same thing when more were asked for than the run has
+            # timesteps to give
+            write_interval = geometry_write_interval(md_runsteps, number_of_geometries)
+            geometries_written = number_of_geometries_written(
+                md_runsteps, write_interval
+            )
+
+            notes = [
+                "The job is now queued on a compute node, so it will not start "
+                "immediately and this menu does not wait for it. Check on it with "
+                "your batch system's queue command (e.g. qstat / squeue).",
+                "The PLUMED input, the trajectory and the accumulated bias "
+                "(HILLS) are all written into the run directory above; the job's "
+                "stdout and stderr end up in the outputs and errors directories.",
+            ]
+            # geometries can only be written a whole number of timesteps apart, so the
+            # run rarely writes out exactly the number asked for. say so rather than
+            # leaving the difference to be discovered in the finished trajectory
+            if geometries_written != number_of_geometries:
+                notes.insert(
+                    0,
+                    f"Note that {number_of_geometries:,} geometries were asked for but "
+                    f"the run will write out about {geometries_written:,} of them: they "
+                    "can only be written a whole number of timesteps apart, and "
+                    f"{md_runsteps:,} timesteps works out at one every "
+                    f"{write_interval:,}. Making the number of timesteps a multiple of "
+                    "the number of geometries gives exactly the number asked for.",
+                )
+
             print_summary_and_pause(
                 "METADYNAMICS JOB SUBMITTED",
                 {
@@ -225,6 +308,8 @@ class MetadynamicsMenuFunctions:
                     "Calculator": calculator,
                     "Timestep": f"{timestep} fs",
                     "MD timesteps": f"{md_runsteps:,}",
+                    "Geometries written": f"~{geometries_written:,} "
+                    f"(one every {write_interval:,} timestep(s))",
                     "Calculator iterations": f"{iterations:,} (max per energy "
                     "evaluation)",
                     "Temperature": f"{temperature} K",
@@ -232,14 +317,7 @@ class MetadynamicsMenuFunctions:
                     "CPU cores": ncores,
                     "Overwrite existing": overwrite,
                 },
-                [
-                    "The job is now queued on a compute node, so it will not start "
-                    "immediately and this menu does not wait for it. Check on it with "
-                    "your batch system's queue command (e.g. qstat / squeue).",
-                    "The PLUMED input, the trajectory and the accumulated bias "
-                    "(HILLS) are all written into the run directory above; the job's "
-                    "stdout and stderr end up in the outputs and errors directories.",
-                ],
+                notes,
             )
             # update logger
             ichor.hpc.global_variables.LOGGER.info(
@@ -270,6 +348,10 @@ metadynamics_menu_items = [
     FunctionItem(
         "Select number of MD timesteps ",
         MetadynamicsMenuFunctions.select_number_of_md_timesteps,
+    ),
+    FunctionItem(
+        "Select number of geometries to write out",
+        MetadynamicsMenuFunctions.select_number_of_geometries_to_write,
     ),
     FunctionItem(
         "Select bias factor for collective variables",

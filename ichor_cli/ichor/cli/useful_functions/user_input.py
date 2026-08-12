@@ -30,10 +30,17 @@ def user_input_path(s="Enter Path: ", default_path=".") -> str:
     return path
 
 
-def user_input_int(s="Enter integer: ", default=None) -> Union[int, None]:
+def user_input_int(
+    s="Enter integer: ", default=None, minimum: Union[int, None] = None
+) -> Union[int, None]:
     """Returns an integer that user has given
 
     :param s: A string that is shown in the prompt (printed to standard output).
+    :param default: The value returned if the user gives no answer.
+    :param minimum: An optional smallest value the answer is allowed to take. Anything
+        below it is rejected and asked for again, which is used for settings such as
+        counts of things, where a zero or negative answer would only break the job that
+        the setting is used for.
     """
 
     while True:
@@ -46,9 +53,12 @@ def user_input_int(s="Enter integer: ", default=None) -> Union[int, None]:
             return default
         try:
             user_input = int(user_input)
-            return user_input
         except ValueError:
-            pass
+            continue
+        if minimum is not None and user_input < minimum:
+            print(f"Value must be {minimum} or greater.")
+            continue
+        return user_input
 
 
 def user_input_float(s="Enter float: ", default=None) -> Union[int, None]:
