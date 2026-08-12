@@ -1,7 +1,7 @@
 import textwrap
 from pathlib import Path
 from string import Template
-from typing import Optional, Union
+from typing import Optional, Sequence, Union
 
 from ichor.core.files.file import File, WriteFile
 
@@ -24,7 +24,7 @@ class DiversityScript(WriteFile, File):
         rot_method: Optional[str] = None,
         parallel: bool = True,
         auto_stop: bool = False,
-        sample_size: Optional[int] = None,
+        sample_size: Optional[Union[int, Sequence[int]]] = None,
     ):
         File.__init__(self, path)
 
@@ -40,7 +40,7 @@ class DiversityScript(WriteFile, File):
         self.rot_method: str = rot_method
         self.parallel: bool = parallel
         self.auto_stop: bool = auto_stop
-        self.sample_size: int = sample_size
+        self.sample_size: Union[int, Sequence[int]] = sample_size
 
     def set_write_defaults_if_needed(
         self,
@@ -52,6 +52,23 @@ class DiversityScript(WriteFile, File):
         self.chunk_size = self.chunk_size or 500
         self.rot_method = self.rot_method or "KU"
         self.sample_size = self.sample_size or 10000
+
+    def sample_sizes_as_list(self) -> str:
+        """Returns the sample sizes as the contents of the ``sampleSize`` list of the
+        script.
+
+        The sampler takes a list rather than one number, as it can write out several
+        (nested) samples of different sizes in the one pass over the trajectory, which is
+        much cheaper than sampling the trajectory once per size. A single size is
+        therefore just the one element list.
+        """
+
+        sizes = self.sample_size
+        # a single size does not have to be given as a list by the caller
+        if isinstance(sizes, int):
+            sizes = [sizes]
+
+        return ", ".join(str(int(size)) for size in sizes)
 
     # write file from a template
     def _write_file(self, path: Path, *args, **kwargs):
@@ -100,7 +117,7 @@ class DiversityScript(WriteFile, File):
             seed_geom=self.seed_geom,
             output_dir=self.output_dir,
             filename=self.filename,
-            sample_size=self.sample_size,
+            sample_size=self.sample_sizes_as_list(),
         )
 
         return script_text

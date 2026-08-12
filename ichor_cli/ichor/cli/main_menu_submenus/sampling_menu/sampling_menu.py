@@ -8,9 +8,16 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.sampling_menu.sampling_submenus import (
     submit_diversity_menu,
     SUBMIT_DIVERSITY_MENU_DESCRIPTION,
+    update_trajectory_information,
+)
+from ichor.cli.main_menu_submenus.sampling_menu.sampling_submenus.diversity_submenu import (  # noqa: E501
+    chunk_memory_gb,
+    memory_per_core_gb,
+    submit_diversity_menu_options,
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
+from ichor.cli.useful_functions import print_summary_and_pause
 from ichor.cli.useful_functions.user_input import user_input_path
 
 
@@ -60,13 +67,48 @@ class SamplingFunctions:
 
     @staticmethod
     def select_trajectory():
-        """function that asks user to update trajectory path."""
+        """function that asks user to update trajectory path.
+
+        The geometries in the trajectory are counted (without reading them all in), as
+        both how large a sample can be taken from it and how large a chunk the diversity
+        sampler can hold in memory depend on how long it is."""
         traj_path = user_input_path("Enter Trajectory Path: ")
         ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH = Path(
             traj_path
         ).absolute()
         sampling_menu_options.selected_trajectory_path = (
             ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH
+        )
+
+        ngeometries = update_trajectory_information(
+            ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH
+        )
+        # a file which could not be counted is caught by the check functions, which say
+        # so in the menu prologue, so there is nothing worth reporting for it here
+        if not ngeometries:
+            return
+
+        chunk_size = submit_diversity_menu_options.selected_chunk_size
+        print_summary_and_pause(
+            "TRAJECTORY SELECTED",
+            {
+                "Trajectory": ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH,
+                "Geometries": f"{ngeometries:,}",
+                "Chunk size": f"{chunk_size:,} geometries per chunk",
+                "Estimated memory": (
+                    f"about {chunk_memory_gb(chunk_size, ngeometries):.1f} GB per core "
+                    f"of the {memory_per_core_gb()} GB a core gets"
+                ),
+            },
+            [
+                "The diversity sampler compares a chunk of geometries against the whole "
+                "trajectory at a time, so the memory it needs grows with both. The chunk "
+                "size above has been derived from the length of this trajectory so that "
+                "it fits in the memory a core is given, which is what keeps the job from "
+                "being killed for running out of memory.",
+                "It can be changed (or pinned) in the diversity sampling menu; a smaller "
+                "chunk uses less memory but takes longer.",
+            ],
         )
 
     @staticmethod
