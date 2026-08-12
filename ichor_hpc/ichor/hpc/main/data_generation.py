@@ -29,6 +29,8 @@ class DataGeneration:
 def submit_data_generation(
     input_path: Union[str, Path, PointsDirectory],
     system_name: Optional[str] = None,
+    create_database: bool = False,
+    create_csvs: bool = False,
     every: int = 1,
     center: bool = True,
     gaussian_ncores: int = 2,
@@ -43,17 +45,24 @@ def submit_data_generation(
     aimall_kwargs: Optional[Dict[str, Any]] = None,
     csv_kwargs: Optional[Dict[str, Any]] = None,
 ) -> DataGeneration:
-    """Create/accept a points directory and submit four dependent jobs.
+    """Create/accept a points directory and submit dependent data-generation jobs.
 
     ``input_path`` may be an existing ``.pointsdir`` directory or an XYZ
-    trajectory.  Separate scripts are submitted for Gaussian, AIMAll, and
-    database creation, and CSV creation, so no single allocation spans the
-    whole workflow. Each stage is held for the preceding stage.
+    trajectory. Separate scripts are submitted for Gaussian, AIMAll, optional
+    database creation, and optional CSV creation, so no single allocation spans
+    the whole workflow. Each requested stage is held for the preceding stage.
+
+    Requesting ``create_csvs=True`` always enables and submits database creation,
+    even when ``create_database=False`` was passed. CSVs therefore cannot be
+    generated from a pre-existing database through this workflow.
     """
 
     gaussian_kwargs = dict(gaussian_kwargs or {})
     aimall_kwargs = dict(aimall_kwargs or {})
     csv_kwargs = dict(csv_kwargs or {})
+
+    # CSV generation must always use the database produced by this workflow.
+    create_database = create_database or create_csvs
 
     if isinstance(input_path, PointsDirectory):
         points = input_path
@@ -94,22 +103,29 @@ def submit_data_generation(
         script_name=ichor.hpc.global_variables.SCRIPT_NAMES["aimall"],
         **aimall_kwargs,
     )
-    database_job = submit_make_database(
-        points.path,
-        database_format="sqlite",
-        ncores=database_ncores,
-        hold=aimall_job,
-        script_name=ichor.hpc.global_variables.SCRIPT_NAMES["pd_to_database"],
-    )
-    database_path = points.path / points.path.stem
-    database_path = database_path.with_suffix(".sqlite")
-    csv_job = submit_make_csvs_from_database(
-        database_path,
-        db_type="sqlite",
-        ncores=csv_ncores,
-        hold=database_job,
-        script_name=ichor.hpc.global_variables.SCRIPT_NAMES["calculate_features"],
-        **csv_kwargs,
-    )
+
+    database_job = None
+    csv_job = None
+
+    if create_database:
+        database_job = submit_make_database(
+            points.path,
+            database_format="sqlite",
+            ncores=database_ncores,
+            hold=aimall_job,
+            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["pd_to_database"],
+        )
+        database_path = points.path / points.path.stem
+        database_path = database_path.with_suffix(".sqlite")
+
+    if create_csvs:
+        csv_job = submit_make_csvs_from_database(
+            database_path,
+            db_type="sqlite",
+            ncores=csv_ncores,
+            hold=database_job,
+            script_name=ichor.hpc.global_variables.SCRIPT_NAMES["calculate_features"],
+            **csv_kwargs,
+        )
 
     return DataGeneration(points.path, gaussian_job, aimall_job, database_job, csv_job)
