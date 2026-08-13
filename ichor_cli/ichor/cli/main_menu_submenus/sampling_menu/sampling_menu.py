@@ -11,9 +11,10 @@ from ichor.cli.main_menu_submenus.sampling_menu.sampling_submenus import (
     update_trajectory_information,
 )
 from ichor.cli.main_menu_submenus.sampling_menu.sampling_submenus.diversity_submenu import (  # noqa: E501
-    chunk_memory_gb,
-    memory_per_core_gb,
+    job_memory_gb,
+    rmsd_matrix_memory_gb,
     submit_diversity_menu_options,
+    total_memory_gb,
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
@@ -89,25 +90,31 @@ class SamplingFunctions:
             return
 
         chunk_size = submit_diversity_menu_options.selected_chunk_size
+        ncores = submit_diversity_menu_options.selected_number_of_cores
         print_summary_and_pause(
             "TRAJECTORY SELECTED",
             {
                 "Trajectory": ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH,
                 "Geometries": f"{ngeometries:,}",
                 "Chunk size": f"{chunk_size:,} geometries per chunk",
+                "RMSD matrix": f"about {rmsd_matrix_memory_gb(ngeometries):,.1f} GB",
                 "Estimated memory": (
-                    f"about {chunk_memory_gb(chunk_size, ngeometries):.1f} GB per core "
-                    f"of the {memory_per_core_gb()} GB a core gets"
+                    f"about {total_memory_gb(chunk_size, ngeometries):,.1f} GB in "
+                    f"total, of the {job_memory_gb(ncores):,.0f} GB a {ncores} core "
+                    f"job is given"
                 ),
             },
             [
-                "The diversity sampler compares a chunk of geometries against the whole "
-                "trajectory at a time, so the memory it needs grows with both. The chunk "
-                "size above has been derived from the length of this trajectory so that "
-                "it fits in the memory a core is given, which is what keeps the job from "
-                "being killed for running out of memory.",
-                "It can be changed (or pinned) in the diversity sampling menu; a smaller "
-                "chunk uses less memory but takes longer.",
+                "The diversity sampler works out the RMSD of every geometry against "
+                "every other one and keeps the whole matrix in memory, so what it needs "
+                "grows with the square of the length of the trajectory. That is the "
+                "RMSD matrix above, and it is there whatever the chunk size is.",
+                "The chunk size has been derived from this trajectory and the memory "
+                "the job asks for, so that the two together fit; it can be changed (or "
+                "pinned) in the diversity sampling menu. If the trajectory is too long "
+                "to fit at all, the menu says so: it then has to be thinned (e.g. every "
+                "nth step of it) or given a job with more cores, as the memory comes "
+                "with the cores.",
             ],
         )
 

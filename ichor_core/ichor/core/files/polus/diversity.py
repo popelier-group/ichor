@@ -25,6 +25,7 @@ class DiversityScript(WriteFile, File):
         parallel: bool = True,
         auto_stop: bool = False,
         sample_size: Optional[Union[int, Sequence[int]]] = None,
+        ncores: Optional[int] = None,
     ):
         File.__init__(self, path)
 
@@ -41,6 +42,7 @@ class DiversityScript(WriteFile, File):
         self.parallel: bool = parallel
         self.auto_stop: bool = auto_stop
         self.sample_size: Union[int, Sequence[int]] = sample_size
+        self.ncores: int = ncores
 
     def set_write_defaults_if_needed(
         self,
@@ -52,6 +54,10 @@ class DiversityScript(WriteFile, File):
         self.chunk_size = self.chunk_size or 500
         self.rot_method = self.rot_method or "KU"
         self.sample_size = self.sample_size or 10000
+        # the sampler computes the RMSDs with a pool of this many processes. Its own
+        # default is 16, which has nothing to do with the cores the job asked for, so
+        # one core is the safe thing to fall back on when the caller does not say.
+        self.ncores = self.ncores or 1
 
     def sample_sizes_as_list(self) -> str:
         """Returns the sample sizes as the contents of the ``sampleSize`` list of the
@@ -84,6 +90,7 @@ class DiversityScript(WriteFile, File):
 
         job = DIVSampler(
             systemName="$system_name",
+            ncores=$ncores,
             weightsVector="$weights_vector",
             groupAverage=$group_average,
             writeFerebusInputs=$write_ferebus_inputs,
@@ -106,6 +113,7 @@ class DiversityScript(WriteFile, File):
         # subsitute template values into script
         script_text = diversity_script_template.substitute(
             system_name=self.system_name,
+            ncores=self.ncores,
             weights_vector=self.weights_vector,
             group_average=self.group_average,
             write_ferebus_inputs=self.write_ferebus_inputs,
