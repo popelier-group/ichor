@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import Callable, Dict, Iterable, List, Union
+from typing import Callable, Dict, Iterable, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -52,6 +52,101 @@ def count_geometries_in_xyz(path: Union[str, Path]) -> int:
             ngeometries += 1
 
     return ngeometries
+
+
+def thin_xyz(
+    path: Union[str, Path],
+    output_path: Union[str, Path],
+    stride: int = 1,
+    max_geometries: Optional[int] = None,
+) -> int:
+    """Writes a shorter .xyz file by keeping only some of the geometries of another one.
+
+    A trajectory can hold far more geometries than a later step can work with (diversity
+    sampling, for instance, compares every geometry against every other one, so what it
+    needs grows with the square of the length of the trajectory), which is what this is
+    for. Like :func:`count_geometries_in_xyz`, the geometries are stepped over as lines
+    rather than read in, so the whole trajectory never has to be held in memory, and the
+    lines that are kept are written out exactly as they were.
+
+    The two ways of thinning suit different trajectories:
+
+    * A **stride** keeps every ``stride``-th geometry, so what is kept is spread over the
+      whole trajectory. This is the one to use for a trajectory in which the order is
+      time (e.g. the output of a molecular dynamics run), where the beginning of it is
+      not representative of the rest.
+    * A **maximum** keeps only the first ``max_geometries`` geometries. This is the one to
+      use when the trajectory is already ordered by how much each geometry adds (e.g. the
+      output of a previous diversity sampling, which writes the geometries in the order
+      it picked them), where cutting off the tail keeps the most diverse ones.
+
+    They can be combined, in which case the stride is applied first.
+
+    :param path: Path to the .xyz file to read.
+    :param output_path: Path of the .xyz file to write. It must not be the file being
+        read, as that would overwrite the geometries while they are being read.
+    :param stride: Keep every ``stride``-th geometry (1, the default, keeps every one).
+    :param max_geometries: Stop after this many geometries have been kept. The default
+        (None) keeps going to the end of the file.
+    :raises ValueError: If the stride or maximum is not positive, or if the file would be
+        written over the file being read.
+    :return: The number of geometries written.
+    """
+
+    path, output_path = Path(path), Path(output_path)
+
+    if stride < 1:
+        raise ValueError(f"The stride ({stride}) must be 1 or greater.")
+    if max_geometries is not None and max_geometries < 1:
+        raise ValueError(
+            f"The maximum number of geometries ({max_geometries}) must be 1 or greater."
+        )
+    # resolve() so that the same file reached by different paths is still caught
+    if path.resolve() == output_path.resolve():
+        raise ValueError(
+            f"The thinned trajectory {output_path} would be written over the "
+            "trajectory it is made from."
+        )
+
+    mkdir(output_path.parent)
+
+    ngeometries = 0
+    nwritten = 0
+
+    with open(path, "r") as f, open(output_path, "w") as thinned_file:
+        while True:
+            line = f.readline()
+            # an empty string (rather than a newline) is the end of the file
+            if not line:
+                break
+            # blank lines between geometries are not part of a block
+            if not line.strip():
+                continue
+            natoms = int(line)
+            # a geometry is the number of atoms, a comment line and one line per atom
+            geometry = [line]
+            for _ in range(natoms + 1):
+                next_line = f.readline()
+                if not next_line:
+                    break
+                geometry.append(next_line)
+            # the file ran out mid-geometry, so this block is not written out
+            if len(geometry) != natoms + 2:
+                break
+
+            if ngeometries % stride == 0:
+                # a file whose last line has no newline of its own would otherwise run
+                # into the first line of the next geometry written after it
+                if not geometry[-1].endswith("\n"):
+                    geometry[-1] += "\n"
+                thinned_file.writelines(geometry)
+                nwritten += 1
+                if max_geometries is not None and nwritten >= max_geometries:
+                    break
+
+            ngeometries += 1
+
+    return nwritten
 
 
 class Trajectory(ReadFile, WriteFile, ListOfAtoms):

@@ -42,7 +42,7 @@ from ichor.core.files.points_directory import PointsDirectory
 from ichor.core.files.points_directory_parent import PointsDirectoryParent
 
 # xyz files
-from ichor.core.files.xyz import count_geometries_in_xyz, Trajectory, XYZ
+from ichor.core.files.xyz import count_geometries_in_xyz, thin_xyz, Trajectory, XYZ
 
 __all__ = [
     "Int",
@@ -57,6 +57,7 @@ __all__ = [
     "OrcaEngrad",
     "OrcaOutput",
     "count_geometries_in_xyz",
+    "thin_xyz",
     "Trajectory",
     "DlPolyHistory",
     "DlPolyField",

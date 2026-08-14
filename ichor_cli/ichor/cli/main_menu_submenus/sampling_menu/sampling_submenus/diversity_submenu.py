@@ -155,6 +155,17 @@ def total_memory_gb(chunk_size: int, ngeometries: int) -> float:
     return rmsd_matrix_memory_gb(ngeometries) + chunk_memory_gb(chunk_size, ngeometries)
 
 
+def format_memory_gb(memory_gb: float) -> str:
+    """Formats a memory estimate for display, e.g. ``about 1.5 GB``. An estimate too
+    small to show is worded as such rather than being shown as the 0.0 GB it would round
+    to, so the qualifier is part of what is returned."""
+
+    if memory_gb < 0.05:
+        return "less than 0.1 GB"
+
+    return f"about {memory_gb:,.1f} GB"
+
+
 def largest_trajectory_for(ncores: int) -> int:
     """Returns the longest trajectory whose RMSD matrix alone fits in the memory of a job
     with the given number of cores, which is the hard limit on what can be sampled at all
@@ -166,16 +177,64 @@ def largest_trajectory_for(ncores: int) -> int:
     return int((memory_budget_gb(ncores) * 1024**3 / BYTES_PER_MATRIX_ELEMENT) ** 0.5)
 
 
-def cores_needed_for(ngeometries: int) -> int:
+def maximum_cores() -> int:
+    """Returns the largest number of cores a job can ask for on this machine, taken from
+    the parallel environments it has. 0 means the machine (or its parallel environments)
+    is not in the config, so there is no limit to check against."""
+
+    environments = get_param_from_config(
+        ichor.hpc.global_variables.ICHOR_CONFIG,
+        ichor.hpc.global_variables.MACHINE,
+        "hpc",
+        "parallel_environments",
+        default=None,
+    )
+    if not environments:
+        return 0
+
+    # each environment is a [smallest, largest] number of cores it can be used for
+    return max(int(bounds[1]) for bounds in environments.values())
+
+
+def cores_needed_for(
+    ngeometries: int, chunk_size: int = MINIMUM_SUGGESTED_CHUNK_SIZE
+) -> int:
     """Returns the number of cores whose memory would hold the RMSD matrix of the given
-    trajectory, plus the smallest chunk worth using.
+    trajectory, plus a chunk of the given size.
 
     :param ngeometries: The number of geometries in the trajectory.
+    :param chunk_size: The number of geometries whose RMSDs are computed at a time. The
+        default is the smallest chunk worth using, which gives the smallest job the
+        trajectory can be sampled by at all.
     """
 
-    needed_gb = total_memory_gb(MINIMUM_SUGGESTED_CHUNK_SIZE, ngeometries)
+    needed_gb = total_memory_gb(chunk_size, ngeometries)
 
     return max(1, math.ceil(needed_gb / (MEMORY_FRACTION * memory_per_core_gb())))
+
+
+def suggest_number_of_cores(ngeometries: int) -> int:
+    """Returns the number of cores to ask for, which is the number the memory of the job
+    has to come from (see :func:`cores_needed_for`).
+
+    A chunk size the user has pinned is taken as given and the cores are made to fit
+    around it. Otherwise the chunk size is the one which follows the cores, so what is
+    suggested is the smallest job the trajectory fits in at all; the chunk size then
+    grows to fill whatever is asked for.
+
+    :param ngeometries: The number of geometries in the trajectory. If this is not known
+        (0), the menu default is returned instead.
+    """
+
+    if ngeometries <= 0:
+        return SUBMIT_DIVERSITY_MENU_DEFAULTS["default_ncores"]
+
+    if chunk_size_overridden:
+        return cores_needed_for(
+            ngeometries, submit_diversity_menu_options.selected_chunk_size
+        )
+
+    return cores_needed_for(ngeometries)
 
 
 def suggest_chunk_size(ngeometries: int, ncores: int) -> int:
@@ -295,15 +354,39 @@ class SubmitDiversityMenuOptions(MenuOptions):
         if matrix_gb <= budget_gb:
             return None
 
+        needed_cores = cores_needed_for(ngeometries)
+        largest_cores = maximum_cores()
+        # more cores are the way out of this, unless the machine does not have that many
+        # to give, in which case a shorter trajectory is the only way out
+        if largest_cores and needed_cores > largest_cores:
+            way_out = (
+                f"That would need {needed_cores:,} cores, more than the "
+                f"{largest_cores:,} a job can ask for on this machine, so the "
+                f"trajectory has to be thinned to about "
+                f"{largest_trajectory_for(largest_cores):,} geometries or fewer."
+            )
+        else:
+            way_out = (
+                f"Thin the trajectory to about "
+                f"{largest_trajectory_for(self.selected_number_of_cores):,} geometries "
+                f"or ask for {needed_cores:,} cores."
+            )
+
         return (
             f"The {ngeometries:,} geometries in the trajectory need a {matrix_gb:,.1f} "
             f"GB RMSD matrix, which does not fit in the "
             f"{job_memory_gb(self.selected_number_of_cores):,.0f} GB of a "
-            f"{self.selected_number_of_cores} core job. Take a shorter trajectory (up "
-            f"to about {largest_trajectory_for(self.selected_number_of_cores):,} "
-            f"geometries, e.g. every nth step of this one) or ask for "
-            f"{cores_needed_for(ngeometries):,} cores."
+            f"{self.selected_number_of_cores} core job. {way_out}"
         )
+
+    def check_number_of_cores_fits_machine(self) -> Union[str, None]:
+        """Checks the job does not ask for more cores than the machine can give it."""
+        largest = maximum_cores()
+        if largest and self.selected_number_of_cores > largest:
+            return (
+                f"Current number of cores: {self.selected_number_of_cores:,} is more "
+                f"than the {largest:,} a job can ask for on this machine."
+            )
 
     def check_selected_chunk_size(self) -> Union[str, None]:
         """Checks the chunk size is positive, is not larger than the trajectory, and
@@ -425,12 +508,35 @@ class SubmitDiversityFunctions:
         """Asks user to select the number of cores, which the RMSDs are computed in
         parallel over. As the batch system hands out memory per core, this is also how
         much memory the job has to hold the RMSD matrix and its chunks in, so the chunk
-        size is derived again from it (unless it was picked by hand)."""
-        submit_diversity_menu_options.selected_number_of_cores = user_input_int(
-            "Enter number of cores: ",
+        size is derived again from it (unless it was picked by hand).
+
+        The number of cores the trajectory needs to fit at all is suggested (see
+        :func:`suggest_number_of_cores`); entering 0 asks for that many."""
+        ngeometries = submit_diversity_menu_options.number_of_geometries_in_file
+        suggested = suggest_number_of_cores(ngeometries)
+
+        if ngeometries:
+            largest = maximum_cores()
+            print(
+                f"The {ngeometries:,} geometries in the trajectory need at least "
+                f"{suggested:,} cores, as their RMSD matrix takes "
+                f"{format_memory_gb(rmsd_matrix_memory_gb(ngeometries))} and each core "
+                f"is given {memory_per_core_gb()} GB. More cores than that also work "
+                f"out the RMSDs faster."
+            )
+            if largest and suggested > largest:
+                print(
+                    f"Note that this is more than the {largest:,} cores a job can ask "
+                    f"for on this machine, so the trajectory has to be thinned instead "
+                    f"(the sampling menu above this one can do that)."
+                )
+
+        ncores = user_input_int(
+            "Enter number of cores (0 = the number the trajectory needs): ",
             submit_diversity_menu_options.selected_number_of_cores,
-            minimum=1,
+            minimum=0,
         )
+        submit_diversity_menu_options.selected_number_of_cores = ncores or suggested
         derive_chunk_size()
 
     @staticmethod
@@ -495,11 +601,11 @@ class SubmitDiversityFunctions:
         if ngeometries:
             print(
                 f"Suggested chunk size for the {ngeometries:,} geometries in the "
-                f"trajectory: {suggested:,} (about "
-                f"{total_memory_gb(suggested, ngeometries):,.1f} GB in total, of the "
-                f"{job_memory_gb(ncores):,.0f} GB a {ncores} core job is given, with "
-                f"{rmsd_matrix_memory_gb(ngeometries):,.1f} GB of it taken by the RMSD "
-                f"matrix whatever the chunk size)"
+                f"trajectory: {suggested:,} ("
+                f"{format_memory_gb(total_memory_gb(suggested, ngeometries))} in total, "
+                f"of the {job_memory_gb(ncores):,.0f} GB a {ncores} core job is given, "
+                f"with {format_memory_gb(rmsd_matrix_memory_gb(ngeometries))} of it "
+                f"taken by the RMSD matrix whatever the chunk size)"
             )
 
         chunk_size = user_input_int(
@@ -670,14 +776,15 @@ class SubmitDiversityFunctions:
                 ),
                 "Chunk size": f"{chunk_size:,} geometries per chunk",
                 "RMSD matrix": (
-                    f"about {rmsd_matrix_memory_gb(ngeometries):,.1f} GB "
+                    f"{format_memory_gb(rmsd_matrix_memory_gb(ngeometries))} "
                     f"({ngeometries:,} x {ngeometries:,} geometries)"
                     if ngeometries
                     else "not known (the trajectory could not be counted)"
                 ),
                 "Estimated memory": (
-                    f"about {total_memory_gb(chunk_size, ngeometries):,.1f} GB in "
-                    f"total, of the {job_memory_gb(ncores):,.0f} GB this job is given"
+                    f"{format_memory_gb(total_memory_gb(chunk_size, ngeometries))}"
+                    f" in total, of the {job_memory_gb(ncores):,.0f} GB this job is "
+                    f"given"
                     if ngeometries
                     else "not known (the trajectory could not be counted)"
                 ),
