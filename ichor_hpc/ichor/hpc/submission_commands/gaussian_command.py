@@ -99,6 +99,13 @@ class GaussianCommand(SubmissionCommand):
         # variables[0] ${arr1[$SGE_TASK_ID-1]}, variables[1] ${arr2[$SGE_TASK_ID-1]}
         cmd = f"export GAUSS_SCRDIR=$(dirname {variables[0]})"
         cmd += f"\n{self.total_gaussian_memory()}"
-        cmd += "\nexport GAUSS_PDEF=$SLURM_NTASKS"
+        # the number of cores the job was given, which the batch system puts in a
+        # variable of its own (NSLOTS on SGE, SLURM_CPUS_PER_TASK on SLURM). It used to
+        # be SLURM_NTASKS, which is empty on SGE and, now that the cores are asked for
+        # with --cpus-per-task, would be 1 on SLURM and make Gaussian run on one core.
+        cmd += (
+            "\nexport GAUSS_PDEF="
+            f"${ichor.hpc.global_variables.BATCH_SYSTEM.NumProcs}"
+        )
         cmd += f"\n{GaussianCommand.command} {variables[0]} {variables[1]}"
         return cmd

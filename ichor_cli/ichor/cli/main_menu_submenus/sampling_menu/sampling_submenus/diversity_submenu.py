@@ -77,16 +77,26 @@ ROTATION_METHODS = ["KU", "R"]
 # and is what makes a long trajectory impossible to sample rather than merely slow.
 BYTES_PER_MATRIX_ELEMENT = 4
 # On top of that, each batch builds a block of chunk_size x ngeoms elements three times
-# over: a float32 in the temporary matrix, a python int in the list of indices handed to
-# the process pool, and a python float in the list of results it gives back. The two
-# python lists are what make a chunk expensive, as an int or float object costs far more
-# than the 4 bytes of the array it ends up in.
-BYTES_PER_CHUNK_ELEMENT = 4 + 36 + 32
+# over: a python int in the list of indices handed to the process pool (~44 bytes each
+# once the over-allocation of the list holding them is counted), a python float in the
+# list of results it gives back (~33 bytes), and a float32 in the temporary matrix they
+# are copied into (4). The index list is still alive while the results are collected, so
+# they add up rather than taking turns. These are measured numbers: a batch of
+# 100,020,001 elements was seen to take 4.5 GB for the index list alone.
+BYTES_PER_CHUNK_ELEMENT = 44 + 33 + 4
+# The largest number of elements a batch is allowed to cover, whatever the memory of the
+# job. The lists above are made of individual python objects, so a batch big enough to
+# cover the whole matrix at once builds a list of hundreds of millions of them, which the
+# process pool then has to pickle (and fork around) in one go. Keeping a batch to this
+# many elements keeps that under about a GB and costs only the time of starting a few
+# more pools.
+MAXIMUM_CHUNK_ELEMENTS = 10_000_000
 # The fraction of the job's memory the estimate is allowed to take. The rest covers the
 # things which are not worth modelling: the lines of the .xyz file, the geometries as
-# python lists and as rotated arrays, the copies of the sampler which the process pool
-# pickles for its workers, and the interpreter itself.
-MEMORY_FRACTION = 0.5
+# python lists and as rotated arrays, the pickled copies of the batch that the process
+# pool hands to its workers (and the pages of the parent they touch after forking), and
+# the interpreter itself.
+MEMORY_FRACTION = 0.35
 # a chunk smaller than this spends more time on the per-chunk overhead than on the
 # distances it is there to compute, so suggestions are not rounded below it (a trajectory
 # long enough that even this does not fit in memory is given whatever does)
@@ -128,6 +138,44 @@ def memory_budget_gb(ncores: int) -> float:
     return MEMORY_FRACTION * job_memory_gb(ncores)
 
 
+def process_copies(ncores: int) -> int:
+    """Returns how many times over the sampler's memory is counted against the job.
+
+    Each batch is worked out by a pool of ``ncores`` worker processes, which the sampler
+    forks once it is already holding the RMSD matrix and the indices of the batch. Every
+    one of them inherits all of that, and the pages show up in each of their resident
+    sizes, so what the batch system sees is the sampler's memory once per worker as well
+    as once for the sampler itself.
+
+    A job of 10,001 geometries was killed for using 81.6 GB of its 32 GB while the
+    sampler itself was holding 4.94 GB: 4.94 x (1 + 16 workers) = 84 GB. The 16 was
+    polus' default pool size, which is why the number of cores is now passed to it.
+
+    :param ncores: The number of cores the job asks for, which is the size of the pool.
+    """
+
+    return 1 + ncores
+
+
+def per_process_budget_gb(ncores: int) -> float:
+    """Returns the memory (in GB) the sampler itself is allowed to hold.
+
+    As the job's memory grows with the cores it asks for but its memory is counted once
+    per worker (see :func:`process_copies`), the two nearly cancel: what one process may
+    hold works out at little more than the memory of a single core however many cores are
+    asked for. This is the number which decides whether a trajectory can be sampled.
+    """
+
+    return memory_budget_gb(ncores) / process_copies(ncores)
+
+
+def peak_memory_gb(chunk_size: int, ngeometries: int, ncores: int) -> float:
+    """Returns the memory (in GB) the job is estimated to be charged for in total, i.e.
+    what the sampler holds counted once per process (see :func:`process_copies`)."""
+
+    return process_copies(ncores) * total_memory_gb(chunk_size, ngeometries)
+
+
 def rmsd_matrix_memory_gb(ngeometries: int) -> float:
     """Returns the memory (in GB) taken by the RMSD matrix of every geometry against
     every other one, which the sampler holds for the whole run.
@@ -167,14 +215,20 @@ def format_memory_gb(memory_gb: float) -> str:
 
 
 def largest_trajectory_for(ncores: int) -> int:
-    """Returns the longest trajectory whose RMSD matrix alone fits in the memory of a job
-    with the given number of cores, which is the hard limit on what can be sampled at all
-    (a chunk of any size needs room on top of it).
+    """Returns the longest trajectory whose RMSD matrix alone fits in what one process is
+    allowed to hold, which is the hard limit on what can be sampled at all (a chunk of any
+    size needs room on top of it).
+
+    Asking for more cores barely moves this, as the memory they bring is also counted
+    once per worker (see :func:`per_process_budget_gb`), so a trajectory which does not
+    fit has to be thinned rather than given a larger job.
 
     :param ncores: The number of cores the job asks for.
     """
 
-    return int((memory_budget_gb(ncores) * 1024**3 / BYTES_PER_MATRIX_ELEMENT) ** 0.5)
+    budget_bytes = per_process_budget_gb(ncores) * 1024**3
+
+    return int((budget_bytes / BYTES_PER_MATRIX_ELEMENT) ** 0.5)
 
 
 def maximum_cores() -> int:
@@ -196,21 +250,43 @@ def maximum_cores() -> int:
     return max(int(bounds[1]) for bounds in environments.values())
 
 
+def capped_chunk_size(ngeometries: int) -> int:
+    """Returns the largest chunk size which keeps a batch within
+    :data:`MAXIMUM_CHUNK_ELEMENTS`, which is the ceiling every suggestion is held under
+    however much memory the job has.
+
+    :param ngeometries: The number of geometries in the trajectory.
+    """
+
+    return max(1, min(ngeometries, MAXIMUM_CHUNK_ELEMENTS // ngeometries))
+
+
 def cores_needed_for(
     ngeometries: int, chunk_size: int = MINIMUM_SUGGESTED_CHUNK_SIZE
 ) -> int:
     """Returns the number of cores whose memory would hold the RMSD matrix of the given
     trajectory, plus a chunk of the given size.
 
+    The cores have to cover what one process holds once for every worker as well as for
+    the sampler itself, so ``(1 + n)`` lots of it have to fit in ``n`` cores' worth of
+    memory. Solving that for ``n`` leaves a ceiling: once one process needs more than the
+    memory of a single core, no number of cores is enough.
+
     :param ngeometries: The number of geometries in the trajectory.
     :param chunk_size: The number of geometries whose RMSDs are computed at a time. The
         default is the smallest chunk worth using, which gives the smallest job the
         trajectory can be sampled by at all.
+    :return: The number of cores needed, or 0 if no number of them would be enough.
     """
 
     needed_gb = total_memory_gb(chunk_size, ngeometries)
+    per_core_gb = MEMORY_FRACTION * memory_per_core_gb()
 
-    return max(1, math.ceil(needed_gb / (MEMORY_FRACTION * memory_per_core_gb())))
+    # (1 + n) * needed <= n * per_core  ->  n >= needed / (per_core - needed)
+    if needed_gb >= per_core_gb:
+        return 0
+
+    return max(1, math.ceil(needed_gb / (per_core_gb - needed_gb)))
 
 
 def suggest_number_of_cores(ngeometries: int) -> int:
@@ -218,9 +294,9 @@ def suggest_number_of_cores(ngeometries: int) -> int:
     has to come from (see :func:`cores_needed_for`).
 
     A chunk size the user has pinned is taken as given and the cores are made to fit
-    around it. Otherwise the chunk size is the one which follows the cores, so what is
-    suggested is the smallest job the trajectory fits in at all; the chunk size then
-    grows to fill whatever is asked for.
+    around it. Otherwise the chunk size is the one which follows the cores, and as it is
+    held under a ceiling of its own (see :func:`capped_chunk_size`) what a batch can cost
+    is bounded, so the cores only have to cover the RMSD matrix and one of those.
 
     :param ngeometries: The number of geometries in the trajectory. If this is not known
         (0), the menu default is returned instead.
@@ -234,7 +310,7 @@ def suggest_number_of_cores(ngeometries: int) -> int:
             ngeometries, submit_diversity_menu_options.selected_chunk_size
         )
 
-    return cores_needed_for(ngeometries)
+    return cores_needed_for(ngeometries, capped_chunk_size(ngeometries))
 
 
 def suggest_chunk_size(ngeometries: int, ncores: int) -> int:
@@ -249,13 +325,16 @@ def suggest_chunk_size(ngeometries: int, ncores: int) -> int:
     if ngeometries <= 0:
         return SUBMIT_DIVERSITY_MENU_DEFAULTS["default_chunk_size"]
 
-    remaining_gb = memory_budget_gb(ncores) - rmsd_matrix_memory_gb(ngeometries)
+    remaining_gb = per_process_budget_gb(ncores) - rmsd_matrix_memory_gb(ngeometries)
     # the trajectory is too long to sample with this many cores whatever the chunk size,
     # which the menu checks warn about; the smallest useful chunk is the best on offer
     if remaining_gb <= 0:
         return MINIMUM_SUGGESTED_CHUNK_SIZE
 
     chunk_size = int(remaining_gb * 1024**3 // (ngeometries * BYTES_PER_CHUNK_ELEMENT))
+    # a job with memory to spare must still not be given a batch which covers the whole
+    # matrix in one go (see :data:`MAXIMUM_CHUNK_ELEMENTS`)
+    chunk_size = min(chunk_size, capped_chunk_size(ngeometries))
 
     # a trajectory long enough that not even the smallest worthwhile chunk fits is
     # suggested the largest chunk that does, as a slow job is still better than one which
@@ -349,16 +428,22 @@ class SubmitDiversityMenuOptions(MenuOptions):
         if not ngeometries or self.selected_number_of_cores < 1:
             return None
 
+        ncores = self.selected_number_of_cores
         matrix_gb = rmsd_matrix_memory_gb(ngeometries)
-        budget_gb = memory_budget_gb(self.selected_number_of_cores)
-        if matrix_gb <= budget_gb:
+        if matrix_gb <= per_process_budget_gb(ncores):
             return None
 
         needed_cores = cores_needed_for(ngeometries)
         largest_cores = maximum_cores()
-        # more cores are the way out of this, unless the machine does not have that many
-        # to give, in which case a shorter trajectory is the only way out
-        if largest_cores and needed_cores > largest_cores:
+        # the memory more cores bring is also counted once per worker, so they are only
+        # a way out of this while one process still fits in a single core's memory
+        if not needed_cores:
+            way_out = (
+                "No number of cores would fit it, as the memory they bring is counted "
+                "once for every worker as well, so the trajectory has to be thinned to "
+                f"about {largest_trajectory_for(ncores):,} geometries or fewer."
+            )
+        elif largest_cores and needed_cores > largest_cores:
             way_out = (
                 f"That would need {needed_cores:,} cores, more than the "
                 f"{largest_cores:,} a job can ask for on this machine, so the "
@@ -367,16 +452,15 @@ class SubmitDiversityMenuOptions(MenuOptions):
             )
         else:
             way_out = (
-                f"Thin the trajectory to about "
-                f"{largest_trajectory_for(self.selected_number_of_cores):,} geometries "
-                f"or ask for {needed_cores:,} cores."
+                f"Thin the trajectory to about {largest_trajectory_for(ncores):,} "
+                f"geometries or ask for {needed_cores:,} cores."
             )
 
         return (
             f"The {ngeometries:,} geometries in the trajectory need a {matrix_gb:,.1f} "
-            f"GB RMSD matrix, which does not fit in the "
-            f"{job_memory_gb(self.selected_number_of_cores):,.0f} GB of a "
-            f"{self.selected_number_of_cores} core job. {way_out}"
+            f"GB RMSD matrix, and the sampler is charged for it once per worker, so a "
+            f"{ncores} core job may hold only about "
+            f"{per_process_budget_gb(ncores):,.1f} GB of it. {way_out}"
         )
 
     def check_number_of_cores_fits_machine(self) -> Union[str, None]:
@@ -406,22 +490,38 @@ class SubmitDiversityMenuOptions(MenuOptions):
                 f"{ngeometries:,} geometries in the trajectory."
             )
 
-        budget_gb = memory_budget_gb(self.selected_number_of_cores)
+        ncores = self.selected_number_of_cores
+        budget_gb = per_process_budget_gb(ncores)
         # a trajectory whose matrix alone does not fit is reported by the check above,
         # which says what to do about it; no chunk size would save it
         if rmsd_matrix_memory_gb(ngeometries) > budget_gb:
             return None
 
+        # the lists a batch is made of are python objects rather than an array, so a
+        # batch covering too much of the matrix at once is worth warning about on its own
+        # (a job with memory to spare is still killed building and pickling them)
+        if self.selected_chunk_size * ngeometries > MAXIMUM_CHUNK_ELEMENTS:
+            return (
+                f"Current chunk size: {self.selected_chunk_size:,} makes each batch "
+                f"cover {self.selected_chunk_size * ngeometries:,} elements of the RMSD "
+                f"matrix, which the sampler builds a python list of before it starts "
+                f"working them out. Keep it under "
+                f"{MAXIMUM_CHUNK_ELEMENTS // ngeometries:,} (a chunk size of "
+                f"{suggest_chunk_size(ngeometries, self.selected_number_of_cores):,} "
+                f"would do), or the job is likely to be killed for running out of "
+                f"memory before the first batch has begun."
+            )
+
         needed_gb = total_memory_gb(self.selected_chunk_size, ngeometries)
         if needed_gb > budget_gb:
             return (
-                f"Current chunk size: {self.selected_chunk_size:,} brings what the job "
-                f"needs to about {needed_gb:,.1f} GB, more than the "
-                f"{job_memory_gb(self.selected_number_of_cores):,.0f} GB of a "
-                f"{self.selected_number_of_cores} core job, so it may be killed for "
-                f"running out of memory. A chunk size of "
-                f"{suggest_chunk_size(ngeometries, self.selected_number_of_cores):,} "
-                f"would fit."
+                f"Current chunk size: {self.selected_chunk_size:,} brings what the "
+                f"sampler holds to about {needed_gb:,.1f} GB, which is charged once for "
+                f"the sampler and once per worker, so a {ncores} core job would be "
+                f"asked for about {peak_memory_gb(self.selected_chunk_size, ngeometries, ncores):,.1f} GB "  # noqa: E501
+                f"of its {job_memory_gb(ncores):,.0f} GB and may be killed for running "
+                f"out of memory. A chunk size of "
+                f"{suggest_chunk_size(ngeometries, ncores):,} would fit."
             )
 
     def check_selected_rotation_method(self) -> Union[str, None]:
@@ -515,14 +615,24 @@ class SubmitDiversityFunctions:
         ngeometries = submit_diversity_menu_options.number_of_geometries_in_file
         suggested = suggest_number_of_cores(ngeometries)
 
-        if ngeometries:
+        if ngeometries and not suggested:
+            print(
+                f"The {ngeometries:,} geometries in the trajectory need "
+                f"{format_memory_gb(rmsd_matrix_memory_gb(ngeometries))} for their RMSD "
+                f"matrix, which no number of cores would fit: the sampler is charged "
+                f"for what it holds once per worker as well, so asking for more cores "
+                f"brings little more than one core's {memory_per_core_gb()} GB with it. "
+                f"Thin the trajectory in the sampling menu above this one."
+            )
+        elif ngeometries:
             largest = maximum_cores()
             print(
                 f"The {ngeometries:,} geometries in the trajectory need at least "
                 f"{suggested:,} cores, as their RMSD matrix takes "
-                f"{format_memory_gb(rmsd_matrix_memory_gb(ngeometries))} and each core "
-                f"is given {memory_per_core_gb()} GB. More cores than that also work "
-                f"out the RMSDs faster."
+                f"{format_memory_gb(rmsd_matrix_memory_gb(ngeometries))} and it is "
+                f"charged once for the sampler and once per worker against the "
+                f"{memory_per_core_gb()} GB each core brings. More cores than that also "
+                f"work out the RMSDs faster."
             )
             if largest and suggested > largest:
                 print(
@@ -536,7 +646,11 @@ class SubmitDiversityFunctions:
             submit_diversity_menu_options.selected_number_of_cores,
             minimum=0,
         )
-        submit_diversity_menu_options.selected_number_of_cores = ncores or suggested
+        submit_diversity_menu_options.selected_number_of_cores = (
+            ncores
+            or suggested
+            or submit_diversity_menu_options.selected_number_of_cores
+        )
         derive_chunk_size()
 
     @staticmethod
@@ -696,13 +810,14 @@ class SubmitDiversityFunctions:
                 f"The largest sample size ({max(sample_sizes):,}) is larger than the "
                 f"{ngeometries:,} geometries in the trajectory."
             )
-        elif ngeometries and rmsd_matrix_memory_gb(ngeometries) > memory_budget_gb(
+        elif ngeometries and rmsd_matrix_memory_gb(ngeometries) > per_process_budget_gb(
             ncores
         ):
             problem = (
                 f"The {ngeometries:,} geometries in the trajectory need a "
-                f"{rmsd_matrix_memory_gb(ngeometries):,.1f} GB RMSD matrix, which does "
-                f"not fit in the {job_memory_gb(ncores):,.0f} GB of a {ncores} core job."
+                f"{rmsd_matrix_memory_gb(ngeometries):,.1f} GB RMSD matrix, and it is "
+                f"charged once for the sampler and once per worker, so a {ncores} core "
+                f"job can hold only about {per_process_budget_gb(ncores):,.1f} GB of it."
             )
 
         if problem:
@@ -782,9 +897,11 @@ class SubmitDiversityFunctions:
                     else "not known (the trajectory could not be counted)"
                 ),
                 "Estimated memory": (
-                    f"{format_memory_gb(total_memory_gb(chunk_size, ngeometries))}"
-                    f" in total, of the {job_memory_gb(ncores):,.0f} GB this job is "
-                    f"given"
+                    f"{format_memory_gb(total_memory_gb(chunk_size, ngeometries))} "
+                    f"held by the sampler, charged as "
+                    f"{format_memory_gb(peak_memory_gb(chunk_size, ngeometries, ncores))}"
+                    f" over its {process_copies(ncores)} processes, of the "
+                    f"{job_memory_gb(ncores):,.0f} GB this job is given"
                     if ngeometries
                     else "not known (the trajectory could not be counted)"
                 ),
@@ -820,8 +937,12 @@ class SubmitDiversityFunctions:
                 "with the square of it. The chunk size only sets how much of that "
                 "matrix is worked out at a time, so a smaller chunk uses less memory on "
                 "top of it but takes longer.",
-                "The batch system hands out memory per core, so asking for more cores "
-                "is also how the job is given the memory to hold a longer trajectory.",
+                "The RMSDs are worked out by a pool of one worker process per core, "
+                "each of which is forked once the sampler already holds the matrix and "
+                "the batch, so what it holds is charged against the job once per worker "
+                "as well. Asking for more cores therefore brings little more memory "
+                "than it takes: a trajectory which does not fit has to be thinned "
+                "rather than given a larger job.",
                 "The job is now queued on a compute node, so it will not start "
                 "immediately and this menu does not wait for it. Check on it with your "
                 "batch system's queue command (e.g. qstat / squeue); the sampled "

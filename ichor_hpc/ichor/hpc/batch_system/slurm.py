@@ -184,10 +184,29 @@ class SLURM(BatchSystem):
 
     @classmethod
     def parallel_environment(cls, ncores: int) -> Optional[str]:
-        """Returns the line in the job script defining the number of corest to be used for the job."""
+        """Returns the lines in the job script defining the number of cores to be used
+        for the job.
+
+        The cores are asked for as one task given several CPUs, rather than as several
+        tasks, because everything ichor runs is a single process which parallelises over
+        the cores of one machine (Gaussian over ``%NProcShared``, AIMAll over ``-nproc``,
+        FEREBUS and CP2K over OpenMP threads, the diversity sampler over a pool of worker
+        processes). Nothing it runs is an MPI program spread over several tasks.
+
+        Asking for tasks instead lets the batch system place them on different nodes, and
+        the job script then runs on one of those nodes with only the cores (and, as
+        memory is handed out per core, only the memory) which happen to be on it, while
+        the program still uses the number of cores it was told to. ``--nodes=1`` is what
+        keeps the allocation in one place.
+        """
         import ichor.hpc.global_variables
 
-        return f"-p {ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ncores]}\n#{cls.OptionCmd} -n {ncores}"  # noqa E501
+        return (
+            f"-p {ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ncores]}\n"
+            f"#{cls.OptionCmd} --nodes=1\n"
+            f"#{cls.OptionCmd} --ntasks=1\n"
+            f"#{cls.OptionCmd} --cpus-per-task={ncores}"
+        )
 
     @classmethod
     def array_job(cls, njobs: int, max_running_tasks: Optional[int] = None) -> str:
@@ -227,8 +246,11 @@ class SLURM(BatchSystem):
 
     @classproperty
     def NumProcs(self) -> str:
-        """https://docs.oracle.com/cd/E19957-01/820-0699/chp4-21/index.html"""
-        return "SLURM_NPROCS"
+        """Returns the environment variable holding the number of cores the job was
+        given. As the cores are asked for with ``--cpus-per-task`` (see
+        :meth:`parallel_environment`), that is the CPUs of the one task rather than
+        SLURM_NPROCS, which counts the tasks and would be 1."""
+        return "SLURM_CPUS_PER_TASK"
 
     @classproperty
     def OptionCmd(self) -> str:

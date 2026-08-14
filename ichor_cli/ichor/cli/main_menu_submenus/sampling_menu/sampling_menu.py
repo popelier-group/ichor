@@ -16,9 +16,10 @@ from ichor.cli.main_menu_submenus.sampling_menu.sampling_submenus.diversity_subm
     format_memory_gb,
     job_memory_gb,
     largest_trajectory_for,
+    peak_memory_gb,
+    process_copies,
     rmsd_matrix_memory_gb,
     submit_diversity_menu_options,
-    total_memory_gb,
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
@@ -108,9 +109,9 @@ class SamplingFunctions:
                 "Chunk size": f"{chunk_size:,} geometries per chunk",
                 "RMSD matrix": format_memory_gb(rmsd_matrix_memory_gb(ngeometries)),
                 "Estimated memory": (
-                    f"{format_memory_gb(total_memory_gb(chunk_size, ngeometries))}"
-                    f" in total, of the {job_memory_gb(ncores):,.0f} GB a {ncores} core "
-                    f"job is given"
+                    f"{format_memory_gb(peak_memory_gb(chunk_size, ngeometries, ncores))}"  # noqa: E501
+                    f" over the {process_copies(ncores)} processes of a {ncores} core "
+                    f"job, which is given {job_memory_gb(ncores):,.0f} GB"
                 ),
             },
             [
@@ -120,10 +121,13 @@ class SamplingFunctions:
                 "RMSD matrix above, and it is there whatever the chunk size is.",
                 "The chunk size has been derived from this trajectory and the memory "
                 "the job asks for, so that the two together fit; it can be changed (or "
-                "pinned) in the diversity sampling menu. If the trajectory is too long "
-                "to fit at all, the menu says so: it then has to be thinned (e.g. every "
-                "nth step of it) or given a job with more cores, as the memory comes "
-                "with the cores.",
+                "pinned) in the diversity sampling menu.",
+                "The sampler forks a worker process per core once it is already holding "
+                "the matrix, and what it holds is charged against the job again for "
+                "every one of them, which is why the estimate above is counted over the "
+                "processes. Asking for more cores therefore brings little more memory "
+                "than it takes: if the trajectory is too long to fit, the menu says so "
+                "and thinning it is the way out.",
             ],
         )
 
@@ -289,9 +293,9 @@ class SamplingFunctions:
                 + (f", up to the first {max_geometries:,}" if max_geometries else ""),
                 "RMSD matrix": format_memory_gb(rmsd_matrix_memory_gb(nwritten)),
                 "Estimated memory": (
-                    f"{format_memory_gb(total_memory_gb(chunk_size, nwritten))} "
-                    f"in total, of the {job_memory_gb(ncores):,.0f} GB a {ncores} core "
-                    f"job is given"
+                    f"{format_memory_gb(peak_memory_gb(chunk_size, nwritten, ncores))}"  # noqa: E501
+                    f" over the {process_copies(ncores)} processes of a {ncores} core "
+                    f"job, which is given {job_memory_gb(ncores):,.0f} GB"
                 ),
             },
             [
