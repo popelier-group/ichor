@@ -4,6 +4,14 @@ ichor.cli.main\_menu\_submenus.points\_directory\_menu.points\_directory\_submen
 Submodules
 ----------
 
+ichor.cli.main\_menu\_submenus.points\_directory\_menu.points\_directory\_submenus.check\_calculations\_menu module
+--------------------------------------------------------------------------------------------------------------------
+
+.. automodule:: ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.check_calculations_menu
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ichor.cli.main\_menu\_submenus.points\_directory\_menu.points\_directory\_submenus.submit\_aimall\_menu module
 --------------------------------------------------------------------------------------------------------------
 

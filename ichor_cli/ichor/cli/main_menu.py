@@ -26,10 +26,6 @@ from ichor.cli.main_menu_submenus.sampling_menu import (
     sampling_menu,
     SAMPLING_MENU_DESCRIPTION,
 )
-from ichor.cli.main_menu_submenus.tools_menu.tools_menu import (
-    tools_menu,
-    TOOLS_MENU_DESCRIPTION,
-)
 from ichor.cli.main_menu_submenus.training_menu.training_menu import (
     training_menu,
     TRAINING_MENU_DESCRIPTION,
@@ -105,7 +101,6 @@ main_menu_items = [
         main_menu,
     ),
     SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
-    SubmenuItem(TOOLS_MENU_DESCRIPTION.title, tools_menu, main_menu),
 ]
 
 # add items to menu

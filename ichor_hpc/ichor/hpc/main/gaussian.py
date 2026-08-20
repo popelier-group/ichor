@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 
 import ichor.hpc.global_variables
 
-from ichor.core.files import GaussianOutput, GJF, PointsDirectory, WFN
+from ichor.core.files import GaussianOutput, GJF, PointDirectory, PointsDirectory, WFN
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.main.opt import (
     read_single_geometry,
@@ -147,7 +147,7 @@ def submit_gaussian_output_to_xyz(
 
 
 def submit_points_directory_to_gaussian(
-    points_directory: Union[Path, PointsDirectory],
+    points_directory: Union[Path, PointsDirectory, List[PointDirectory]],
     overwrite_existing=False,
     force_calculate_wfn: bool = False,
     ncores=2,
@@ -160,8 +160,11 @@ def submit_points_directory_to_gaussian(
     """Function that writes out .gjf files from .xyz files that are in each directory and
     calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
 
-    :param directory: A Path object which is the path of the directory
-        (commonly traning set path, sample pool path, etc.).
+    :param points_directory: The points to submit, given either as the path of a
+        directory which contains points (commonly training set path, sample pool path,
+        etc.), as a PointsDirectory, or as a list of the PointDirectory-ies of interest.
+        The last of these is used to submit only some of the points of a PointsDirectory,
+        such as the ones which have to be calculated again.
     :param force_calculate_wfn: Run Gaussian calculations on given .gjf files,
         even if .wfn files already exist. Defaults to False.
     :param kwargs: Key word arguments to pass to GJF class. These are things like number of cores, basis set,
@@ -169,8 +172,9 @@ def submit_points_directory_to_gaussian(
         These will get used in the new written gjf files (overwriting
         settings from previously existing gjf files)
     """
-    # a directory which contains points (a bunch of molecular geometries)
-    if not isinstance(points_directory, PointsDirectory):
+    # a path to a directory which contains points (a bunch of molecular geometries).
+    # A PointsDirectory or a list of PointDirectory-ies is already the points to submit.
+    if isinstance(points_directory, (str, Path)):
         points_directory = PointsDirectory(points_directory)
 
     gjf_files = write_gjfs(points_directory, overwrite_existing, **kwargs)
@@ -186,15 +190,18 @@ def submit_points_directory_to_gaussian(
 
 
 def write_gjfs(
-    points_directory: PointsDirectory, overwrite_existing: bool, **kwargs
+    points_directory: Union[PointsDirectory, List[PointDirectory]],
+    overwrite_existing: bool,
+    **kwargs,
 ) -> List[Path]:
     """Writes out .gjf files in every PointDirectory which is contained
     in a PointsDirectory. Each PointDirectory should always have a `.xyz` file in it,
     which contains only one molecular geometry. This `.xyz` file can be used to write out the `.gjf`
     file in the PointDirectory (if it does not exist already).
 
-    :param points: A PointsDirectory instance which wraps around a
-        whole directory containing points (such as TRAINING_SET).
+    :param points_directory: A PointsDirectory instance which wraps around a
+        whole directory containing points (such as TRAINING_SET), or a list of the
+        PointDirectory-ies to write the .gjf files of.
     :return: A list of Path objects which point to `.gjf` files in each
         PointDirectory that is contained in the PointsDirectory.
     """

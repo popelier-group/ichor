@@ -6,7 +6,7 @@ import ichor.hpc.global_variables
 
 from ichor.core.common.constants import AIMALL_FUNCTIONALS
 
-from ichor.core.files import PointsDirectory
+from ichor.core.files import PointDirectory, PointsDirectory
 from ichor.core.files.file import FileWriteError
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import AIMAllCommand
@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 
 def submit_points_directory_to_aimall(
-    points_directory: Union[PointsDirectory, Path],
+    points_directory: Union[PointsDirectory, Path, List[PointDirectory]],
     method="B3LYP",
     ncores: int = 2,
     naat: int = 1,
@@ -30,7 +30,10 @@ def submit_points_directory_to_aimall(
     """Submits .wfn files which will be partitioned into .int files by
     AIMALL. Each topological atom i the system has its own .int file
 
-    :param points_directory: A path to a `PointsDirectory`-structured directory or a PointsDirectory instance
+    :param points_directory: A path to a `PointsDirectory`-structured directory, a
+        PointsDirectory instance, or a list of the PointDirectory-ies of interest. The
+        last of these is used to submit only some of the points of a PointsDirectory,
+        such as the ones which have to be calculated again.
     :param method: Functional to be written to the .wfn file because AIMAll needs to know it to function correctly.
         Note that only HF, B3LYP, M062X, PBE are supported.
     :param ncores: Number of cores to run AIMAll with, defaults to 2
@@ -43,7 +46,8 @@ def submit_points_directory_to_aimall(
     :rtype: Optional[ichor.hpc.batch_system.jobs.JobID]
     """
 
-    if not isinstance(points_directory, PointsDirectory):
+    # a PointsDirectory or a list of PointDirectory-ies is already the points to submit
+    if isinstance(points_directory, (str, Path)):
         points_directory = PointsDirectory(points_directory)
 
     method = method.upper().strip()
@@ -69,10 +73,17 @@ def submit_points_directory_to_aimall(
     )
 
 
-def add_method_and_get_wfn_paths(points: PointsDirectory, method: str) -> List[Path]:
+def add_method_and_get_wfn_paths(
+    points: Union[PointsDirectory, List[PointDirectory]], method: str
+) -> List[Path]:
     """AIMALL needs to know the method from the wfn file. The method needs to be
     added in the wfn file, otherwise AIMALL gets the method wrong and
-    gives the wrong results."""
+    gives the wrong results.
+
+    :param points: A PointsDirectory instance, or a list of the PointDirectory-ies whose
+        wavefunctions are to be written out with the method in them.
+    :param method: The method (functional) used in the Gaussian calculation.
+    """
 
     wfns = []
     for point in tqdm(points, desc="Extracting WFN files"):

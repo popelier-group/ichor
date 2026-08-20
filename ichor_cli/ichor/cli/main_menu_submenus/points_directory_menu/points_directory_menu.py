@@ -3,6 +3,10 @@ from dataclasses import dataclass
 from consolemenu.items import SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus import (
+    check_aimall_menu,
+    CHECK_AIMALL_MENU_DESCRIPTION,
+    check_gaussian_menu,
+    CHECK_GAUSSIAN_MENU_DESCRIPTION,
     submit_aimall_menu,
     SUBMIT_AIMALL_MENU_DESCRIPTION,
     submit_csvs_menu,
@@ -19,8 +23,10 @@ from ichor.cli.menu_options import MenuOptions
 
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
-    "PointsDirectory Menu",
-    subtitle="Use this to create and interact with ichor's PointsDirectory class.\n",
+    "Property Calculation Menu",
+    subtitle="Use this to calculate atomic properties for a set of geometries "
+    "(a PointsDirectory) with Gaussian and AIMAll, to check that these calculations "
+    "have finished, and to collect the results into a database.\n",
 )
 
 
@@ -57,7 +63,17 @@ point_directory_menu_items = [
         points_directory_menu,
     ),
     SubmenuItem(
+        CHECK_GAUSSIAN_MENU_DESCRIPTION.title,
+        check_gaussian_menu,
+        points_directory_menu,
+    ),
+    SubmenuItem(
         SUBMIT_AIMALL_MENU_DESCRIPTION.title, submit_aimall_menu, points_directory_menu
+    ),
+    SubmenuItem(
+        CHECK_AIMALL_MENU_DESCRIPTION.title,
+        check_aimall_menu,
+        points_directory_menu,
     ),
     SubmenuItem(
         SUBMIT_DATABASE_MENU_DESCRIPTION.title,

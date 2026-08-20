@@ -28,6 +28,14 @@ ichor.core.processing.point\_directory\_processing module
    :undoc-members:
    :show-inheritance:
 
+ichor.core.processing.points\_directory\_check module
+------------------------------------------------------
+
+.. automodule:: ichor.core.processing.points_directory_check
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
