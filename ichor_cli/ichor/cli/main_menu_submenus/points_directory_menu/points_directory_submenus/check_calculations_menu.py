@@ -49,6 +49,7 @@ from ichor.hpc.main import (
     submit_points_directory_to_gaussian,
 )
 from ichor.hpc.submission_commands import GaussianCommand
+from tqdm import tqdm
 
 CHECK_CALCULATIONS_MENU_DESCRIPTION = MenuDescription(
     "Check Point Calculations Menu",
@@ -148,6 +149,9 @@ def make_check(
     )
 
     print(f"CHECKING {points_directory_path}\n")
+    # the point directories are read before the check itself can report any progress,
+    # which is a wait of its own for a large set, so say what is going on first
+    print("Reading the point directories...\n")
 
     try:
         return check_class(points_directory_path)
@@ -292,7 +296,9 @@ def problem_points_by_points_directory(
     points_by_points_directory = {}
     skipped_points = []
 
-    for result in check.problem_points:
+    for result in tqdm(
+        check.problem_points, desc="Collecting points to resubmit", unit="point"
+    ):
         point = PointDirectory(result.path)
         if not can_be_resubmitted(point):
             skipped_points.append(check.display_name(result))

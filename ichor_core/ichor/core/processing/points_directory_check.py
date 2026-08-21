@@ -21,6 +21,7 @@ from typing import Dict, List, Sequence, Tuple, Union
 
 from ichor.core.files import PointDirectory, PointsDirectory, PointsDirectoryParent
 from ichor.core.useful_functions import single_or_many_points_directories
+from tqdm import tqdm
 
 __all__ = [
     "PointCheckResult",
@@ -207,18 +208,29 @@ class PointsDirectoryCheck:
 
         self.results = []
 
-        for points_directory in self.points_directories:
-            for point in points_directory:
-                status, problems = self.check_point(point)
-                self.results.append(
-                    PointCheckResult(
-                        name=point.path.name,
-                        path=point.path,
-                        points_directory=points_directory.path.name,
-                        status=status,
-                        problems=problems,
-                    )
+        # the points of every PointsDirectory being checked, gathered first so that one
+        # progress bar covers the lot. Checking a large set means reading a file or two
+        # in each of many thousands of directories, which takes long enough on a busy
+        # filesystem to look like nothing is happening
+        points = [
+            (points_directory, point)
+            for points_directory in self.points_directories
+            for point in points_directory
+        ]
+
+        for points_directory, point in tqdm(
+            points, desc=f"Checking {self.calculation_name} output", unit="point"
+        ):
+            status, problems = self.check_point(point)
+            self.results.append(
+                PointCheckResult(
+                    name=point.path.name,
+                    path=point.path,
+                    points_directory=points_directory.path.name,
+                    status=status,
+                    problems=problems,
                 )
+            )
 
         return self.results
 
