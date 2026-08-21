@@ -3,10 +3,8 @@ from dataclasses import dataclass
 from consolemenu.items import SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus import (
-    check_aimall_menu,
-    CHECK_AIMALL_MENU_DESCRIPTION,
-    check_gaussian_menu,
-    CHECK_GAUSSIAN_MENU_DESCRIPTION,
+    check_calculations_menu,
+    CHECK_CALCULATIONS_MENU_DESCRIPTION,
     submit_aimall_menu,
     SUBMIT_AIMALL_MENU_DESCRIPTION,
     submit_csvs_menu,
@@ -63,16 +61,11 @@ point_directory_menu_items = [
         points_directory_menu,
     ),
     SubmenuItem(
-        CHECK_GAUSSIAN_MENU_DESCRIPTION.title,
-        check_gaussian_menu,
-        points_directory_menu,
-    ),
-    SubmenuItem(
         SUBMIT_AIMALL_MENU_DESCRIPTION.title, submit_aimall_menu, points_directory_menu
     ),
     SubmenuItem(
-        CHECK_AIMALL_MENU_DESCRIPTION.title,
-        check_aimall_menu,
+        CHECK_CALCULATIONS_MENU_DESCRIPTION.title,
+        check_calculations_menu,
         points_directory_menu,
     ),
     SubmenuItem(

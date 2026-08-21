@@ -1,8 +1,6 @@
-from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.check_calculations_menu import (
-    check_aimall_menu,
-    CHECK_AIMALL_MENU_DESCRIPTION,
-    check_gaussian_menu,
-    CHECK_GAUSSIAN_MENU_DESCRIPTION,
+from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.check_calculations_menu import (  # noqa: E501
+    check_calculations_menu,
+    CHECK_CALCULATIONS_MENU_DESCRIPTION,
 )
 from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.submit_aimall_menu import (
     submit_aimall_menu,
@@ -26,10 +24,8 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
 )
 
 __all__ = [
-    "check_gaussian_menu",
-    "check_aimall_menu",
-    "CHECK_GAUSSIAN_MENU_DESCRIPTION",
-    "CHECK_AIMALL_MENU_DESCRIPTION",
+    "check_calculations_menu",
+    "CHECK_CALCULATIONS_MENU_DESCRIPTION",
     "submit_aimall_menu",
     "submit_gaussian_menu",
     "submit_database_menu",

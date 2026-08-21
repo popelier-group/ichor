@@ -1,15 +1,16 @@
-"""Menus which check that the Gaussian and AIMAll calculations of a PointsDirectory have
+"""Menu which checks that the Gaussian and AIMAll calculations of a PointsDirectory have
 finished, i.e. that there is a wavefunction for every geometry and a set of atomic files
-for every wavefunction, and which submit the points that are not finished again.
+for every wavefunction, and which submits the points that are not finished again.
 
-Both menus are the same apart from which calculation they check, so they share their
-options and the functions which run a check, report its outcome and resubmit the points
-it found. The settings a resubmission is made with are the ones of the menu the points
+A check prints what is wrong with each unfinished point, followed by a summary naming
+them, and then offers to save a report of every point which was checked. A resubmission
+runs the same check and queues the points it found, with the settings of the menu they
 were submitted from in the first place (the Submit Gaussian Menu and the Submit AIMAll
 Menu), so that points which are calculated again are calculated the same way as the rest
-of the set.
+of the set. Those settings can be changed for a resubmission if they need to be.
 """
 
+import textwrap
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
@@ -31,8 +32,11 @@ from ichor.cli.useful_functions import (
     print_summary_and_pause,
     user_input_bool,
     user_input_free_flow,
+    user_input_int,
     user_input_path,
+    user_input_restricted,
 )
+from ichor.cli.useful_functions.summary import SUMMARY_WIDTH
 from ichor.core.files import PointDirectory, PointsDirectory, PointsDirectoryParent
 from ichor.core.processing import (
     AimallCheck,
@@ -46,42 +50,30 @@ from ichor.hpc.main import (
 )
 from ichor.hpc.submission_commands import GaussianCommand
 
-CHECK_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
-    "Check Gaussian Menu",
-    subtitle="Use this menu to check that Gaussian has written a wavefunction for "
-    "every point, and to resubmit the points which are not finished.\n",
+CHECK_CALCULATIONS_MENU_DESCRIPTION = MenuDescription(
+    "Check Point Calculations Menu",
+    subtitle="Use this menu to check that the Gaussian and AIMAll calculations of a "
+    "PointsDirectory have finished, and to resubmit the points which have not.\n",
 )
 
-CHECK_AIMALL_MENU_DESCRIPTION = MenuDescription(
-    "Check AIMAll Menu",
-    subtitle="Use this menu to check that AIMAll has written the atomic files for "
-    "every point, and to resubmit the points which are not finished.\n",
-)
+# name of the report file, which is written into the directory which was checked
+REPORT_NAME = "{}-CHECK-REPORT.txt"
 
-CHECK_GAUSSIAN_MENU_DEFAULTS = {
-    "default_check_file_contents": True,
-    "default_write_report": True,
-    "default_report_name": "GAUSSIAN-CHECK-REPORT.txt",
-}
+# how many points are printed with what is wrong with them. A check of a large
+# PointsDirectory can find thousands of unfinished points, and their problems tend to be
+# the same few sentences over and over, so only the first handful are spelled out. The
+# summary underneath them names the rest, and the report file has all of them
+MAX_PROBLEMS_PRINTED = 10
 
-CHECK_AIMALL_MENU_DEFAULTS = {
-    "default_check_file_contents": True,
-    "default_write_report": True,
-    "default_report_name": "AIMALL-CHECK-REPORT.txt",
-}
-
-# a check of a large PointsDirectory can find thousands of unfinished points, which are
-# all written to the report file but would scroll the menu away if they were all printed
-MAX_PROBLEMS_PRINTED = 20
+# how many point names are listed per status in the summary of unfinished points. This is
+# higher than the number of points printed with what is wrong with them, as the summary
+# is only names and so fits many more of them on the screen
+MAX_NAMES_SUMMARISED = 60
 
 
-# dataclass used to store values for both check menus
+# dataclass used to store values for CheckCalculationsMenu
 @dataclass
-class CheckCalculationMenuOptions(MenuOptions):
-
-    selected_check_file_contents: bool
-    selected_write_report: bool
-    selected_report_name: str
+class CheckCalculationsMenuOptions(MenuOptions):
 
     # defaults to the current working directory
     selected_points_directory_path: Path = field(default_factory=lambda: Path.cwd())
@@ -101,25 +93,8 @@ class CheckCalculationMenuOptions(MenuOptions):
             return f"Current path: {pd_path} might not be PointsDirectory-like)."
 
 
-# initialize dataclasses for storing information for the menus
-check_gaussian_menu_options = CheckCalculationMenuOptions(
-    *CHECK_GAUSSIAN_MENU_DEFAULTS.values()
-)
-
-check_aimall_menu_options = CheckCalculationMenuOptions(
-    *CHECK_AIMALL_MENU_DEFAULTS.values()
-)
-
-
-def select_points_directory(menu_options: CheckCalculationMenuOptions):
-    """Asks user to update points directory and then updates the given menu options."""
-    pd_path = user_input_path("Change PointsDirectory Path: ")
-    ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH = Path(
-        pd_path
-    ).absolute()
-    menu_options.selected_points_directory_path = (
-        ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-    )
+# initialize dataclass for storing information for menu
+check_calculations_menu_options = CheckCalculationsMenuOptions()
 
 
 def shorten_names(names: Sequence[str]) -> str:
@@ -155,17 +130,15 @@ def has_usable_wfn(point: PointDirectory) -> bool:
 
 def make_check(
     check_class: Type[PointsDirectoryCheck],
-    menu_options: CheckCalculationMenuOptions,
 ) -> Optional[PointsDirectoryCheck]:
     """Checks the selected PointsDirectory (or parent to many PointsDirectory-ies) for
     the output of one of the calculations.
 
     The check is done here rather than being submitted to a compute node, as it only
-    looks at which files are on disk (and, if asked to, at the last line of each of
-    them), so even a PointsDirectory of many thousands of points is checked in seconds.
+    looks at which files are on disk and at the last line of each of them, so even a
+    PointsDirectory of many thousands of points is checked in seconds.
 
     :param check_class: The check to run, e.g. ``GaussianCheck`` or ``AimallCheck``.
-    :param menu_options: The options of the menu the check is run from.
     :return: The finished check, or None if the selected path could not be read as a
         PointsDirectory (in which case that has been shown to the user).
     """
@@ -177,10 +150,7 @@ def make_check(
     print(f"CHECKING {points_directory_path}\n")
 
     try:
-        return check_class(
-            points_directory_path,
-            check_file_contents=menu_options.selected_check_file_contents,
-        )
+        return check_class(points_directory_path)
     # the path is only checked for being PointsDirectory-like when it is selected, so it
     # can still be a directory which does not exist or holds no points at all
     except FileNotFoundError as e:
@@ -198,7 +168,10 @@ def make_check(
 
 
 def print_problem_points(check: PointsDirectoryCheck):
-    """Prints the points which are not finished, with what is wrong with each of them.
+    """Prints the points which are not finished: first what is wrong with each of them,
+    then a summary listing which points are missing their output and which have
+    incomplete output, so that the names can be read off the screen without opening the
+    report file.
 
     Only the points which need looking at are printed, as a finished PointsDirectory
     would otherwise scroll thousands of OK lines past the user.
@@ -215,38 +188,67 @@ def print_problem_points(check: PointsDirectoryCheck):
             f"{'; '.join(result.problems)}"
         )
     if len(problem_points) > MAX_PROBLEMS_PRINTED:
-        print(
-            f"  ... and {len(problem_points) - MAX_PROBLEMS_PRINTED} more "
-            "(see the report file for all of them)"
-        )
+        print(f"  ... and {len(problem_points) - MAX_PROBLEMS_PRINTED} more")
     print()
 
+    names_by_status = {}
+    for result in problem_points:
+        names_by_status.setdefault(result.status, []).append(check.display_name(result))
 
-def run_check(
-    check_class: Type[PointsDirectoryCheck],
-    menu_options: CheckCalculationMenuOptions,
-    notes: List[str],
-):
+    print("Summary of the unfinished points:\n")
+
+    # the counts are keyed in a fixed order, so the statuses are always reported in the
+    # same order rather than in the order the points happen to be in
+    for status in check.counts:
+
+        names = names_by_status.get(status)
+        if not names:
+            continue
+
+        listed_names = ", ".join(names[:MAX_NAMES_SUMMARISED])
+        if len(names) > MAX_NAMES_SUMMARISED:
+            listed_names += f", ... and {len(names) - MAX_NAMES_SUMMARISED} more"
+
+        print(f"  {status} ({len(names)}):")
+        for line in textwrap.wrap(listed_names, SUMMARY_WIDTH - 4):
+            print(f"    {line}")
+        print()
+
+
+def offer_report(check: PointsDirectoryCheck):
+    """Asks whether a report of every point which was checked should be saved, and
+    writes it into the directory which was checked if so.
+
+    The screen only shows the points which need looking at (and only the first few of
+    those in full), so the report is what to keep when a set is too big to read off the
+    screen or when the outcome is to be looked at later.
+    """
+
+    if not user_input_bool("Save a report of every point to file (yes/no): ", False):
+        return
+
+    report_path = check.write_report(
+        Path(check.path) / REPORT_NAME.format(check.calculation_name)
+    )
+    print(f"\nReport written to {report_path}")
+    # the menu clears the screen when it is drawn again, so wait for the path to be read
+    user_input_free_flow("\nPress enter to continue: ")
+
+
+def run_check(check_class: Type[PointsDirectoryCheck], notes: List[str]):
     """Checks the selected PointsDirectory, prints the points which are not finished and
-    optionally writes a report containing every point.
+    offers to save a report of every point.
 
     :param check_class: The check to run, e.g. ``GaussianCheck`` or ``AimallCheck``.
-    :param menu_options: The options of the menu the check is run from.
     :param notes: Sentences printed underneath the summary, explaining what the outcome
         of this particular check means and what to do about it.
     """
 
-    check = make_check(check_class, menu_options)
+    check = make_check(check_class)
     if check is None:
         return
 
     print_problem_points(check)
-
-    report_path = "not written"
-    if menu_options.selected_write_report:
-        report_path = check.write_report(
-            Path(check.path) / menu_options.selected_report_name
-        )
 
     counts = check.counts
     ichor.hpc.global_variables.LOGGER.info(
@@ -254,7 +256,7 @@ def run_check(
         f"{counts['OK']}/{check.npoints} points finished."
     )
 
-    print_summary_and_pause(
+    print_summary(
         f"{check_class.calculation_name} CHECK FINISHED",
         {
             "PointsDirectory": check.path,
@@ -262,11 +264,11 @@ def run_check(
             "Finished": f"{counts['OK']:,}",
             "Missing output": f"{counts['MISSING']:,}",
             "Incomplete output": f"{counts['INCOMPLETE']:,}",
-            "Checked file contents": menu_options.selected_check_file_contents,
-            "Report": report_path,
         },
         notes,
     )
+
+    offer_report(check)
 
 
 def problem_points_by_points_directory(
@@ -301,6 +303,37 @@ def problem_points_by_points_directory(
     return points_by_points_directory, skipped_points
 
 
+def nothing_to_resubmit(
+    check: PointsDirectoryCheck,
+    skipped_points: List[str],
+    skipped_reason: str,
+):
+    """Tells the user why there is nothing to submit again, which is either that every
+    point is finished or that the unfinished ones cannot be calculated as they are."""
+
+    if skipped_points:
+        notes = [
+            f"None of the {len(skipped_points)} unfinished points can be resubmitted, "
+            f"as {skipped_reason}.",
+            f"The points in question are: {shorten_names(skipped_points)}.",
+        ]
+    else:
+        notes = [
+            "Every point has the output of this calculation, so there is nothing to "
+            "submit again."
+        ]
+
+    print_summary_and_pause(
+        f"NOTHING TO RESUBMIT TO {check.calculation_name}",
+        {
+            "PointsDirectory": check.path,
+            "Points checked": f"{check.npoints:,}",
+            "Unfinished": f"{len(check.problem_points):,}",
+        },
+        notes,
+    )
+
+
 def confirm_resubmission(
     check: PointsDirectoryCheck,
     points_by_points_directory: Dict[Path, List[PointDirectory]],
@@ -308,7 +341,8 @@ def confirm_resubmission(
     skipped_reason: str,
     settings: dict,
     settings_menu: str,
-) -> bool:
+    settings_changed: bool = False,
+) -> str:
     """Shows which points would be calculated again, and with which settings, and asks
     whether to go ahead with submitting them.
 
@@ -319,42 +353,29 @@ def confirm_resubmission(
     :param skipped_reason: Why those points cannot be resubmitted.
     :param settings: The settings the calculation would be submitted with.
     :param settings_menu: The name of the menu those settings come from.
-    :return: True if there is something to resubmit and the user asked for it to be
-        submitted. False otherwise, in which case the reason has been shown.
+    :param settings_changed: Whether the settings have been changed for this
+        resubmission, i.e. are no longer the ones of that menu, defaults to False.
+    :return: ``"yes"`` to submit, ``"change"`` to change the settings first, or ``"no"``
+        to submit nothing.
     """
 
     npoints = sum(len(points) for points in points_by_points_directory.values())
 
-    if not npoints:
-
-        if skipped_points:
-            notes = [
-                f"None of the {len(skipped_points)} unfinished points can be "
-                f"resubmitted, as {skipped_reason}.",
-                f"The points in question are: {shorten_names(skipped_points)}.",
-            ]
-        else:
-            notes = [
-                "Every point has the output of this calculation, so there is nothing "
-                "to submit again."
-            ]
-
-        print_summary_and_pause(
-            f"NOTHING TO RESUBMIT TO {check.calculation_name}",
-            {
-                "PointsDirectory": check.path,
-                "Points checked": f"{check.npoints:,}",
-                "Unfinished": f"{len(check.problem_points):,}",
-            },
-            notes,
+    if settings_changed:
+        settings_note = (
+            "The settings above are the ones which have just been entered. They are "
+            f"used for this resubmission only, i.e. the {settings_menu} keeps its own."
         )
-        return False
+    else:
+        settings_note = (
+            f"The settings above are the ones of the {settings_menu}. Choose 'change' "
+            "to use different ones for this resubmission."
+        )
 
     notes = [
-        f"The settings above are the ones of the {settings_menu}, which is where they "
-        "are changed. Points which are calculated again should be calculated the same "
-        "way as the rest of the set, so make sure they are the settings this set was "
-        "made with.",
+        settings_note + " Points which are calculated again should be calculated the "
+        "same way as the rest of the set, so make sure these are the settings this set "
+        "was made with.",
         "The points are submitted as a job array, one job array per PointsDirectory, "
         "and the output of the unfinished points is overwritten as they are calculated "
         "again.",
@@ -379,73 +400,52 @@ def confirm_resubmission(
         notes,
     )
 
-    return user_input_bool(
-        f"Resubmit {npoints} point{'s' if npoints != 1 else ''} (yes/no): ", False
+    return user_input_restricted(
+        ["yes", "no", "change"],
+        f"Resubmit {npoints} point{'s' if npoints != 1 else ''} "
+        "(change to change the settings first): ",
+        "no",
     )
 
 
 # class with static methods for each menu item that calls a function.
-class CheckGaussianFunctions:
+class CheckCalculationsFunctions:
     """Functions that run when menu items are selected"""
 
     @staticmethod
     def select_points_directory():
         """Asks user to update points directory and then updates the menu options."""
-        select_points_directory(check_gaussian_menu_options)
-
-    @staticmethod
-    def select_check_file_contents():
-        """Asks user whether the wavefunctions which are there should also be checked
-        for having been written to the end."""
-        check_gaussian_menu_options.selected_check_file_contents = user_input_bool(
-            "Check contents of wfn files (yes/no): ",
-            check_gaussian_menu_options.selected_check_file_contents,
+        pd_path = user_input_path("Change PointsDirectory Path: ")
+        ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH = Path(
+            pd_path
+        ).absolute()
+        check_calculations_menu_options.selected_points_directory_path = (
+            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
         )
 
     @staticmethod
-    def select_write_report():
-        """Asks user whether a report file should be written."""
-        check_gaussian_menu_options.selected_write_report = user_input_bool(
-            "Write report file (yes/no): ",
-            check_gaussian_menu_options.selected_write_report,
-        )
-
-    @staticmethod
-    def select_report_name():
-        """Asks user for the name of the report file, which is written into the selected
-        PointsDirectory."""
-        check_gaussian_menu_options.selected_report_name = user_input_free_flow(
-            "Enter report file name: ",
-            check_gaussian_menu_options.selected_report_name,
-        )
-
-    @staticmethod
-    def check_gaussian_wfns():
+    def check_gaussian_calculations():
         """Checks that Gaussian has written a wavefunction for every point."""
 
         run_check(
             GaussianCheck,
-            check_gaussian_menu_options,
             [
                 "A point with missing output has no wfn file, so Gaussian either has "
                 "not run on it yet or crashed before writing anything; a point with "
                 "incomplete output has a wfn file which was not written to the end, "
                 "which usually means the job ran out of time or was killed.",
-                "Points which are not finished are printed above with what is wrong "
-                "with them, and the report file lists every point that was checked.",
                 "Use the resubmit option of this menu to calculate the unfinished "
-                "points again. They are submitted with the settings of the Submit "
-                "Gaussian Menu, and only the unfinished points are calculated, so the "
-                "points which are already done are not touched.",
+                "points again. Only those points are submitted, so the ones which are "
+                "already done are not touched.",
             ],
         )
 
     @staticmethod
-    def resubmit_gaussian_points():
+    def resubmit_gaussian_calculations():
         """Checks the selected PointsDirectory and submits the points which are not
         finished back to Gaussian."""
 
-        check = make_check(GaussianCheck, check_gaussian_menu_options)
+        check = make_check(GaussianCheck)
         if check is None:
             return
 
@@ -456,6 +456,13 @@ class CheckGaussianFunctions:
         points_by_points_directory, skipped_points = problem_points_by_points_directory(
             check, has_geometry
         )
+        skipped_reason = (
+            "they have no .xyz and no .gjf file, so there is no geometry to calculate"
+        )
+
+        if not points_by_points_directory:
+            nothing_to_resubmit(check, skipped_points, skipped_reason)
+            return
 
         (method, basis_set, ncores, overwrite_existing_gjfs) = (
             submit_gaussian_menu_options.selected_method,
@@ -464,30 +471,47 @@ class CheckGaussianFunctions:
             submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
         )
 
-        # add memory link0 to GJF, as the Submit Gaussian Menu does
-        mem = (GaussianCommand.memory_per_core - 1) * ncores
-        link0 = [f"NProcShared={ncores}", f"Mem={mem}GB"]
+        settings_changed = False
 
-        settings = {
-            "Method": method,
-            "Basis set": basis_set,
-            "CPU cores per point": ncores,
-            "Memory per point": f"{mem} GB",
-            "Overwrite existing gjfs": overwrite_existing_gjfs,
-        }
+        while True:
 
-        if not confirm_resubmission(
-            check,
-            points_by_points_directory,
-            skipped_points,
-            "they have no .xyz and no .gjf file, so there is no geometry to calculate",
-            settings,
-            "Submit Gaussian Menu",
-        ):
+            # add memory link0 to GJF, as the Submit Gaussian Menu does
+            mem = (GaussianCommand.memory_per_core - 1) * ncores
+            settings = {
+                "Method": method,
+                "Basis set": basis_set,
+                "CPU cores per point": ncores,
+                "Memory per point": f"{mem} GB",
+                "Overwrite existing gjfs": overwrite_existing_gjfs,
+            }
+
+            answer = confirm_resubmission(
+                check,
+                points_by_points_directory,
+                skipped_points,
+                skipped_reason,
+                settings,
+                "Submit Gaussian Menu",
+                settings_changed,
+            )
+
+            if answer != "change":
+                break
+
+            method = user_input_free_flow("Enter method: ", method)
+            basis_set = user_input_free_flow("Enter basis set: ", basis_set)
+            ncores = user_input_int("Enter number of cores: ", ncores, minimum=1)
+            overwrite_existing_gjfs = user_input_bool(
+                "Overwrite existing gjfs (yes/no): ", overwrite_existing_gjfs
+            )
+            settings_changed = True
+
+        if answer != "yes":
             return
 
         print("\nSTARTING GAUSSIAN JOB SUBMISSION\n")
 
+        link0 = [f"NProcShared={ncores}", f"Mem={mem}GB"]
         outputs_directory = ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
         errors_directory = ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
 
@@ -541,48 +565,12 @@ class CheckGaussianFunctions:
             ],
         )
 
-
-class CheckAIMAllFunctions:
-    """Functions that run when menu items are selected"""
-
     @staticmethod
-    def select_points_directory():
-        """Asks user to update points directory and then updates the menu options."""
-        select_points_directory(check_aimall_menu_options)
-
-    @staticmethod
-    def select_check_file_contents():
-        """Asks user whether the .int files which are there should also be checked for
-        having been written to the end."""
-        check_aimall_menu_options.selected_check_file_contents = user_input_bool(
-            "Check contents of int files (yes/no): ",
-            check_aimall_menu_options.selected_check_file_contents,
-        )
-
-    @staticmethod
-    def select_write_report():
-        """Asks user whether a report file should be written."""
-        check_aimall_menu_options.selected_write_report = user_input_bool(
-            "Write report file (yes/no): ",
-            check_aimall_menu_options.selected_write_report,
-        )
-
-    @staticmethod
-    def select_report_name():
-        """Asks user for the name of the report file, which is written into the selected
-        PointsDirectory."""
-        check_aimall_menu_options.selected_report_name = user_input_free_flow(
-            "Enter report file name: ",
-            check_aimall_menu_options.selected_report_name,
-        )
-
-    @staticmethod
-    def check_aimall_atomicfiles():
+    def check_aimall_calculations():
         """Checks that AIMAll has written the atomic files for every point."""
 
         run_check(
             AimallCheck,
-            check_aimall_menu_options,
             [
                 "AIMAll writes one .int file per atom into a <point>_atomicfiles "
                 "directory next to the wavefunction. A point with missing output has no "
@@ -590,21 +578,19 @@ class CheckAIMAllFunctions:
                 "output is missing the .int file of one or more atoms, or has files "
                 "which AIMAll leaves behind when it crashes (a .sh script or "
                 "intermediate .mog files).",
-                "Points which are not finished are printed above with what is wrong "
-                "with them, and the report file lists every point that was checked.",
                 "Points without a wavefunction cannot be run through AIMAll at all, so "
                 "check Gaussian first if many points are missing their atomic files. "
                 "Otherwise, use the resubmit option of this menu to calculate the "
-                "unfinished points again with the settings of the Submit AIMAll Menu.",
+                "unfinished points again.",
             ],
         )
 
     @staticmethod
-    def resubmit_aimall_points():
+    def resubmit_aimall_calculations():
         """Checks the selected PointsDirectory and submits the points which are not
         finished back to AIMAll."""
 
-        check = make_check(AimallCheck, check_aimall_menu_options)
+        check = make_check(AimallCheck)
         if check is None:
             return
 
@@ -615,6 +601,14 @@ class CheckAIMAllFunctions:
         points_by_points_directory, skipped_points = problem_points_by_points_directory(
             check, has_usable_wfn
         )
+        skipped_reason = (
+            "Gaussian has not finished writing their wavefunction, so calculate them "
+            "with the Gaussian check of this menu first"
+        )
+
+        if not points_by_points_directory:
+            nothing_to_resubmit(check, skipped_points, skipped_reason)
+            return
 
         method, ncores, naat, encomp = (
             submit_aimall_menu_options.selected_method,
@@ -623,22 +617,37 @@ class CheckAIMAllFunctions:
             submit_aimall_menu_options.selected_encomp,
         )
 
-        settings = {
-            "Method": method,
-            "naat setting": naat,
-            "encomp setting": encomp,
-            "CPU cores per point": ncores,
-        }
+        settings_changed = False
 
-        if not confirm_resubmission(
-            check,
-            points_by_points_directory,
-            skipped_points,
-            "Gaussian has not finished writing their wavefunction, so calculate them "
-            "with the Check Gaussian Menu first",
-            settings,
-            "Submit AIMAll Menu",
-        ):
+        while True:
+
+            settings = {
+                "Method": method,
+                "naat setting": naat,
+                "encomp setting": encomp,
+                "CPU cores per point": ncores,
+            }
+
+            answer = confirm_resubmission(
+                check,
+                points_by_points_directory,
+                skipped_points,
+                skipped_reason,
+                settings,
+                "Submit AIMAll Menu",
+                settings_changed,
+            )
+
+            if answer != "change":
+                break
+
+            method = user_input_free_flow("Enter method: ", method)
+            ncores = user_input_int("Enter number of cores: ", ncores, minimum=1)
+            naat = user_input_int("Select 'naat' setting: ", naat, minimum=1)
+            encomp = user_input_int("Select 'encomp' setting: ", encomp)
+            settings_changed = True
+
+        if answer != "yes":
             return
 
         print("\nSTARTING AIMALL JOB SUBMISSION\n")
@@ -698,78 +707,37 @@ class CheckAIMAllFunctions:
 
 
 # make menu items
-check_gaussian_menu_items = [
+check_calculations_menu_items = [
     FunctionItem(
         "Select PointsDirectory Path or Parent to PointsDirectory",
-        CheckGaussianFunctions.select_points_directory,
+        CheckCalculationsFunctions.select_points_directory,
     ),
     FunctionItem(
-        "Check contents of wfn files as well",
-        CheckGaussianFunctions.select_check_file_contents,
+        "Check Gaussian calculations",
+        CheckCalculationsFunctions.check_gaussian_calculations,
     ),
     FunctionItem(
-        "Write report to file",
-        CheckGaussianFunctions.select_write_report,
+        "Resubmit failed Gaussian calculations",
+        CheckCalculationsFunctions.resubmit_gaussian_calculations,
     ),
     FunctionItem(
-        "Change report file name",
-        CheckGaussianFunctions.select_report_name,
+        "Check AIMAll calculations",
+        CheckCalculationsFunctions.check_aimall_calculations,
     ),
     FunctionItem(
-        "Check Gaussian wavefunctions",
-        CheckGaussianFunctions.check_gaussian_wfns,
-    ),
-    FunctionItem(
-        "Resubmit unfinished points to Gaussian",
-        CheckGaussianFunctions.resubmit_gaussian_points,
+        "Resubmit failed AIMAll calculations",
+        CheckCalculationsFunctions.resubmit_aimall_calculations,
     ),
 ]
 
-check_aimall_menu_items = [
-    FunctionItem(
-        "Select PointsDirectory Path or Parent to PointsDirectory",
-        CheckAIMAllFunctions.select_points_directory,
-    ),
-    FunctionItem(
-        "Check contents of int files as well",
-        CheckAIMAllFunctions.select_check_file_contents,
-    ),
-    FunctionItem(
-        "Write report to file",
-        CheckAIMAllFunctions.select_write_report,
-    ),
-    FunctionItem(
-        "Change report file name",
-        CheckAIMAllFunctions.select_report_name,
-    ),
-    FunctionItem(
-        "Check AIMAll atomic files",
-        CheckAIMAllFunctions.check_aimall_atomicfiles,
-    ),
-    FunctionItem(
-        "Resubmit unfinished points to AIMAll",
-        CheckAIMAllFunctions.resubmit_aimall_points,
-    ),
-]
-
-# initialize menus
-check_gaussian_menu = ConsoleMenu(
-    this_menu_options=check_gaussian_menu_options,
-    title=CHECK_GAUSSIAN_MENU_DESCRIPTION.title,
-    subtitle=CHECK_GAUSSIAN_MENU_DESCRIPTION.subtitle,
-    prologue_text=CHECK_GAUSSIAN_MENU_DESCRIPTION.prologue_description_text,
-    epilogue_text=CHECK_GAUSSIAN_MENU_DESCRIPTION.epilogue_description_text,
-    show_exit_option=CHECK_GAUSSIAN_MENU_DESCRIPTION.show_exit_option,
+# initialize menu
+check_calculations_menu = ConsoleMenu(
+    this_menu_options=check_calculations_menu_options,
+    title=CHECK_CALCULATIONS_MENU_DESCRIPTION.title,
+    subtitle=CHECK_CALCULATIONS_MENU_DESCRIPTION.subtitle,
+    prologue_text=CHECK_CALCULATIONS_MENU_DESCRIPTION.prologue_description_text,
+    epilogue_text=CHECK_CALCULATIONS_MENU_DESCRIPTION.epilogue_description_text,
+    show_exit_option=CHECK_CALCULATIONS_MENU_DESCRIPTION.show_exit_option,
 )
 
-check_aimall_menu = ConsoleMenu(
-    this_menu_options=check_aimall_menu_options,
-    title=CHECK_AIMALL_MENU_DESCRIPTION.title,
-    subtitle=CHECK_AIMALL_MENU_DESCRIPTION.subtitle,
-    prologue_text=CHECK_AIMALL_MENU_DESCRIPTION.prologue_description_text,
-    epilogue_text=CHECK_AIMALL_MENU_DESCRIPTION.epilogue_description_text,
-    show_exit_option=CHECK_AIMALL_MENU_DESCRIPTION.show_exit_option,
-)
-
-add_items_to_menu(check_gaussian_menu, check_gaussian_menu_items)
-add_items_to_menu(check_aimall_menu, check_aimall_menu_items)
+add_items_to_menu(check_calculations_menu, check_calculations_menu_items)
