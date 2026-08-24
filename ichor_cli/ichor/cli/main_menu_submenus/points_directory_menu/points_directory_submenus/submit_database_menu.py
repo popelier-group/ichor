@@ -66,6 +66,9 @@ SUBMIT_DATABASE_MENU_DEFAULTS = {
     # the csv files are what the training stages actually read, and a database is not
     # much use without them, so they are made straight after the database by default
     "default_make_csv_files": True,
+    # the csv job works out one atom per core, so this follows the number of atoms in the
+    # system once one has been measured
+    "default_csv_ncores": 4,
     "default_rotate_multipole_moments": True,
     "default_calculate_feature_forces": False,
 }
@@ -271,18 +274,18 @@ def make_csvs_on_login_node(db_path: Path, db_type: str, ncores: int) -> Path:
     return csvs_path
 
 
-def csv_number_of_cores() -> int:
-    """Returns the number of cores for the csv job which follows the database job.
+def suggest_csv_number_of_cores() -> int:
+    """Returns the number of cores to suggest for the csv job which follows the database
+    job.
 
-    That job works out one atom per core, so the number of atoms in the system is the most
-    it has any use for. The atoms are counted from the .int files of a point when the
-    PointsDirectory is selected; when that is not known, the csv menu's own setting is
-    used.
+    That job works out one atom at a time, one atom per core, so the number of atoms in
+    the system is the most it has any use for and is what is suggested. The atoms are
+    counted from the .int files of a point when the PointsDirectory is selected; when that
+    is not known, the menu default is kept.
     """
 
     if not number_of_atoms:
-        # nothing has been measured, so fall back to the cores the database job asks for
-        return submit_database_menu_options.selected_number_of_cores
+        return SUBMIT_DATABASE_MENU_DEFAULTS["default_csv_ncores"]
 
     largest = maximum_cores()
 
@@ -326,6 +329,8 @@ class SubmitDatabaseMenuOptions(MenuOptions):
     selected_run_on_compute_node: bool
     # whether the csv files are made from the database as soon as it is written
     selected_make_csv_files: bool
+    # the cores the csv job asks for, which it works the atoms out over
+    selected_csv_number_of_cores: int
     # settings of the csv files: whether the multipole moments of each atom are rotated
     # into its own frame, and whether the forces are given in feature coordinates
     selected_rotate_multipole_moments: bool
@@ -366,6 +371,30 @@ class SubmitDatabaseMenuOptions(MenuOptions):
             return (
                 f"Current number of cores: {self.selected_number_of_cores:,} is more "
                 f"than the {largest:,} a job can ask for on this machine."
+            )
+
+    def check_selected_csv_number_of_cores(self) -> Union[str, None]:
+        """Checks the csv job asks for at least one core, no more than the machine can
+        give it, and no more than it has atoms to work out over."""
+        if not self.selected_make_csv_files:
+            return None
+
+        ncores = self.selected_csv_number_of_cores
+        if ncores < 1:
+            return f"Current csv job cores: {ncores} must be 1 or greater."
+
+        largest = maximum_cores()
+        if largest and ncores > largest:
+            return (
+                f"Current csv job cores: {ncores:,} is more than the {largest:,} a job "
+                f"can ask for on this machine."
+            )
+
+        if number_of_atoms and ncores > number_of_atoms:
+            return (
+                f"Current csv job cores: {ncores:,} is more than the "
+                f"{number_of_atoms:,} atoms in the system. The job works out one atom "
+                f"per core, so the rest would sit idle."
             )
 
     def check_points_directory_fits_in_memory(self) -> Union[str, None]:
@@ -426,6 +455,8 @@ number_of_atoms = 0
 # hand, in which case their choice is kept even when a different PointsDirectory (or a
 # different database format) is selected
 ncores_overridden = False
+# the same for the cores of the csv job, which follow the number of atoms in the system
+csv_ncores_overridden = False
 
 
 def derive_number_of_cores():
@@ -442,6 +473,18 @@ def derive_number_of_cores():
         sampled_point_read_bytes,
         sampled_int_file_bytes,
         submit_database_menu_options.selected_database_format,
+    )
+
+
+def derive_csv_number_of_cores():
+    """Sets the cores of the csv job from the number of atoms in the selected
+    PointsDirectory, unless the user has picked a number by hand."""
+
+    if csv_ncores_overridden:
+        return
+
+    submit_database_menu_options.selected_csv_number_of_cores = (
+        suggest_csv_number_of_cores()
     )
 
 
@@ -464,6 +507,7 @@ def update_points_directory_information(points_directory_path: Path) -> int:
 
     submit_database_menu_options.number_of_points_in_directory = npoints
     derive_number_of_cores()
+    derive_csv_number_of_cores()
 
     return npoints
 
@@ -528,6 +572,7 @@ class SubmitDatabaseFunctions:
             submit_database_menu_options.selected_database_format,
         )
 
+        # one short line each, as this is printed just above the prompt
         if npoints:
             needed_gb = estimated_memory_gb(
                 npoints,
@@ -535,18 +580,22 @@ class SubmitDatabaseFunctions:
                 sampled_int_file_bytes,
                 submit_database_menu_options.selected_database_format,
             )
+            print(f"\n{npoints:,} points, needing {format_memory_gb(needed_gb)}.")
             print(
-                f"The {npoints:,} points in the PointsDirectory are estimated to need "
-                f"{format_memory_gb(needed_gb)}, which {suggested:,} core(s) of the "
-                f"{memory_per_core_gb()} GB each core brings on this machine would hold. "
-                f"The job reads the points one at a time, so the cores are only a way of "
-                f"asking for that memory and more of them will not make it faster."
+                f"Suggested: {suggested:,} core{'' if suggested == 1 else 's'}, at "
+                f"{memory_per_core_gb()} GB per core on this machine."
             )
+            print("Points are read one at a time: cores buy memory, not speed.")
+            if number_of_atoms:
+                print(
+                    f"The csv job which follows takes one core per atom "
+                    f"({number_of_atoms:,}).\n"
+                )
+            else:
+                print("")
         else:
-            print(
-                "The size of the PointsDirectory is not known (select one above), so "
-                "the memory the job needs cannot be estimated."
-            )
+            print("\nNo PointsDirectory has been measured yet (select one above),")
+            print("so the memory the job needs is not known.\n")
 
         ncores = user_input_int(
             "Cores for the database job (0 = as many as its memory needs): ",
@@ -562,6 +611,49 @@ class SubmitDatabaseFunctions:
 
         ncores_overridden = True
         submit_database_menu_options.selected_number_of_cores = ncores
+
+    @staticmethod
+    def select_csv_number_of_cores():
+        """Asks user to select the number of cores for the csv job.
+
+        That job is parallel for real: it works out one atom per core, so cores up to the
+        number of atoms in the system make it faster and any beyond that sit idle.
+
+        The number of atoms is suggested and is what the menu keeps it at as a
+        PointsDirectory is selected. Entering a number here pins it instead; entering 0
+        goes back to following the number of atoms."""
+        global csv_ncores_overridden
+
+        suggested = suggest_csv_number_of_cores()
+        largest = maximum_cores()
+
+        # one short line each, as this is printed just above the prompt
+        if number_of_atoms:
+            print(f"\n{number_of_atoms:,} atoms, so one core each is {suggested:,}.")
+            print("Atoms are worked out one per core: fewer cores are slower,")
+            print("cores past the atom count sit idle.")
+            if largest and number_of_atoms > largest:
+                print(f"This machine allows {largest:,} cores, fewer than the atoms.\n")
+            else:
+                print("")
+        else:
+            print("\nNo PointsDirectory has been measured yet (select one above),")
+            print("so the number of atoms is not known.\n")
+
+        ncores = user_input_int(
+            "Cores for the csv job (0 = one per atom): ",
+            submit_database_menu_options.selected_csv_number_of_cores,
+            minimum=0,
+        )
+
+        # 0 hands the setting back to the number of atoms, anything else pins it
+        if not ncores:
+            csv_ncores_overridden = False
+            derive_csv_number_of_cores()
+            return
+
+        csv_ncores_overridden = True
+        submit_database_menu_options.selected_csv_number_of_cores = ncores
 
     @staticmethod
     def select_run_on_compute_node():
@@ -655,7 +747,7 @@ class SubmitDatabaseFunctions:
         npoints = submit_database_menu_options.number_of_points_in_directory
 
         make_csv_files = submit_database_menu_options.selected_make_csv_files
-        csv_ncores = csv_number_of_cores()
+        csv_ncores = submit_database_menu_options.selected_csv_number_of_cores
         csvs_path = processed_csvs_directory(db_path)
         rotate_multipole_moments = (
             submit_database_menu_options.selected_rotate_multipole_moments
@@ -818,7 +910,7 @@ submit_database_menu_items = [
         SubmitDatabaseFunctions.select_database,
     ),
     FunctionItem(
-        "Set the number cores for the database job (memory allocation",
+        "Set the number cores for the database job (memory allocation)",
         SubmitDatabaseFunctions.select_number_of_cores,
     ),
     FunctionItem(
@@ -828,6 +920,10 @@ submit_database_menu_items = [
     FunctionItem(
         "Create training data files (csv)",
         SubmitDatabaseFunctions.select_make_csv_files,
+    ),
+    FunctionItem(
+        "Set the number of cores for the csv job (one core per atom)",
+        SubmitDatabaseFunctions.select_csv_number_of_cores,
     ),
     FunctionItem(
         "Rotate multipole moments into each atom's frame (csv files)",
