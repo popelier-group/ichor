@@ -45,6 +45,7 @@ from ichor.core.files.point_directory import PointDirectory
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main.database import (
     AVAILABLE_DATABASE_FORMATS,
+    database_name,
     database_path,
     processed_csvs_directory,
     submit_make_database,
@@ -743,7 +744,9 @@ class SubmitDatabaseFunctions:
         # file among thousands of point directories named after the same system
         db_path = database_path(points_directory_path, database_format)
         # the name the write methods are given, which they add the suffix of the format to
-        db_name = str(points_directory_path.parent / points_directory_path.stem)
+        db_name = str(
+            points_directory_path.parent / database_name(points_directory_path)
+        )
         npoints = submit_database_menu_options.number_of_points_in_directory
 
         make_csv_files = submit_database_menu_options.selected_make_csv_files

@@ -17,6 +17,98 @@ AVAILABLE_DATABASE_FORMATS = {
 }
 
 
+# What a database and a folder of processed csv files are called. Both sit next to the
+# PointsDirectory they were made from and are named after it, so they are told apart by
+# these prefixes rather than by which directory they are in.
+DATABASE_PREFIX = "db_"
+PROCESSED_CSVS_PREFIX = "csv_"
+# what the older stages called the folder, and what a dataset directory holds its copy
+# of the csv files under. A folder called only this says nothing about the system.
+PROCESSED_CSVS_FOLDER = "processed_csvs"
+PROCESSED_CSVS_SUFFIX = f"_{PROCESSED_CSVS_FOLDER}"
+# what the write methods of PointsDirectory / PointsDirectoryParent add to the name they
+# are given, depending on the format and on whether it holds many PointsDirectory-ies
+DATABASE_NAME_SUFFIXES = ("_parent", "_json")
+
+
+def database_name(points_dir_path: Path) -> str:
+    """Returns the name a database made from the given PointsDirectory is given, without
+    the suffix of whichever format it is written in.
+
+    This is what the write methods of ``PointsDirectory`` and ``PointsDirectoryParent``
+    are handed; they add the suffix of the format (and ``_parent``) themselves, which is
+    what :func:`database_path` works out.
+
+    :param points_dir_path: Path to the PointsDirectory or parent to PointsDirectory-ies.
+    """
+
+    return f"{DATABASE_PREFIX}{points_dir_path.stem}"
+
+
+def system_name_from_database(db_path: Path) -> str:
+    """Returns the name of the system a database holds, which is the name of the database
+    with everything that says what kind of file it is taken back off it.
+
+    The stages after the database are given the system name and put it in the names of the
+    files they write, so what they are given has to name the system rather than the
+    database: WATER, not db_WATER_parent.
+
+    :param db_path: Path to the database (a .sqlite file or a json database directory).
+    """
+
+    system_name = db_path.name
+    for suffix in (".sqlite", ".pointsdir", ".pointsdirparent"):
+        system_name = system_name.removesuffix(suffix)
+    # _json_parent comes off in two goes, which is why _parent is stripped first
+    for suffix in DATABASE_NAME_SUFFIXES:
+        system_name = system_name.removesuffix(suffix)
+
+    return system_name.removeprefix(DATABASE_PREFIX)
+
+
+def system_name_from_processed_csvs(csvs_path: Path) -> str:
+    """Returns the name of the system a folder of processed csv files holds, which is the
+    name of the folder with the parts naming it as a csv folder taken back off it (see
+    :func:`system_name_from_database`).
+
+    Only the name of the folder is looked at, never the directory that holds it: the csv
+    folder sits next to the PointsDirectory rather than inside it, so what holds it is a
+    directory of runs (4_PROPERTY_CALC, say) rather than anything naming the system.
+
+    The one exception is a folder called exactly ``processed_csvs``, which is what the
+    older stages wrote and what a dataset directory holds a copy under. Its name says
+    nothing about the system, so there the directory holding it is the best guess.
+
+    :param csvs_path: Path to the folder of per-atom csv files.
+    """
+
+    csvs_path = Path(csvs_path)
+
+    # the folder itself, then a couple of levels up, so that a per-property subfolder
+    # inside the csv folder still gives the name of the system
+    for path in (csvs_path, *list(csvs_path.parents)[:2]):
+        if not path.name.endswith(PROCESSED_CSVS_SUFFIX) and (
+            path.name != PROCESSED_CSVS_FOLDER
+        ):
+            continue
+
+        system_name = path.name.removesuffix(PROCESSED_CSVS_FOLDER).removesuffix("_")
+        system_name = system_name.removeprefix(PROCESSED_CSVS_PREFIX)
+        # csv folders made before the stages were named this way sat inside the
+        # PointsDirectory, sorted to the top of it by a leading 0_
+        system_name = system_name.removeprefix("0_")
+
+        if system_name:
+            return system_name
+
+        # a folder named only `processed_csvs`: what holds it is the PointsDirectory it
+        # was written inside, or the dataset directory it was copied into
+        return path.parent.name.split(".", 1)[0]
+
+    # not named as a csv folder at all, so its own name is the best guess at the system
+    return csvs_path.name
+
+
 def database_path(points_dir_path: Path, database_format: str = "sqlite") -> Path:
     """Returns the path that the database made from the given PointsDirectory
     (or parent to PointsDirectory-ies) is written to.
@@ -34,9 +126,8 @@ def database_path(points_dir_path: Path, database_format: str = "sqlite") -> Pat
         json.
     """
 
-    # the name of the PointsDirectory without its .pointsdir/.pointsdirparent suffix,
-    # in the directory the PointsDirectory itself sits in
-    stem_path = points_dir_path.parent / points_dir_path.stem
+    # the name of the database, in the directory the PointsDirectory itself sits in
+    stem_path = points_dir_path.parent / database_name(points_dir_path)
     is_parent_directory_to_many_points_directories = single_or_many_points_directories(
         points_dir_path
     )
@@ -61,12 +152,11 @@ def processed_csvs_directory(db_path: Path) -> Path:
     :return: The path of the directory holding the per-atom csv files.
     """
 
-    # find system name from the database name, stripping whichever suffix it carries
-    system_name = db_path.name
-    for suffix in (".pointsdir", ".pointsdirparent", ".sqlite"):
-        system_name = system_name.removesuffix(suffix)
+    system_name = system_name_from_database(db_path)
 
-    return db_path.parent / f"0_{system_name}_processed_csvs"
+    return (
+        db_path.parent / f"{PROCESSED_CSVS_PREFIX}{system_name}{PROCESSED_CSVS_SUFFIX}"
+    )
 
 
 def submit_make_database(
@@ -89,7 +179,7 @@ def submit_make_database(
 
     # the write methods add the suffix of the format to this themselves, so they are
     # given the name without one (see `database_path`, which says where that ends up)
-    db_name = points_dir_path.parent / points_dir_path.stem
+    db_name = points_dir_path.parent / database_name(points_dir_path)
 
     # this is used to be able to call the respective methods from PointsDirectory
     # so that the same code below is used with the respective methods

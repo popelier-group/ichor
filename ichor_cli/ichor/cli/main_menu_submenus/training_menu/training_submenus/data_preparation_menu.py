@@ -14,6 +14,7 @@ from ichor.cli.useful_functions import (
     user_input_int,
     user_input_path,
 )
+from ichor.hpc.main.database import system_name_from_processed_csvs
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
 AVAILABLE_PROPS = {
@@ -171,6 +172,10 @@ class SubmitDataPrepMenuOptions(MenuOptions):
     # that the dataset sizes can be checked against what there is to take them from.
     # 0 = not known
     number_of_geometries_in_csvs: int = 0
+    # the name of the system, taken from the name of the csv folder. The job puts it in
+    # the name of the dataset directory and of everything inside it, so it is shown here
+    # rather than only turning up in the output
+    system_name: str = ""
 
     def check_path(self):
 
@@ -310,9 +315,15 @@ class SubmitDataPrepFunctions:
             ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH
         )
         submit_data_prep_menu_options.number_of_geometries_in_csvs = ngeometries
+        submit_data_prep_menu_options.system_name = system_name_from_processed_csvs(
+            ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH
+        )
 
         if ngeometries:
-            print(f"The csv files hold {ngeometries:,} geometries.")
+            print(
+                f"The csv files hold {ngeometries:,} geometries, and the datasets will "
+                f"be named after {submit_data_prep_menu_options.system_name}."
+            )
         else:
             print(
                 "No csv files were found in that directory, so the number of geometries "
@@ -506,6 +517,7 @@ class SubmitDataPrepFunctions:
             "DATASET SPLITTING JOB SUBMITTED",
             {
                 "Input csv directory": input_path,
+                "System": system_name_from_processed_csvs(input_path),
                 "Dataset directory": system_dir,
                 "Job ID": job_id.id if job_id else "not available",
                 "Properties": ", ".join(props),
@@ -537,35 +549,35 @@ class SubmitDataPrepFunctions:
 # can use lambda functions to change text of options as well :)
 submit_data_prep_menu_items = [
     FunctionItem(
-        "Select input directory",
+        "Select training feature csv directory",
         SubmitDataPrepFunctions.select_input_directory,
     ),
     FunctionItem(
-        "Change cores",
+        "Set the number of cores for the dataset splitting job",
         SubmitDataPrepFunctions.select_number_of_cores,
     ),
     FunctionItem(
-        "Change properties",
+        "Set the properties to build datasets for (iqa and multipoles)",
         SubmitDataPrepFunctions.select_props,
     ),
     FunctionItem(
-        "Change q00 threshold",
+        "Set the q00 recovery threshold (point distance from mean)",
         SubmitDataPrepFunctions.select_q00_threshold,
     ),
     FunctionItem(
-        "Change train set size",
+        "Set the training set size(s) (separate dataset built for each)",
         SubmitDataPrepFunctions.select_train_size,
     ),
     FunctionItem(
-        "Change val set size",
+        "Set the validation set size",
         SubmitDataPrepFunctions.select_val_size,
     ),
     FunctionItem(
-        "Change test set size",
+        "Set the test set size",
         SubmitDataPrepFunctions.select_test_size,
     ),
     FunctionItem(
-        "Submit data prep sampler",
+        "Run: filter and split into training, validation and test sets",
         SubmitDataPrepFunctions.submit_data_prep_on_compute,
     ),
 ]

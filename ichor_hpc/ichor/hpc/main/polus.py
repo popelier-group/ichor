@@ -6,6 +6,7 @@ from ichor.core.common.io import copytree, mkdir
 from ichor.core.files.polus import DatasetPrepScript, DiversityScript
 
 from ichor.hpc.batch_system import JobID
+from ichor.hpc.main.database import system_name_from_processed_csvs
 from ichor.hpc.submission_commands import PythonCommand
 from ichor.hpc.submission_script import SubmissionScript
 
@@ -51,8 +52,10 @@ def write_dataset_prep(
     **kwargs,
 ) -> Optional[JobID]:
 
-    # extract system name from data somehow...
-    system_name = Path(outlier_input_dir).parent.name.split(".", 1)[0]
+    # the name of the system the csv files hold, which the dataset prep job puts in the
+    # names of everything it writes. It comes from the csv folder itself rather than from
+    # the directory that holds it, and drops the parts which name it as a csv folder
+    system_name = system_name_from_processed_csvs(Path(outlier_input_dir))
 
     # Make new parent directory called DATASETS
     data_parent = ichor.hpc.global_variables.FILE_STRUCTURE["training"]
