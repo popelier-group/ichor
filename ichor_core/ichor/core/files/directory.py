@@ -73,6 +73,25 @@ class Directory(PathObject, ABC):
             return self.path.name.replace(suff, "")
 
 
+def _unloaded(path_object: PathObject) -> PathObject:
+    """Returns the given file or directory as it was before anything was read from it.
+
+    A directory of annotated contents is unloaded in place (an ``IntDirectory`` inside a
+    ``PointDirectory``, for example), as it is its own contents which hold the data that
+    was read. Anything else is replaced with a new instance of its class pointing at the
+    same path, which is how ``_parse`` made it in the first place and which leaves it
+    unread.
+
+    :param path_object: The file or directory to unload.
+    """
+
+    if isinstance(path_object, AnnotatedDirectory):
+        path_object.unload()
+        return path_object
+
+    return type(path_object)(path_object.path)
+
+
 class AnnotatedDirectory(Directory, ABC):
     """Abstract method for adding a parser for a Directory that
     has annotated files (such as GJF, Int, WFN). For example, look at the `PointDirectory` class.
@@ -166,6 +185,34 @@ class AnnotatedDirectory(Directory, ABC):
         """Returns a list of PathObjects corresponding to files and directories
         that are in the instance of AnnotatedDirectory."""
         return self.files + self.directories
+
+    def unload(self) -> None:
+        """Gives back the memory taken by whatever has been read from the files in this
+        directory.
+
+        Files are read lazily and what they parse is then kept for the lifetime of the
+        instance (see :class:`ichor.core.files.file.ReadFile`), which is what is wanted
+        when a directory is used more than once. Code which walks over many directories
+        in turn instead (making a database out of a ``PointsDirectory``, say) needs only
+        one of them at a time, and without this the parsed contents of every directory it
+        has already been through pile up until the job is killed for running out of
+        memory. A .wfn file alone leaves behind its primitive coefficients for every
+        molecular orbital, so the pile grows quickly.
+
+        The contents are left as unread instances of the same classes pointing at the
+        same paths, so the directory is exactly as it was when it was parsed and reading
+        anything from it again simply reads the file again.
+        """
+
+        for var in self.pathtypes:
+            contents = getattr(self, var)
+            # an attribute is one instance, a list of instances (when the directory holds
+            # several files of that type, such as the .int files) or OptionalContent when
+            # the directory does not hold that file at all, which has nothing to unload
+            if isinstance(contents, list):
+                setattr(self, var, [_unloaded(c) for c in contents])
+            elif isinstance(contents, (File, Directory)):
+                setattr(self, var, _unloaded(contents))
 
     def _parse(self):
         """

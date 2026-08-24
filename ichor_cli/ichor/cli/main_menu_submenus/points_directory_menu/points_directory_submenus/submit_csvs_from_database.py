@@ -52,10 +52,21 @@ class SubmitCSVSMenuOptions(MenuOptions):
     selected_submit_on_compute: bool
 
     def check_selected_database_path(self) -> Union[str, None]:
-        """Checks whether the given database exists or if it is a file."""
+        """Checks whether the given database exists and is of the kind the selected
+        format is written as: an sqlite database is one file, while a json database is a
+        directory holding the json files."""
         db_path = Path(self.selected_database_path)
         if not db_path.exists():
-            return f"Current database path: {db_path} does not exist."
+            return (
+                f"Current database path: {db_path} does not exist. A database job which "
+                "has been submitted but has not run yet writes it later on."
+            )
+        if self.selected_database_format == "json":
+            if not db_path.is_dir():
+                return (
+                    f"Current database path: {db_path} is not a directory, which is "
+                    "what a json database is written as."
+                )
         elif not db_path.is_file():
             return f"Current file path: {db_path} is not a file."
 
@@ -65,6 +76,86 @@ submit_csvs_menu_options = SubmitCSVSMenuOptions(
     ichor.cli.global_menu_variables.SELECTED_DATABASE_PATH,
     *SUBMIT_CSVS_MENU_DEFAULTS.values(),
 )
+
+
+# the whole database is exported: the integration error and IQA/wfn energy difference
+# filters are set high enough to keep every point, so any filtering of bad points is left
+# to the dataset preparation stage
+FLOAT_INTEGRATION_ERROR = 100000000.0
+FLOAT_DIFFERENCE_IQA_WFN = 10000000.0
+
+
+def csv_settings() -> dict:
+    """Returns the settings this menu would make csv files with.
+
+    The database menu makes the csvs straight after the database by default, and reads the
+    settings from here so that there is one place where they are chosen rather than two
+    menus with their own copies of the same options.
+    """
+
+    return {
+        "ncores": submit_csvs_menu_options.selected_number_of_cores,
+        "rotate_multipole_moments": (
+            submit_csvs_menu_options.selected_rotate_multipole_moments
+        ),
+        "calculate_feature_forces": (
+            submit_csvs_menu_options.selected_calculate_feature_forces
+        ),
+        # the filters are effectively switched off, so the whole database is exported and
+        # the filtering of bad points is left to the dataset preparation stage
+        "float_difference_iqa_wfn": FLOAT_DIFFERENCE_IQA_WFN,
+        "float_integration_error": FLOAT_INTEGRATION_ERROR,
+    }
+
+
+def run_make_csvs_on_login_node(
+    db_path: Union[str, Path], db_type: str, ncores: int
+) -> Path:
+    """Makes the csv files of a database here and now rather than on a compute node.
+
+    This is what the database menu uses when it is asked to make a database on the login
+    node: the database is finished by the time this is called, so the csvs can simply be
+    made after it.
+
+    :param db_path: The database to read.
+    :param db_type: The type of database, sqlite or json.
+    :param ncores: The number of cores to work the atoms out over.
+    :return: The directory the csv files were written to.
+    """
+
+    db_path = Path(db_path)
+    csvs_path = processed_csvs_directory(db_path)
+    settings = csv_settings()
+    alf = get_alf_from_first_db_geometry(db_path, db_type)
+
+    write_processed_data_for_atoms_parallel(
+        db_path,
+        db_type,
+        alf,
+        ncores,
+        max_diff_iqa_wfn=FLOAT_DIFFERENCE_IQA_WFN,
+        max_integration_error=FLOAT_INTEGRATION_ERROR,
+        calc_multipoles=settings["rotate_multipole_moments"],
+        calc_forces=settings["calculate_feature_forces"],
+        parent_directory=csvs_path,
+    )
+
+    return csvs_path
+
+
+def update_selected_database_path(db_path: Union[str, Path]) -> None:
+    """Points this menu at the given database.
+
+    The database menu calls this once it has made (or submitted a job to make) a database,
+    so that this stage, which takes a database as its input, is already pointed at the one
+    that was just made rather than having to be given the path by hand.
+
+    :param db_path: The path of the database (a file for sqlite, a directory for json).
+    """
+
+    db_path = Path(db_path).absolute()
+    ichor.cli.global_menu_variables.SELECTED_DATABASE_PATH = db_path
+    submit_csvs_menu_options.selected_database_path = db_path
 
 
 # class with static methods for each menu item that calls a function.
@@ -154,8 +245,8 @@ class SubmitCSVSFunctions:
         submit_on_compute = submit_csvs_menu_options.selected_submit_on_compute
 
         # make into a very large number to export full database to polus
-        float_integration_error = 100000000.0
-        float_difference_iqa_wfn = 10000000.0
+        float_integration_error = FLOAT_INTEGRATION_ERROR
+        float_difference_iqa_wfn = FLOAT_DIFFERENCE_IQA_WFN
 
         # the csv files are written into a folder named after the database, one csv per
         # atom and property, which is the layout the training menu expects
@@ -175,6 +266,12 @@ class SubmitCSVSFunctions:
             "points has to be done afterwards.",
         ]
 
+        # the csvs are written next to the database, which is itself next to the
+        # PointsDirectory it was made from, so that the two stages leave their output in
+        # the same place rather than one of them inside a directory of point directories
+        # and the other wherever ichor happened to be started from
+        csvs_path = processed_csvs_directory(db_path)
+
         if not submit_on_compute:
             alf = get_alf_from_first_db_geometry(db_path, db_type)
             write_processed_data_for_atoms_parallel(
@@ -186,15 +283,14 @@ class SubmitCSVSFunctions:
                 max_integration_error=float_integration_error,
                 calc_multipoles=rotate_multipole_moments,
                 calc_forces=calculate_feature_forces,
+                parent_directory=csvs_path,
             )
 
             print_summary_and_pause(
                 "DATABASE CSV FILES WRITTEN",
                 {
                     **csv_details,
-                    # the login node run uses the default output folder of
-                    # write_processed_data_for_atoms_parallel, next to where ichor runs
-                    "csv folder": Path.cwd() / "processed_csvs",
+                    "csv folder": csvs_path,
                     "Ran on": "login node (not submitted)",
                 },
                 csv_notes
@@ -222,7 +318,7 @@ class SubmitCSVSFunctions:
             {
                 **csv_details,
                 # the folder submit_make_csvs_from_database writes into
-                "csv folder": processed_csvs_directory(db_path),
+                "csv folder": csvs_path,
                 "Job ID": job_id.id if job_id else "not available",
                 "Ran on": "compute node",
             },

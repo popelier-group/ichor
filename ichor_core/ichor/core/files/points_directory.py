@@ -438,6 +438,12 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
                 add_point_to_database(
                     session, point, echo=echo, print_missing_data=print_missing_data
                 )
+                # the point is in the database now, so give back the memory its
+                # Gaussian/AIMAll files took when they were read. Without this the parsed
+                # contents of every point stay behind (a .wfn file leaves its primitive
+                # coefficients for every molecular orbital), so what the job needs grows
+                # with the number of points rather than staying at one point at a time
+                point.unload()
         else:
             print("Making new database and adding points...")
             create_database(db_path, echo)
@@ -447,6 +453,8 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
                 add_point_to_database(
                     session, point, echo=echo, print_missing_data=print_missing_data
                 )
+                # see the comment above: only one point has to be held in memory at once
+                point.unload()
 
         return db_path
 
@@ -503,6 +511,11 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
                 total_data_list.append(
                     datafunction(point, print_missing_data=print_missing_data)
                 )
+                # the data which is written out has been taken from the point, so give
+                # back the memory its files took when they were read (see the comment in
+                # write_to_sqlite3_database). Only the data of the points in the current
+                # chunk is held on to, rather than the parsed files of every point
+                point.unload()
 
             with open(json_file_path, "w") as json_db:
                 json.dump(

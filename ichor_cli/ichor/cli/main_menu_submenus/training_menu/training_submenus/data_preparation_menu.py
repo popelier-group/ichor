@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Union
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
@@ -91,6 +92,55 @@ AVAILABLE_PROPS = {
     ],
 }
 
+
+def train_size_list(train_size) -> list:
+    """Returns the training set sizes as a list.
+
+    The menu holds one size to begin with and a list of them once they have been chosen,
+    so this is what the checks and the summary use to treat both the same way.
+
+    :param train_size: One size or a list of them.
+    """
+
+    if isinstance(train_size, (list, tuple)):
+        return list(train_size)
+
+    return [train_size]
+
+
+def count_geometries_in_csv_directory(csv_directory: Union[Path, str]) -> int:
+    """Counts the geometries in a folder of per-atom csv files, which is how many there
+    are to split between the training, validation and test sets.
+
+    Every csv in the folder holds one row per geometry (its features and the property a
+    model is trained on), and every atom has the same geometries, so the rows of the first
+    csv found are the count. Only that one file is read.
+
+    :param csv_directory: The folder of csv files made by 'Make csvs from database'.
+    :return: The number of geometries, or 0 if there is no csv file to count (which the
+        menu checks warn about).
+    """
+
+    csv_directory = Path(csv_directory)
+
+    try:
+        # the csvs are usually written straight into the folder, but a folder of
+        # per-property subfolders is also read, as that is what some of the stages write
+        csv_path = next(iter(sorted(csv_directory.glob("*.csv"))), None) or next(
+            iter(sorted(csv_directory.rglob("*.csv"))), None
+        )
+        if not csv_path:
+            return 0
+
+        with open(csv_path, "r") as csv_file:
+            # every line but the header of column names is one geometry
+            nlines = sum(1 for _ in csv_file)
+    except OSError:
+        return 0
+
+    return max(0, nlines - 1)
+
+
 SUBMIT_DATA_PREP_MENU_DESCRIPTION = MenuDescription(
     "Dataset Preparation Menu",
     subtitle="Use this menu to prepare datasets for training.\n",
@@ -117,6 +167,10 @@ class SubmitDataPrepMenuOptions(MenuOptions):
     selected_train_size: int
     selected_val_size: int
     selected_test_size: int
+    # the geometries in the selected csv files, counted when the directory is selected so
+    # that the dataset sizes can be checked against what there is to take them from.
+    # 0 = not known
+    number_of_geometries_in_csvs: int = 0
 
     def check_path(self):
 
@@ -124,11 +178,118 @@ class SubmitDataPrepMenuOptions(MenuOptions):
         if not input_directory_path.is_dir():
             return "Current path is not a directory."
 
+    def check_selected_train_size(self) -> Union[str, None]:
+        """Checks the training set sizes are positive and that there are enough geometries
+        to take the largest of them from."""
+        train_sizes = train_size_list(self.selected_train_size)
+
+        if not train_sizes:
+            return "No training set sizes are selected."
+        if any(size < 1 for size in train_sizes):
+            return f"Current training set size(s): {train_sizes} must be 1 or greater."
+
+        ngeometries = self.number_of_geometries_in_csvs
+        largest = max(train_sizes)
+        if ngeometries and largest > ngeometries:
+            return (
+                f"Current training set size: {largest:,} is larger than the "
+                f"{ngeometries:,} geometries in the csv files."
+            )
+
+    def check_selected_val_size(self) -> Union[str, None]:
+        """Checks the validation set size is positive and is not larger than the number of
+        geometries there are."""
+        if self.selected_val_size < 1:
+            return (
+                f"Current validation set size: {self.selected_val_size} must be 1 or "
+                "greater."
+            )
+
+        ngeometries = self.number_of_geometries_in_csvs
+        if ngeometries and self.selected_val_size > ngeometries:
+            return (
+                f"Current validation set size: {self.selected_val_size:,} is larger "
+                f"than the {ngeometries:,} geometries in the csv files."
+            )
+
+    def check_selected_test_size(self) -> Union[str, None]:
+        """Checks the test set size is positive and is not larger than the number of
+        geometries there are."""
+        if self.selected_test_size < 1:
+            return f"Current test set size: {self.selected_test_size} must be 1 or greater."
+
+        ngeometries = self.number_of_geometries_in_csvs
+        if ngeometries and self.selected_test_size > ngeometries:
+            return (
+                f"Current test set size: {self.selected_test_size:,} is larger than the "
+                f"{ngeometries:,} geometries in the csv files."
+            )
+
+    def check_dataset_sizes_fit_the_geometries(self) -> Union[str, None]:
+        """Checks that the three sets can all be taken from the geometries there are.
+
+        The sets are drawn from the same pool without overlapping, so it is their total
+        that has to fit, and it has to fit with room to spare: the outlier and q00
+        recovery filters throw points out of that pool before any of it is split up."""
+        ngeometries = self.number_of_geometries_in_csvs
+        train_sizes = train_size_list(self.selected_train_size)
+        if not ngeometries or not train_sizes:
+            return None
+        if self.selected_val_size < 1 or self.selected_test_size < 1:
+            return None
+
+        # each training set size is a split of its own, so it is the largest of them that
+        # has to fit alongside the validation and test sets
+        largest = max(train_sizes)
+        needed = largest + self.selected_val_size + self.selected_test_size
+        if needed <= ngeometries:
+            return None
+
+        return (
+            f"The training ({largest:,}), validation ({self.selected_val_size:,}) and "
+            f"test ({self.selected_test_size:,}) sets need {needed:,} geometries "
+            f"between them, but there are only {ngeometries:,} in the csv files. The "
+            f"job filters outliers out of those before it splits them up, so the sizes "
+            f"have to add up to rather less than {ngeometries:,}."
+        )
+
 
 # initialize dataclass for storing information for menu
 submit_data_prep_menu_options = SubmitDataPrepMenuOptions(
     *SUBMIT_DATA_PREP_MENU_DEFAULTS.values(),
 )
+
+
+def remaining_geometries_message(set_being_chosen: str) -> str:
+    """Returns a line saying how many geometries there are and how many of them the other
+    two sets have already been given, which is what is left for the set being chosen.
+
+    :param set_being_chosen: "training", "validation" or "test".
+    """
+
+    options = submit_data_prep_menu_options
+    ngeometries = options.number_of_geometries_in_csvs
+
+    if not ngeometries:
+        return (
+            "The number of geometries in the csv files is not known (select the input "
+            "directory above), so the size cannot be checked against it."
+        )
+
+    train_sizes = train_size_list(options.selected_train_size)
+    taken = {
+        "training": options.selected_val_size + options.selected_test_size,
+        "validation": (max(train_sizes) if train_sizes else 0)
+        + options.selected_test_size,
+        "test": (max(train_sizes) if train_sizes else 0) + options.selected_val_size,
+    }[set_being_chosen]
+
+    return (
+        f"The csv files hold {ngeometries:,} geometries, of which the other two sets "
+        f"take {taken:,}, so up to {max(0, ngeometries - taken):,} are left for the "
+        f"{set_being_chosen} set. The outlier and q00 filters throw some of them out "
+        f"before the split, so leave room for that."
+    )
 
 
 # class with static methods for each menu item that calls a function.
@@ -143,6 +304,22 @@ class SubmitDataPrepFunctions:
         submit_data_prep_menu_options.selected_input_directory_path = (
             ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH
         )
+        # the geometries in the csv files are what the three sets are taken from, so they
+        # are counted here and the sizes are checked against them
+        ngeometries = count_geometries_in_csv_directory(
+            ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH
+        )
+        submit_data_prep_menu_options.number_of_geometries_in_csvs = ngeometries
+
+        if ngeometries:
+            print(f"The csv files hold {ngeometries:,} geometries.")
+        else:
+            print(
+                "No csv files were found in that directory, so the number of geometries "
+                "to split is not known. The input directory is the folder of per-atom "
+                "csv files made by 'Make csvs from database' (usually a "
+                "*_processed_csvs folder)."
+            )
 
     @staticmethod
     def select_number_of_cores():
@@ -208,6 +385,8 @@ class SubmitDataPrepFunctions:
     def select_train_size():
         """Asks user to select the size of the training set for machine learning."""
 
+        print(remaining_geometries_message("training"))
+
         training_sets = []
 
         while True:
@@ -246,6 +425,8 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_val_size():
         """Asks user to select the size of the validation set for testing."""
+        print(remaining_geometries_message("validation"))
+
         submit_data_prep_menu_options.selected_val_size = user_input_int(
             "Enter valiation set size: ",
             submit_data_prep_menu_options.selected_val_size,
@@ -258,6 +439,8 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_test_size():
         """Asks user to select the size of the test set for machine learning."""
+        print(remaining_geometries_message("test"))
+
         submit_data_prep_menu_options.selected_test_size = user_input_int(
             "Enter test set size: ",
             submit_data_prep_menu_options.selected_test_size,

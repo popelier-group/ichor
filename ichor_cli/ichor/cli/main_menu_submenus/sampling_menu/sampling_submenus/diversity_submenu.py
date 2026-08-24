@@ -20,6 +20,10 @@ from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     bool_to_str,
+    format_memory_gb,
+    job_memory_gb,
+    maximum_cores,
+    memory_per_core_gb,
     print_summary_and_pause,
     user_input_bool,
     user_input_free_flow,
@@ -27,7 +31,6 @@ from ichor.cli.useful_functions import (
     user_input_restricted,
 )
 from ichor.core.files import count_geometries_in_xyz
-from ichor.hpc.global_variables import get_param_from_config
 from ichor.hpc.main.polus import submit_polus, write_diversity_sampling
 
 SUBMIT_DIVERSITY_MENU_DESCRIPTION = MenuDescription(
@@ -105,29 +108,6 @@ MINIMUM_SUGGESTED_CHUNK_SIZE = 50
 # easier to recognise as a suggestion (and the estimate is not precise enough to warrant
 # suggesting e.g. 537 geometries)
 CHUNK_SIZE_ROUNDING = 50
-# used when the machine is not in the config (e.g. running the menu on a laptop), where
-# a small budget is the safe way to be wrong
-FALLBACK_MEMORY_PER_CORE_GB = 4
-
-
-def memory_per_core_gb() -> float:
-    """Returns the memory (in GB) that one core is given on this machine."""
-
-    return get_param_from_config(
-        ichor.hpc.global_variables.ICHOR_CONFIG,
-        ichor.hpc.global_variables.MACHINE,
-        "hpc",
-        "memory_per_core_gb",
-        default=FALLBACK_MEMORY_PER_CORE_GB,
-    )
-
-
-def job_memory_gb(ncores: int) -> float:
-    """Returns the memory (in GB) a job asking for the given number of cores can use, as
-    the batch system hands out memory per core. Asking for more cores is therefore how a
-    longer trajectory (or a larger chunk) is given the memory it needs."""
-
-    return ncores * memory_per_core_gb()
 
 
 def memory_budget_gb(ncores: int) -> float:
@@ -203,17 +183,6 @@ def total_memory_gb(chunk_size: int, ngeometries: int) -> float:
     return rmsd_matrix_memory_gb(ngeometries) + chunk_memory_gb(chunk_size, ngeometries)
 
 
-def format_memory_gb(memory_gb: float) -> str:
-    """Formats a memory estimate for display, e.g. ``about 1.5 GB``. An estimate too
-    small to show is worded as such rather than being shown as the 0.0 GB it would round
-    to, so the qualifier is part of what is returned."""
-
-    if memory_gb < 0.05:
-        return "less than 0.1 GB"
-
-    return f"about {memory_gb:,.1f} GB"
-
-
 def largest_trajectory_for(ncores: int) -> int:
     """Returns the longest trajectory whose RMSD matrix alone fits in what one process is
     allowed to hold, which is the hard limit on what can be sampled at all (a chunk of any
@@ -229,25 +198,6 @@ def largest_trajectory_for(ncores: int) -> int:
     budget_bytes = per_process_budget_gb(ncores) * 1024**3
 
     return int((budget_bytes / BYTES_PER_MATRIX_ELEMENT) ** 0.5)
-
-
-def maximum_cores() -> int:
-    """Returns the largest number of cores a job can ask for on this machine, taken from
-    the parallel environments it has. 0 means the machine (or its parallel environments)
-    is not in the config, so there is no limit to check against."""
-
-    environments = get_param_from_config(
-        ichor.hpc.global_variables.ICHOR_CONFIG,
-        ichor.hpc.global_variables.MACHINE,
-        "hpc",
-        "parallel_environments",
-        default=None,
-    )
-    if not environments:
-        return 0
-
-    # each environment is a [smallest, largest] number of cores it can be used for
-    return max(int(bounds[1]) for bounds in environments.values())
 
 
 def capped_chunk_size(ngeometries: int) -> int:

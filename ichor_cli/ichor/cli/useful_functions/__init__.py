@@ -1,3 +1,10 @@
+from ichor.cli.useful_functions.hpc_resources import (
+    FALLBACK_MEMORY_PER_CORE_GB,
+    format_memory_gb,
+    job_memory_gb,
+    maximum_cores,
+    memory_per_core_gb,
+)
 from ichor.cli.useful_functions.summary import (
     print_summary,
     print_summary_and_pause,
@@ -13,6 +20,11 @@ from ichor.cli.useful_functions.user_input import (
 )
 
 __all__ = [
+    "FALLBACK_MEMORY_PER_CORE_GB",
+    "format_memory_gb",
+    "job_memory_gb",
+    "maximum_cores",
+    "memory_per_core_gb",
     "print_summary",
     "print_summary_and_pause",
     "user_input_path",
