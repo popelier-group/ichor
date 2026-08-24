@@ -7,8 +7,6 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
     CHECK_CALCULATIONS_MENU_DESCRIPTION,
     submit_aimall_menu,
     SUBMIT_AIMALL_MENU_DESCRIPTION,
-    submit_csvs_menu,
-    SUBMIT_CSVS_MENU_DESCRIPTION,
     submit_database_menu,
     SUBMIT_DATABASE_MENU_DESCRIPTION,
     submit_gaussian_menu,
@@ -18,7 +16,6 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
     "Property Calculation Menu",
@@ -71,11 +68,6 @@ point_directory_menu_items = [
     SubmenuItem(
         SUBMIT_DATABASE_MENU_DESCRIPTION.title,
         submit_database_menu,
-        points_directory_menu,
-    ),
-    SubmenuItem(
-        SUBMIT_CSVS_MENU_DESCRIPTION.title,
-        submit_csvs_menu,
         points_directory_menu,
     ),
 ]

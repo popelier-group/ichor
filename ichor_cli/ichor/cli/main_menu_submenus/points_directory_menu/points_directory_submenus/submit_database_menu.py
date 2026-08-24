@@ -1,11 +1,17 @@
-"""The database menu, which collects the Gaussian and AIMAll results of a PointsDirectory
-into one database that the csv (and then the training) stages are given.
+"""The menu which processes the finished calculations of a PointsDirectory: it collects
+the Gaussian and AIMAll results of every point into one database, and then turns that
+database into the per-atom csv files that the dataset preparation and training stages
+read.
 
-The setting which most often goes wrong here is the number of cores, as the job has no use
-for the cores themselves but the batch system hands out memory per core, so a job left at
-one core is a job given one core's worth of memory. It is therefore worked out from the
-size of the selected PointsDirectory (see :func:`suggest_number_of_cores`) rather than
-being left at a fixed default.
+The two stages are one menu because a database on its own is not what any later stage
+reads. On a compute node they are two jobs, the second held on the first, so the csv job
+is given a database which does not exist yet at the time both are submitted.
+
+The setting which most often goes wrong here is the number of cores, as the database job
+has no use for the cores themselves but the batch system hands out memory per core, so a
+job left at one core is a job given one core's worth of memory. It is therefore worked out
+from the size of the selected PointsDirectory (see :func:`suggest_number_of_cores`) rather
+than being left at a fixed default.
 """
 
 import math
@@ -16,11 +22,6 @@ from typing import List, Tuple, Union
 import ichor.cli.global_menu_variables
 from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
-from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.submit_csvs_from_database import (  # noqa: E501
-    csv_settings,
-    run_make_csvs_on_login_node,
-    update_selected_database_path,
-)
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
@@ -33,6 +34,10 @@ from ichor.cli.useful_functions import (
     user_input_int,
     user_input_path,
     user_input_restricted,
+)
+from ichor.core.database.query_database import (
+    get_alf_from_first_db_geometry,
+    write_processed_data_for_atoms_parallel,
 )
 from ichor.core.files import PointsDirectory, PointsDirectoryParent
 from ichor.core.files.aimall import IntDirectory
@@ -47,19 +52,29 @@ from ichor.hpc.main.database import (
 )
 
 SUBMIT_DATABASE_MENU_DESCRIPTION = MenuDescription(
-    "Database Menu",
-    subtitle="Use this menu to make a database from PointsDirectory.\n",
+    "Process Point Calculations",
+    subtitle="Use this menu to collect the finished Gaussian and AIMAll calculations of "
+    "a PointsDirectory into a database, and to turn that database into the csv files "
+    "that model training reads.\n",
 )
 
 # TODO: possibly make this be read from a file
 SUBMIT_DATABASE_MENU_DEFAULTS = {
     "default_database_format": "sqlite",
     "default_ncores": 1,
-    "default_submit_on_compute": True,
+    "default_run_on_compute_node": True,
     # the csv files are what the training stages actually read, and a database is not
     # much use without them, so they are made straight after the database by default
-    "default_make_csvs": True,
+    "default_make_csv_files": True,
+    "default_rotate_multipole_moments": True,
+    "default_calculate_feature_forces": False,
 }
+
+# The whole database is written out to the csv files: the integration error and IQA/wfn
+# energy difference filters are set high enough to keep every point, so the filtering of
+# bad points is left to the dataset preparation stage.
+FLOAT_INTEGRATION_ERROR = 100000000.0
+FLOAT_DIFFERENCE_IQA_WFN = 10000000.0
 
 # The memory the job needs is worked out from what making a database actually holds at
 # once. The points are read one at a time and given back as soon as they are in the
@@ -224,6 +239,38 @@ def cores_needed_for(memory_gb: float) -> int:
     return max(1, math.ceil(memory_gb / per_core_gb))
 
 
+def make_csvs_on_login_node(db_path: Path, db_type: str, ncores: int) -> Path:
+    """Makes the csv files of a database here and now rather than on a compute node, which
+    is what a database made on the login node is followed by.
+
+    The database is finished by the time this is called, so the ALF can simply be read
+    from it (the compute node job has to read it once it starts instead, as it is
+    submitted before the database exists).
+
+    :param db_path: The database to read.
+    :param db_type: The type of database, sqlite or json.
+    :param ncores: The number of cores to work the atoms out over.
+    :return: The directory the csv files were written to.
+    """
+
+    csvs_path = processed_csvs_directory(db_path)
+    alf = get_alf_from_first_db_geometry(db_path, db_type)
+
+    write_processed_data_for_atoms_parallel(
+        db_path,
+        db_type,
+        alf,
+        ncores,
+        max_diff_iqa_wfn=FLOAT_DIFFERENCE_IQA_WFN,
+        max_integration_error=FLOAT_INTEGRATION_ERROR,
+        calc_multipoles=submit_database_menu_options.selected_rotate_multipole_moments,
+        calc_forces=submit_database_menu_options.selected_calculate_feature_forces,
+        parent_directory=csvs_path,
+    )
+
+    return csvs_path
+
+
 def csv_number_of_cores() -> int:
     """Returns the number of cores for the csv job which follows the database job.
 
@@ -234,7 +281,8 @@ def csv_number_of_cores() -> int:
     """
 
     if not number_of_atoms:
-        return csv_settings()["ncores"]
+        # nothing has been measured, so fall back to the cores the database job asks for
+        return submit_database_menu_options.selected_number_of_cores
 
     largest = maximum_cores()
 
@@ -275,9 +323,13 @@ class SubmitDatabaseMenuOptions(MenuOptions):
 
     selected_database_format: str
     selected_number_of_cores: int
-    selected_submit_on_compute: bool
+    selected_run_on_compute_node: bool
     # whether the csv files are made from the database as soon as it is written
-    selected_make_csvs: bool
+    selected_make_csv_files: bool
+    # settings of the csv files: whether the multipole moments of each atom are rotated
+    # into its own frame, and whether the forces are given in feature coordinates
+    selected_rotate_multipole_moments: bool
+    selected_calculate_feature_forces: bool
     # defaults to the current working directory
     selected_points_directory_path: Path = field(default_factory=lambda: Path.cwd())
     # the points in the selected directory, counted when it is selected so that the memory
@@ -423,7 +475,9 @@ class SubmitDatabaseFunctions:
     @staticmethod
     def select_points_directory():
         """Asks user to update points directory and then updates PointsDirectoryMenuOptions instance."""
-        pd_path = user_input_path("Change PointsDirectory Path: ")
+        pd_path = user_input_path(
+            "Path to the PointsDirectory (or to a directory holding several): "
+        )
         ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH = Path(
             pd_path
         ).absolute()
@@ -444,7 +498,7 @@ class SubmitDatabaseFunctions:
 
         submit_database_menu_options.selected_database_format = user_input_restricted(
             AVAILABLE_DATABASE_FORMATS.keys(),
-            "Choose a database format: ",
+            "Database format (sqlite or json): ",
             submit_database_menu_options.selected_database_format,
         )
         # a json database holds a chunk of points at a time rather than one point, so it
@@ -495,7 +549,7 @@ class SubmitDatabaseFunctions:
             )
 
         ncores = user_input_int(
-            "Enter number of cores (0 = the number the PointsDirectory needs): ",
+            "Cores for the database job (0 = as many as its memory needs): ",
             submit_database_menu_options.selected_number_of_cores,
             minimum=0,
         )
@@ -510,18 +564,18 @@ class SubmitDatabaseFunctions:
         submit_database_menu_options.selected_number_of_cores = ncores
 
     @staticmethod
-    def select_submit_on_compute():
+    def select_run_on_compute_node():
         """
         Asks user whether or not to submit database making on compute.
         """
 
-        submit_database_menu_options.selected_submit_on_compute = user_input_bool(
-            "Submit on compute (yes/no): ",
-            submit_database_menu_options.selected_submit_on_compute,
+        submit_database_menu_options.selected_run_on_compute_node = user_input_bool(
+            "Run on a compute node, rather than here on the login node (yes/no): ",
+            submit_database_menu_options.selected_run_on_compute_node,
         )
 
     @staticmethod
-    def select_make_csvs():
+    def select_make_csv_files():
         """Asks whether the csv files are made from the database as soon as it is written.
 
         A database on its own is not what any of the training stages read, so this is on
@@ -529,9 +583,34 @@ class SubmitDatabaseFunctions:
         database job, which is how it is given a database that does not exist yet at the
         time both are submitted."""
 
-        submit_database_menu_options.selected_make_csvs = user_input_bool(
-            "Make csvs from the database as well (yes/no): ",
-            submit_database_menu_options.selected_make_csvs,
+        submit_database_menu_options.selected_make_csv_files = user_input_bool(
+            "Make the csv files from the database as well (yes/no): ",
+            submit_database_menu_options.selected_make_csv_files,
+        )
+
+    @staticmethod
+    def select_rotate_multipole_moments():
+        """Asks whether the multipole moments written to the csv files are rotated from
+        the global frame into the local frame of each atom, which is the frame a model
+        predicts them in."""
+
+        submit_database_menu_options.selected_rotate_multipole_moments = (
+            user_input_bool(
+                "Rotate multipole moments into each atom's own frame (yes/no): ",
+                submit_database_menu_options.selected_rotate_multipole_moments,
+            )
+        )
+
+    @staticmethod
+    def select_calculate_feature_forces():
+        """Asks whether the forces are worked out in feature coordinates and written to
+        the csv files alongside the properties."""
+
+        submit_database_menu_options.selected_calculate_feature_forces = (
+            user_input_bool(
+                "Calculate forces in feature coordinates (yes/no): ",
+                submit_database_menu_options.selected_calculate_feature_forces,
+            )
         )
 
     @staticmethod
@@ -550,10 +629,10 @@ class SubmitDatabaseFunctions:
             )
         )
 
-        database_format, ncores, submit_on_compute = (
+        database_format, ncores, run_on_compute_node = (
             submit_database_menu_options.selected_database_format,
             submit_database_menu_options.selected_number_of_cores,
-            submit_database_menu_options.selected_submit_on_compute,
+            submit_database_menu_options.selected_run_on_compute_node,
         )
 
         # this is used to be able to call the respective methods from PointsDirectory
@@ -575,14 +654,19 @@ class SubmitDatabaseFunctions:
         db_name = str(points_directory_path.parent / points_directory_path.stem)
         npoints = submit_database_menu_options.number_of_points_in_directory
 
-        make_csvs = submit_database_menu_options.selected_make_csvs
+        make_csv_files = submit_database_menu_options.selected_make_csv_files
         csv_ncores = csv_number_of_cores()
         csvs_path = processed_csvs_directory(db_path)
-        settings = csv_settings()
+        rotate_multipole_moments = (
+            submit_database_menu_options.selected_rotate_multipole_moments
+        )
+        calculate_feature_forces = (
+            submit_database_menu_options.selected_calculate_feature_forces
+        )
 
-        if submit_on_compute:
+        if run_on_compute_node:
 
-            if make_csvs:
+            if make_csv_files:
                 # the csv job is held on the database job by the batch system, so it
                 # starts as soon as the database has been written and nothing about the
                 # database is read here, where it does not exist yet
@@ -591,10 +675,10 @@ class SubmitDatabaseFunctions:
                     database_format,
                     ncores=ncores,
                     csv_ncores=csv_ncores,
-                    float_difference_iqa_wfn=settings["float_difference_iqa_wfn"],
-                    float_integration_error=settings["float_integration_error"],
-                    rotate_multipole_moments=settings["rotate_multipole_moments"],
-                    calculate_feature_forces=settings["calculate_feature_forces"],
+                    float_difference_iqa_wfn=FLOAT_DIFFERENCE_IQA_WFN,
+                    float_integration_error=FLOAT_INTEGRATION_ERROR,
+                    rotate_multipole_moments=rotate_multipole_moments,
+                    calculate_feature_forces=calculate_feature_forces,
                 )
             else:
                 job_id, csvs_job_id = (
@@ -606,9 +690,9 @@ class SubmitDatabaseFunctions:
                     None,
                 )
 
-            # the csv stage which follows this one takes the database as its input, so it
-            # is pointed at the database that was just asked for
-            update_selected_database_path(db_path)
+            # remember the database that was asked for, so that anything else which
+            # works from a database starts from this one
+            ichor.cli.global_menu_variables.SELECTED_DATABASE_PATH = db_path
 
             summary = {
                 "PointsDirectory": points_directory_path,
@@ -636,7 +720,7 @@ class SubmitDatabaseFunctions:
                 "PointsDirectory.",
             ]
 
-            if make_csvs:
+            if make_csv_files:
                 summary["csv folder"] = csvs_path
                 summary["csv job ID"] = (
                     csvs_job_id.id if csvs_job_id else "not available"
@@ -653,16 +737,16 @@ class SubmitDatabaseFunctions:
                     "are what the dataset preparation menu is then pointed at."
                 )
                 notes.append(
-                    "The csv job works out one atom per core and takes the rest of its "
-                    "settings (rotated multipole moments, feature forces) from the "
-                    "'Database Processing Menu', where the csvs can also be remade on "
-                    "their own."
+                    "The csv job works out one atom per core, and writes out every "
+                    "point in the database: the filtering of bad points is done by the "
+                    "dataset preparation menu, which is what the csv folder is then "
+                    "given to."
                 )
             else:
                 notes.append(
-                    "The csv files were not asked for, so 'Make csvs from database' in "
-                    "the 'Database Processing Menu' (already pointed at this database) "
-                    "is what turns it into training data."
+                    "The csv files were not asked for, so the database is not yet in a "
+                    "form any of the training stages read. Turning 'make csv files' on "
+                    "and running this again is what makes them."
                 )
 
             print_summary_and_pause("DATABASE JOB SUBMITTED", summary, notes)
@@ -681,7 +765,7 @@ class SubmitDatabaseFunctions:
             func = getattr(pointdir, str_database_method)
             database_written_path = func(db_name, print_missing_data=True)
 
-        update_selected_database_path(db_path)
+        ichor.cli.global_menu_variables.SELECTED_DATABASE_PATH = db_path
 
         summary = {
             "PointsDirectory": points_directory_path,
@@ -698,11 +782,11 @@ class SubmitDatabaseFunctions:
             "It is written next to the PointsDirectory, not inside it.",
         ]
 
-        if make_csvs:
+        if make_csv_files:
             # the database is finished, so the csvs can simply be made after it rather
             # than by a job held on anything
-            written_csvs_path = run_make_csvs_on_login_node(
-                database_written_path if database_written_path else db_path,
+            written_csvs_path = make_csvs_on_login_node(
+                Path(database_written_path) if database_written_path else db_path,
                 database_format,
                 csv_ncores,
             )
@@ -710,16 +794,13 @@ class SubmitDatabaseFunctions:
             summary["csv CPU cores"] = csv_ncores
             notes.append(
                 "The csv files were made from it straight afterwards and written next "
-                "to it, so they are ready for the dataset preparation menu. Their "
-                "settings come from the 'Database Processing Menu', where they can also "
-                "be remade on their own."
+                "to it, so they are ready for the dataset preparation menu."
             )
         else:
             notes.append(
-                "The csv files were not asked for, so 'Make csvs from database' in the "
-                "'Database Processing Menu' (already pointed at this database) is what "
-                "turns it into the feature and property csv files that model training "
-                "reads."
+                "The csv files were not asked for, so the database is not yet in a form "
+                "any of the training stages read. Turning 'make csv files' on and "
+                "running this again is what makes them."
             )
 
         print_summary_and_pause("DATABASE WRITTEN", summary, notes)
@@ -729,27 +810,35 @@ class SubmitDatabaseFunctions:
 # can use lambda functions to change text of options as well :)
 submit_database_menu_items = [
     FunctionItem(
-        "Select PointsDirectory Path or Parent to PointsDirectory",
+        "Select the PointsDirectory to process",
         SubmitDatabaseFunctions.select_points_directory,
     ),
     FunctionItem(
-        "Change database format",
+        "Set the database format (sqlite or json)",
         SubmitDatabaseFunctions.select_database,
     ),
     FunctionItem(
-        "Change number of cores (the memory the job is given)",
+        "Set the number cores for the database job (memory allocation",
         SubmitDatabaseFunctions.select_number_of_cores,
     ),
     FunctionItem(
-        "Change submit to compute",
-        SubmitDatabaseFunctions.select_submit_on_compute,
+        "Run on a compute node, or here on the login node",
+        SubmitDatabaseFunctions.select_run_on_compute_node,
     ),
     FunctionItem(
-        "Change make csvs from the database as well",
-        SubmitDatabaseFunctions.select_make_csvs,
+        "Create training data files (csv)",
+        SubmitDatabaseFunctions.select_make_csv_files,
     ),
     FunctionItem(
-        "Make database (and csvs)",
+        "Rotate multipole moments into each atom's frame (csv files)",
+        SubmitDatabaseFunctions.select_rotate_multipole_moments,
+    ),
+    FunctionItem(
+        "Calculate forces in feature coordinates (csv files)",
+        SubmitDatabaseFunctions.select_calculate_feature_forces,
+    ),
+    FunctionItem(
+        "Run: make the database and training csv files",
         SubmitDatabaseFunctions.points_directory_to_database,
     ),
 ]
