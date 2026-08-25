@@ -29,6 +29,7 @@ from ichor.cli.useful_functions import (
     job_memory_gb,
     maximum_cores,
     memory_per_core_gb,
+    points_directory_selected,
     print_summary_and_pause,
     user_input_bool,
     user_input_int,
@@ -716,6 +717,14 @@ class SubmitDatabaseFunctions:
         compute node by a second job held on this one, and here and now when the database
         is being made on the login node.
         """
+
+        # without this, a menu whose PointsDirectory was never selected writes an empty
+        # database and then makes csv files which have nothing in them
+        if not points_directory_selected(
+            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH,
+            "collect into a database",
+        ):
+            return
 
         is_parent_directory_to_many_points_directories = (
             single_or_many_points_directories(

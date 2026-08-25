@@ -9,6 +9,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    points_directory_selected,
     print_summary_and_pause,
     user_input_free_flow,
     user_input_int,
@@ -118,6 +119,15 @@ class SubmitAIMALLFunctions:
     @staticmethod
     def points_directory_to_aimall_on_compute():
         """Submits a single PointsDirectory or many PointsDirectory-ies to AIMAll on compute."""
+
+        # without this, a menu whose PointsDirectory was never selected submits a job
+        # array of no tasks and then says the calculations have been submitted
+        if not points_directory_selected(
+            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH,
+            "submit to AIMAll",
+        ):
+            return
+
         print("STARTING AIMALL JOB SUBMISSION\n")
         method, ncores, naat, encomp = (
             submit_aimall_menu_options.selected_method,

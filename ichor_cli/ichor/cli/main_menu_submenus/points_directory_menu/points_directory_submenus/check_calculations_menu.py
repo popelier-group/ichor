@@ -35,6 +35,7 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    points_directory_selected,
     print_summary,
     print_summary_and_pause,
     user_input_bool,
@@ -156,13 +157,20 @@ def make_check(
     PointsDirectory of many thousands of points is checked in seconds.
 
     :param check_class: The check to run, e.g. ``GaussianCheck`` or ``AimallCheck``.
-    :return: The finished check, or None if the selected path could not be read as a
-        PointsDirectory (in which case that has been shown to the user).
+    :return: The finished check, or None if there is nothing at the selected path to
+        check (in which case that has been shown to the user).
     """
 
     points_directory_path = (
         ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
     )
+
+    # without this, a menu whose PointsDirectory was never selected reports that none of
+    # the zero points it found are missing anything
+    if not points_directory_selected(
+        points_directory_path, f"check for {check_class.calculation_name} output"
+    ):
+        return None
 
     print(f"CHECKING {points_directory_path}\n")
     # the point directories are read before the check itself can report any progress,

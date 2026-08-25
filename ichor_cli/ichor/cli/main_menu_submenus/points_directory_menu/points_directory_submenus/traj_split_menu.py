@@ -7,7 +7,7 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import print_summary_and_pause
+from ichor.cli.useful_functions import print_summary_and_pause, trajectory_selected
 from ichor.cli.useful_functions.user_input import (
     user_input_bool,
     user_input_int,
@@ -58,6 +58,15 @@ class TrajSplitFunctions:
     @staticmethod
     def split_trajectory_into_points_directory():
         """functions that splits a trajectory into a PointsDirectory."""
+
+        # reading a trajectory which is not there gives an empty trajectory rather than
+        # an error, so without this a menu whose trajectory was never selected writes out
+        # a PointsDirectory holding no geometries at all
+        if not trajectory_selected(
+            ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH, "split"
+        ):
+            return
+
         default_to_center = True
         default_every = 1
 
@@ -102,6 +111,15 @@ class TrajSplitFunctions:
     @staticmethod
     def split_trajectory_into_many_points_directories():
         """function that splits a given trajectory into many PointsDirectory-like directories."""
+
+        # reading a trajectory which is not there gives an empty trajectory rather than
+        # an error, so without this a menu whose trajectory was never selected writes out
+        # a parent directory holding one empty PointsDirectory
+        if not trajectory_selected(
+            ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH, "split"
+        ):
+            return
+
         default_split_size = 5000
         default_to_center = True
         default_every = 1

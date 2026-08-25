@@ -9,6 +9,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    points_directory_selected,
     print_summary_and_pause,
     user_input_bool,
     user_input_free_flow,
@@ -125,6 +126,15 @@ class SubmitGaussianFunctions:
     @staticmethod
     def points_directory_to_gaussian_on_compute():
         """Submits a single PointsDirectory to Gaussian on compute."""
+
+        # without this, a menu whose PointsDirectory was never selected submits a job
+        # array of no tasks and then says the calculations have been submitted
+        if not points_directory_selected(
+            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH,
+            "submit to Gaussian",
+        ):
+            return
+
         print("STARTING GAUSSIAN JOB SUBMISSION\n")
 
         (method, basis_set, ncores, overwrite_existing, force_calculate_wfn) = (
