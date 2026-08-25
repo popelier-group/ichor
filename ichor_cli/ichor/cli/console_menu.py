@@ -92,9 +92,43 @@ class ConsoleMenu(OriginalConsoleMenu):
         )
 
         self.this_menu_options = this_menu_options
+        # the ">>" prompt, taken out of the drawn menu by `draw` so that it can be
+        # handed to `input` by `get_input` instead (see those methods)
+        self._input_prompt = ""
         # if formatter is None:
         #     formatter = MenuFormatBuilder(max_dimension=Dimension(120, 100))
         # self.formatter = formatter
+
+    def draw(self):
+        """Draws the menu, but stops just short of the trailing `">>"` prompt, which is
+        kept back in `self._input_prompt` for `get_input` to pass to `input`.
+
+        The library prints the prompt as the last (newline-less) part of the formatted
+        menu and then calls `input()` with an empty prompt string. `readline` therefore
+        thinks the line it is editing starts at the left edge of the terminal, and since
+        every redisplay (a Backspace, an arrow key, a completion) begins by returning the
+        cursor to that edge, it draws what has been typed over the `">>"` and the prompt
+        disappears. Giving the prompt to `input` instead tells `readline` how many columns
+        to leave alone, so the prompt survives editing.
+        """
+
+        formatted_menu = self.formatter.format(
+            title=self.get_title(),
+            subtitle=self.get_subtitle(),
+            items=self.items,
+            prologue_text=self.get_prologue_text(),
+            epilogue_text=self.get_epilogue_text(),
+        )
+        # everything after the last newline is the prompt, as the section before it
+        # (the menu footer) is newline terminated but the prompt itself is not
+        menu_without_prompt, newline, prompt = formatted_menu.rpartition("\n")
+        self._input_prompt = prompt
+        self.screen.printf(menu_without_prompt + newline)
+
+    def get_input(self):
+        """Prompts for the menu selection, using the prompt that `draw` held back."""
+
+        return self.screen.input(self._input_prompt)
 
     @property
     def parent_menu_options(self) -> List[MenuOptions]:
