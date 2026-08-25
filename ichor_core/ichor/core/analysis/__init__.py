@@ -1,4 +1,9 @@
-from ichor.core.analysis.dlpoly import DlpolyStabilityCheck, RunStability
+from ichor.core.analysis.dlpoly import (
+    DlpolyStabilityCheck,
+    RunStability,
+    subsample_history,
+    SubsampledTrajectory,
+)
 from ichor.core.analysis.model_metrics import (
     calculate_metrics_dataframe,
     calculate_metrics_from_csv_files,
@@ -20,4 +25,6 @@ __all__ = [
     "get_true_predicted_dicts",
     "DlpolyStabilityCheck",
     "RunStability",
+    "subsample_history",
+    "SubsampledTrajectory",
 ]

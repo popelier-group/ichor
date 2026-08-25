@@ -298,7 +298,7 @@ dl_poly_parameters_menu = make_dl_poly_parameters_menu(
 # can use lambda functions to change text of options as well :)
 dl_fflux_menu_items = [
     FunctionItem(
-        "Select DL_FFLUX run path (RUN0, RUN1, ... are created inside it)",
+        "Select DL_FFLUX run path (RUN0, RUN1, ... are made within)",
         DLFFLUXMenuFunctions.select_dlpoly_run_path,
     ),
     FunctionItem(
@@ -310,7 +310,7 @@ dl_fflux_menu_items = [
         DLFFLUXMenuFunctions.select_xyz,
     ),
     SubmenuItem(
-        "Change DL_POLY parameters (ensemble, temperature, timestep, cutoff, cap)",
+        "Change DL_POLY parameters",
         dl_poly_parameters_menu,
         dl_fflux_menu,
     ),

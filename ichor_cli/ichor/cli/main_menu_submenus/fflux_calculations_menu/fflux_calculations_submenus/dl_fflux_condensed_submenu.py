@@ -449,7 +449,7 @@ dl_poly_parameters_menu = make_dl_poly_parameters_menu(
 # make menu items
 dl_fflux_condensed_menu_items = [
     FunctionItem(
-        "Select DL_FFLUX run path (RUN0, RUN1, ... are created inside it)",
+        "Select DL_FFLUX run path (RUN0, RUN1, ... are made within)",
         DLFFLUXCondensedMenuFunctions.select_dlpoly_run_path,
     ),
     FunctionItem(
@@ -461,7 +461,7 @@ dl_fflux_condensed_menu_items = [
         DLFFLUXCondensedMenuFunctions.select_cell_size,
     ),
     FunctionItem(
-        "Add model directory (one per kind of molecule in the box)",
+        "Add model directory (one per kind of molecule in box)",
         DLFFLUXCondensedMenuFunctions.add_model_directory_path,
     ),
     FunctionItem(
@@ -469,7 +469,7 @@ dl_fflux_condensed_menu_items = [
         DLFFLUXCondensedMenuFunctions.clear_model_directory_paths,
     ),
     SubmenuItem(
-        "Change DL_POLY parameters (ensemble, temperature, timestep, cutoff, cap)",
+        "Change DL_POLY parameters",
         dl_poly_parameters_menu,
         dl_fflux_condensed_menu,
     ),
@@ -482,7 +482,7 @@ dl_fflux_condensed_menu_items = [
         DLFFLUXCondensedMenuFunctions.select_executable_path,
     ),
     FunctionItem(
-        "Show what the box is made of",
+        "Show simulation box composition",
         DLFFLUXCondensedMenuFunctions.show_composition,
     ),
     FunctionItem(

@@ -10,6 +10,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    directory_selected,
     user_input_bool,
     user_input_free_flow,
     user_input_path,
@@ -121,16 +122,38 @@ model_analysis_menu_options = ModelAnalysisMenuOptions(
 )
 
 
-def _inputs_are_valid() -> bool:
-    """Returns True if the models path is valid, otherwise prints why and returns
-    False."""
+# which option selects the models the analysis is run on, so that an option which is
+# picked before it has been used says what to do about it
+SELECT_MODELS_WITH = "Use 'Select models directory' in this menu first."
 
-    models_error = model_analysis_menu_options.check_selected_models_path()
-    if models_error:
-        _pause(models_error)
-        return False
 
-    return True
+def _models_directory_selected(action: str, holds_models: bool = True) -> bool:
+    """Checks that the models directory an option is about to be run on has been
+    selected, and tells the user what to select if it has not.
+
+    The models path starts out as the directory ichor is running in, so an option which
+    is picked before it has been selected is handed the working directory: the analysis
+    of it then finds no models (or, for the options which search a whole tree of model
+    folders, walks everything below wherever ichor was started) rather than saying that
+    nothing was selected.
+
+    :param action: What the option would do with the models, e.g. ``"make the
+        S-curves"``.
+    :param holds_models: Whether the directory has to hold the ``.model`` files itself,
+        defaults to True. Pass False for the options which are pointed at a parent of
+        model folders (e.g. ``6_MODELS``), which holds no models of its own.
+    :return: True if the option can go ahead, False if it cannot (in which case the user
+        has been shown what is wrong).
+    """
+
+    return directory_selected(
+        model_analysis_menu_options.selected_models_path,
+        action,
+        what="models directory",
+        holds="*.model" if holds_models else None,
+        holds_description="models (.model files)",
+        select_with=SELECT_MODELS_WITH,
+    )
 
 
 def _get_models_and_csv_files():
@@ -256,12 +279,16 @@ def _warn_no_csv_files():
     )
 
 
-def _prepare_ferebus_analysis():
+def _prepare_ferebus_analysis(action: str):
     """Validates inputs, gathers models and held-out CSVs, and builds the nested
     ``total_dict`` of true/predicted/error values. Returns ``(models, total_dict)``
-    or ``None`` if inputs are invalid or no CSVs matched the selected split."""
+    or ``None`` if inputs are invalid or no CSVs matched the selected split.
 
-    if not _inputs_are_valid():
+    :param action: What the option which is being run would do, e.g. ``"make the
+        S-curves"``, used in the message when the models have not been selected.
+    """
+
+    if not _models_directory_selected(action):
         return None
 
     models, csv_files = _get_models_and_csv_files()
@@ -284,8 +311,23 @@ class ModelAnalysisFunctions:
         The selected folder can be a whole ``5_TRAINING`` tree, a system folder, a
         ``TRAIN-<n>`` folder, or a single SEQ folder."""
 
-        run_path = user_input_path("Enter path to completed training run: ")
-        seq_folders = _discover_seq_folders(Path(run_path).absolute())
+        run_path = Path(
+            user_input_path("Enter path to completed training run: ")
+        ).absolute()
+
+        # the run folder is typed rather than kept as a menu selection, so pressing
+        # ctrl+D at the prompt gives the directory ichor is running in, every file of
+        # which would then be walked looking for SEQ folders
+        if not directory_selected(
+            run_path,
+            "extract the models",
+            what="training run folder",
+            select_with="Run this option again and enter the path of the completed "
+            "training run.",
+        ):
+            return
+
+        seq_folders = _discover_seq_folders(run_path)
 
         if not seq_folders:
             _pause(f"No SEQ folders containing models found under {run_path}.")
@@ -358,7 +400,7 @@ class ModelAnalysisFunctions:
         / matplotlib images / CSV data only) and whether to also write a
         per-element-type breakdown (a separate set of files for each element)."""
 
-        result = _prepare_ferebus_analysis()
+        result = _prepare_ferebus_analysis("make the S-curves")
         if result is None:
             return
         _, total_dict = result
@@ -401,7 +443,7 @@ class ModelAnalysisFunctions:
         also write a per-element-type breakdown (a separate CSV for each element,
         e.g. ``model_metrics_C.csv``, ``model_metrics_H.csv``)."""
 
-        result = _prepare_ferebus_analysis()
+        result = _prepare_ferebus_analysis("extract the quality metrics")
         if result is None:
             return
         _, total_dict = result
@@ -432,6 +474,11 @@ class ModelAnalysisFunctions:
         ``6_MODELS/<system>``) to analyse many batches at once, or at a single model
         folder to analyse just that one.
         """
+
+        # a parent folder of model batches holds no models of its own, so only the
+        # choice of the directory is checked here; the batches in it are found below
+        if not _models_directory_selected("run the analysis", holds_models=False):
+            return
 
         root = Path(model_analysis_menu_options.selected_models_path)
         model_folders = _discover_model_folders(root)

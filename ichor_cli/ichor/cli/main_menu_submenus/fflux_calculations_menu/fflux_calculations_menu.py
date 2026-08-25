@@ -7,6 +7,8 @@ from ichor.cli.main_menu_submenus.fflux_calculations_menu.fflux_calculations_sub
     DL_FFLUX_CONDENSED_MENU_DESCRIPTION,
     dl_fflux_menu,
     DL_FFLUX_MENU_DESCRIPTION,
+    extract_history_menu,
+    EXTRACT_HISTORY_MENU_DESCRIPTION,
     fflux_api_menu,
     FFLUX_API_MENU_DESCRIPTION,
 )
@@ -51,6 +53,11 @@ fflux_calculations_menu_items = [
     SubmenuItem(
         DL_FFLUX_CONDENSED_MENU_DESCRIPTION.title,
         dl_fflux_condensed_menu,
+        fflux_calculations_menu,
+    ),
+    SubmenuItem(
+        EXTRACT_HISTORY_MENU_DESCRIPTION.title,
+        extract_history_menu,
         fflux_calculations_menu,
     ),
 ]

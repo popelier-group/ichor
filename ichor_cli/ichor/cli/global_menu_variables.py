@@ -45,6 +45,12 @@ SELECTED_DLPOLY_CONDENSED_XYZ_PATH: Path = Path("").absolute()
 # added one at a time, which is why this starts out empty rather than as a placeholder path.
 SELECTED_DLPOLY_CONDENSED_MODEL_PATHS: List[Path] = []
 
+# DL_FFLUX HISTORY extraction (FFLUX calculations menu) options
+# HISTORY trajectory written by a finished DL_FFLUX run
+SELECTED_DLPOLY_HISTORY_PATH: Path = Path("").absolute()
+# .xyz file the geometries taken out of that HISTORY file are written to
+SELECTED_DLPOLY_HISTORY_XYZ_PATH: Path = Path("").absolute()
+
 # DL_FFLUX robustness check (analysis menu) options
 # base directory in which the per-seed RUN* directories are created
 SELECTED_DLPOLY_ROBUSTNESS_PATH: Path = Path("").absolute()

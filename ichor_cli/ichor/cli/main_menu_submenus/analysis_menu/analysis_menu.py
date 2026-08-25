@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
@@ -7,8 +8,8 @@ from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus import (
     MODEL_ANALYSIS_MENU_DESCRIPTION,
     robustness_menu,
     ROBUSTNESS_MENU_DESCRIPTION,
-    SINGLE_POINT_MENU_DESCRIPTION,
     single_point_menu,
+    SINGLE_POINT_MENU_DESCRIPTION,
 )
 from ichor.cli.menu_description import MenuDescription
 
@@ -17,6 +18,7 @@ from ichor.cli.useful_functions import (
     user_input_bool,
     user_input_free_flow,
     user_input_path,
+    xyz_file_selected,
 )
 from ichor.core.atoms import ALF
 from ichor.core.common.str import get_digits
@@ -89,7 +91,21 @@ class AnalysisFunctions:
         on the given ALF.
         """
 
-        trajectory_path = user_input_path("Enter path to xyz: ")
+        trajectory_path = Path(user_input_path("Enter path to xyz: ")).absolute()
+
+        # the path is typed here rather than kept as a menu selection, so anything can
+        # come back from it: the directory ichor is running in (which is what pressing
+        # ctrl+D at the prompt gives), a path which is not there, or a file which is not
+        # an xyz file. Reading the atom names off any of those raises out of the menu
+        # instead of saying what is wrong, so the file is checked before it is read.
+        if not xyz_file_selected(
+            trajectory_path,
+            "center the trajectory",
+            what="xyz file",
+            select_with="Run this option again and enter the path of the xyz file to "
+            "center.",
+        ):
+            return
 
         # get atom names from first geometry
         first_geometry = XYZ(trajectory_path)
