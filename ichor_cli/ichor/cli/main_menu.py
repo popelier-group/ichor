@@ -5,6 +5,7 @@ from typing import Union
 import ichor.hpc.global_variables
 
 from consolemenu.items import SubmenuItem
+from ichor.cli.completers import install_completion_interrupt_handler
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.analysis_menu import (
     analysis_menu,
@@ -110,4 +111,8 @@ add_items_to_menu(main_menu, main_menu_items)
 # this function will be used by setuptools entry points
 def run_main_menu():
     """Runs main ichor menu."""
+    # must be done from the main thread, before the menu loop is started in its
+    # own thread, so that Ctrl+C cancels a slow Tab completion instead of
+    # taking down the whole menu
+    install_completion_interrupt_handler()
     main_menu.show()

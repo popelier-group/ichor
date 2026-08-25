@@ -87,6 +87,13 @@ def copytree(src: Path, dst: Path, symlinks=False, ignore=None):
     """Copy a whole tree (a folder and all of its inside
     contents such as subdirectories, sub-subdirectories, files, etc.)
 
+    Unlike ``shutil.copytree``, the destination is expected to be there already: this
+    copies the contents of one directory into another rather than making a copy of the
+    directory itself. What is already in the destination is left alone unless the source
+    holds something of the same name, which replaces it, and that goes for whole
+    sub-directories as well as for files - without which copying into a destination
+    which already holds a sub-directory of that name fails outright.
+
     :param src: The source directory where the tree is currently
     :param dst: The destination directory where the tree is to be copied to
     :param symlinks: Whether or not to keep symlinks or
@@ -97,7 +104,7 @@ def copytree(src: Path, dst: Path, symlinks=False, ignore=None):
         s = item
         d = dst / item.name
         if s.is_dir():
-            shutil.copytree(s, d, symlinks, ignore)
+            shutil.copytree(s, d, symlinks, ignore, dirs_exist_ok=True)
         else:
             shutil.copy2(s, d)
 
