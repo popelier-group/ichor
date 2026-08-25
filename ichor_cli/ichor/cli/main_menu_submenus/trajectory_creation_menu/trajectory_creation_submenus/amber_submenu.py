@@ -13,6 +13,7 @@ from ichor.cli.useful_functions import (
     user_input_free_flow,
     user_input_int,
     user_input_path,
+    xyz_file_selected,
 )
 from ichor.core.molecular_dynamics.amber import mdcrd_to_xyz
 from ichor.hpc.molecular_dynamics import submit_amber
@@ -113,6 +114,16 @@ class AmberMenuFunctions:
     @staticmethod
     def submit_amber_to_compute():
         """Asks for user input and submits AMBER job to compute node."""
+
+        # the geometry the run starts from is selected in the menu above this one, so it
+        # can still be unset by the time a job is submitted from here
+        if not xyz_file_selected(
+            ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
+            "submit the AMBER run",
+            what="starting geometry",
+            select_with="Use 'Select xyz file containing a single optimised geometry' in the Trajectory Creation Menu above this one.",
+        ):
+            return
 
         temperature = amber_menu_options.selected_temperature
         nsteps = amber_menu_options.selected_number_of_timesteps

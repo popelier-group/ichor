@@ -11,6 +11,7 @@ from ichor.cli.useful_functions import (
     print_summary_and_pause,
     user_input_free_flow,
     user_input_int,
+    xyz_file_selected,
 )
 from ichor.hpc.molecular_dynamics import submit_cp2k
 
@@ -113,6 +114,16 @@ class CP2KMenuFunctions:
     @staticmethod
     def submit_cp2k_to_compute():
         """Submits CP2K job to compute node with the given settings."""
+
+        # the geometry the run starts from is selected in the menu above this one, so it
+        # can still be unset by the time a job is submitted from here
+        if not xyz_file_selected(
+            ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
+            "submit the CP2K run",
+            what="starting geometry",
+            select_with="Use 'Select xyz file containing a single optimised geometry' in the Trajectory Creation Menu above this one.",
+        ):
+            return
 
         method = cp2k_menu_options.selected_method
         basis_set = cp2k_menu_options.selected_basis_set

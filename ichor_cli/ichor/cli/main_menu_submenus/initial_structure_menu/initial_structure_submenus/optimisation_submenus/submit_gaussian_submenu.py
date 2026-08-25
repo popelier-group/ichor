@@ -8,11 +8,13 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    input_file_selected,
     print_summary_and_pause,
     user_input_bool,
     user_input_free_flow,
     user_input_int,
     user_input_path,
+    xyz_file_selected,
 )
 from ichor.core.files import GaussianOutput
 from ichor.hpc.main.gaussian import (
@@ -100,6 +102,17 @@ class SubmitGaussianFunctions:
     @staticmethod
     def xyz_to_gaussian_on_compute():
         """Converts a single xyz to gjf and submit to Gaussian on compute."""
+
+        # the geometry is selected in the menu above this one, so it can still be unset
+        # by the time a job is submitted from here
+        if not xyz_file_selected(
+            ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
+            "submit the optimisation to Gaussian",
+            what="starting geometry",
+            select_with="Use 'Select xyz file containing a single unoptimised geometry' in the Optimisation Menu above this one.",
+        ):
+            return
+
         keywords, method, basis_set, ncores, overwrite_existing = (
             ["opt"],
             submit_gaussian_menu_options.selected_method,
@@ -181,6 +194,14 @@ class SubmitGaussianFunctions:
             ichor.cli.global_menu_variables.SELECTED_GJF_PATH
         )
         gjf_path = ichor.cli.global_menu_variables.SELECTED_GJF_PATH
+
+        # the path is typed in above rather than being a setting of the menu, so pressing
+        # enter at the prompt leaves it as the directory ichor is running in
+        if not input_file_selected(
+            gjf_path, "submit the Gaussian job", what="gjf file"
+        ):
+            return
+
         ncores = submit_gaussian_menu_options.selected_number_of_cores
         job_id = submit_gjfs([gjf_path], force_calculate_wfn=False, ncores=ncores)
 

@@ -27,6 +27,7 @@ from ichor.cli.useful_functions import (
     print_summary_and_pause,
     user_input_free_flow,
     user_input_int,
+    xyz_file_selected,
 )
 from ichor.cli.useful_functions.user_input import user_input_path
 from ichor.core.files import thin_xyz
@@ -163,16 +164,21 @@ class SamplingFunctions:
         trajectory_path = Path(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
         ngeometries = submit_diversity_menu_options.number_of_geometries_in_file
 
-        if not trajectory_path.is_file() or not ngeometries:
+        if not xyz_file_selected(
+            trajectory_path,
+            "thin the trajectory",
+            select_with="Use 'Select path of trajectory' in this menu first.",
+        ):
+            return
+
+        # the trajectory is a real one, but how many geometries it holds is only counted
+        # when it is selected through this menu, and the thinning is worked out from that
+        if not ngeometries:
             print_summary_and_pause(
                 "TRAJECTORY NOT THINNED",
                 {
                     "Trajectory": trajectory_path,
-                    "Reason": (
-                        f"{trajectory_path} is not a file."
-                        if not trajectory_path.is_file()
-                        else "No geometries could be counted in the trajectory."
-                    ),
+                    "Reason": "No geometries could be counted in the trajectory.",
                 },
                 [
                     "Select the trajectory to thin in this menu first; how many "

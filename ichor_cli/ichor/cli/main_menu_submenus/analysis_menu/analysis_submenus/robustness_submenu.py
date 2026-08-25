@@ -18,6 +18,8 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    directory_selected,
+    input_file_selected,
     print_summary_and_pause,
     user_input_bool,
     user_input_float,
@@ -25,6 +27,7 @@ from ichor.cli.useful_functions import (
     user_input_int,
     user_input_path,
     user_input_restricted,
+    xyz_file_selected,
 )
 from ichor.core.analysis import DlpolyStabilityCheck
 from ichor.core.files import read_dlpoly_control_settings
@@ -479,6 +482,36 @@ class RobustnessSetupMenuFunctions:
         """Sets up one RUN* directory per seed geometry, all linking to the one copy of the
         models kept in the base path, and submits them as a job array."""
 
+        # every path defaults to the directory ichor is running in, so without these the
+        # runs are set up next to wherever ichor was started, with no models to run on
+        if not directory_selected(
+            ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH,
+            "submit the robustness runs",
+            what="robustness base path",
+            # the base path is made if it is not there, so only the choice of it matters
+            must_exist=False,
+            select_with="Use 'Select robustness base path' in the DL_FFLUX Robustness Menu above this one.",
+        ):
+            return
+
+        if not directory_selected(
+            ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH,
+            "submit the robustness runs",
+            what="model directory",
+            select_with="Use 'Select model directory' in this menu to select the "
+            "folder of trained models to test.",
+        ):
+            return
+
+        if not xyz_file_selected(
+            ichor.cli.global_menu_variables.SELECTED_DLPOLY_SEED_TRAJECTORY_PATH,
+            "submit the robustness runs",
+            what="seed trajectory",
+            select_with="Use 'Select seed trajectory (.xyz)' in this menu to select "
+            "the diversity-sampled trajectory the seed geometries are taken from.",
+        ):
+            return
+
         try:
             job_id = submit_dlpoly_fflux_robustness(
                 base_path=ichor.cli.global_menu_variables.SELECTED_DLPOLY_ROBUSTNESS_PATH,
@@ -687,6 +720,28 @@ class StabilityCheckMenuFunctions:
         reference_geometry = (
             ichor.cli.global_menu_variables.SELECTED_DLPOLY_REFERENCE_GEOMETRY_PATH
         )
+
+        # the runs to check and the geometry whose bond lengths say what an intact
+        # molecule looks like both default to the directory ichor is running in
+        if not directory_selected(
+            base_path,
+            "check the stability of the runs",
+            what="robustness base path",
+            select_with="Use 'Select robustness base path' in the DL_FFLUX Robustness Menu above this one.",
+        ):
+            return
+
+        # the reference geometry can be an .xyz or a .gjf file, so only the file itself
+        # is checked here
+        if not input_file_selected(
+            reference_geometry,
+            "check the stability of the runs",
+            what="reference geometry",
+            select_with="Use 'Select reference geometry' in this menu to select the "
+            "optimised geometry whose bond lengths define an intact molecule.",
+        ):
+            return
+
         report_path = (
             Path(base_path) / stability_check_menu_options.selected_report_name
         )

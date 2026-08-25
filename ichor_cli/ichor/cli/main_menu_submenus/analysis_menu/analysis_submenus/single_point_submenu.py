@@ -18,11 +18,13 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    directory_selected,
     print_summary_and_pause,
     user_input_float,
     user_input_free_flow,
     user_input_int,
     user_input_path,
+    xyz_file_selected,
 )
 from ichor.core.files import count_geometries_in_xyz
 from ichor.hpc.molecular_dynamics import submit_dlpoly_fflux_single_points
@@ -206,6 +208,36 @@ class SinglePointMenuFunctions:
     def submit_single_points_to_compute():
         """Sets up one POINT* directory per geometry, all linking to the one copy of the
         models kept in the base path, and submits them as a job array."""
+
+        # every path defaults to the directory ichor is running in, so without these the
+        # calculations are set up next to wherever ichor was started, with no models
+        if not directory_selected(
+            ichor.cli.global_menu_variables.SELECTED_DLPOLY_SINGLE_POINT_PATH,
+            "submit the single point calculations",
+            what="single points base path",
+            # the base path is made if it is not there, so only the choice of it matters
+            must_exist=False,
+            select_with="Use 'Select single points base path' in this menu first.",
+        ):
+            return
+
+        if not directory_selected(
+            ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH,
+            "submit the single point calculations",
+            what="model directory",
+            select_with="Use 'Select model directory' in this menu to select the "
+            "folder of trained models to calculate with.",
+        ):
+            return
+
+        if not xyz_file_selected(
+            ichor.cli.global_menu_variables.SELECTED_DLPOLY_SINGLE_POINT_TRAJECTORY_PATH,
+            "submit the single point calculations",
+            what="geometries file",
+            select_with="Use 'Select geometries (.xyz file to calculate every geometry "
+            "of)' in this menu first.",
+        ):
+            return
 
         try:
             job_id = submit_dlpoly_fflux_single_points(

@@ -20,6 +20,7 @@ from ichor.cli.useful_functions import (
     user_input_float,
     user_input_free_flow,
     user_input_int,
+    xyz_file_selected,
 )
 from ichor.core.files.mtd import (
     DEFAULT_MD_RUNSTEPS,
@@ -188,6 +189,17 @@ class MetadynamicsMenuFunctions:
     @staticmethod
     def submit_metadynamics_to_compute():
         """Asks for user input and submits metadynamics job to compute node."""
+
+        # the geometry the run starts from is selected in the menu above this one, so it
+        # can still be unset by the time a job is submitted from here
+        if not xyz_file_selected(
+            ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
+            "set up the metadynamics run",
+            what="starting geometry",
+            select_with="Use 'Select xyz file containing a single optimised geometry' in the Trajectory Creation Menu above this one.",
+        ):
+            return
+
         # if no collective variables are defined then do nothing.
         if len(metadynamics_menu_options.collective_variables) == 0:
             print_summary_and_pause(

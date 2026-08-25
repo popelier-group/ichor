@@ -6,8 +6,11 @@ from ichor.cli.useful_functions.hpc_resources import (
     memory_per_core_gb,
 )
 from ichor.cli.useful_functions.selection_checks import (
+    directories_selected,
+    directory_selected,
+    input_file_selected,
     points_directory_selected,
-    trajectory_selected,
+    xyz_file_selected,
 )
 from ichor.cli.useful_functions.summary import print_summary, print_summary_and_pause
 from ichor.cli.useful_functions.user_input import (
@@ -29,7 +32,10 @@ __all__ = [
     "print_summary",
     "print_summary_and_pause",
     "points_directory_selected",
-    "trajectory_selected",
+    "xyz_file_selected",
+    "input_file_selected",
+    "directory_selected",
+    "directories_selected",
     "user_input_path",
     "user_input_bool",
     "user_input_free_flow",

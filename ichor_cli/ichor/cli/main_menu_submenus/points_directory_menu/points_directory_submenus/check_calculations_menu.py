@@ -168,7 +168,9 @@ def make_check(
     # without this, a menu whose PointsDirectory was never selected reports that none of
     # the zero points it found are missing anything
     if not points_directory_selected(
-        points_directory_path, f"check for {check_class.calculation_name} output"
+        points_directory_path,
+        f"check for {check_class.calculation_name} output",
+        select_with="Use 'Select PointsDirectory Path or Parent to PointsDirectory' in this menu first.",
     ):
         return None
 

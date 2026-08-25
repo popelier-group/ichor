@@ -10,6 +10,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    input_file_selected,
     print_summary_and_pause,
     user_input_path,
     user_input_restricted,
@@ -275,6 +276,16 @@ class FileConversionFunctions:
     @staticmethod
     def convert_file():
         """Converts file from input to selected output format."""
+
+        # ase raises whatever the reader of the format happens to raise on a file which
+        # is not there, which comes out of the menu as a traceback
+        if not input_file_selected(
+            ichor.cli.global_menu_variables.SELECTED_INPUT_FILE_PATH,
+            "convert the file",
+            select_with="Use 'Change input file path' in this menu first.",
+        ):
+            return
+
         # read in data to ase from file
         loaded_atoms = io.read(ichor.cli.global_menu_variables.SELECTED_INPUT_FILE_PATH)
         # finds path to input file

@@ -10,6 +10,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    directory_selected,
     print_summary_and_pause,
     user_input_float,
     user_input_int,
@@ -166,6 +167,24 @@ class SubmitTrainingFunctions:
 
     @staticmethod
     def submit_training_on_compute():
+
+        select_with = (
+            "Use 'Change directory path' in this menu to select the dataset directory "
+            "made by the Dataset Preparation Menu (either one dataset folder or the "
+            "parent holding several of them); the training folders under it are found "
+            "when it is selected."
+        )
+
+        # the input directory defaults to the directory ichor is running in, in which
+        # nothing would be found to train on
+        if not directory_selected(
+            ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH,
+            "submit the model training",
+            what="dataset directory",
+            select_with=select_with,
+        ):
+            return
+
         train_folders = submit_training_menu_options.selected_train_folders
 
         if not train_folders:
@@ -177,10 +196,10 @@ class SubmitTrainingFunctions:
                     )
                 },
                 [
-                    "No training folders are selected, so there is nothing to train. "
-                    "Use the option which finds the FEREBUS subdirectories to pick up "
-                    "the training folders under the input directory first.",
-                    "Those folders are the ones made by the data preparation menu, "
+                    "No TRAIN folders holding a job-details file were found under the "
+                    "selected directory, so there is nothing to train.",
+                    select_with,
+                    "Those folders are the ones made by the Dataset Preparation Menu, "
                     "each holding the training, validation and test files of one "
                     "training set size.",
                 ],

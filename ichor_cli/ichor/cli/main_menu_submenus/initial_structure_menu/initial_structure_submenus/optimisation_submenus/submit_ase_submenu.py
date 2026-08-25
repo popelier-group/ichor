@@ -13,6 +13,7 @@ from ichor.cli.useful_functions import (
     user_input_float,
     user_input_free_flow,
     user_input_int,
+    xyz_file_selected,
 )
 from ichor.hpc.main.ase import submit_single_ase_xyz
 from ichor.hpc.main.opt import single_geometry_optimisation_directory
@@ -135,6 +136,17 @@ class SubmitAseFunctions:
     @staticmethod
     def xyz_to_ase_on_compute():
         """Creates and submits an optimisation using ase calculator."""
+
+        # the geometry is selected in the menu above this one, so it can still be unset
+        # by the time a job is submitted from here
+        if not xyz_file_selected(
+            ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
+            "submit the optimisation to ASE",
+            what="starting geometry",
+            select_with="Use 'Select xyz file containing a single unoptimised geometry' in the Optimisation Menu above this one.",
+        ):
+            return
+
         (
             method,
             ncores,

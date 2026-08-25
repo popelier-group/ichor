@@ -13,10 +13,12 @@ from ichor.cli.main_menu_submenus.fflux_calculations_menu.fflux_calculations_sub
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    directory_selected,
     print_summary_and_pause,
     user_input_free_flow,
     user_input_int,
     user_input_path,
+    xyz_file_selected,
 )
 from ichor.hpc.molecular_dynamics import submit_dlpoly_fflux
 
@@ -160,6 +162,35 @@ class DLFFLUXMenuFunctions:
     def submit_dl_fflux_to_compute():
         """Sets up a RUN<i> directory under the DL_FFLUX run path and submits the job to a
         compute node."""
+
+        # all three paths default to the directory ichor is running in, so without these
+        # a run is set up next to wherever ichor was started, with no models to run on
+        if not directory_selected(
+            ichor.cli.global_menu_variables.SELECTED_DLPOLY_RUN_PATH,
+            "submit the DL_FFLUX job",
+            what="run path",
+            # the run path is made if it is not there, so only the choice of it matters
+            must_exist=False,
+            select_with="Use 'Select DL_FFLUX run path' in this menu first.",
+        ):
+            return
+
+        if not directory_selected(
+            ichor.cli.global_menu_variables.SELECTED_MODEL_DIRECTORY_PATH,
+            "submit the DL_FFLUX job",
+            what="model directory",
+            select_with="Use 'Select model directory' in this menu to select the "
+            "folder of trained models (usually one of the 6_MODELS subfolders).",
+        ):
+            return
+
+        if not xyz_file_selected(
+            ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
+            "submit the DL_FFLUX job",
+            what="starting geometry",
+            select_with="Use 'Select starting geometry (.xyz)' in this menu first.",
+        ):
+            return
 
         try:
             job_id = submit_dlpoly_fflux(

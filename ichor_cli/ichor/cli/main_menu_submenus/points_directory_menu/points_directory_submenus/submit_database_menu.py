@@ -723,6 +723,7 @@ class SubmitDatabaseFunctions:
         if not points_directory_selected(
             ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH,
             "collect into a database",
+            select_with="Use 'Select PointsDirectory Path or Parent to PointsDirectory' in this menu first.",
         ):
             return
 

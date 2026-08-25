@@ -29,6 +29,7 @@ from ichor.cli.useful_functions import (
     user_input_free_flow,
     user_input_int,
     user_input_restricted,
+    xyz_file_selected,
 )
 from ichor.core.files import count_geometries_in_xyz
 from ichor.hpc.main.polus import submit_polus, write_diversity_sampling
@@ -281,7 +282,9 @@ def suggest_chunk_size(ngeometries: int, ncores: int) -> int:
     if remaining_gb <= 0:
         return MINIMUM_SUGGESTED_CHUNK_SIZE
 
-    chunk_size = int(remaining_gb * 1024**3 // (ngeometries * BYTES_PER_CHUNK_ELEMENT))
+    chunk_size = int(
+        remaining_gb * 1024**3 // (ngeometries * BYTES_PER_CHUNK_ELEMENT)
+    )
     # a job with memory to spare must still not be given a batch which covers the whole
     # matrix in one go (see :data:`MAXIMUM_CHUNK_ELEMENTS`)
     chunk_size = min(chunk_size, capped_chunk_size(ngeometries))
@@ -750,12 +753,26 @@ class SubmitDiversityFunctions:
 
         # the paths are selected in the parent menu, so they can still be unset (or wrong)
         # by the time the job is submitted from here
+        if not xyz_file_selected(
+            trajectory_path,
+            "submit the diversity sampling",
+            select_with="Use 'Select path of trajectory' in the Sampling Menu above "
+            "this one.",
+        ):
+            return
+
+        if not xyz_file_selected(
+            xyz_path,
+            "submit the diversity sampling",
+            what="seed geometry",
+            select_with="Use 'Select xyz file containing a single optimised geometry' "
+            "in the Sampling Menu above this one.",
+        ):
+            return
+
+        # what is left are the settings of this menu being at odds with the trajectory
         problem = None
-        if not trajectory_path.is_file():
-            problem = f"The trajectory {trajectory_path} is not a file."
-        elif not xyz_path.is_file():
-            problem = f"The seed geometry {xyz_path} is not a file."
-        elif sample_sizes and ngeometries and max(sample_sizes) > ngeometries:
+        if sample_sizes and ngeometries and max(sample_sizes) > ngeometries:
             problem = (
                 f"The largest sample size ({max(sample_sizes):,}) is larger than the "
                 f"{ngeometries:,} geometries in the trajectory."
@@ -782,9 +799,10 @@ class SubmitDiversityFunctions:
                     "Reason": problem,
                 },
                 [
-                    "The trajectory to sample and the seed geometry to start from are "
-                    "both selected in the sampling menu above this one, so go back and "
-                    "select them before submitting.",
+                    "The sample sizes and the number of cores are settings of this "
+                    "menu, and the trajectory they have to fit is selected in the "
+                    "sampling menu above it, so either can be changed to get the job "
+                    "submitted.",
                     "The sampler compares every geometry against every other one and "
                     "keeps the whole RMSD matrix in memory, so the memory it needs grows "
                     "with the square of the length of the trajectory. A trajectory which "

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Union
+from typing import List, Tuple, Union
 
 import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
@@ -9,6 +9,7 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    directory_selected,
     print_summary_and_pause,
     user_input_float,
     user_input_int,
@@ -157,6 +158,54 @@ SUBMIT_DATA_PREP_MENU_DEFAULTS = {
     "default_test_size": 1000,
 }
 
+# The share of the geometries each set is given to begin with. They add up to 90 rather
+# than 100 percent, because the outlier and q00 filters throw geometries out before the
+# split, so sizes which used every geometry in the csv files would not fit what is left
+# (the job scales them down when that happens, but starting inside what there is means
+# the sets are the sizes they say they are).
+DEFAULT_TRAIN_FRACTION = 0.5
+DEFAULT_VAL_FRACTION = 0.2
+DEFAULT_TEST_FRACTION = 0.2
+
+
+def suggested_dataset_sizes(ngeometries: int) -> Tuple[List[int], int, int]:
+    """Returns the sizes of the three sets to start from, as shares of the geometries
+    there are to split.
+
+    A fixed default is either far more geometries than a small set has or a fraction of a
+    large one, and in both cases it is the first thing which has to be changed, so the
+    sizes follow the csv files which were selected instead.
+
+    :param ngeometries: The geometries in the selected csv files.
+    :return: The training set sizes (one of them), the validation set size and the test
+        set size. The fixed defaults are returned when there are no geometries to go on.
+    """
+
+    if ngeometries < 1:
+        return (
+            list(SUBMIT_DATA_PREP_MENU_DEFAULTS["default_train_size"]),
+            SUBMIT_DATA_PREP_MENU_DEFAULTS["default_val_size"],
+            SUBMIT_DATA_PREP_MENU_DEFAULTS["default_test_size"],
+        )
+
+    # at least one geometry each, so that a set of a handful of geometries still gives
+    # three sets which can be worked with rather than empty ones
+    train = max(1, int(ngeometries * DEFAULT_TRAIN_FRACTION))
+    val = max(1, int(ngeometries * DEFAULT_VAL_FRACTION))
+    test = max(1, int(ngeometries * DEFAULT_TEST_FRACTION))
+
+    # only when there are so few geometries that the minimums do not fit in them
+    while train + val + test > ngeometries and max(train, val, test) > 1:
+        largest = max(train, val, test)
+        if train == largest:
+            train -= 1
+        elif val == largest:
+            val -= 1
+        else:
+            test -= 1
+
+    return [train], val, test
+
 
 # dataclass used to store values for submit dataset preparation menu
 @dataclass
@@ -235,7 +284,10 @@ class SubmitDataPrepMenuOptions(MenuOptions):
 
         The sets are drawn from the same pool without overlapping, so it is their total
         that has to fit, and it has to fit with room to spare: the outlier and q00
-        recovery filters throw points out of that pool before any of it is split up."""
+        recovery filters throw points out of that pool before any of it is split up. The
+        job scales the three sizes down in proportion when they turn out not to fit
+        what the filters leave, so this is a warning that the sets will not be the sizes
+        they say they are rather than one that the job will fail."""
         ngeometries = self.number_of_geometries_in_csvs
         train_sizes = train_size_list(self.selected_train_size)
         if not ngeometries or not train_sizes:
@@ -253,9 +305,10 @@ class SubmitDataPrepMenuOptions(MenuOptions):
         return (
             f"The training ({largest:,}), validation ({self.selected_val_size:,}) and "
             f"test ({self.selected_test_size:,}) sets need {needed:,} geometries "
-            f"between them, but there are only {ngeometries:,} in the csv files. The "
-            f"job filters outliers out of those before it splits them up, so the sizes "
-            f"have to add up to rather less than {ngeometries:,}."
+            f"between them, but there are only {ngeometries:,} in the csv files, and "
+            f"the job filters outliers out of those before it splits them up. The job "
+            f"will scale the three sizes down in proportion to what is left, so the "
+            f"sets will be smaller than the sizes above."
         )
 
 
@@ -263,6 +316,27 @@ class SubmitDataPrepMenuOptions(MenuOptions):
 submit_data_prep_menu_options = SubmitDataPrepMenuOptions(
     *SUBMIT_DATA_PREP_MENU_DEFAULTS.values(),
 )
+
+# the three set sizes follow the geometries in the selected csv files unless the user
+# picks sizes by hand, in which case their choice is kept even when a different csv
+# folder is selected
+dataset_sizes_overridden = False
+
+
+def derive_dataset_sizes():
+    """Sets the three set sizes from the geometries in the selected csv files, unless the
+    user has picked sizes by hand."""
+
+    if dataset_sizes_overridden:
+        return
+
+    (
+        submit_data_prep_menu_options.selected_train_size,
+        submit_data_prep_menu_options.selected_val_size,
+        submit_data_prep_menu_options.selected_test_size,
+    ) = suggested_dataset_sizes(
+        submit_data_prep_menu_options.number_of_geometries_in_csvs
+    )
 
 
 def remaining_geometries_message(set_being_chosen: str) -> str:
@@ -318,12 +392,31 @@ class SubmitDataPrepFunctions:
         submit_data_prep_menu_options.system_name = system_name_from_processed_csvs(
             ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH
         )
+        # the sizes of the three sets are shares of what there is to split, so they
+        # follow the csv files which have just been selected
+        derive_dataset_sizes()
 
         if ngeometries:
             print(
                 f"The csv files hold {ngeometries:,} geometries, and the datasets will "
                 f"be named after {submit_data_prep_menu_options.system_name}."
             )
+            if dataset_sizes_overridden:
+                print(
+                    "The set sizes are the ones which were entered by hand, so they "
+                    "have been left alone."
+                )
+            else:
+                print(
+                    "The set sizes have been set to "
+                    f"{int(DEFAULT_TRAIN_FRACTION * 100)}/"
+                    f"{int(DEFAULT_VAL_FRACTION * 100)}/"
+                    f"{int(DEFAULT_TEST_FRACTION * 100)} percent of them: "
+                    f"{max(submit_data_prep_menu_options.selected_train_size):,} "
+                    f"training, "
+                    f"{submit_data_prep_menu_options.selected_val_size:,} validation "
+                    f"and {submit_data_prep_menu_options.selected_test_size:,} test."
+                )
         else:
             print(
                 "No csv files were found in that directory, so the number of geometries "
@@ -394,7 +487,9 @@ class SubmitDataPrepFunctions:
 
     @staticmethod
     def select_train_size():
-        """Asks user to select the size of the training set for machine learning."""
+        """Asks user to select the size(s) of the training set for machine learning."""
+
+        global dataset_sizes_overridden
 
         print(remaining_geometries_message("training"))
 
@@ -427,6 +522,8 @@ class SubmitDataPrepFunctions:
                 print("Invalid input. Please enter an integer or 'done' to finish.")
 
         submit_data_prep_menu_options.selected_train_size = training_sets
+        # sizes entered by hand are kept even when another csv folder is selected
+        dataset_sizes_overridden = True
 
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
@@ -436,12 +533,18 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_val_size():
         """Asks user to select the size of the validation set for testing."""
+
+        global dataset_sizes_overridden
+
         print(remaining_geometries_message("validation"))
 
         submit_data_prep_menu_options.selected_val_size = user_input_int(
-            "Enter valiation set size: ",
+            "Enter validation set size: ",
             submit_data_prep_menu_options.selected_val_size,
+            minimum=1,
         )
+        # sizes entered by hand are kept even when another csv folder is selected
+        dataset_sizes_overridden = True
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             f"Validation set size {submit_data_prep_menu_options.selected_val_size}"
@@ -450,12 +553,18 @@ class SubmitDataPrepFunctions:
     @staticmethod
     def select_test_size():
         """Asks user to select the size of the test set for machine learning."""
+
+        global dataset_sizes_overridden
+
         print(remaining_geometries_message("test"))
 
         submit_data_prep_menu_options.selected_test_size = user_input_int(
             "Enter test set size: ",
             submit_data_prep_menu_options.selected_test_size,
+            minimum=1,
         )
+        # sizes entered by hand are kept even when another csv folder is selected
+        dataset_sizes_overridden = True
         # update logger
         ichor.hpc.global_variables.LOGGER.info(
             f"Test set size {submit_data_prep_menu_options.selected_test_size}"
@@ -474,20 +583,21 @@ class SubmitDataPrepFunctions:
         )
 
         input_path = Path(ichor.cli.global_menu_variables.SELECTED_DIRECTORY_PATH)
-        has_csv = any(input_path.glob("*.csv"))
 
-        if not has_csv:
-            print_summary_and_pause(
-                "DATASET SPLITTING JOB NOT SUBMITTED",
-                {"Input directory": input_path},
-                [
-                    "No csv files were found in the directory selected, so there is "
-                    "nothing to split into training, validation and test sets.",
-                    "The input directory is the folder of per-atom csv files written "
-                    "by the point calculation menu: the folder named after the system "
-                    "inside training_csvs, not the database or PointsDirectory itself.",
-                ],
-            )
+        # the input directory defaults to the directory ichor is running in, so without
+        # this a job which has nothing to split is submitted (or, worse, one which splits
+        # whatever csv files happen to be lying about)
+        if not directory_selected(
+            input_path,
+            "prepare the datasets",
+            what="csv directory",
+            holds="*.csv",
+            holds_description="csv files",
+            select_with="Use 'Change directory path' in this menu to select the folder "
+            "of per-atom csv files written by the Property Calculation Menu: the folder "
+            "named after the system inside training_csvs, not the database or the "
+            "PointsDirectory itself.",
+        ):
             return
 
         script_path, system_dir = write_dataset_prep(
@@ -530,6 +640,11 @@ class SubmitDataPrepFunctions:
                 "The job filters out points whose q00 is further than the threshold "
                 "from the mean, then splits what is left into training, validation and "
                 "test sets, one set of files per atom and property.",
+                "The sizes above are what the sets are asked for. Some of the "
+                "geometries are thrown out by the outlier and q00 filters before the "
+                "split, and how many is only known once the job has run them, so if "
+                "the three sets no longer fit in what is left the job scales all three "
+                "of them down in proportion and says so in its output.",
                 "Giving several training set sizes builds a separate training folder "
                 "for each of them, which is what a learning curve is made from.",
                 "The job is now queued on a compute node, so it will not start "

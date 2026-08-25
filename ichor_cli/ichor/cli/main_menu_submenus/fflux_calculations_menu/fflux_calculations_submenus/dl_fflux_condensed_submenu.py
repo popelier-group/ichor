@@ -13,11 +13,14 @@ from ichor.cli.main_menu_submenus.fflux_calculations_menu.fflux_calculations_sub
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
+    directories_selected,
+    directory_selected,
     print_summary_and_pause,
     user_input_float,
     user_input_free_flow,
     user_input_int,
     user_input_path,
+    xyz_file_selected,
 )
 from ichor.hpc.molecular_dynamics import (
     dlpoly_fflux_composition,
@@ -133,6 +136,32 @@ dl_fflux_condensed_menu_options = DLFFLUXCondensedMenuOptions(
 )
 
 
+def box_and_models_selected(action: str) -> bool:
+    """Checks that the packed box and the models to run it with have been selected, as
+    both the composition of the box and the calculation itself are worked out from them.
+
+    :param action: What the option would do with them, e.g. ``"submit the DL_FFLUX job"``.
+    :return: True if the option can go ahead, False if it cannot (in which case the user
+        has been shown what is wrong).
+    """
+
+    if not xyz_file_selected(
+        ichor.cli.global_menu_variables.SELECTED_DLPOLY_CONDENSED_XYZ_PATH,
+        action,
+        what="packed box",
+        select_with="Use 'Select packed box (.xyz)' in this menu first.",
+    ):
+        return False
+
+    return directories_selected(
+        ichor.cli.global_menu_variables.SELECTED_DLPOLY_CONDENSED_MODEL_PATHS,
+        action,
+        what="model directory",
+        select_with="Use 'Add model directory' in this menu to add one folder of "
+        "trained models per kind of molecule in the box.",
+    )
+
+
 # class with static methods for each menu item that calls a function.
 class DLFFLUXCondensedMenuFunctions:
     """Functions that run when menu items are selected"""
@@ -221,6 +250,9 @@ class DLFFLUXCondensedMenuFunctions:
         the composition of the box - it is read off the geometry, so this is the chance to
         check that what ichor found is what was packed."""
 
+        if not box_and_models_selected("work out what the box is made of"):
+            return
+
         try:
             composition = dlpoly_fflux_composition(
                 ichor.cli.global_menu_variables.SELECTED_DLPOLY_CONDENSED_XYZ_PATH,
@@ -266,6 +298,42 @@ class DLFFLUXCondensedMenuFunctions:
         compute node."""
 
         options = dl_fflux_condensed_menu_options
+
+        # every path defaults to the directory ichor is running in, so without these a
+        # run is set up next to wherever ichor was started, with no models to run on
+        if not directory_selected(
+            ichor.cli.global_menu_variables.SELECTED_DLPOLY_CONDENSED_RUN_PATH,
+            "submit the DL_FFLUX job",
+            what="run path",
+            # the run path is made if it is not there, so only the choice of it matters
+            must_exist=False,
+            select_with="Use 'Select DL_FFLUX run path' in this menu first.",
+        ):
+            return
+
+        if not box_and_models_selected("submit the DL_FFLUX job"):
+            return
+
+        # unlike a single molecule run, there is no sensible default for the size of the
+        # box: it is what sets the density of the simulation
+        if options.selected_cell_size <= 0:
+            print_summary_and_pause(
+                "CANNOT SUBMIT THE DL_FFLUX JOB",
+                {
+                    "Packed box": (
+                        ichor.cli.global_menu_variables.SELECTED_DLPOLY_CONDENSED_XYZ_PATH  # noqa: E501
+                    ),
+                    "Problem": "No box size has been selected.",
+                },
+                [
+                    "Nothing has been done, as the size of the box the geometry was "
+                    "packed into is what sets the density of the simulation, and it "
+                    "cannot be guessed from the geometry.",
+                    "Use 'Select box size (Angstrom)' in this menu to give the box size "
+                    "that Packmol (or whatever packed the geometry) was given.",
+                ],
+            )
+            return
 
         try:
             job_id, composition = submit_dlpoly_fflux_condensed(
