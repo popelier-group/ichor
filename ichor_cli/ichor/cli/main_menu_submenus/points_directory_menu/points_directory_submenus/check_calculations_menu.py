@@ -8,6 +8,13 @@ runs the same check and queues the points it found, with the settings of the men
 were submitted from in the first place (the Submit Gaussian Menu and the Submit AIMAll
 Menu), so that points which are calculated again are calculated the same way as the rest
 of the set. Those settings can be changed for a resubmission if they need to be.
+
+The Gaussian side of the menu also looks for points which are not in the set at all.
+The points of a set are named after the geometry they came from, so a point directory
+which has been deleted leaves a hole in that sequence, which a check of the point
+directories which are there cannot see. Those points can be made again from the
+trajectory the set was written out of and submitted to Gaussian along with the ones which
+did not finish, so that a set which lost some of its points ends up whole again.
 """
 
 import textwrap
@@ -37,11 +44,20 @@ from ichor.cli.useful_functions import (
     user_input_restricted,
 )
 from ichor.cli.useful_functions.summary import SUMMARY_WIDTH
-from ichor.core.files import PointDirectory, PointsDirectory, PointsDirectoryParent
+from ichor.core.files import (
+    count_geometries_in_xyz,
+    PointDirectory,
+    PointsDirectory,
+    PointsDirectoryParent,
+)
 from ichor.core.processing import (
     AimallCheck,
     GaussianCheck,
+    matching_geometries,
+    MissingPointsCheck,
+    points_are_centred,
     PointsDirectoryCheck,
+    restore_missing_points,
     wfn_is_finished,
 )
 from ichor.hpc.main import (
@@ -219,6 +235,285 @@ def print_problem_points(check: PointsDirectoryCheck):
         print()
 
 
+def find_missing_points(
+    points_directory_path: Path,
+    ngeometries: Optional[int] = None,
+    every: int = 1,
+) -> Optional[MissingPointsCheck]:
+    """Looks for points which are missing from the sequence of the selected set.
+
+    :param points_directory_path: Path of the PointsDirectory (or of a parent to many)
+        to look in.
+    :param ngeometries: How many geometries the trajectory the set was made from holds,
+        defaults to None (i.e. the trajectory is not known, so only the holes between the
+        points which are there are found).
+    :param every: How many geometries of the trajectory each point steps over, defaults
+        to 1.
+    :return: The finished check, or None if the path could not be read.
+    """
+
+    try:
+        return MissingPointsCheck(
+            points_directory_path, ngeometries=ngeometries, every=every
+        )
+    except FileNotFoundError:
+        return None
+
+
+def print_missing_points(check: MissingPointsCheck):
+    """Prints the points which are missing from the sequence of the set, i.e. the ones
+    which are not there to be checked at all."""
+
+    if not check.nmissing:
+        return
+
+    print(f"{check.nmissing} points are missing from the sequence of this set:\n")
+
+    for sequence in check.sequences:
+
+        if not sequence.missing:
+            continue
+
+        names = [point.name for point in sequence.missing]
+        listed_names = ", ".join(names[:MAX_NAMES_SUMMARISED])
+        if len(names) > MAX_NAMES_SUMMARISED:
+            listed_names += f", ... and {len(names) - MAX_NAMES_SUMMARISED} more"
+
+        print(
+            f"  {sequence.system_name} ({sequence.npresent:,} points there, "
+            f"{sequence.nmissing:,} missing):"
+        )
+        for line in textwrap.wrap(listed_names, SUMMARY_WIDTH - 4):
+            print(f"    {line}")
+        print()
+
+
+def matched_trajectory(
+    check: MissingPointsCheck, trajectory_path: Path, every: int
+) -> Tuple[bool, int]:
+    """Checks a trajectory against the points of the set which are still there, and asks
+    what to do if it does not look like the trajectory the set was made from.
+
+    The geometry of a point which is missing is taken out of the trajectory by its
+    position in it, so a trajectory which is not the one the set was made from would
+    quietly fill the holes in the set with the wrong geometries. That is worse than
+    leaving the holes in it, so it is ruled out before anything is written.
+
+    :param check: The check which found the missing points.
+    :param trajectory_path: Path of the trajectory (.xyz) file.
+    :param every: How many geometries of the trajectory each point steps over.
+    :return: Whether to go ahead, and the (possibly changed) number of geometries of the
+        trajectory each point steps over.
+    """
+
+    while True:
+
+        ncompared, nmatched = matching_geometries(
+            check.present_point_paths, trajectory_path, every
+        )
+
+        if ncompared and nmatched == ncompared:
+            print(
+                f"\nThe geometries of {nmatched} of the points which are there are the "
+                f"geometries this trajectory has at their positions, so it is the "
+                "trajectory this set was made from.\n"
+            )
+            return True, every
+
+        if not ncompared:
+            notes = [
+                "None of the points which are there could be compared against the "
+                "trajectory, either because their geometries could not be read or "
+                "because the trajectory has no geometry at their positions.",
+                "Going ahead means trusting that this is the trajectory the set was "
+                "made from, which cannot be checked here.",
+            ]
+        else:
+            notes = [
+                f"Only {nmatched} of the {ncompared} points which were compared hold "
+                "the geometry this trajectory has at their position, so this is "
+                "probably not the trajectory this set was made from, or geometries "
+                "have been taken out of it since the set was made.",
+                "If the set was written out in chunks from every nth geometry of the "
+                "trajectory, its points are numbered one after the other rather than by "
+                "where their geometry is in the trajectory. Choose 'change' to say what "
+                "n was, and the points will be lined up against the trajectory again.",
+                "Going ahead anyway would fill the holes in the set with whichever "
+                "geometries this trajectory has at those positions, which are not the "
+                "geometries the points which were deleted had.",
+            ]
+
+        print_summary(
+            "TRAJECTORY DOES NOT MATCH THE SET",
+            {
+                "PointsDirectory": check.path,
+                "Trajectory": trajectory_path,
+                "Points compared": f"{ncompared:,}",
+                "Points which match": f"{nmatched:,}",
+                "Geometries per point": every,
+            },
+            notes,
+        )
+
+        answer = user_input_restricted(
+            ["no", "yes", "change"],
+            "Make the missing points from this trajectory anyway "
+            "(change to say how many geometries of the trajectory each point steps "
+            "over): ",
+            "no",
+        )
+
+        if answer == "yes":
+            return True, every
+        if answer == "no":
+            return False, every
+
+        every = user_input_int(
+            "Enter how many geometries of the trajectory each point steps over: ",
+            every,
+            minimum=1,
+        )
+
+
+def restore_points_missing_from_sequence(
+    points_directory_path: Path,
+) -> List[PointDirectory]:
+    """Offers to make the points which are missing from the sequence of a set again, out
+    of the trajectory the set was written out of.
+
+    The point directories are written exactly as they were written when the set was made
+    (a directory named after the point, holding the .xyz file of its geometry), so the
+    points which are made again are calculated the same way as the rest of the set when
+    they are submitted.
+
+    :param points_directory_path: Path of the PointsDirectory (or of a parent to many).
+    :return: The points which were made again, ready to be submitted to Gaussian.
+    """
+
+    check = find_missing_points(points_directory_path)
+    if check is None:
+        return []
+
+    print_missing_points(check)
+
+    if not user_input_bool(
+        "Make the points which are missing from the sequence of this set again, from "
+        "the trajectory it was made from (yes/no): ",
+        bool(check.nmissing),
+    ):
+        return []
+
+    trajectory_path = Path(
+        user_input_path("Enter the path of the trajectory this set was made from: ")
+    )
+    if not trajectory_path.is_file():
+        print_summary_and_pause(
+            "TRAJECTORY NOT FOUND",
+            {"Trajectory": trajectory_path},
+            [
+                "There is no file at that path, so there is nothing to make the missing "
+                "points from. No point directories have been made."
+            ],
+        )
+        return []
+
+    print("\nReading the trajectory...\n")
+    ngeometries = count_geometries_in_xyz(trajectory_path)
+
+    go_ahead, every = matched_trajectory(check, trajectory_path, 1)
+    if not go_ahead:
+        return []
+
+    # now that the trajectory is known, the points which were deleted from the end of the
+    # set can be found as well, which the names of the points on their own cannot show
+    check = find_missing_points(
+        points_directory_path, ngeometries=ngeometries, every=every
+    )
+    if check is None or not check.nmissing:
+        print_summary_and_pause(
+            "NO POINTS MISSING FROM THE SET",
+            {
+                "PointsDirectory": points_directory_path,
+                "Trajectory": trajectory_path,
+                "Geometries in the trajectory": f"{ngeometries:,}",
+                "Points in the set": f"{check.npresent:,}" if check else "0",
+            },
+            [
+                "The set holds a point for every geometry of the trajectory it was made "
+                "from, so there is nothing to make again."
+            ],
+        )
+        return []
+
+    print_missing_points(check)
+
+    # a point which is made again should be made the same way as the rest of the set it
+    # is going into, so it is centred only if the points which are there are
+    centred = points_are_centred(check.present_point_paths)
+
+    print_summary(
+        "POINTS MISSING FROM THE SET",
+        {
+            "PointsDirectory": points_directory_path,
+            "Trajectory": trajectory_path,
+            "Geometries in the trajectory": f"{ngeometries:,}",
+            "Points in the set": f"{check.npresent:,}",
+            "Points missing": f"{check.nmissing:,}",
+            "Geometries centred": centred,
+        },
+        [
+            "These points are not in the set at all, so neither the Gaussian check nor "
+            "the AIMAll check can see them. Their geometries are still in the "
+            "trajectory the set was made from, so the point directories can be written "
+            "again and calculated.",
+            "The geometries are written the way the ones which are there were written, "
+            "so the points which are made again are no different from the rest of the "
+            "set. Nothing which is already in the set is touched.",
+        ],
+    )
+
+    if not user_input_bool(
+        f"Make {check.nmissing} point director"
+        f"{'ies' if check.nmissing != 1 else 'y'} again (yes/no): ",
+        True,
+    ):
+        return []
+
+    print("\nWriting the point directories...\n")
+    restored_paths, not_in_trajectory = restore_missing_points(
+        check.missing, trajectory_path, every=every, centre=centred
+    )
+
+    ichor.hpc.global_variables.LOGGER.info(
+        f"Made {len(restored_paths)} points of {points_directory_path} again from "
+        f"{trajectory_path}."
+    )
+
+    notes = [
+        "The points which were made again hold the geometry they had, and no more, so "
+        "they are submitted to Gaussian along with the points which did not finish."
+    ]
+    if not_in_trajectory:
+        notes.append(
+            f"{len(not_in_trajectory)} of the missing points could not be made, as the "
+            "trajectory has no geometry at their position: "
+            f"{shorten_names([point.name for point in not_in_trajectory])}."
+        )
+
+    print_summary(
+        "MISSING POINTS MADE AGAIN",
+        {
+            "PointsDirectory": points_directory_path,
+            "Trajectory": trajectory_path,
+            "Point directories made": f"{len(restored_paths):,}",
+            "Could not be made": f"{len(not_in_trajectory):,}",
+        },
+        notes,
+    )
+
+    return [PointDirectory(path) for path in restored_paths]
+
+
 def offer_report(check: PointsDirectoryCheck):
     """Asks whether a report of every point which was checked should be saved, and
     writes it into the directory which was checked if so.
@@ -239,13 +534,20 @@ def offer_report(check: PointsDirectoryCheck):
     user_input_free_flow("\nPress enter to continue: ")
 
 
-def run_check(check_class: Type[PointsDirectoryCheck], notes: List[str]):
+def run_check(
+    check_class: Type[PointsDirectoryCheck],
+    notes: List[str],
+    check_sequence: bool = False,
+):
     """Checks the selected PointsDirectory, prints the points which are not finished and
     offers to save a report of every point.
 
     :param check_class: The check to run, e.g. ``GaussianCheck`` or ``AimallCheck``.
     :param notes: Sentences printed underneath the summary, explaining what the outcome
         of this particular check means and what to do about it.
+    :param check_sequence: Whether to also look for points which are missing from the
+        sequence of the set, i.e. which are not there to be checked at all, defaults to
+        False.
     """
 
     check = make_check(check_class)
@@ -254,21 +556,39 @@ def run_check(check_class: Type[PointsDirectoryCheck], notes: List[str]):
 
     print_problem_points(check)
 
+    missing_points_check = find_missing_points(check.path) if check_sequence else None
+    if missing_points_check is not None:
+        print_missing_points(missing_points_check)
+
     counts = check.counts
     ichor.hpc.global_variables.LOGGER.info(
         f"{check_class.calculation_name} check of {check.path}: "
         f"{counts['OK']}/{check.npoints} points finished."
     )
 
+    summary = {
+        "PointsDirectory": check.path,
+        "Points checked": f"{check.npoints:,}",
+        "Finished": f"{counts['OK']:,}",
+        "Missing output": f"{counts['MISSING']:,}",
+        "Incomplete output": f"{counts['INCOMPLETE']:,}",
+    }
+
+    if missing_points_check is not None:
+        summary["Missing from the set"] = f"{missing_points_check.nmissing:,}"
+        notes = notes + [
+            "A point which is missing from the set is one whose point directory is not "
+            "there at all, which shows up as a hole in the sequence the points are "
+            "numbered in. Use the resubmit option of this menu to write those points "
+            "again out of the trajectory the set was made from and calculate them.",
+            "Only the holes between the points which are there can be found here. "
+            "Points which were deleted from the end of a set are found as well once the "
+            "trajectory is given, which the resubmit option asks for.",
+        ]
+
     print_summary(
         f"{check_class.calculation_name} CHECK FINISHED",
-        {
-            "PointsDirectory": check.path,
-            "Points checked": f"{check.npoints:,}",
-            "Finished": f"{counts['OK']:,}",
-            "Missing output": f"{counts['MISSING']:,}",
-            "Incomplete output": f"{counts['INCOMPLETE']:,}",
-        },
+        summary,
         notes,
     )
 
@@ -348,6 +668,7 @@ def confirm_resubmission(
     settings: dict,
     settings_menu: str,
     settings_changed: bool = False,
+    nrestored: int = 0,
 ) -> str:
     """Shows which points would be calculated again, and with which settings, and asks
     whether to go ahead with submitting them.
@@ -361,6 +682,8 @@ def confirm_resubmission(
     :param settings_menu: The name of the menu those settings come from.
     :param settings_changed: Whether the settings have been changed for this
         resubmission, i.e. are no longer the ones of that menu, defaults to False.
+    :param nrestored: How many of the points to submit are points which were missing from
+        the set and have just been written again, defaults to 0.
     :return: ``"yes"`` to submit, ``"change"`` to change the settings first, or ``"no"``
         to submit nothing.
     """
@@ -393,23 +716,32 @@ def confirm_resubmission(
             f"{skipped_reason}: {shorten_names(skipped_points)}."
         )
 
+    summary = {
+        "PointsDirectory": check.path,
+        "Points checked": f"{check.npoints:,}",
+        "To resubmit": f"{npoints:,}",
+        "Left out": f"{len(skipped_points):,}",
+        "Job arrays": f"{len(points_by_points_directory)}",
+    }
+
+    if nrestored:
+        summary["Made again from trajectory"] = f"{nrestored:,}"
+        notes.append(
+            f"{nrestored} of the points being submitted are points which were missing "
+            "from the set and have just been written again, so they were not among the "
+            "points which were checked."
+        )
+
     print_summary(
         f"POINTS TO RESUBMIT TO {check.calculation_name}",
-        {
-            "PointsDirectory": check.path,
-            "Points checked": f"{check.npoints:,}",
-            "To resubmit": f"{npoints:,}",
-            "Left out": f"{len(skipped_points):,}",
-            "Job arrays": f"{len(points_by_points_directory)}",
-            **settings,
-        },
+        {**summary, **settings},
         notes,
     )
 
     return user_input_restricted(
         ["yes", "no", "change"],
         f"Resubmit {npoints} point{'s' if npoints != 1 else ''} "
-        "(change to change the settings first): ",
+        "(type change to alter the calculation settings first): ",
         "no",
     )
 
@@ -444,12 +776,14 @@ class CheckCalculationsFunctions:
                 "points again. Only those points are submitted, so the ones which are "
                 "already done are not touched.",
             ],
+            check_sequence=True,
         )
 
     @staticmethod
     def resubmit_gaussian_calculations():
-        """Checks the selected PointsDirectory and submits the points which are not
-        finished back to Gaussian."""
+        """Checks the selected PointsDirectory, writes the points which are missing from
+        it again out of the trajectory it was made from, and submits both those and the
+        points which are not finished back to Gaussian."""
 
         check = make_check(GaussianCheck)
         if check is None:
@@ -466,11 +800,21 @@ class CheckCalculationsFunctions:
             "they have no .xyz and no .gjf file, so there is no geometry to calculate"
         )
 
+        # a point directory which was deleted is not there to be checked, so the points
+        # which are missing from the sequence of the set are found (and written again)
+        # separately from the ones which did not finish
+        restored_points = restore_points_missing_from_sequence(check.path)
+        for point in restored_points:
+            # a point directory is inside the PointsDirectory which holds it
+            points_by_points_directory.setdefault(point.path.parent, []).append(point)
+        for points in points_by_points_directory.values():
+            points.sort(key=lambda point: point.path.name)
+
         if not points_by_points_directory:
             nothing_to_resubmit(check, skipped_points, skipped_reason)
             return
 
-        (method, basis_set, ncores, overwrite_existing_gjfs) = (
+        method, basis_set, ncores, overwrite_existing_gjfs = (
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
@@ -499,6 +843,7 @@ class CheckCalculationsFunctions:
                 settings,
                 "Submit Gaussian Menu",
                 settings_changed,
+                nrestored=len(restored_points),
             )
 
             if answer != "change":
@@ -546,29 +891,42 @@ class CheckCalculationsFunctions:
 
         npoints = sum(len(points) for points in points_by_points_directory.values())
         ichor.hpc.global_variables.LOGGER.info(
-            f"Resubmitted {npoints} unfinished points of {check.path} to Gaussian."
+            f"Resubmitted {npoints} unfinished points of {check.path} to Gaussian "
+            f"({len(restored_points)} of them written again from a trajectory)."
         )
+
+        summary = {
+            "PointsDirectory": check.path,
+            "Geometries": f"{npoints:,}",
+            "Job arrays": f"{len(points_by_points_directory)}",
+            "Job IDs": ", ".join(
+                job_id.id if job_id else "not available" for job_id in job_ids
+            ),
+        }
+
+        notes = [
+            "Only the points which need calculating have been submitted, so the "
+            "wavefunctions which are already there are left alone. The wfn file of "
+            "a point which was cut short is overwritten when its job runs.",
+            "The jobs are queued, so they will not start immediately and this menu "
+            "does not wait for them. Check on them with your batch system's queue "
+            "command (e.g. qstat / squeue), then run the check again to see whether "
+            "they finished this time.",
+        ]
+
+        if restored_points:
+            summary["Made again from trajectory"] = f"{len(restored_points):,}"
+            notes.append(
+                f"{len(restored_points)} of the points submitted were missing from the "
+                "set and have been written again out of the trajectory it was made "
+                "from, so once their jobs have run the set holds a wavefunction for "
+                "every geometry it should have."
+            )
 
         print_summary_and_pause(
             "UNFINISHED GAUSSIAN POINTS RESUBMITTED",
-            {
-                "PointsDirectory": check.path,
-                "Geometries": f"{npoints:,}",
-                "Job arrays": f"{len(points_by_points_directory)}",
-                "Job IDs": ", ".join(
-                    job_id.id if job_id else "not available" for job_id in job_ids
-                ),
-                **settings,
-            },
-            [
-                "Only the points which were not finished have been submitted, so the "
-                "wavefunctions which are already there are left alone. The wfn file of "
-                "a point which was cut short is overwritten when its job runs.",
-                "The jobs are queued, so they will not start immediately and this menu "
-                "does not wait for them. Check on them with your batch system's queue "
-                "command (e.g. qstat / squeue), then run the check again to see whether "
-                "they finished this time.",
-            ],
+            {**summary, **settings},
+            notes,
         )
 
     @staticmethod
@@ -723,7 +1081,7 @@ check_calculations_menu_items = [
         CheckCalculationsFunctions.check_gaussian_calculations,
     ),
     FunctionItem(
-        "Resubmit failed Gaussian calculations",
+        "Resubmit failed and missing Gaussian calculations",
         CheckCalculationsFunctions.resubmit_gaussian_calculations,
     ),
     FunctionItem(

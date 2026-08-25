@@ -17,32 +17,56 @@ AVAILABLE_DATABASE_FORMATS = {
 }
 
 
-# What a database and a folder of processed csv files are called. Both sit next to the
-# PointsDirectory they were made from and are named after it, so they are told apart by
-# these prefixes rather than by which directory they are in.
-DATABASE_PREFIX = "db_"
-PROCESSED_CSVS_PREFIX = "csv_"
-# what the older stages called the folder, and what a dataset directory holds its copy
-# of the csv files under. A folder called only this says nothing about the system.
-PROCESSED_CSVS_FOLDER = "processed_csvs"
-PROCESSED_CSVS_SUFFIX = f"_{PROCESSED_CSVS_FOLDER}"
+# Where the two stages write, both next to the PointsDirectory they were made from:
+#
+#     4_PROPERTY_CALC/
+#         SYSTEM.pointsdir/
+#         database/
+#             SYSTEM.sqlite
+#         training_csvs/
+#             SYSTEM/
+#                 <one csv per atom and property>
+#
+# A folder each keeps a run directory tidy, and naming what is inside them after the
+# PointsDirectory means several systems processed into the same run directory neither
+# overwrite one another nor lose track of where they came from.
+DATABASE_DIRECTORY_NAME = "database"
+TRAINING_CSVS_DIRECTORY_NAME = "training_csvs"
 # what the write methods of PointsDirectory / PointsDirectoryParent add to the name they
 # are given, depending on the format and on whether it holds many PointsDirectory-ies
 DATABASE_NAME_SUFFIXES = ("_parent", "_json")
 
+# How the stages used to name what they wrote, which system_name_from_processed_csvs
+# still reads, so that csv folders made before this layout can be pointed at.
+DATABASE_PREFIX = "db_"
+PROCESSED_CSVS_PREFIX = "csv_"
+PROCESSED_CSVS_FOLDER = "processed_csvs"
+PROCESSED_CSVS_SUFFIX = f"_{PROCESSED_CSVS_FOLDER}"
 
-def database_name(points_dir_path: Path) -> str:
-    """Returns the name a database made from the given PointsDirectory is given, without
-    the suffix of whichever format it is written in.
 
-    This is what the write methods of ``PointsDirectory`` and ``PointsDirectoryParent``
-    are handed; they add the suffix of the format (and ``_parent``) themselves, which is
-    what :func:`database_path` works out.
+def database_directory(points_dir_path: Path) -> Path:
+    """Returns the directory the database of the given PointsDirectory is written into,
+    which sits next to the PointsDirectory itself.
 
     :param points_dir_path: Path to the PointsDirectory or parent to PointsDirectory-ies.
     """
 
-    return f"{DATABASE_PREFIX}{points_dir_path.stem}"
+    return points_dir_path.parent / DATABASE_DIRECTORY_NAME
+
+
+def database_write_name(points_dir_path: Path) -> Path:
+    """Returns the path a database made from the given PointsDirectory is written to,
+    without the suffix of whichever format it is written in.
+
+    This is what the write methods of ``PointsDirectory`` and ``PointsDirectoryParent``
+    are handed; they add the suffix of the format (and ``_parent``) themselves, which is
+    what :func:`database_path` works out. The name is that of the PointsDirectory without
+    its suffix, i.e. the name of the system.
+
+    :param points_dir_path: Path to the PointsDirectory or parent to PointsDirectory-ies.
+    """
+
+    return database_directory(points_dir_path) / points_dir_path.stem
 
 
 def system_name_from_database(db_path: Path) -> str:
@@ -51,7 +75,7 @@ def system_name_from_database(db_path: Path) -> str:
 
     The stages after the database are given the system name and put it in the names of the
     files they write, so what they are given has to name the system rather than the
-    database: WATER, not db_WATER_parent.
+    database: WATER, not WATER_parent.
 
     :param db_path: Path to the database (a .sqlite file or a json database directory).
     """
@@ -63,21 +87,17 @@ def system_name_from_database(db_path: Path) -> str:
     for suffix in DATABASE_NAME_SUFFIXES:
         system_name = system_name.removesuffix(suffix)
 
+    # databases written before this layout carried a prefix instead of sitting in a folder
     return system_name.removeprefix(DATABASE_PREFIX)
 
 
 def system_name_from_processed_csvs(csvs_path: Path) -> str:
-    """Returns the name of the system a folder of processed csv files holds, which is the
-    name of the folder with the parts naming it as a csv folder taken back off it (see
-    :func:`system_name_from_database`).
+    """Returns the name of the system a folder of csv files holds.
 
-    Only the name of the folder is looked at, never the directory that holds it: the csv
-    folder sits next to the PointsDirectory rather than inside it, so what holds it is a
-    directory of runs (4_PROPERTY_CALC, say) rather than anything naming the system.
-
-    The one exception is a folder called exactly ``processed_csvs``, which is what the
-    older stages wrote and what a dataset directory holds a copy under. Its name says
-    nothing about the system, so there the directory holding it is the best guess.
+    The csv files of a system are written into a folder named after it, inside the
+    training_csvs folder of the run, so it is the name of that folder which says what the
+    system is called. Folders written by the older stages are read as well: they were
+    named after the system too, with a prefix and a suffix around it.
 
     :param csvs_path: Path to the folder of per-atom csv files.
     """
@@ -87,6 +107,10 @@ def system_name_from_processed_csvs(csvs_path: Path) -> str:
     # the folder itself, then a couple of levels up, so that a per-property subfolder
     # inside the csv folder still gives the name of the system
     for path in (csvs_path, *list(csvs_path.parents)[:2]):
+
+        if path.parent.name == TRAINING_CSVS_DIRECTORY_NAME:
+            return path.name
+
         if not path.name.endswith(PROCESSED_CSVS_SUFFIX) and (
             path.name != PROCESSED_CSVS_FOLDER
         ):
@@ -101,8 +125,8 @@ def system_name_from_processed_csvs(csvs_path: Path) -> str:
         if system_name:
             return system_name
 
-        # a folder named only `processed_csvs`: what holds it is the PointsDirectory it
-        # was written inside, or the dataset directory it was copied into
+        # a folder named only processed_csvs: what holds it is the PointsDirectory it was
+        # written inside, or the dataset directory it was copied into
         return path.parent.name.split(".", 1)[0]
 
     # not named as a csv folder at all, so its own name is the best guess at the system
@@ -113,11 +137,11 @@ def database_path(points_dir_path: Path, database_format: str = "sqlite") -> Pat
     """Returns the path that the database made from the given PointsDirectory
     (or parent to PointsDirectory-ies) is written to.
 
-    The database is written next to the PointsDirectory rather than inside it. A
-    PointsDirectory holds one directory per point, so a database written inside one is a
-    single file among thousands of point directories with much the same name as it, which
-    makes it awkward to find (and to pass on to the stages which take the database as
-    their input).
+    The database is written into a database folder next to the PointsDirectory, rather
+    than inside the PointsDirectory itself. A PointsDirectory holds one directory per
+    point, so a database written inside one is a single file among thousands of point
+    directories with much the same name as it, which makes it awkward to find (and to pass
+    on to the stages which take the database as their input).
 
     :param points_dir_path: Path to the PointsDirectory or parent to PointsDirectory-ies
         the database is made from.
@@ -126,8 +150,8 @@ def database_path(points_dir_path: Path, database_format: str = "sqlite") -> Pat
         json.
     """
 
-    # the name of the database, in the directory the PointsDirectory itself sits in
-    stem_path = points_dir_path.parent / database_name(points_dir_path)
+    # the name of the database, in the database folder of the run
+    stem_path = database_write_name(points_dir_path)
     is_parent_directory_to_many_points_directories = single_or_many_points_directories(
         points_dir_path
     )
@@ -145,17 +169,22 @@ def database_path(points_dir_path: Path, database_format: str = "sqlite") -> Pat
 
 
 def processed_csvs_directory(db_path: Path) -> Path:
-    """Returns the directory that the processed csv files of a database are written to,
-    which sits next to the database itself and is named after the system.
+    """Returns the directory that the csv files of a database are written to, which is a
+    folder named after the system inside the training_csvs folder of the run.
 
     :param db_path: Path to the database (a .sqlite file or a json database directory).
     :return: The path of the directory holding the per-atom csv files.
     """
 
-    system_name = system_name_from_database(db_path)
+    # the run directory, which holds the database folder and the training_csvs folder
+    run_directory = db_path.parent
+    if run_directory.name == DATABASE_DIRECTORY_NAME:
+        run_directory = run_directory.parent
 
     return (
-        db_path.parent / f"{PROCESSED_CSVS_PREFIX}{system_name}{PROCESSED_CSVS_SUFFIX}"
+        run_directory
+        / TRAINING_CSVS_DIRECTORY_NAME
+        / system_name_from_database(db_path)
     )
 
 
@@ -178,8 +207,10 @@ def submit_make_database(
     )
 
     # the write methods add the suffix of the format to this themselves, so they are
-    # given the name without one (see `database_path`, which says where that ends up)
-    db_name = points_dir_path.parent / database_name(points_dir_path)
+    # given the name without one (see `database_path`, which says where that ends up).
+    # The folder it is written into has to be there first, as the job runs on a compute
+    # node with nothing else to make it
+    db_name = database_write_name(points_dir_path)
 
     # this is used to be able to call the respective methods from PointsDirectory
     # so that the same code below is used with the respective methods
@@ -195,6 +226,7 @@ def submit_make_database(
         text_list.append("from pathlib import Path")
         # needs to be a list comprehension because for loops do not work with -c flag
         # need to write each pointdirectory to a separate json directory
+        text_list.append(f"Path('{db_name.parent}').mkdir(parents=True, exist_ok=True)")
         text_list.append(f"pd_parent = Path('{str(points_dir_path.absolute())}')")
         text_list.append(
             f"PointsDirectoryParent(pd_parent).{str_database_method}('{db_name}')"
@@ -212,6 +244,7 @@ def submit_make_database(
         # it will get executed as `python -c python_code_to_execute...`
         text_list.append("from ichor.core.files import PointsDirectory")
         text_list.append("from pathlib import Path")
+        text_list.append(f"Path('{db_name.parent}').mkdir(parents=True, exist_ok=True)")
         text_list.append(f"pd = PointsDirectory('{str(points_dir_path.absolute())}')")
         text_list.append(f"pd.{str_database_method}('{db_name}')")
 

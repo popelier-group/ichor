@@ -149,6 +149,72 @@ def thin_xyz(
     return nwritten
 
 
+def read_geometries_from_xyz(
+    path: Union[str, Path], indices: Iterable[int]
+) -> Dict[int, Atoms]:
+    """Reads some of the geometries of a .xyz file, by their position in it.
+
+    The trajectory a set of points was made from can hold hundreds of thousands of
+    geometries, of which making a point directory which has gone missing needs only one,
+    so the geometries which were not asked for are stepped over as lines rather than
+    read. Like :func:`count_geometries_in_xyz`, this means the whole trajectory is never
+    held in memory, and the file is only read up to the last geometry which was asked
+    for.
+
+    :param path: Path to the .xyz file.
+    :param indices: The positions of the geometries to read, counted from 0.
+    :return: The geometries which were found, by their position in the file. A position
+        which is past the end of the file is not in it, so a caller which asked for one
+        geometry per missing point can see which of them the trajectory does not have.
+    """
+
+    wanted = set(indices)
+    geometries = {}
+
+    with open(path, "r") as f:
+
+        index = 0
+
+        while wanted:
+
+            line = f.readline()
+            # an empty string (rather than a newline) is the end of the file
+            if not line:
+                break
+            # blank lines between geometries are not part of a block
+            if not line.strip():
+                continue
+
+            natoms = int(line)
+            # the comment line, which is not part of the geometry itself
+            f.readline()
+
+            if index in wanted:
+
+                atoms = Atoms()
+                for _ in range(natoms):
+                    atom_line = f.readline()
+                    # the file ran out mid-geometry, so this block is not a geometry
+                    if not atom_line:
+                        return geometries
+                    # add *_ to work for extended xyz files, which have more on the line
+                    # than the x, y, z coordinates
+                    atom_type, x, y, z, *_ = atom_line.split()
+                    atoms.add(Atom(atom_type, float(x), float(y), float(z)))
+
+                geometries[index] = atoms
+                wanted.remove(index)
+
+            else:
+                for _ in range(natoms):
+                    if not f.readline():
+                        return geometries
+
+            index += 1
+
+    return geometries
+
+
 class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     """
     Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the

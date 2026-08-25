@@ -1,3 +1,8 @@
+from ichor.core.files.dl_poly.dl_poly_composition import (
+    infer_molecular_composition,
+    MolecularComposition,
+    MolecularSpecies,
+)
 from ichor.core.files.dl_poly.dl_poly_config import DlPolyConfig
 from ichor.core.files.dl_poly.dl_poly_control import (
     DlPolyControl,
@@ -24,4 +29,7 @@ __all__ = [
     "DlPolyMpoles",
     "FFLUXDirectory",
     "read_dlpoly_control_settings",
+    "MolecularComposition",
+    "MolecularSpecies",
+    "infer_molecular_composition",
 ]

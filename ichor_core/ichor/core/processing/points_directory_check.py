@@ -11,24 +11,43 @@ incomplete.
 The checks only look at the files themselves, i.e. no wavefunction or .int file is fully
 parsed (only the last line of a file is read, to see whether the program that wrote it
 got to the end), so that checking a PointsDirectory containing many thousands of points
-stays cheap.
+stays cheap. What a check spends its time on is the filesystem rather than the CPU, so
+each point directory is listed once with :func:`os.scandir` (see :class:`DirectoryScan`)
+and several points are looked at at a time (see ``nthreads``), which is what makes
+checking a large set on the shared filesystem of a cluster take seconds rather than
+minutes.
 """
 
 import os
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Sequence, Tuple, Union
+from typing import Dict, List, Sequence, Tuple, Type, Union
 
-from ichor.core.files import PointDirectory, PointsDirectory, PointsDirectoryParent
+from ichor.core.files import (
+    GaussianOutput,
+    GJF,
+    Int,
+    IntDirectory,
+    PointDirectory,
+    PointsDirectory,
+    WFN,
+    XTB,
+    XYZ,
+)
+from ichor.core.files.file import File
+from ichor.core.files.path_object import PathObject
 from ichor.core.useful_functions import single_or_many_points_directories
 from tqdm import tqdm
 
 __all__ = [
     "PointCheckResult",
+    "DirectoryScan",
     "PointsDirectoryCheck",
     "GaussianCheck",
     "AimallCheck",
-    "points_directories_in",
+    "point_directory_paths_in",
+    "points_directory_paths_in",
     "wfn_is_finished",
     "OK",
     "MISSING",
@@ -50,6 +69,23 @@ INT_FINAL_LINE = "AIMInt is Done."
 # how many names of atoms/files are named in a problem before it is cut short, so that
 # the report of a system with many atoms stays readable
 MAX_NAMES_IN_PROBLEM = 6
+
+# how many points are looked at at the same time. Checking a point is waiting on the
+# filesystem rather than on the CPU (one listing of the point directory, and the last
+# line of each of the files which were found in it), and on the shared filesystem of a
+# cluster every one of those waits is a round trip over the network, so a check gets
+# through the points many times quicker when it has more than one of them outstanding at
+# a time. Threads are what this wants rather than processes, as a thread waiting on a
+# read is not holding the GIL and there is nothing to send back and forth.
+DEFAULT_NTHREADS = 16
+
+# the geometry files which reading a PointsDirectory turns into point directories
+GEOMETRY_FILETYPES = {XYZ.get_filetype(), GJF.get_filetype(), XTB.get_filetype()}
+
+# how many points of a PointsDirectory are looked in for the atoms of the system before
+# giving up on finding them. The atoms are read from the first point which has a geometry
+# file that can be read, which is the first point of the set unless something is wrong
+MAX_POINTS_READ_FOR_ATOM_NAMES = 20
 
 
 @dataclass
@@ -76,21 +112,76 @@ class PointCheckResult:
         return self.status == OK
 
 
-def _as_list(attribute) -> list:
-    """Returns the contents of an AnnotatedDirectory attribute as a list.
+def _scandir(path: Path) -> List[os.DirEntry]:
+    """Lists a directory, returning the entries of one :func:`os.scandir` of it.
 
-    Contents of an ``AnnotatedDirectory`` (such as a PointDirectory) are
-    ``OptionalContent`` when they are not on disk, a single instance when one file
-    matches and a list of instances when several do, so this flattens all three cases
-    into a list.
+    Unlike ``Path.iterdir``, the entries carry what the operating system returned with
+    the listing itself, so asking whether an entry is a directory does not cost another
+    trip to the filesystem.
+
+    :param path: Path of the directory to list.
+    :return: The entries in it, or an empty list if it cannot be listed, i.e. it is not
+        there or it cannot be read.
     """
 
-    if not attribute:
+    try:
+        with os.scandir(path) as entries:
+            return list(entries)
+    except OSError:
         return []
-    if isinstance(attribute, list):
-        return attribute
 
-    return [attribute]
+
+class DirectoryScan:
+    """The contents of one directory, from a single listing of it.
+
+    A check needs to know which files a point directory holds and, for some of them, how
+    they end. Reading it as a :class:`PointDirectory` instead builds a file object for
+    every file in it (and, for the atomic files, an ``IntDirectory`` holding an ``Int``
+    per atom on top of that), which a check has no use for. For a set of many thousands
+    of points, doing without that is most of the time a check used to take.
+
+    Which files are of which kind is still decided by the ``check_path`` of the classes
+    which wrap them, so a check finds the same files in a directory as the rest of ichor
+    would.
+
+    :param path: Path of the directory to scan.
+    """
+
+    def __init__(self, path: Union[str, Path]):
+
+        self.path = Path(path)
+        self.name = self.path.name
+        self.file_paths: List[Path] = []
+        self.directory_paths: List[Path] = []
+
+        for entry in _scandir(self.path):
+            if entry.is_dir():
+                self.directory_paths.append(Path(entry.path))
+            else:
+                self.file_paths.append(Path(entry.path))
+
+    def files(self, file_class: Type[File]) -> List[Path]:
+        """The paths of the files which are of a kind, e.g. the .wfn files.
+
+        :param file_class: The class which wraps that kind of file, e.g. ``WFN``.
+        """
+        return [path for path in self.file_paths if file_class.check_path(path)]
+
+    def directories(self, directory_class: Type[PathObject]) -> List[Path]:
+        """The paths of the sub-directories which are of a kind, e.g. the directories of
+        atomic files.
+
+        :param directory_class: The class which wraps that kind of directory, e.g.
+            ``IntDirectory``.
+        """
+        return [
+            path for path in self.directory_paths if directory_class.check_path(path)
+        ]
+
+    def files_with_suffix(self, *suffixes: str) -> List[Path]:
+        """The paths of the files whose suffix is one of the given ones, for the files
+        which no class of ichor wraps (the .sh and .mog files AIMAll leaves behind)."""
+        return [path for path in self.file_paths if path.suffix in suffixes]
 
 
 def _last_line(path: Path, nbytes: int = 1024) -> str:
@@ -125,6 +216,15 @@ def _ends_with(path: Path, final_line: str) -> bool:
     return final_line in _last_line(path)
 
 
+def _is_empty(path: Path) -> bool:
+    """Whether a file which is on disk has nothing in it."""
+
+    try:
+        return path.stat().st_size == 0
+    except OSError:
+        return False
+
+
 def wfn_is_finished(path: Union[str, Path]) -> bool:
     """Whether a .wfn file was written all the way to the end by Gaussian, i.e. whether
     it ends with the total energy line.
@@ -152,19 +252,62 @@ def _shorten(names: Sequence[str]) -> str:
     return ", ".join(names)
 
 
-def points_directories_in(path: Union[str, Path]) -> List[PointsDirectory]:
-    """Returns the PointsDirectory-ies at a path, which can either be one
+def points_directory_paths_in(path: Union[str, Path]) -> List[Path]:
+    """Returns the paths of the PointsDirectory-ies at a path, which can either be one
     PointsDirectory or a parent directory containing many of them.
 
     :param path: Path to a PointsDirectory or PointsDirectoryParent-like directory.
+    :raises FileNotFoundError: If the path is not a directory on disk.
     """
 
     path = Path(path)
 
-    if single_or_many_points_directories(path):
-        return list(PointsDirectoryParent(path))
+    if not path.is_dir():
+        raise FileNotFoundError(
+            f"{path} is not a directory, so there are no points in it to check."
+        )
 
-    return [PointsDirectory(path)]
+    if single_or_many_points_directories(path):
+        return sorted(
+            (p for p in path.iterdir() if PointsDirectory.check_path(p)),
+            key=lambda p: p.name,
+        )
+
+    return [path]
+
+
+def point_directory_paths_in(points_directory_path: Union[str, Path]) -> List[Path]:
+    """Returns the paths of the point directories of one PointsDirectory, in the order
+    the points are named in.
+
+    :param points_directory_path: Path of the PointsDirectory.
+    """
+
+    points_directory_path = Path(points_directory_path)
+
+    def point_paths(entries: List[os.DirEntry]) -> List[Path]:
+        return [
+            Path(entry.path)
+            for entry in entries
+            if entry.name.endswith(PointDirectory._suffix) and entry.is_dir()
+        ]
+
+    entries = _scandir(points_directory_path)
+    paths = point_paths(entries)
+
+    # a set which has just been written out of a trajectory holds one loose geometry file
+    # per point rather than point directories, and it is reading it as a PointsDirectory
+    # which makes a point directory of each of them (see PointsDirectory._parse). That is
+    # the one thing which cannot be done by looking, so a set which is still in that
+    # state is read in the usual way before it is checked.
+    if any(
+        Path(entry.name).suffix in GEOMETRY_FILETYPES and not entry.is_dir()
+        for entry in entries
+    ):
+        PointsDirectory(points_directory_path)
+        paths = point_paths(_scandir(points_directory_path))
+
+    return sorted(paths, key=lambda p: p.name)
 
 
 class PointsDirectoryCheck:
@@ -178,6 +321,10 @@ class PointsDirectoryCheck:
         written to the end (i.e. that the program which wrote them was not cut short),
         defaults to True. This reads the last line of every file, so it is slower than
         only checking that the files exist.
+    :param nthreads: How many points to look at at the same time, defaults to
+        :data:`DEFAULT_NTHREADS`. Checking a point is waiting on the filesystem, so
+        having several of them outstanding at a time is what makes a check of a large set
+        quick; pass 1 to check the points one after the other.
     """
 
     # name of the calculation being checked, used in the report
@@ -187,14 +334,16 @@ class PointsDirectoryCheck:
         self,
         path: Union[str, Path],
         check_file_contents: bool = True,
+        nthreads: int = DEFAULT_NTHREADS,
     ):
 
         self.path = Path(path)
         self.check_file_contents = check_file_contents
-        self.points_directories = points_directories_in(self.path)
+        self.nthreads = max(1, nthreads)
+        self.points_directory_paths = points_directory_paths_in(self.path)
         # more than one PointsDirectory means point names can repeat, so the points are
         # reported together with the PointsDirectory they are in
-        self._many_points_directories = len(self.points_directories) > 1
+        self._many_points_directories = len(self.points_directory_paths) > 1
 
         self.results: List[PointCheckResult] = []
         self.check()
@@ -209,35 +358,65 @@ class PointsDirectoryCheck:
         self.results = []
 
         # the points of every PointsDirectory being checked, gathered first so that one
-        # progress bar covers the lot. Checking a large set means reading a file or two
-        # in each of many thousands of directories, which takes long enough on a busy
-        # filesystem to look like nothing is happening
-        points = [
-            (points_directory, point)
-            for points_directory in self.points_directories
-            for point in points_directory
-        ]
-
-        for points_directory, point in tqdm(
-            points, desc=f"Checking {self.calculation_name} output", unit="point"
-        ):
-            status, problems = self.check_point(point)
-            self.results.append(
-                PointCheckResult(
-                    name=point.path.name,
-                    path=point.path,
-                    points_directory=points_directory.path.name,
-                    status=status,
-                    problems=problems,
-                )
+        # progress bar covers the lot. This is one listing per PointsDirectory, so it is
+        # quick even for a set of many thousands of points, unlike the walk over the
+        # points themselves which follows it
+        points = []
+        for points_directory_path in self.points_directory_paths:
+            point_paths = point_directory_paths_in(points_directory_path)
+            self.prepare(points_directory_path, point_paths)
+            points.extend(
+                (points_directory_path, point_path) for point_path in point_paths
             )
+
+        def check_one(point: Tuple[Path, Path]) -> PointCheckResult:
+            points_directory_path, point_path = point
+            status, problems = self.check_point(DirectoryScan(point_path))
+            return PointCheckResult(
+                name=point_path.name,
+                path=point_path,
+                points_directory=points_directory_path.name,
+                status=status,
+                problems=problems,
+            )
+
+        progress = tqdm(
+            total=len(points),
+            desc=f"Checking {self.calculation_name} output",
+            unit="point",
+        )
+
+        try:
+            if self.nthreads > 1 and len(points) > 1:
+                with ThreadPoolExecutor(max_workers=self.nthreads) as executor:
+                    # map hands back the results in the order the points were given in,
+                    # so they are in the order the points are named in however the
+                    # threads happened to get through them
+                    for result in executor.map(check_one, points):
+                        self.results.append(result)
+                        progress.update()
+            else:
+                for point in points:
+                    self.results.append(check_one(point))
+                    progress.update()
+        finally:
+            progress.close()
 
         return self.results
 
-    def check_point(self, point: PointDirectory) -> Tuple[str, List[str]]:
+    def prepare(self, points_directory_path: Path, point_paths: List[Path]) -> None:
+        """Hook which is run once for each PointsDirectory, before any of its points are
+        checked. Subclasses use it for whatever is the same for every point of a set, so
+        that it is not worked out again for each of them.
+
+        :param points_directory_path: Path of the PointsDirectory about to be checked.
+        :param point_paths: The paths of its point directories.
+        """
+
+    def check_point(self, point: DirectoryScan) -> Tuple[str, List[str]]:
         """Checks a single point.
 
-        :param point: The PointDirectory to check.
+        :param point: The listed contents of the point directory to check.
         :return: The status of the point and the list of problems found with it.
         """
         raise NotImplementedError(
@@ -354,22 +533,23 @@ class GaussianCheck(PointsDirectoryCheck):
         PointsDirectory-ies.
     :param check_file_contents: Whether to also check that each .wfn file ends with the
         total energy line Gaussian finishes it with, defaults to True.
+    :param nthreads: How many points to look at at the same time.
     """
 
     calculation_name = "GAUSSIAN"
 
-    def check_point(self, point: PointDirectory) -> Tuple[str, List[str]]:
+    def check_point(self, point: DirectoryScan) -> Tuple[str, List[str]]:
         """Checks that one point has a (finished) wavefunction file."""
 
         problems = []
-        wfns = _as_list(point.wfn)
+        wfns = point.files(WFN)
 
         if not wfns:
-            if not _as_list(point.gjf):
+            if not point.files(GJF):
                 problems.append(
                     "no .wfn and no .gjf file, so the point has not been set up for Gaussian"
                 )
-            elif _as_list(point.gaussian_output):
+            elif point.files(GaussianOutput):
                 problems.append(
                     "no .wfn file, but a Gaussian output file is there, so look in it for errors"
                 )
@@ -380,16 +560,16 @@ class GaussianCheck(PointsDirectoryCheck):
 
         if len(wfns) > 1:
             problems.append(
-                f"{len(wfns)} .wfn files found ({_shorten([w.path.name for w in wfns])}), "
+                f"{len(wfns)} .wfn files found ({_shorten([w.name for w in wfns])}), "
                 "only one is expected"
             )
 
         for wfn in wfns:
-            if wfn.path.stat().st_size == 0:
-                problems.append(f"{wfn.path.name} is empty")
-            elif self.check_file_contents and not wfn_is_finished(wfn.path):
+            if _is_empty(wfn):
+                problems.append(f"{wfn.name} is empty")
+            elif self.check_file_contents and not wfn_is_finished(wfn):
                 problems.append(
-                    f"{wfn.path.name} does not end with a total energy line, "
+                    f"{wfn.name} does not end with a total energy line, "
                     "so Gaussian did not finish writing it"
                 )
 
@@ -420,35 +600,66 @@ class AimallCheck(PointsDirectoryCheck):
         PointsDirectory-ies.
     :param check_file_contents: Whether to also check that each .int file ends with the
         line AIMAll finishes it with, defaults to True.
+    :param nthreads: How many points to look at at the same time.
     """
 
     calculation_name = "AIMALL"
 
-    @staticmethod
-    def expected_atom_names(point: PointDirectory) -> List[str]:
-        """The names of the atoms an .int file is expected for, read from the geometry of
-        the point. Returns an empty list if the point has no geometry file which can be
-        read, in which case the .int files cannot be checked against the atoms."""
+    def __init__(self, *args, **kwargs):
 
-        for geometry_file in _as_list(point.xyz) + _as_list(point.gjf):
-            try:
-                return [atom.name for atom in geometry_file.atoms]
-            # a geometry file which is there but cannot be read is a problem for the
-            # Gaussian side of things, here it only means the atoms are unknown
-            except Exception:
-                continue
+        # the atoms an .int file is expected for, by PointsDirectory. Every point of a
+        # PointsDirectory is a geometry of the same system, so these are read once for
+        # the whole set rather than once per point (see prepare)
+        self._atom_names: Dict[Path, List[str]] = {}
+        super().__init__(*args, **kwargs)
+
+    @staticmethod
+    def expected_atom_names(point_paths: Sequence[Path]) -> List[str]:
+        """The names of the atoms an .int file is expected for, read from the geometry of
+        the first of the given points which has one that can be read.
+
+        Reading a geometry means parsing a file in full, which is more work than the rest
+        of checking a point put together, so it is done once for the set rather than once
+        for each point of it: every point of a PointsDirectory is a geometry of the same
+        system, so they all have the same atoms.
+
+        :param point_paths: The paths of the point directories of one PointsDirectory.
+        :return: The names of the atoms, or an empty list if no geometry which could be
+            read was found, in which case the .int files cannot be checked against the
+            atoms of the system.
+        """
+
+        for point_path in point_paths[:MAX_POINTS_READ_FOR_ATOM_NAMES]:
+
+            point = DirectoryScan(point_path)
+            geometry_files = [(XYZ, path) for path in point.files(XYZ)]
+            geometry_files += [(GJF, path) for path in point.files(GJF)]
+
+            for geometry_class, geometry_path in geometry_files:
+                try:
+                    return [atom.name for atom in geometry_class(geometry_path).atoms]
+                # a geometry file which is there but cannot be read is a problem for the
+                # Gaussian side of things, here it only means trying the next one
+                except Exception:
+                    continue
 
         return []
 
-    def check_point(self, point: PointDirectory) -> Tuple[str, List[str]]:
+    def prepare(self, points_directory_path: Path, point_paths: List[Path]) -> None:
+        """Reads the atoms of the system which the PointsDirectory holds geometries of,
+        as those are the atoms every one of its points needs an .int file for."""
+
+        self._atom_names[points_directory_path] = self.expected_atom_names(point_paths)
+
+    def check_point(self, point: DirectoryScan) -> Tuple[str, List[str]]:
         """Checks that one point has an atomicfiles directory holding a finished .int
         file for every atom."""
 
         problems = []
-        int_directories = _as_list(point.ints)
+        int_directories = point.directories(IntDirectory)
 
         if not int_directories:
-            if not _as_list(point.wfn):
+            if not point.files(WFN):
                 problems.append(
                     "no _atomicfiles directory and no .wfn file, so AIMAll had nothing to run on"
                 )
@@ -462,17 +673,20 @@ class AimallCheck(PointsDirectoryCheck):
         if len(int_directories) > 1:
             problems.append(
                 f"{len(int_directories)} _atomicfiles directories found "
-                f"({_shorten([d.path.name for d in int_directories])}), "
+                f"({_shorten([d.name for d in int_directories])}), "
                 "only one is expected"
             )
 
-        expected_atom_names = self.expected_atom_names(point)
+        # a point directory is inside the PointsDirectory whose atoms were read
+        expected_atom_names = self._atom_names.get(point.path.parent, [])
 
-        for int_directory in int_directories:
+        for int_directory_path in int_directories:
 
-            int_files = _as_list(int_directory.ints)
+            int_directory = DirectoryScan(int_directory_path)
             # AIMAll names the .int file of an atom after the atom, e.g. o1.int for O1
-            int_files_by_atom = {f.path.stem.capitalize(): f for f in int_files}
+            int_files_by_atom = {
+                path.stem.capitalize(): path for path in int_directory.files(Int)
+            }
 
             if expected_atom_names:
                 missing_atoms = [
@@ -485,16 +699,15 @@ class AimallCheck(PointsDirectoryCheck):
                         f"no .int file for {len(missing_atoms)} of "
                         f"{len(expected_atom_names)} atoms ({_shorten(missing_atoms)})"
                     )
-            elif not int_files:
+            elif not int_files_by_atom:
                 problems.append("the _atomicfiles directory holds no .int files")
 
             # AIMAll writes a .mog file while it integrates an atom and deletes it once
             # that atom is done, so one left behind means it never got there
             unfinished_atoms = sorted(
                 {
-                    f.stem.capitalize()
-                    for f in int_directory.path.iterdir()
-                    if f.suffix in (".mog", ".mog2")
+                    path.stem.capitalize()
+                    for path in int_directory.files_with_suffix(".mog", ".mog2")
                 }
             )
             if unfinished_atoms:
@@ -506,8 +719,8 @@ class AimallCheck(PointsDirectoryCheck):
             if self.check_file_contents:
                 truncated_atoms = sorted(
                     atom_name
-                    for atom_name, int_file in int_files_by_atom.items()
-                    if not _ends_with(int_file.path, INT_FINAL_LINE)
+                    for atom_name, int_path in int_files_by_atom.items()
+                    if not _ends_with(int_path, INT_FINAL_LINE)
                 )
                 if truncated_atoms:
                     problems.append(
@@ -517,7 +730,7 @@ class AimallCheck(PointsDirectoryCheck):
 
         # AIMAll deletes the submission script it is given once it finishes, so one left
         # behind in the point directory means it crashed
-        leftover_scripts = [f.name for f in point.path.iterdir() if f.suffix == ".sh"]
+        leftover_scripts = [path.name for path in point.files_with_suffix(".sh")]
         if leftover_scripts:
             problems.append(
                 f"a .sh file is left in the point directory "

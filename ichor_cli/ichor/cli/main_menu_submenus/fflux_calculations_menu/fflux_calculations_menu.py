@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from consolemenu.items import SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.fflux_calculations_menu.fflux_calculations_submenus import (  # noqa: E501
+    dl_fflux_condensed_menu,
+    DL_FFLUX_CONDENSED_MENU_DESCRIPTION,
     dl_fflux_menu,
     DL_FFLUX_MENU_DESCRIPTION,
     fflux_api_menu,
@@ -45,6 +47,11 @@ fflux_calculations_menu_items = [
     ),
     SubmenuItem(
         DL_FFLUX_MENU_DESCRIPTION.title, dl_fflux_menu, fflux_calculations_menu
+    ),
+    SubmenuItem(
+        DL_FFLUX_CONDENSED_MENU_DESCRIPTION.title,
+        dl_fflux_condensed_menu,
+        fflux_calculations_menu,
     ),
 ]
 

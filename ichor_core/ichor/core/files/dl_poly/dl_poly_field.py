@@ -6,6 +6,10 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.calculators import default_connectivity_calculator
 from ichor.core.calculators.geometry_calculator import get_internal_feature_indices
 from ichor.core.common.constants import dlpoly_weights
+from ichor.core.files.dl_poly.dl_poly_composition import (
+    MolecularComposition,
+    MolecularSpecies,
+)
 from ichor.core.files.file import WriteFile
 
 
@@ -119,6 +123,30 @@ class ConnectedAtoms(Atoms):
 
 
 class DlPolyField(WriteFile):
+    """Write out a DL_POLY FIELD file, which declares the molecular types of the system.
+
+    :param system_name: The name of the chemical system, which names the (single) molecular
+        type. Ignored (in favour of the name of each species) when a ``composition`` is given.
+    :param atoms: The atoms of one molecule of the system. Ignored (in favour of each
+        species' own template) when a ``composition`` is given.
+    :param path: The path to the FIELD file, defaults to ``Path("FIELD")``.
+    :param nummols: The number of molecules of the (single) molecular type, defaults to 1.
+        Ignored (in favour of each species' own count) when a ``composition`` is given.
+    :param multipolar: The highest multipole interaction order (L') for FFLUX
+        electrostatics, written as a ``Multipolar <L'>`` line. ``None`` (default) omits the
+        line, i.e. a pure-IQA run.
+    :param all_pairs_bonds: Whether to list every intramolecular atom pair as a
+        (zero-constant) bond rather than just the chemically bonded pairs plus angles and
+        dihedrals, see below.
+    :param composition: The molecular composition of the system (see
+        :class:`ichor.core.files.dl_poly.MolecularComposition`), used when it holds more than
+        one kind of molecule and/or many copies of them - as a condensed phase box out of
+        Packmol does. One molecular type is then declared per species, each with its own
+        name, its own ``nummols`` count and the bonded terms of a *single* molecule of it
+        (which is what DL_POLY expects: the terms are declared once and applied to every copy
+        of the molecule). If ``None`` (default), a single molecular type is declared from
+        ``system_name``, ``atoms`` and ``nummols``.
+    """
 
     _filetype = ""
 
@@ -130,6 +158,7 @@ class DlPolyField(WriteFile):
         nummols=1,
         multipolar: Optional[int] = None,
         all_pairs_bonds: bool = False,
+        composition: Optional[MolecularComposition] = None,
     ):
 
         super().__init__(path)
@@ -137,6 +166,7 @@ class DlPolyField(WriteFile):
         self.system_name = system_name
         self.atoms = atoms
         self.nummols = nummols
+        self.composition = composition
         # highest multipole interaction order (L') for FFLUX electrostatics, written as a
         # "Multipolar <L'>" line. None (default) omits the line, i.e. a pure-IQA run.
         self.multipolar = multipolar
@@ -184,37 +214,64 @@ class DlPolyField(WriteFile):
     # def _read_file(self):
     #     ...
 
-    def _write_file(self, path: Path):
+    @property
+    def molecular_types(self) -> List[MolecularSpecies]:
+        """The molecular types declared in the FIELD file: the species of the composition
+        when there is one, otherwise the single type built from ``system_name``, ``atoms``
+        and ``nummols``."""
+        if self.composition is not None:
+            return self.composition.species
+        return [
+            MolecularSpecies(
+                system_name=self.system_name,
+                atoms=self.atoms,
+                nummols=self.nummols,
+            )
+        ]
+
+    def _all_pairs_bonds(self, species: MolecularSpecies) -> List[tuple]:
+        """Every pair of atoms of one molecular type as a zero-constant "bond", so that
+        DL_POLY excludes all intra-molecular pairs from the nonbonded (multipole)
+        electrostatics while inter-molecular pairs stay active. No angle or dihedral terms
+        are needed since every intramolecular pair is already covered by a bond.
+
+        With a composition each molecular type is a single molecule, so this is simply every
+        pair of it. Without one, ``atoms`` may hold several molecules (e.g. a water n-mer
+        making up one molecular type), so the pairs are taken within each molecule
+        (connected component) only, keeping the inter-molecular electrostatics intact.
+        """
+        if self.composition is not None:
+            components = [list(range(species.natoms))]
+        else:
+            components = self._molecule_atom_indices()
+
+        bonds = []
+        for component in components:
+            for a in range(len(component)):
+                for b in range(a + 1, len(component)):
+                    # DL_POLY atom indices are 1-based
+                    bonds.append((component[a] + 1, component[b] + 1))
+        bonds.sort()
+        return bonds
+
+    def _molecular_type_block(self, species: MolecularSpecies) -> str:
+        """The FIELD block declaring one molecular type: its name, how many copies of it the
+        system holds, its atoms and its (zero-constant) bonded terms. The terms are declared
+        for a single molecule of the type; DL_POLY applies them to every copy."""
 
         if self.all_pairs_bonds:
-            # every pair WITHIN each molecule (connected component) as a zero-constant "bond"
-            # -> DL_POLY excludes all intra-molecular pairs from the nonbonded (multipole)
-            # electrostatics, while inter-molecular pairs stay active. No angle or dihedral
-            # terms are needed since every intramolecular pair is already covered by a bond.
-            bonds = []
-            for component in self._molecule_atom_indices():
-                for a in range(len(component)):
-                    for b in range(a + 1, len(component)):
-                        # DL_POLY atom indices are 1-based
-                        bonds.append((component[a] + 1, component[b] + 1))
-            bonds.sort()
+            bonds = self._all_pairs_bonds(species)
             angles = []
             dihedrals = []
         else:
-            bonds, angles, dihedrals = get_internal_feature_indices(self.atoms)
+            bonds, angles, dihedrals = get_internal_feature_indices(species.atoms)
 
         str_to_write = ""
 
-        str_to_write += "DL_FIELD v3.00\n"
-        str_to_write += "Units kJ/mol\n"
-        # multipole electrostatics interaction order (omitted for a pure-IQA run)
-        if self.multipolar is not None:
-            str_to_write += f"Multipolar {self.multipolar}\n"
-        str_to_write += "Molecular types 1\n"
-        str_to_write += f"{self.system_name}\n"
-        str_to_write += f"nummols {self.nummols}\n"
-        str_to_write += f"atoms {len(self.atoms)}\n"
-        for atom in self.atoms:
+        str_to_write += f"{species.system_name}\n"
+        str_to_write += f"nummols {species.nummols}\n"
+        str_to_write += f"atoms {species.natoms}\n"
+        for atom in species.atoms:
             #  Atom Type      Atomic Mass                    Charge Repeats Frozen(0=NotFrozen)
             str_to_write += (
                 f"{atom.type}\t\t{dlpoly_weights[atom.type]:.7f}     0.0   1   0\n"
@@ -231,6 +288,24 @@ class DlPolyField(WriteFile):
             for i, j, k, l in dihedrals:
                 str_to_write += f"harm {i} {j} {k} {l} 0.0 0.0\n"
         str_to_write += "finish\n"
+
+        return str_to_write
+
+    def _write_file(self, path: Path):
+
+        molecular_types = self.molecular_types
+
+        str_to_write = ""
+
+        str_to_write += "DL_FIELD v3.00\n"
+        str_to_write += "Units kJ/mol\n"
+        # multipole electrostatics interaction order (omitted for a pure-IQA run)
+        if self.multipolar is not None:
+            str_to_write += f"Multipolar {self.multipolar}\n"
+        str_to_write += f"Molecular types {len(molecular_types)}\n"
+        # one block per molecular type, in the order DL_POLY reads the CONFIG atoms into
+        for species in molecular_types:
+            str_to_write += self._molecular_type_block(species)
         str_to_write += "close\n"
 
         return str_to_write

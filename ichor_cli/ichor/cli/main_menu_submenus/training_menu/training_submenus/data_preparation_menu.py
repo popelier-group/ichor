@@ -328,8 +328,8 @@ class SubmitDataPrepFunctions:
             print(
                 "No csv files were found in that directory, so the number of geometries "
                 "to split is not known. The input directory is the folder of per-atom "
-                "csv files made by 'Make csvs from database' (usually a "
-                "*_processed_csvs folder)."
+                "csv files written by the point calculation menu: the folder named after "
+                "the system inside training_csvs."
             )
 
     @staticmethod
@@ -483,10 +483,9 @@ class SubmitDataPrepFunctions:
                 [
                     "No csv files were found in the directory selected, so there is "
                     "nothing to split into training, validation and test sets.",
-                    "The input directory is the folder of per-atom csv files made by "
-                    "'Make csvs from database' in the points directory menu (usually a "
-                    "*_processed_csvs folder), not the database or PointsDirectory "
-                    "itself.",
+                    "The input directory is the folder of per-atom csv files written "
+                    "by the point calculation menu: the folder named after the system "
+                    "inside training_csvs, not the database or PointsDirectory itself.",
                 ],
             )
             return

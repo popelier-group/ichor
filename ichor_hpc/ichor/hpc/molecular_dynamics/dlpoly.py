@@ -3,7 +3,7 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Sequence, Tuple, Union
 
 import ichor.hpc.global_variables
 import numpy as np
@@ -16,6 +16,8 @@ from ichor.core.files.dl_poly import (
     DlPolyFFLUXInput,
     DlPolyField,
     DlPolyMpoles,
+    infer_molecular_composition,
+    MolecularComposition,
 )
 from ichor.core.models import Models
 from ichor.hpc.batch_system.jobs import JobID
@@ -48,6 +50,187 @@ SINGLE_POINT_DIRECTORY_PREFIX = "POINT"
 # evaluates the energies and forces of the configuration it was given and stops without
 # ever moving an atom
 SINGLE_POINT_NSTEPS = 0
+
+# the real-space cutoff (in Angstrom) a condensed phase run uses when it is not given one.
+# Unlike a single molecule in a large empty box - where the cutoff has to be large enough to
+# hold the whole molecule and there is nothing else around to interact with - a periodic box
+# is full of neighbours, so the cutoff is the usual condensed phase compromise between how
+# much of the surroundings each atom sees and how long a timestep takes. It is brought down
+# to half the cell when the box is smaller than twice this.
+CONDENSED_PHASE_DEFAULT_CUTOFF = 10.0
+
+# how much room (in Angstrom) to leave between the cutoff and half the cell width, so that
+# rounding a cutoff down to fit a box does not land exactly on DL_POLY's limit
+CELL_CUTOFF_MARGIN = 0.5
+
+
+def _largest_molecule_diameter(
+    atoms, composition: Optional[MolecularComposition]
+) -> float:
+    """Returns the largest distance between two atoms of the same molecule, i.e. how wide
+    the widest molecule of the system is.
+
+    FFLUX builds each molecule's intramolecular interaction cluster within the real-space
+    cutoff and, if any atom of it lies outside, prints the offending distance against the
+    cutoff and calls MPI_ABORT - so this is the smallest cutoff the system can be run with.
+    Without a composition the whole geometry is one molecule; with one, only the atoms
+    within each species' molecule count (atoms of *different* molecules being far apart is
+    exactly what a condensed phase box is).
+    """
+
+    if composition is None:
+        molecules = [atoms]
+    else:
+        molecules = [species.atoms for species in composition.species]
+
+    diameter = 0.0
+    for molecule in molecules:
+        coordinates = np.array(molecule.coordinates, dtype=float)
+        differences = coordinates[:, None, :] - coordinates[None, :, :]
+        diameter = max(diameter, float(np.sqrt((differences**2).sum(axis=-1)).max()))
+
+    return diameter
+
+
+def _resolve_cell_size_and_cutoff(
+    atoms,
+    composition: Optional[MolecularComposition],
+    cell_size: float,
+    cutoff: Optional[float],
+) -> Tuple[float, float]:
+    """Works out the cell size and real-space cutoff a run is set up with. DL_POLY requires
+    the cutoff to be at most half the (cubic) cell width, and FFLUX requires it to be at
+    least as large as the widest molecule - which of the two gives way depends on what the
+    cell size means:
+
+    - Without a composition the geometry is a single molecule placed in an otherwise empty
+      box, whose size is arbitrary: the cutoff is sized to hold the molecule and the cell is
+      grown around it if need be.
+    - With one the geometry is a box which was packed at a chosen density, so its size is
+      the whole point and must not be touched. The cutoff is fitted to the box instead, and
+      a box too small to hold even a single molecule is an error rather than something to
+      quietly work around.
+
+    :return: The cell size and cutoff to set the run up with.
+    """
+
+    molecule_diameter = _largest_molecule_diameter(atoms, composition)
+    # a margin so that the outermost atoms of a molecule are comfortably inside the cutoff
+    # rather than right on it
+    minimum_cutoff = math.ceil(molecule_diameter) + 2.0
+
+    if composition is None:
+        # the cutoff holds the whole molecule (never going below the 8.0 A which is small
+        # for a cutoff anyway), and the cell is grown to at least twice it
+        if cutoff is None:
+            cutoff = max(8.0, minimum_cutoff)
+        return max(cell_size, 2.0 * cutoff + 2.0), cutoff
+
+    largest_allowed = cell_size / 2.0 - CELL_CUTOFF_MARGIN
+
+    if minimum_cutoff > largest_allowed:
+        raise ValueError(
+            f"The simulation cell is {cell_size} Angstrom wide, which allows a real-space "
+            f"cutoff of at most {largest_allowed:.1f} Angstrom, but the largest molecule of "
+            f"the system is {molecule_diameter:.1f} Angstrom across and so needs a cutoff "
+            f"of at least {minimum_cutoff:.1f} Angstrom. Use the box size the geometry was "
+            "actually packed into, or pack a larger one."
+        )
+
+    if cutoff is None:
+        cutoff = min(CONDENSED_PHASE_DEFAULT_CUTOFF, largest_allowed)
+    elif cutoff > largest_allowed:
+        ichor.hpc.global_variables.LOGGER.warning(
+            f"A real-space cutoff of {cutoff} Angstrom is more than half of the "
+            f"{cell_size} Angstrom cell, which DL_POLY does not allow; using "
+            f"{largest_allowed:.1f} Angstrom instead."
+        )
+        cutoff = largest_allowed
+    elif cutoff < minimum_cutoff:
+        ichor.hpc.global_variables.LOGGER.warning(
+            f"A real-space cutoff of {cutoff} Angstrom is smaller than the largest "
+            f"molecule of the system ({molecule_diameter:.1f} Angstrom across), which "
+            f"FFLUX aborts on; using {minimum_cutoff:.1f} Angstrom instead."
+        )
+        cutoff = minimum_cutoff
+
+    return cell_size, cutoff
+
+
+def dlpoly_fflux_composition(
+    starting_geometry: Union[str, Path],
+    model_directory: Union[str, Path, Sequence[Union[str, Path]]],
+    models: Optional[Union[Models, Sequence[Models]]] = None,
+) -> MolecularComposition:
+    """Works out what a condensed phase starting geometry is made of and which of the given
+    sets of models simulates each of its species.
+
+    Nothing about the box has to be stated: it is split into molecules along its bonds and
+    the molecules are collected into species and counted (see
+    :func:`ichor.core.files.dl_poly.infer_molecular_composition`), then each species is
+    matched to the models made for a molecule with the same atoms in the same order. What
+    comes out is the composition the DL_POLY input files are written from, with its species
+    named as the model files are copied out.
+
+    :param starting_geometry: A ``.xyz`` file holding the box (e.g. as packed by Packmol).
+        Only its first geometry is looked at.
+    :param model_directory: The directory holding the trained models of the box's species,
+        or one such directory per species (in any order - they are matched up by their atoms).
+    :param models: The already read models of ``model_directory``, to save reading them
+        again. If ``None`` (default), they are read from ``model_directory``.
+    :raises ValueError: If the box does not hold exactly as many species as there are sets
+        of models, if a species cannot be matched to one set of models, or if two species
+        would end up sharing a system name (their model files would overwrite each other).
+    :return: The composition of the box, with each species named after its models.
+    """
+
+    atoms = Trajectory(starting_geometry)[0]
+    composition = infer_molecular_composition(atoms)
+
+    models = read_models(model_directory) if models is None else models
+    models = [models] if isinstance(models, Models) else list(models)
+
+    if len(models) != len(composition.species):
+        raise ValueError(
+            f"The geometry '{starting_geometry}' holds {len(composition.species)} "
+            f"molecular species ({composition}) but {len(models)} set(s) of models were "
+            "given. A condensed phase run needs one model directory per species."
+        )
+
+    # match each species to the models made for a molecule with the same atoms. An atom name
+    # ("C1", "O2", ...) carries the position of the atom in its molecule, so matching on the
+    # names checks the ordering as well as the make-up - which matters, because it is the
+    # position of an atom in its molecule that decides which model is used for it. The names
+    # are compared as sets because Models.atom_names comes back in no particular order.
+    remaining = list(enumerate(models))
+    system_names = []
+    for species in composition.species:
+        wanted = species.atom_names
+        matches = [
+            (index, species_models)
+            for index, species_models in remaining
+            if set(species_models.atom_names) == set(wanted)
+        ]
+        if len(matches) != 1:
+            raise ValueError(
+                f"{'No' if not matches else len(matches)} set(s) of the models given are "
+                f"for a molecule of {species.formula} ({', '.join(wanted)}), "
+                f"{species.nummols} of which are in '{starting_geometry}'. The models of a "
+                "species must be made for its atoms in the order the geometry lists them."
+            )
+        index, species_models = matches[0]
+        remaining = [entry for entry in remaining if entry[0] != index]
+        system_names.append(clean_system_name(species_models[0].system_name))
+
+    duplicates = {name for name in system_names if system_names.count(name) > 1}
+    if duplicates:
+        raise ValueError(
+            f"More than one species is modelled by a system called "
+            f"'{', '.join(sorted(duplicates))}'. Every species needs its own system name, "
+            "since the model files of the run are named after it."
+        )
+
+    return composition.with_system_names(system_names)
 
 
 def _copy_model_with_clean_system_name(
@@ -92,10 +275,56 @@ def _model_file_name(clean_system_name: str, model) -> str:
     return f"{clean_system_name}_{model.prop}_{model.atom_name}{model.path.suffix}"
 
 
+def clean_system_name(system_name: str) -> str:
+    """Returns the underscore-free system name used in the CONFIG atom labels, the copied
+    model file names and the model files' own ``name`` lines.
+
+    The FFLUX model reader reconstructs each model *file name* in two inconsistent ways:
+
+    - the metadata read inserts the property after the FIRST underscore of the CONFIG
+      label -> ``<first_token>_iqa_<rest>_<atom>.model``
+    - the data read (mean/kernel/weights) builds it as ``<SystemName>_iqa_<atom>.model``
+      (``SystemName`` read from the file's ``name`` line)
+
+    When the system name itself contains underscores (e.g. ``BZAMID05_MOL_MTD_OUT0``) these
+    disagree, so the data-read open silently fails (it is IOSTAT-guarded), ``nPredPerAtm``
+    stays 0, and the mean/kernel/weights are never read - every IQA energy and force is
+    exactly 0.0 and the molecule flies apart. Removing the underscores makes both
+    constructions collapse to the standard ``<system>_<prop>_<atom>.model``.
+    """
+    return system_name.replace("_", "")
+
+
+def _as_model_directories(
+    model_directory: Union[str, Path, Sequence[Union[str, Path]]]
+) -> List[Path]:
+    """Returns the given model directory (or directories) as a list of canonical paths, so
+    that the same directory written differently (e.g. through a relative path) is
+    recognised as the same one."""
+    if isinstance(model_directory, (str, Path)):
+        model_directory = [model_directory]
+    return [Path(directory).resolve() for directory in model_directory]
+
+
+def read_models(
+    model_directory: Union[str, Path, Sequence[Union[str, Path]]]
+) -> List[Models]:
+    """Reads the models of one or more model directories, one :class:`Models` per directory.
+
+    A condensed phase simulation of a mixture uses one set of models per molecular species,
+    so the models a run uses are handled as a list throughout, of which a single-species
+    (or gas phase) run simply has one.
+
+    :param model_directory: A model directory, or several of them (one per species).
+    :return: The read models, in the order their directories were given.
+    """
+    return [Models(directory) for directory in _as_model_directories(model_directory)]
+
+
 def write_dlpoly_fflux_model_directory(
-    model_directory: Union[str, Path],
+    model_directory: Union[str, Path, Sequence[Union[str, Path]]],
     parent_path: Union[str, Path],
-    models: Optional[Models] = None,
+    models: Optional[Union[Models, Sequence[Models]]] = None,
     progress: Optional[tqdm] = None,
 ) -> Path:
     """Copies the trained models into a ``model_krig`` directory inside ``parent_path``,
@@ -106,91 +335,111 @@ def write_dlpoly_fflux_model_directory(
     single runs set up into the same place) all use the same models, so the copy is made
     once per base directory and the run directories only link to it (see
     :func:`write_dlpoly_fflux_setup`). An existing directory is therefore reused rather
-    than copied over again: the model directory it was copied from is recorded in a
+    than copied over again: the model directories it was copied from are recorded in a
     ``.ichor_model_source`` file, and only the model files which are not there yet are
     copied.
 
+    Several model directories can be given, which is what a condensed phase simulation of a
+    mixture needs: one set of models per molecular species. They all go into the one
+    ``model_krig`` directory, which they do not collide in because every model file name is
+    prefixed with the system name of the species it belongs to.
+
     :param model_directory: Directory containing the trained models to copy (usually one
-        of the ``6_MODEL/xxx`` subfolders).
+        of the ``6_MODEL/xxx`` subfolders), or a sequence of such directories.
     :param parent_path: Directory to create the ``model_krig`` directory in. This is the
         base directory holding the run directories, not a run directory itself (unless the
         models are deliberately not being shared).
-    :param models: The already read models of ``model_directory``. Reading the models is
-        by far the most expensive part of setting a run up, so a caller setting up several
-        runs from the same models should read them once and pass them in here. If ``None``
-        (default), they are read from ``model_directory``.
+    :param models: The already read models of ``model_directory`` (one :class:`Models` per
+        directory). Reading the models is by far the most expensive part of setting a run
+        up, so a caller setting up several runs from the same models should read them once
+        and pass them in here. If ``None`` (default), they are read from ``model_directory``.
     :param progress: An optional progress bar to advance once per copied model file, whose
         total already accounts for them. If ``None`` (default), a progress bar of its own
         is shown while the models are copied.
-    :raises ValueError: If the directory already holds models copied from a *different*
-        model directory, as overwriting those would silently change the force field of the
+    :raises ValueError: If the directory already holds models copied from *different*
+        model directories, as overwriting those would silently change the force field of the
         runs which are already set up (and possibly running) alongside it.
     :return: The path to the ``model_krig`` directory the models were copied into.
     """
 
-    # the source is recorded (and compared) in canonical form, so that the same directory
-    # written differently (e.g. through a relative path) is recognised as the same one
-    model_directory = Path(model_directory).resolve()
+    model_directories = _as_model_directories(model_directory)
     parent_path = Path(parent_path)
-    models = models if models is not None else Models(model_directory)
+    if models is None:
+        models = [Models(directory) for directory in model_directories]
+    elif isinstance(models, Models):
+        models = [models]
+    else:
+        models = list(models)
 
     model_krig_dir = parent_path / MODEL_DIRECTORY_NAME
     source_file = model_krig_dir / MODEL_SOURCE_FILE_NAME
 
-    previous_source = None
+    previous_sources = None
     if source_file.is_file():
-        previous_source = Path(source_file.read_text().strip()).resolve()
+        # one line per model directory the models were copied from (a file written before
+        # several of them were supported holds the single directory on its own line)
+        previous_sources = [
+            Path(line.strip()).resolve()
+            for line in source_file.read_text().splitlines()
+            if line.strip()
+        ]
 
-    if previous_source is not None and previous_source != model_directory:
+    if previous_sources is not None and previous_sources != model_directories:
         raise ValueError(
-            f"The models in '{model_krig_dir}' were copied from '{previous_source}', but "
-            f"this run uses the models in '{model_directory}'. The runs inside "
-            f"'{parent_path}' all share one set of models, so setting this run up here "
-            "would change the force field of the runs which are already set up. Please "
-            "use a different base path for a different set of models."
+            f"The models in '{model_krig_dir}' were copied from "
+            f"'{', '.join(str(source) for source in previous_sources)}', but this run uses "
+            f"the models in "
+            f"'{', '.join(str(directory) for directory in model_directories)}'. The runs "
+            f"inside '{parent_path}' all share one set of models, so setting this run up "
+            "here would change the force field of the runs which are already set up. "
+            "Please use a different base path for a different set of models."
         )
 
     # models which are already there but whose origin is not recorded (e.g. copied by a
     # version of ichor which did not share them yet) cannot be assumed to be the ones
     # asked for, so they are copied over rather than reused
-    unknown_models_present = previous_source is None and any(
+    unknown_models_present = previous_sources is None and any(
         model_krig_dir.glob("*.model")
     )
     if unknown_models_present:
         ichor.hpc.global_variables.LOGGER.warning(
             f"The models already in '{model_krig_dir}' do not record which model "
             f"directory they came from, so they are being overwritten with the models "
-            f"in '{model_directory}'."
+            f"in '{', '.join(str(directory) for directory in model_directories)}'."
         )
 
     mkdir(model_krig_dir)
 
-    # the models define the chemical system name. The FFLUX model reader reconstructs each
-    # model file name from the system name it parses out of the file, so both the copied
-    # file names and the "name" line inside them use an underscore-free system name (see
-    # write_dlpoly_fflux_setup for why).
-    system_name = models[0].system_name
-    clean_system_name = system_name.replace("_", "")
-
     own_progress = progress is None
     if own_progress:
-        progress = tqdm(total=len(models), desc="Copying model files")
+        progress = tqdm(
+            total=sum(len(species_models) for species_models in models),
+            desc="Copying model files",
+        )
 
-    for model in models:
-        destination = model_krig_dir / _model_file_name(clean_system_name, model)
-        if unknown_models_present or not destination.exists():
-            _copy_model_with_clean_system_name(
-                model.path,
-                destination,
-                system_name,
-                clean_system_name,
-            )
-        progress.update()
+    # each set of models defines the chemical system name of the species it was made for.
+    # The FFLUX model reader reconstructs each model file name from the system name it
+    # parses out of the file, so both the copied file names and the "name" line inside them
+    # use an underscore-free system name (see clean_system_name for why).
+    for species_models in models:
+        system_name = species_models[0].system_name
+        clean_name = clean_system_name(system_name)
+
+        for model in species_models:
+            destination = model_krig_dir / _model_file_name(clean_name, model)
+            if unknown_models_present or not destination.exists():
+                _copy_model_with_clean_system_name(
+                    model.path,
+                    destination,
+                    system_name,
+                    clean_name,
+                )
+            progress.update()
 
     if own_progress:
         progress.close()
 
-    source_file.write_text(f"{model_directory}\n")
+    source_file.write_text("".join(f"{directory}\n" for directory in model_directories))
 
     return model_krig_dir
 
@@ -267,7 +516,7 @@ def next_run_directory(
 
 def write_dlpoly_fflux_setup(
     run_path: Union[str, Path],
-    model_directory: Union[str, Path],
+    model_directory: Union[str, Path, Sequence[Union[str, Path]]],
     starting_geometry: Union[str, Path],
     ensemble: str = "nvt",
     temperature: int = 1,
@@ -278,8 +527,9 @@ def write_dlpoly_fflux_setup(
     cell_size: float = 50.0,
     cutoff: Optional[float] = None,
     cap: Optional[float] = None,
-    models: Optional[Models] = None,
+    models: Optional[Union[Models, Sequence[Models]]] = None,
     shared_model_directory: Optional[Union[str, Path]] = None,
+    composition: Optional[MolecularComposition] = None,
     progress_bar: bool = True,
 ) -> Path:
     """Sets up a directory from which a DL_FFLUX (FFLUX-modified DL_POLY) calculation
@@ -292,7 +542,8 @@ def write_dlpoly_fflux_setup(
     :param run_path: Directory in which to set up (and later run) the DL_FFLUX calculation.
         The directory is created if it does not exist.
     :param model_directory: Directory containing the trained models to use for the
-        force field (usually one of the ``6_MODEL/xxx`` subfolders).
+        force field (usually one of the ``6_MODEL/xxx`` subfolders), or - for a condensed
+        phase mixture - one such directory per molecular species of ``composition``.
     :param starting_geometry: A ``.xyz`` file containing the starting geometry (geometries)
         which is written to the CONFIG file.
     :param ensemble: The DL_POLY ensemble to use, either ``"nvt"`` or ``"nve"``, defaults to ``"nvt"``.
@@ -309,28 +560,43 @@ def write_dlpoly_fflux_setup(
         multipole data.
     :param cell_size: The size (in Angstrom) of the cubic simulation cell written to the
         CONFIG file, defaults to 50.0. Also used to size the SPME Ewald FFT grid for
-        multipole runs (~1 grid point per Angstrom). Grown automatically if it would be
-        too small for the (molecule-derived) cutoff (a cutoff must be at most half the cell).
+        multipole runs (~1 grid point per Angstrom). Without a ``composition`` this is only
+        a lower bound and is grown automatically if it would be too small for the
+        (molecule-derived) cutoff, a cutoff having to be at most half the cell. *With* one it
+        is the actual size of the box the geometry was packed into, so it is left alone and
+        the cutoff is fitted to it instead.
     :param cutoff: The real-space cutoff radius (in Angstrom) for the CONTROL ``cutoff`` /
         ``rvdw`` and the FFLUX.in electrostatics ``cut`` directives. If ``None`` (default),
-        it is derived from the starting geometry as the largest interatomic distance plus a
-        margin, so the whole molecule fits inside the cutoff. FFLUX builds the intramolecular
-        interaction cluster within this cutoff and aborts if any atom lies outside it.
+        it is derived from the geometry: without a ``composition``, as the largest
+        interatomic distance plus a margin, so the whole molecule fits inside the cutoff;
+        with one, as the usual condensed phase cutoff of
+        ``CONDENSED_PHASE_DEFAULT_CUTOFF`` Angstrom, brought down to half the cell if the box
+        is smaller than that. FFLUX builds the intramolecular interaction cluster within this
+        cutoff and aborts if any atom lies outside it, so a cutoff is never smaller than the
+        largest molecule of the system.
     :param cap: Optional force cap (in kT/Angstrom) applied during equilibration, written as
         a ``cap`` line in CONTROL. Useful to stop a far-from-equilibrium run (e.g. one using
         inaccurate FFLUX models) from exploding. ``None`` (default) omits the line.
-    :param models: The already read models of ``model_directory``. Reading the models is by
-        far the most expensive part of setting a run up, so a caller setting up several runs
-        from the same models should read them once and pass them in here. If ``None``
-        (default), they are read from ``model_directory``.
+    :param models: The already read models of ``model_directory`` (one :class:`Models` per
+        directory). Reading the models is by far the most expensive part of setting a run up,
+        so a caller setting up several runs from the same models should read them once and
+        pass them in here. If ``None`` (default), they are read from ``model_directory``.
     :param shared_model_directory: An existing directory holding the models already copied
         out in the FFLUX layout (see :func:`write_dlpoly_fflux_model_directory`), which the
         run directory's ``model_krig`` is linked to instead of getting a copy of its own.
         Model files are large, so runs sharing one copy saves a lot of disk space. If
         ``None`` (default), the models are copied into the run directory itself.
+    :param composition: The molecular composition of the starting geometry (see
+        :class:`ichor.core.files.dl_poly.MolecularComposition`), for a condensed phase box
+        holding many molecules - typically inferred from the geometry and named after the
+        models by :func:`dlpoly_fflux_composition`. Its species must line up with the models
+        given (one set of models per species, in the same order). If ``None`` (default), the
+        geometry is taken to be a single molecule.
     :param progress_bar: Whether to show a progress bar while the setup is written out,
         defaults to True. Set to False when calling this in a loop which already has its
         own progress bar (see :func:`submit_dlpoly_fflux_robustness`).
+    :raises ValueError: If the models given do not line up with the species of
+        ``composition``, or if the cell is too small to hold the molecules of the system.
     :return: The path to the run directory which has been set up.
     """
 
@@ -346,9 +612,10 @@ def write_dlpoly_fflux_setup(
         disable=not progress_bar,
     )
 
-    # read the starting geometry which is written to the CONFIG file. A DL_FFLUX run
-    # starts from a single geometry (one molecule, matching the single-molecule FIELD
-    # file), so if the provided xyz contains multiple geometries only the first is used.
+    # read the starting geometry which is written to the CONFIG file. A DL_FFLUX run starts
+    # from a single geometry (matching the FIELD file, which is a single molecule unless a
+    # composition says otherwise), so if the provided xyz contains multiple geometries only
+    # the first is used.
     trajectory = Trajectory(starting_geometry)
     if len(trajectory) > 1:
         ichor.hpc.global_variables.LOGGER.warning(
@@ -359,49 +626,41 @@ def write_dlpoly_fflux_setup(
     starting_trajectory = trajectory[0:1]
     atoms = trajectory[0]
 
-    # The real-space cutoff must be larger than the molecule's own extent. FFLUX builds
-    # the intramolecular interaction cluster within the cutoff and, if any atom lies
-    # outside it, prints the offending distance against the cutoff and calls MPI_ABORT.
-    # Size the cutoff from the actual geometry: the largest pairwise atom-atom distance
-    # (the molecular "diameter") plus a margin, rounded up. Never go below 8.0 A.
-    if cutoff is None:
-        coords = atoms.coordinates
-        diffs = coords[:, None, :] - coords[None, :, :]
-        molecule_diameter = float(np.sqrt((diffs**2).sum(axis=-1)).max())
-        cutoff = max(8.0, math.ceil(molecule_diameter) + 2.0)
+    cell_size, cutoff = _resolve_cell_size_and_cutoff(
+        atoms, composition, cell_size, cutoff
+    )
 
-    # DL_POLY requires the cutoff to be at most half the (cubic) cell width; grow the cell
-    # if the molecule-derived cutoff would otherwise violate that (also keeps the whole
-    # molecule well away from its periodic images).
-    min_cell = 2.0 * cutoff + 2.0
-    if cell_size < min_cell:
-        cell_size = min_cell
-
-    # the models define the chemical system name, which is used to label atoms in the
-    # CONFIG file so that DL_FFLUX picks up the correct model file for each atom.
-    models = models if models is not None else Models(model_directory)
+    # the models define the chemical system name of each species, which is used to label the
+    # atoms in the CONFIG file so that DL_FFLUX picks up the correct model file for each of
+    # them. There is one set of models per species, of which a single molecule run has one.
+    models = read_models(model_directory) if models is None else models
+    models = [models] if isinstance(models, Models) else list(models)
+    nmodel_files = sum(len(species_models) for species_models in models)
     # linking to a shared copy of the models is one step, copying them is one per model file
-    progress.total = progress.total + (1 if shared_model_directory else len(models))
+    progress.total = progress.total + (1 if shared_model_directory else nmodel_files)
     progress.update()
+
     # DL_FFLUX pairs each CONFIG atom label with a model by matching it against
     # "<SystemName>_<AtomName>" built from the model file's "name"/"atom" lines
-    # (see fflux_read_models.f90), so the CONFIG labels must use the same system name.
-    system_name = models[0].system_name
+    # (see fflux_read_models.f90), so the CONFIG labels must use the same (underscore-free,
+    # see clean_system_name) system names the model files are copied out under.
+    clean_system_names = [
+        clean_system_name(species_models[0].system_name) for species_models in models
+    ]
 
-    # The FFLUX model reader reconstructs each model *file name* in two inconsistent ways:
-    #   - the metadata read inserts the property after the FIRST underscore of the CONFIG
-    #     label  ->  "<first_token>_iqa_<rest>_<atom>.model"
-    #   - the data read (mean/kernel/weights) builds it as
-    #     "<SystemName>_iqa_<atom>.model"  (SystemName read from the file's "name" line)
-    # When the system name itself contains underscores (e.g. "BZAMID05_MOL_MTD_OUT0") these
-    # disagree, so the data-read open silently fails (it is IOSTAT-guarded), nPredPerAtm
-    # stays 0, and the mean/kernel/weights are never read -> every IQA energy and force is
-    # exactly 0.0 and the molecule flies apart. Removing the underscores makes both
-    # constructions collapse to the standard "<system>_<prop>_<atom>.model", so use an
-    # underscore-free system name consistently: in the CONFIG atom labels, the copied model
-    # file names, AND each model file's own "name" line (which the reader parses back into
-    # the file name).
-    clean_system_name = system_name.replace("_", "")
+    if composition is not None:
+        # the species carry the names the CONFIG labels and the FIELD/MPOLES molecular types
+        # are written with, which have to be the ones the model files are copied out under.
+        # dlpoly_fflux_composition names them by matching each species to its models, so
+        # here it is only left to check that the models it matched them to are these ones.
+        species_names = [species.system_name for species in composition.species]
+        if sorted(species_names) != sorted(clean_system_names):
+            raise ValueError(
+                f"The composition of the starting geometry is simulated with the models of "
+                f"'{', '.join(species_names)}' but the models given are those of "
+                f"'{', '.join(clean_system_names)}'. A condensed phase run needs one model "
+                "directory per species, matched up by dlpoly_fflux_composition."
+            )
 
     # Electrostatics are only switched on when the models contain multipole moment data.
     # Multipole model properties are named q<l><m> (e.g. "q00" -> rank 0, "q44s" -> rank
@@ -409,10 +668,12 @@ def write_dlpoly_fflux_setup(
     #   - a "Multipolar L'" line in the FIELD file
     #   - an "ewald L(L'+1)" line in FFLUX.in
     # e.g. quadrupole-quadrupole (L'=2) -> "Multipolar 2" + "ewald L3"; a pure-IQA run
-    # (no multipole models) omits both lines.
+    # (no multipole models) omits both lines. The order is taken over all of the species,
+    # since the FIELD file declares it once for the whole system.
     multipole_ranks = [
         int(match.group(1))
-        for prop in models.types
+        for species_models in models
+        for prop in species_models.types
         for match in [re.match(r"q(\d)", prop)]
         if match
     ]
@@ -432,11 +693,15 @@ def write_dlpoly_fflux_setup(
             grid += 1
         spme_sum = f"0.00001 {grid} {grid} {grid}"
 
+    # the CONTROL and FFLUX.in titles name the system being simulated, which for a mixture
+    # is all of the species which make it up
+    title = " ".join(clean_system_names)
+
     # FFLUX-specific settings live in FFLUX.in, so the inline fflux directives are
     # omitted from the CONTROL file (fflux_cluster / fflux_print set to None)
     progress.set_description("Writing CONTROL file")
     DlPolyControl(
-        system_name=clean_system_name,
+        system_name=title,
         path=run_path / "CONTROL",
         ensemble=ensemble,
         temperature=temperature,
@@ -453,16 +718,17 @@ def write_dlpoly_fflux_setup(
 
     progress.set_description("Writing CONFIG file")
     DlPolyConfig(
-        system_name=clean_system_name,
+        system_name=clean_system_names[0],
         trajectory=starting_trajectory,
         path=run_path / "CONFIG",
         cell_size=cell_size,
+        composition=composition,
     ).write()
     progress.update()
 
     progress.set_description("Writing FIELD file")
     DlPolyField(
-        system_name=clean_system_name,
+        system_name=clean_system_names[0],
         atoms=atoms,
         path=run_path / "FIELD",
         multipolar=multipolar_order,
@@ -471,13 +737,14 @@ def write_dlpoly_fflux_setup(
         # explicit multipole electrostatics double-counts intramolecular interactions and
         # diverges as atoms approach, blowing up the trajectory.
         all_pairs_bonds=has_multipole_data,
+        composition=composition,
     ).write()
     progress.update()
 
     progress.set_description("Writing FFLUX.in file")
     DlPolyFFLUXInput(
         path=run_path / "FFLUX.in",
-        title=clean_system_name,
+        title=title,
         electrostatics=electrostatics if has_multipole_data else None,
         electrostatics_level=electrostatics_level,
         electrostatics_cutoff=cutoff,
@@ -490,9 +757,10 @@ def write_dlpoly_fflux_setup(
         progress.total = progress.total + 1
         progress.set_description("Writing MPOLES file")
         DlPolyMpoles(
-            system_name=clean_system_name,
+            system_name=clean_system_names[0],
             atoms=atoms,
             path=run_path / "MPOLES",
+            composition=composition,
         ).write()
         progress.update()
 
@@ -562,7 +830,7 @@ def submit_dlpoly_fflux(
     mkdir(base_path)
 
     # read the models once, both to copy them out and to set the run up with
-    models = Models(model_directory)
+    models = read_models(model_directory)
     # the models are shared by every run under the base path, so they are only copied if
     # they are not already there from a previous run
     shared_model_directory = write_dlpoly_fflux_model_directory(
@@ -595,6 +863,108 @@ def submit_dlpoly_fflux(
         submission_script.add_command(DlpolyCommand(executable_path, run_path))
 
     return submission_script.submit()
+
+
+def submit_dlpoly_fflux_condensed(
+    base_path: Union[str, Path],
+    model_directory: Union[str, Path, Sequence[Union[str, Path]]],
+    starting_geometry: Union[str, Path],
+    cell_size: float,
+    ensemble: str = "nvt",
+    temperature: int = 1,
+    timestep: float = 0.001,
+    nsteps: int = 500,
+    ncores: int = 1,
+    electrostatics: str = "ewald",
+    electrostatics_level: Optional[int] = None,
+    cutoff: Optional[float] = None,
+    cap: Optional[float] = None,
+    executable_path: Optional[Union[str, Path]] = None,
+) -> Tuple[JobID, MolecularComposition]:
+    """Sets up and submits a condensed phase DL_FFLUX (FFLUX-modified DL_POLY) calculation to
+    a compute node: a periodic box of many molecules, as packed by Packmol, rather than the
+    single molecule :func:`submit_dlpoly_fflux` simulates.
+
+    What the box is made of is worked out from the geometry itself (see
+    :func:`dlpoly_fflux_composition`), so only the box it was packed into has to be given.
+    The FIELD file then declares one molecular type per species with its own count, and the
+    CONFIG file labels each atom with its species and its position *within its own molecule*,
+    which is what lets every copy of a molecule be simulated by the one set of models made
+    for it.
+
+    Runs are set up in ``RUN<i>`` directories inside ``base_path`` and share the models
+    copied into it, exactly as for a single molecule run - see :func:`submit_dlpoly_fflux`.
+
+    :param base_path: Base directory to create the run directory (and the shared model
+        directory) in. The directory is created if it does not exist.
+    :param model_directory: The directory holding the trained models of the box's species,
+        or one such directory per species of a mixture (in any order - each is matched to
+        the species whose atoms its models were made for).
+    :param starting_geometry: A ``.xyz`` file holding the packed box.
+    :param cell_size: The width (in Angstrom) of the cubic box the geometry was packed into.
+        Unlike a single molecule run, this is a property of the geometry rather than
+        something to be chosen, since it is what sets the density of the simulation.
+    :param ncores: The number of cores to use for the DL_FFLUX job, defaults to 1.
+    :param executable_path: An optional path to the DL_FFLUX (DLPOLY.Z) executable which
+        overrides the configured ``software.dlpoly.executable_path``. If ``None`` (default),
+        the configured executable path is used.
+
+    See :func:`write_dlpoly_fflux_setup` for a description of the remaining arguments.
+
+    :raises ValueError: If the species of the box cannot be matched up with the models given,
+        if the box is too small to hold its own molecules, or if the base path already holds
+        models copied from different model directories.
+    :return: An object containing information for the submitted job, and the composition the
+        box was found to have (worth showing to whoever submitted it, since it was not they
+        who stated it).
+    """
+
+    base_path = Path(base_path)
+    mkdir(base_path)
+
+    # read the models once, to match the species of the box against, to copy out and to set
+    # the run up with
+    models = read_models(model_directory)
+    composition = dlpoly_fflux_composition(
+        starting_geometry, model_directory, models=models
+    )
+    ichor.hpc.global_variables.LOGGER.info(
+        f"The starting geometry '{starting_geometry}' holds {composition}"
+    )
+
+    # the models are shared by every run under the base path, so they are only copied if
+    # they are not already there from a previous run
+    shared_model_directory = write_dlpoly_fflux_model_directory(
+        model_directory, base_path, models=models
+    )
+
+    run_path = write_dlpoly_fflux_setup(
+        run_path=next_run_directory(base_path),
+        model_directory=model_directory,
+        starting_geometry=starting_geometry,
+        ensemble=ensemble,
+        temperature=temperature,
+        timestep=timestep,
+        nsteps=nsteps,
+        electrostatics=electrostatics,
+        electrostatics_level=electrostatics_level,
+        cell_size=cell_size,
+        cutoff=cutoff,
+        cap=cap,
+        models=models,
+        shared_model_directory=shared_model_directory,
+        composition=composition,
+    )
+    ichor.hpc.global_variables.LOGGER.info(
+        f"Condensed phase DL_FFLUX run set up in {run_path}"
+    )
+
+    with SubmissionScript(
+        ichor.hpc.global_variables.SCRIPT_NAMES["dlpoly"], ncores=ncores
+    ) as submission_script:
+        submission_script.add_command(DlpolyCommand(executable_path, run_path))
+
+    return submission_script.submit(), composition
 
 
 def submit_dlpoly_fflux_trajectory(
@@ -670,7 +1040,7 @@ def submit_dlpoly_fflux_trajectory(
     # every run is set up from the same models, so they are read (the most expensive part
     # of setting a run up) and copied out only once, and each run directory then just
     # links to the copy
-    models = Models(model_directory)
+    models = read_models(model_directory)
     shared_model_directory = write_dlpoly_fflux_model_directory(
         model_directory, base_path, models=models
     )

@@ -4,6 +4,7 @@ have been modified by parent menus.
 """
 
 from pathlib import Path
+from typing import List
 
 # PointsDirectoryMenu options
 SELECTED_POINTS_DIRECTORY_PATH: Path = Path("").absolute()
@@ -34,6 +35,15 @@ SELECTED_MODELS_PATH: Path = Path("").absolute()
 SELECTED_DLPOLY_RUN_PATH: Path = Path("").absolute()
 # directory containing the trained models (usually one of the 6_MODEL/xxx subfolders)
 SELECTED_MODEL_DIRECTORY_PATH: Path = Path("").absolute()
+
+# DL_FFLUX condensed phase menu options
+# directory where the condensed phase DL_FFLUX calculation will be set up and run
+SELECTED_DLPOLY_CONDENSED_RUN_PATH: Path = Path("").absolute()
+# .xyz file holding the packed box of molecules (e.g. as written by Packmol)
+SELECTED_DLPOLY_CONDENSED_XYZ_PATH: Path = Path("").absolute()
+# directories containing the trained models, one per molecular species in the box. They are
+# added one at a time, which is why this starts out empty rather than as a placeholder path.
+SELECTED_DLPOLY_CONDENSED_MODEL_PATHS: List[Path] = []
 
 # DL_FFLUX robustness check (analysis menu) options
 # base directory in which the per-seed RUN* directories are created

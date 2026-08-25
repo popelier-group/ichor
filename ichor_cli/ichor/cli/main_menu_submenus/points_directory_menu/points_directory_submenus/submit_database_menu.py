@@ -45,8 +45,9 @@ from ichor.core.files.point_directory import PointDirectory
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main.database import (
     AVAILABLE_DATABASE_FORMATS,
-    database_name,
+    database_directory,
     database_path,
+    database_write_name,
     processed_csvs_directory,
     submit_make_database,
     submit_make_database_and_csvs,
@@ -740,13 +741,12 @@ class SubmitDatabaseFunctions:
             if is_parent_directory_to_many_points_directories
             else "one PointsDirectory"
         )
-        # the database is written next to the PointsDirectory, so that it is not a single
-        # file among thousands of point directories named after the same system
+        # the database goes in a database folder next to the PointsDirectory, so that it
+        # is not a single file among thousands of point directories named after the same
+        # system
         db_path = database_path(points_directory_path, database_format)
         # the name the write methods are given, which they add the suffix of the format to
-        db_name = str(
-            points_directory_path.parent / database_name(points_directory_path)
-        )
+        db_name = str(database_write_name(points_directory_path))
         npoints = submit_database_menu_options.number_of_points_in_directory
 
         make_csv_files = submit_database_menu_options.selected_make_csv_files
@@ -807,8 +807,10 @@ class SubmitDatabaseFunctions:
                 "The job is now queued, so it will not start immediately and this "
                 "menu does not wait for it. Check on it with your batch system's "
                 "queue command (e.g. qstat / squeue).",
-                "The database is written next to the PointsDirectory (not inside "
-                "it) and named after it.",
+                "The database is written into a database folder next to the "
+                "PointsDirectory and named after it, and the csv files into a folder "
+                "of their own under training_csvs, so that several systems processed "
+                "into the same place do not overwrite one another.",
                 "The database job reads the points one at a time, so the cores it "
                 "asks for do not make it faster: they are how it is given the "
                 "memory it needs, which is why the number follows the size of the "
@@ -847,6 +849,9 @@ class SubmitDatabaseFunctions:
             print_summary_and_pause("DATABASE JOB SUBMITTED", summary, notes)
             return
 
+        # the folder the database goes in has to be there before it is written
+        database_directory(points_directory_path).mkdir(parents=True, exist_ok=True)
+
         # pointsdirectory parent json on login
         if is_parent_directory_to_many_points_directories:
             pointsdirparent = PointsDirectoryParent(points_directory_path)
@@ -874,7 +879,8 @@ class SubmitDatabaseFunctions:
             "The database was made here and now rather than on a compute node, so "
             "it is already finished. Any point that was missing Gaussian or AIMAll "
             "data is listed above.",
-            "It is written next to the PointsDirectory, not inside it.",
+            "It is written into a database folder next to the PointsDirectory, "
+            "named after it.",
         ]
 
         if make_csv_files:
@@ -888,8 +894,8 @@ class SubmitDatabaseFunctions:
             summary["csv folder"] = written_csvs_path
             summary["csv CPU cores"] = csv_ncores
             notes.append(
-                "The csv files were made from it straight afterwards and written next "
-                "to it, so they are ready for the dataset preparation menu."
+                "The csv files were made from it straight afterwards and written to "
+                "the folder above, so they are ready for the dataset preparation menu."
             )
         else:
             notes.append(

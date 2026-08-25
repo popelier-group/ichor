@@ -6,31 +6,27 @@ import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
 from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
+from ichor.cli.main_menu_submenus.fflux_calculations_menu.fflux_calculations_submenus.dl_fflux_parameters import (  # noqa: E501
+    DL_POLY_PARAMETER_DEFAULTS,
+    make_dl_poly_parameters_menu,
+)
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     print_summary_and_pause,
-    user_input_float,
     user_input_free_flow,
     user_input_int,
     user_input_path,
-    user_input_restricted,
 )
 from ichor.hpc.molecular_dynamics import submit_dlpoly_fflux
 
-# available DL_POLY ensembles that the menu exposes
-DL_FFLUX_ENSEMBLES = ["nvt", "nve"]
+# what entering 0 for the real-space cutoff does here: a single molecule sits in a box whose
+# size is arbitrary, so the cutoff is sized to hold the molecule and the box grown around it
+CUTOFF_HELP = "auto from geometry"
 
 # TODO: possibly make this be read from a file
 DL_FFLUX_MENU_DEFAULTS = {
-    "default_ensemble": "nvt",
-    "default_temperature": 300,
-    "default_timestep": 0.001,
-    "default_number_of_timesteps": 500,
-    # real-space cutoff (Angstrom); 0.0 = auto (derived from the geometry)
-    "default_cutoff": 0.0,
-    # force cap (kT/Angstrom) applied during equilibration; 0.0 disables it
-    "default_force_cap": 0.0,
+    **DL_POLY_PARAMETER_DEFAULTS,
     "default_number_of_cores": 1,
     # empty string means "use the executable path from the config"
     "default_executable_path": "",
@@ -141,58 +137,6 @@ class DLFFLUXMenuFunctions:
         ichor.cli.global_menu_variables.SELECTED_XYZ_PATH = Path(xyz_path).absolute()
         dl_fflux_menu_options.selected_xyz_path = (
             ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
-        )
-
-    @staticmethod
-    def select_ensemble():
-        """Select the DL_POLY ensemble (NVT or NVE)."""
-        dl_fflux_menu_options.selected_ensemble = user_input_restricted(
-            DL_FFLUX_ENSEMBLES,
-            "Select ensemble: ",
-            dl_fflux_menu_options.selected_ensemble,
-        )
-
-    @staticmethod
-    def select_temperature():
-        """Select the temperature of the DL_FFLUX simulation."""
-        dl_fflux_menu_options.selected_temperature = user_input_int(
-            "Select temperature: ", dl_fflux_menu_options.selected_temperature
-        )
-
-    @staticmethod
-    def select_timestep():
-        """Select the timestep (in ps) of the DL_FFLUX simulation."""
-        dl_fflux_menu_options.selected_timestep = user_input_float(
-            "Select timestep (ps): ", dl_fflux_menu_options.selected_timestep
-        )
-
-    @staticmethod
-    def select_number_of_timesteps():
-        """Select the number of timesteps of the DL_FFLUX simulation."""
-        dl_fflux_menu_options.selected_number_of_timesteps = user_input_int(
-            "Select number of timesteps: ",
-            dl_fflux_menu_options.selected_number_of_timesteps,
-        )
-
-    @staticmethod
-    def select_cutoff():
-        """Select the real-space cutoff (in Angstrom) for the CONTROL cutoff/rvdw and the
-        FFLUX.in electrostatics cut directives. Enter 0 to auto-derive it from the geometry
-        (largest interatomic distance + margin), which is a good default for a single molecule
-        or small cluster; set an explicit value (e.g. 8-12) for condensed-phase boxes."""
-        dl_fflux_menu_options.selected_cutoff = user_input_float(
-            "Select real-space cutoff in Angstrom (0 = auto from geometry): ",
-            dl_fflux_menu_options.selected_cutoff,
-        )
-
-    @staticmethod
-    def select_force_cap():
-        """Select the force cap (in kT/Angstrom) applied during equilibration. This keeps a
-        far-from-equilibrium run (e.g. one using inaccurate FFLUX models) from exploding.
-        Enter 0 to disable force capping."""
-        dl_fflux_menu_options.selected_force_cap = user_input_float(
-            "Select force cap in kT/Angstrom (0 = disabled): ",
-            dl_fflux_menu_options.selected_force_cap,
         )
 
     @staticmethod
@@ -313,47 +257,11 @@ dl_fflux_menu = ConsoleMenu(
 )
 
 # submenu grouping the DL_POLY simulation parameters, to keep the main DL_FFLUX menu short.
-# It has no options dataclass of its own (its functions edit the shared dl_fflux_menu_options,
-# which is displayed via the parent DL_FFLUX menu's prologue), so the submit function keeps
-# reading the same values.
-DL_POLY_PARAMETERS_MENU_DESCRIPTION = MenuDescription(
-    "DL_POLY Parameters Menu",
-    subtitle="Change the DL_POLY simulation parameters for the DL_FFLUX calculation.",
+# It edits this menu's own options (which the parent DL_FFLUX menu's prologue displays), so
+# the submit function keeps reading the same values.
+dl_poly_parameters_menu = make_dl_poly_parameters_menu(
+    dl_fflux_menu_options, CUTOFF_HELP
 )
-dl_poly_parameters_menu = ConsoleMenu(
-    title=DL_POLY_PARAMETERS_MENU_DESCRIPTION.title,
-    subtitle=DL_POLY_PARAMETERS_MENU_DESCRIPTION.subtitle,
-    prologue_text=DL_POLY_PARAMETERS_MENU_DESCRIPTION.prologue_description_text,
-    epilogue_text=DL_POLY_PARAMETERS_MENU_DESCRIPTION.epilogue_description_text,
-    show_exit_option=DL_POLY_PARAMETERS_MENU_DESCRIPTION.show_exit_option,
-)
-dl_poly_parameters_menu_items = [
-    FunctionItem(
-        "Select ensemble (NVT / NVE)",
-        DLFFLUXMenuFunctions.select_ensemble,
-    ),
-    FunctionItem(
-        "Select simulation temperature",
-        DLFFLUXMenuFunctions.select_temperature,
-    ),
-    FunctionItem(
-        "Select timestep",
-        DLFFLUXMenuFunctions.select_timestep,
-    ),
-    FunctionItem(
-        "Select number of timesteps",
-        DLFFLUXMenuFunctions.select_number_of_timesteps,
-    ),
-    FunctionItem(
-        "Select real-space cutoff (Angstrom, 0 = auto)",
-        DLFFLUXMenuFunctions.select_cutoff,
-    ),
-    FunctionItem(
-        "Select force cap (kT/Angstrom, 0 = disabled)",
-        DLFFLUXMenuFunctions.select_force_cap,
-    ),
-]
-add_items_to_menu(dl_poly_parameters_menu, dl_poly_parameters_menu_items)
 
 # make menu items
 # can use lambda functions to change text of options as well :)
