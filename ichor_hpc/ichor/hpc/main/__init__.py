@@ -5,6 +5,7 @@ from ichor.hpc.main.check_for_missing_files import (
 from ichor.hpc.main.database import submit_make_csvs_from_database
 from ichor.hpc.main.ferebus import (
     find_and_setup_ferebus_subdirs,
+    pyferebus_platform,
     write_extract_models_script,
     write_pyferebus_input_script,
 )
@@ -36,4 +37,5 @@ __all__ = [
     "write_pyferebus_input_script",
     "write_extract_models_script",
     "find_and_setup_ferebus_subdirs",
+    "pyferebus_platform",
 ]

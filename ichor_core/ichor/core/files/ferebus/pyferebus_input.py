@@ -13,11 +13,11 @@ class PyFerebusScript(WriteFile, File):
         self,
         path: Union[Path, str],
         jd_file: Optional[str] = None,
-        submit_to_compute_node: bool = False,
+        submit_to_compute_node: Optional[bool] = None,
         working_directory: Optional[str] = None,
         move_dataset_files: bool = False,
         platform: Optional[str] = None,
-        overwrite_wd: bool = True,
+        overwrite_wd: Optional[bool] = None,
         ncores: Optional[int] = None,
         ntasks: Optional[str] = None,
         rerun: bool = False,
@@ -37,16 +37,16 @@ class PyFerebusScript(WriteFile, File):
         min_damping: Optional[float] = None,
         min_theta: Optional[float] = None,
         max_theta: Optional[float] = None,
-        min_wn: Optional[str] = None,
-        max_wn: Optional[str] = None,
+        min_wn: Optional[float] = None,
+        max_wn: Optional[float] = None,
         a_decay_factor: Optional[float] = None,
         loss: Optional[str] = None,
         huber_delta: Optional[float] = None,
         mean_type: Optional[int] = None,
-        is_constant_noise: bool = True,
+        is_constant_noise: Optional[bool] = None,
         stagnation_check_point: Optional[float] = None,
         cmean_range_factor: Optional[float] = None,
-        overwrite_stout: bool = True,
+        overwrite_stout: Optional[bool] = None,
         max_reg_weight: Optional[float] = None,
         reg_noise: Optional[float] = None,
         batch_size: Optional[int] = None,
@@ -54,10 +54,10 @@ class PyFerebusScript(WriteFile, File):
         gwo_cycles: Optional[int] = None,
         elitism: Optional[int] = None,
         scaling: bool = False,
-        transfer_learning: bool = True,
+        transfer_learning: Optional[bool] = None,
         level_of_theory: Optional[str] = None,
         iqa_deviation_factor: Optional[float] = None,
-        full_ard: bool = True,
+        full_ard: Optional[bool] = None,
         path_to_executeable: Optional[Path] = None,
     ):
         File.__init__(self, path)
@@ -87,8 +87,8 @@ class PyFerebusScript(WriteFile, File):
         self.min_damping: float = min_damping
         self.min_theta: float = min_theta
         self.max_theta: float = max_theta
-        self.min_wn: str = min_wn
-        self.max_wn: str = max_wn
+        self.min_wn: float = min_wn
+        self.max_wn: float = max_wn
         self.a_decay_factor: float = a_decay_factor
         self.loss: str = loss
         self.huber_delta: float = huber_delta
@@ -123,11 +123,13 @@ class PyFerebusScript(WriteFile, File):
     ):
 
         self.jd_file = self.jd_file or "job-details"
-        self.submit_to_compute_node = self.submit_to_compute_node or True
+        if self.submit_to_compute_node is None:
+            self.submit_to_compute_node = True
         self.working_directory = self.working_directory or None
         self.move_dataset_files = self.move_dataset_files or False
         self.platform = self.platform or "CSF4"
-        self.overwrite_wd = self.overwrite_wd or True
+        if self.overwrite_wd is None:
+            self.overwrite_wd = True
         self.ncores = self.ncores or 20
         self.ntasks = self.ntasks or None
         self.rerun = self.rerun or False
@@ -147,16 +149,18 @@ class PyFerebusScript(WriteFile, File):
         self.min_damping = self.min_damping or 0.0
         self.min_theta = self.min_theta or 0.0
         self.max_theta = self.max_theta or 1.0
-        self.min_wn = self.min_wn or "1.0E-4"
-        self.max_wn = self.max_wn or "1.0E-3"
+        self.min_wn = self.min_wn or 1.0e-4
+        self.max_wn = self.max_wn or 1.0e-3
         self.a_decay_factor = self.a_decay_factor or 0.98
         self.loss = self.loss or "rmse"
         self.huber_delta = self.huber_delta or 0.05
         self.mean_type = self.mean_type or 21
-        self.is_constant_noise = self.is_constant_noise or True
+        if self.is_constant_noise is None:
+            self.is_constant_noise = True
         self.stagnation_check_point = self.stagnation_check_point or 1.2
         self.cmean_range_factor = self.cmean_range_factor or 5.0
-        self.overwrite_stout = self.overwrite_stout or True
+        if self.overwrite_stout is None:
+            self.overwrite_stout = True
         self.max_reg_weight = self.max_reg_weight or 40000.0
         self.reg_noise = self.reg_noise or 1.0e-5
         self.batch_size = self.batch_size or 250
@@ -164,10 +168,12 @@ class PyFerebusScript(WriteFile, File):
         self.gwo_cycles = self.gwo_cycles or 1
         self.elitism = self.elitism or 1
         self.scaling = self.scaling or False
-        self.transfer_learning = self.transfer_learning or True
+        if self.transfer_learning is None:
+            self.transfer_learning = True
         self.level_of_theory = self.level_of_theory or "b3lyp/6-31+g(d,p)"
         self.iqa_deviation_factor = self.iqa_deviation_factor or 1.0
-        self.full_ard = self.full_ard or True
+        if self.full_ard is None:
+            self.full_ard = True
         self.path_to_executeable = self.path_to_executeable or None
 
     # write file from a template
@@ -206,8 +212,8 @@ class PyFerebusScript(WriteFile, File):
             mindamping=$min_damping,
             mintheta=$min_theta,
             maxtheta=$max_theta,
-            minWN="$min_wn",
-            maxWN="$max_wn",
+            minWN=$min_wn,
+            maxWN=$max_wn,
             adecayfactor=$a_decay_factor,
             loss="$loss",
             huber_delta=$huber_delta,
