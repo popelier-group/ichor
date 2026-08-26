@@ -19,6 +19,7 @@ from ichor.core.analysis.model_metrics import (
     metrics_df_from_total_dict,
     write_metrics_per_element,
 )
+from ichor.core.analysis.overfitting import overfitting_report, summarise_diagnoses
 from ichor.core.analysis.s_curves.compact_s_curves import (
     plot_s_curves_per_element,
     plot_with_matplotlib,
@@ -58,6 +59,7 @@ S_CURVES_EXCEL_NAME = "s-curves.xlsx"
 S_CURVES_PLOT_NAME = "s-curves.png"
 S_CURVES_CSV_NAME = "s-curves.csv"
 METRICS_CSV_NAME = "model_metrics.csv"
+OVERFITTING_CSV_NAME = "overfitting_report.csv"
 
 
 def _pause(message: str = ""):
@@ -463,6 +465,59 @@ class ModelAnalysisFunctions:
         _report_written_files(written, "metrics CSV(s)")
 
     @staticmethod
+    def check_overfitting():
+        """Writes a CSV reporting whether the selected models are overfitting. Each
+        model is scored against itself by closed-form leave-one-out cross validation on
+        the training data stored in its own ``.model`` file, and against the held-out
+        FEREBUS CSVs of the selected split. Comparing the two, alongside how large the
+        model says its own uncertainty is, separates a model which has memorised its
+        training set from one which is merely being asked about parts of configuration
+        space the training set never covered."""
+
+        if not _models_directory_selected("check for overfitting"):
+            return
+
+        models, csv_files = _get_models_and_csv_files()
+        set_type = model_analysis_menu_options.selected_set_type
+
+        # the leave-one-out half of the check needs nothing but the models themselves,
+        # so it is still worth running when no held-out CSVs were found
+        if not csv_files:
+            print(
+                f"No '{set_type}' CSV files found under "
+                f"{model_analysis_menu_options.selected_models_path}.\n"
+                "Reporting leave-one-out cross validation only; without a held-out "
+                "set there is nothing to compare it against."
+            )
+            set_type = ""
+
+        output_name = _analysis_output_path(OVERFITTING_CSV_NAME)
+        report_df = overfitting_report(
+            models,
+            csv_files_list=csv_files,
+            split_name=set_type,
+            output_location=output_name,
+        )
+
+        if report_df.empty:
+            _pause("No models could be checked.")
+            return
+
+        print(report_df.to_string(index=False))
+        print()
+        print(summarise_diagnoses(report_df))
+
+        written = [output_name]
+        per_element = user_input_bool(
+            "Also write a per-element-type breakdown? (y/n) [default no]: ",
+            default=False,
+        )
+        if per_element:
+            written += write_metrics_per_element(report_df, output_name)
+
+        _report_written_files(written, "overfitting report(s)")
+
+    @staticmethod
     def run_batch_analysis():
         """Runs CSV-based analysis (S-curve Excel + per-property plots + metrics
         CSV) on *every* model batch found under the selected models path - like the
@@ -525,6 +580,17 @@ class ModelAnalysisFunctions:
             )
             write_metrics_per_element(metrics_df, metrics_out)
 
+            # overfitting report (leave-one-out from the models themselves, compared
+            # against the same held-out CSVs)
+            overfitting_out = _analysis_output_path(OVERFITTING_CSV_NAME, model_folder)
+            report_df = overfitting_report(
+                models,
+                csv_files_list=csv_files,
+                split_name=set_type,
+                output_location=overfitting_out,
+            )
+            print(summarise_diagnoses(report_df))
+
             analysed += 1
 
         _pause(
@@ -555,6 +621,10 @@ model_analysis_menu_items = [
     FunctionItem(
         "Extract quality metrics (CSV)",
         ModelAnalysisFunctions.extract_metrics,
+    ),
+    FunctionItem(
+        "Check for overfitting (leave-one-out vs held-out)",
+        ModelAnalysisFunctions.check_overfitting,
     ),
     # Batch: run analysis on every model folder under the selected path
     FunctionItem(

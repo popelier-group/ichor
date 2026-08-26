@@ -43,6 +43,71 @@ def atom_name_from_ferebus_csv(filename: Union[str, Path]) -> str:
     return stem.rsplit("_", 1)[-1]
 
 
+def ferebus_csv_index(
+    csv_files_list: List[Union[str, Path]]
+) -> Dict[Tuple[str, str], Tuple[np.ndarray, np.ndarray]]:
+    """Reads FEREBUS/ichor per-(atom, property) training-style CSVs and indexes their
+    contents by ``(atom name, property name)`` so they can be matched to models.
+
+    Each CSV is expected to contain feature columns named ``f1, f2, ...`` and a
+    single property column named after the property (e.g. ``q43s``, ``iqa``). The
+    atom name is taken from the file name (see :func:`atom_name_from_ferebus_csv`).
+
+    :param csv_files_list: A list of per-(atom, property) CSV files. These should
+        all be of a single split (e.g. only the EXT_VALIDATION_SET files).
+    :return: a dict mapping ``(atom, property)`` to a tuple of the 2D feature array
+        and the 1D array of true values.
+    """
+
+    csv_index: Dict[Tuple[str, str], Tuple[np.ndarray, np.ndarray]] = {}
+    for csv_file in tqdm(csv_files_list, desc="Reading CSVs"):
+        csv_file = Path(csv_file)
+        df = pd.read_csv(csv_file)
+
+        feature_cols = [c for c in df.columns if FEATURE_COLUMN_RE.match(str(c))]
+        property_cols = [c for c in df.columns if c not in feature_cols]
+
+        if not feature_cols or not property_cols:
+            print(
+                f"Skipping {csv_file.name}: could not identify feature/property columns."
+            )
+            continue
+
+        # the property column is the (single) non-feature column, named after the property
+        property_name = str(property_cols[-1])
+        atom_name = atom_name_from_ferebus_csv(csv_file.name)
+        csv_index[(atom_name, property_name)] = (
+            df[feature_cols].values,
+            df[property_name].values,
+        )
+
+    return csv_index
+
+
+def match_model_to_csv_key(
+    csv_index: Dict[Tuple[str, str], tuple], atom_name: str, property_name: str
+) -> Optional[Tuple[str, str]]:
+    """Finds the key of ``csv_index`` holding the data for a model of ``property_name``
+    on ``atom_name``, allowing for the iqa/iqa_energy naming difference (models can
+    call the property ``iqa`` where the CSV column is ``iqa_energy``, or vice versa).
+
+    :param csv_index: an index as returned by :func:`ferebus_csv_index`.
+    :param atom_name: the model's atom name, e.g. ``C5``.
+    :param property_name: the model's property name, e.g. ``iqa``.
+    :return: the matching key, or ``None`` if the index holds no data for the model.
+    """
+
+    key = (atom_name, property_name)
+    if key in csv_index:
+        return key
+
+    for alias, other in (("iqa", "iqa_energy"), ("iqa_energy", "iqa")):
+        if property_name == alias and (atom_name, other) in csv_index:
+            return (atom_name, other)
+
+    return None
+
+
 def true_predicted_from_ferebus_csvs(
     csv_files_list: List[Union[str, Path]],
     models: Models,
@@ -67,27 +132,7 @@ def true_predicted_from_ferebus_csvs(
     """
 
     # index the CSV data by (atom, property) so it can be matched to each model
-    csv_index: Dict[Tuple[str, str], Tuple[np.ndarray, np.ndarray]] = {}
-    for csv_file in tqdm(csv_files_list, desc="Reading CSVs"):
-        csv_file = Path(csv_file)
-        df = pd.read_csv(csv_file)
-
-        feature_cols = [c for c in df.columns if FEATURE_COLUMN_RE.match(str(c))]
-        property_cols = [c for c in df.columns if c not in feature_cols]
-
-        if not feature_cols or not property_cols:
-            print(
-                f"Skipping {csv_file.name}: could not identify feature/property columns."
-            )
-            continue
-
-        # the property column is the (single) non-feature column, named after the property
-        property_name = str(property_cols[-1])
-        atom_name = atom_name_from_ferebus_csv(csv_file.name)
-        csv_index[(atom_name, property_name)] = (
-            df[feature_cols].values,
-            df[property_name].values,
-        )
+    csv_index = ferebus_csv_index(csv_files_list)
 
     # get a nested dict of dict of dict of .... https://stackoverflow.com/a/8702435
     nested_dict = lambda: defaultdict(nested_dict)  # noqa: E731
@@ -96,16 +141,9 @@ def true_predicted_from_ferebus_csvs(
     for model in tqdm(models, desc="Predicting"):
         atom_name = model.atom_name
         property_name = model.prop
-        key = (atom_name, property_name)
 
-        # in case models have "iqa" but the CSV column is "iqa_energy" (or vice versa)
-        if key not in csv_index:
-            if property_name == "iqa" and (atom_name, "iqa_energy") in csv_index:
-                key = (atom_name, "iqa_energy")
-            elif property_name == "iqa_energy" and (atom_name, "iqa") in csv_index:
-                key = (atom_name, "iqa")
-
-        if key not in csv_index:
+        key = match_model_to_csv_key(csv_index, atom_name, property_name)
+        if key is None:
             continue
 
         features_array, true_values = csv_index[key]

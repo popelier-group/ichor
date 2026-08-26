@@ -13,6 +13,7 @@ from ichor.core.common.constants import ha_to_kj_mol
 from ichor.core.common.str import get_characters
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models
+from pandas.api.types import is_numeric_dtype
 from tqdm import tqdm
 
 # properties whose prediction errors are reported in kJ mol-1 (they are
@@ -41,7 +42,13 @@ def append_average_rows(metrics_df: pd.DataFrame) -> pd.DataFrame:
     if metrics_df.empty:
         return metrics_df
 
-    metric_cols = [c for c in metrics_df.columns if c not in _METRIC_ID_COLUMNS]
+    # only numeric columns can be averaged; non-numeric ones (e.g. the diagnosis
+    # column of an overfitting report) are left blank on the average row
+    metric_cols = [
+        c
+        for c in metrics_df.columns
+        if c not in _METRIC_ID_COLUMNS and is_numeric_dtype(metrics_df[c])
+    ]
 
     avg_rows = []
     # sort=False keeps the properties in their existing (already sorted) order

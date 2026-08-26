@@ -12,6 +12,13 @@ from ichor.core.analysis.model_metrics import (
     get_true_predicted_dicts,
     metrics_df_from_total_dict,
 )
+from ichor.core.analysis.overfitting import (
+    calibration_metrics,
+    leave_one_out_predictions,
+    overfitting_report,
+    predictive_variance,
+    summarise_diagnoses,
+)
 from ichor.core.analysis.trajectory_analysis import Stability, TrajectoryAnalysis
 
 __all__ = [
@@ -23,6 +30,11 @@ __all__ = [
     "calculate_metrics_from_ferebus_csvs",
     "metrics_df_from_total_dict",
     "get_true_predicted_dicts",
+    "overfitting_report",
+    "leave_one_out_predictions",
+    "predictive_variance",
+    "calibration_metrics",
+    "summarise_diagnoses",
     "DlpolyStabilityCheck",
     "RunStability",
     "subsample_history",
