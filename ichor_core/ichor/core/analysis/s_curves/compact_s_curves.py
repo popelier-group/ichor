@@ -43,6 +43,25 @@ def atom_name_from_ferebus_csv(filename: Union[str, Path]) -> str:
     return stem.rsplit("_", 1)[-1]
 
 
+def _held_out_csv_preference(csv_file: Path) -> tuple:
+    """Sort key deciding which of several CSVs of the same atom and property is used.
+
+    A training folder can hold more than one copy of a held-out set: a backup of it, or
+    the same file both in the folder of a property and in a per-atom folder inside it.
+    Whichever is read last would otherwise be the one used, which makes the results
+    depend on the order the filesystem happens to return names in. This orders them so
+    that a copy kept in a backup folder loses to one that is not, and the shallowest
+    path wins after that.
+
+    :param csv_file: Path of the CSV.
+    :return: A tuple to sort by, smallest first.
+    """
+
+    is_backup = any("backup" in part.lower() for part in csv_file.parts)
+
+    return (is_backup, len(csv_file.parts), str(csv_file))
+
+
 def ferebus_csv_index(
     csv_files_list: List[Union[str, Path]]
 ) -> Dict[Tuple[str, str], Tuple[np.ndarray, np.ndarray]]:
@@ -60,35 +79,70 @@ def ferebus_csv_index(
     """
 
     csv_index: Dict[Tuple[str, str], Tuple[np.ndarray, np.ndarray]] = {}
-    for csv_file in tqdm(csv_files_list, desc="Reading CSVs"):
-        csv_file = Path(csv_file)
+
+    # read them in the order that decides which copy of a repeated one is used, so that
+    # the first of each (atom, property) read is the one kept
+    ordered_files = sorted(
+        (Path(f) for f in csv_files_list), key=_held_out_csv_preference
+    )
+
+    unreadable = []
+    # repeats holding the same numbers are only clutter; ones that disagree mean the
+    # results depend on which was picked, so the two are counted apart
+    repeats_identical = 0
+    repeats_differing = []
+
+    for csv_file in tqdm(ordered_files, desc="Reading CSVs"):
         df = pd.read_csv(csv_file)
 
         feature_cols = [c for c in df.columns if FEATURE_COLUMN_RE.match(str(c))]
         property_cols = [c for c in df.columns if c not in feature_cols]
 
         if not feature_cols or not property_cols:
-            print(
-                f"Skipping {csv_file.name}: could not identify feature/property columns."
-            )
+            unreadable.append(csv_file)
             continue
 
         # the property column is the (single) non-feature column, named after the property
         property_name = str(property_cols[-1])
         atom_name = atom_name_from_ferebus_csv(csv_file.name)
+        features, true_values = df[feature_cols].values, df[property_name].values
 
-        # two CSVs of the same atom and property are two versions of the same held-out
-        # data, so one of them is being thrown away; say which rather than silently
-        # keeping whichever was read last
-        if (atom_name, property_name) in csv_index:
-            print(
-                f"{csv_file.name} is a second {property_name} CSV for {atom_name}; "
-                f"the one read last ({csv_file}) is the one used."
-            )
+        already = csv_index.get((atom_name, property_name))
+        if already is not None:
+            kept_features, kept_values = already
+            if np.array_equal(kept_features, features) and np.array_equal(
+                kept_values, true_values
+            ):
+                repeats_identical += 1
+            else:
+                repeats_differing.append((atom_name, property_name, csv_file))
+            # the copy already indexed is the preferred one, so this one is passed over
+            continue
 
-        csv_index[(atom_name, property_name)] = (
-            df[feature_cols].values,
-            df[property_name].values,
+        csv_index[(atom_name, property_name)] = (features, true_values)
+
+    # one line each after the bar has finished, rather than a line per file printed
+    # through the middle of it
+    if unreadable:
+        tqdm.write(
+            f"{len(unreadable)} CSV(s) skipped: no feature/property columns could be "
+            f"identified (e.g. {unreadable[0].name})."
+        )
+
+    if repeats_identical:
+        tqdm.write(
+            f"{repeats_identical} CSV(s) were another copy of a held-out set already "
+            "read, holding the same numbers, and were passed over."
+        )
+
+    if repeats_differing:
+        atom_name, property_name, example = repeats_differing[0]
+        tqdm.write(
+            f"{len(repeats_differing)} CSV(s) are another copy of a held-out set "
+            "already read but hold DIFFERENT numbers, so which one is used changes the "
+            f"results. The copy outside any backup folder, nearest the top of the tree, "
+            f"is the one used. First of them: {property_name} for {atom_name}, "
+            f"{example}."
         )
 
     return csv_index

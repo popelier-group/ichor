@@ -115,22 +115,39 @@ class ExtractModelsScript(WriteFile, File):
                 ):
                     csv_pattern = os.path.join(str(current_dir), "**", "*_" + set_suffix + ".csv")
                     csv_files = glob.glob(csv_pattern, recursive=True)
+
+                    # a backup folder holds another copy of held-out sets that are
+                    # already there, so copying it as well would only put the analysis
+                    # in the position of choosing between two of the same thing
+                    to_copy = []
+                    backups = 0
+                    for csv_path in csv_files:
+                        relative_path = os.path.relpath(csv_path, str(current_dir))
+                        # the folders it sits in, not the file itself
+                        folders = Path(relative_path).parts[:-1]
+                        if any(folder.lower().startswith("backup") for folder in folders):
+                            backups += 1
+                            continue
+                        to_copy.append((csv_path, relative_path))
+
                     # what this run has written, so that two CSVs landing on the same
                     # name can be reported. Files already there from an earlier run are
                     # meant to be replaced, so they are not what is counted.
                     written_this_run = set()
                     collisions = 0
-                    for csv_path in tqdm(csv_files, desc="Copying " + set_suffix):
+                    for csv_path, relative_path in tqdm(to_copy, desc="Copying " + set_suffix):
                         # the place the CSV had under the SEQ folder, kept so that no two
                         # of them can land on the same name
-                        relative_path = os.path.relpath(csv_path, str(current_dir))
                         csv_dest = os.path.join(models_dir, dest_name, relative_path)
                         os.makedirs(os.path.dirname(csv_dest), exist_ok=True)
                         if csv_dest in written_this_run:
                             collisions += 1
                         written_this_run.add(csv_dest)
                         shutil.copy(csv_path, csv_dest)
-                    print("Copied " + str(len(csv_files)) + " " + set_suffix + " CSVs into " + dest_name)
+                    print("Copied " + str(len(to_copy)) + " " + set_suffix + " CSVs into " + dest_name)
+                    if backups:
+                        print("Left " + str(backups) + " " + set_suffix
+                              + " CSVs in backup folders where they were")
                     if collisions:
                         print("WARNING: " + str(collisions) + " of the " + set_suffix
                               + " CSVs landed on a name this run had already written,"
