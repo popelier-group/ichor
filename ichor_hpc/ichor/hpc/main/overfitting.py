@@ -13,6 +13,7 @@ def submit_overfitting_report(
     output_path: Path,
     set_type: str = "",
     ncores: int = 1,
+    workers: Optional[int] = None,
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
     """Submits the overfitting check of one folder of trained models to a compute node.
@@ -23,7 +24,7 @@ def submit_overfitting_report(
     tens of minutes. That is not work for a login node, and the report is written to a
     file rather than read off the screen, so there is nothing lost by queueing it.
 
-    Every model is independent of every other, so the job checks ``ncores`` of them at
+    Every model is independent of every other, so the job checks several of them at
     once (see the ``ncores`` argument of
     :func:`ichor.core.analysis.overfitting.overfitting_report`).
 
@@ -36,8 +37,12 @@ def submit_overfitting_report(
     :param set_type: Name of the held-out split whose CSVs are read, e.g.
         ``EXT_VALIDATION_SET``. If empty, no held-out CSVs are looked for and only the
         leave-one-out half of the check is reported.
-    :param ncores: Number of cores the job asks for, which is also the number of models
-        it checks at once.
+    :param ncores: Number of cores the job asks for. The batch system hands out memory
+        per core, so this is what the job's memory comes from as well as its cores.
+    :param workers: Number of models the job checks at once. Defaults to one per core,
+        which is the fastest. Pass fewer when one check needs more memory than one core
+        brings, so that the job is still given the memory of all the cores while running
+        only as many checks at a time as that memory holds.
     :param hold: An optional JobID to hold for. The check will not run until that other
         job has finished.
     :return: The JobID of the submitted job.
@@ -45,6 +50,7 @@ def submit_overfitting_report(
 
     model_folder = Path(model_folder).absolute()
     output_path = Path(output_path).absolute()
+    workers = max(1, workers or ncores)
 
     text_list = []
     # the python code the job runs, as `python -c` cannot take a for loop
@@ -68,7 +74,7 @@ def submit_overfitting_report(
 
     text_list.append(
         "report = overfitting_report(Models(model_folder), csv_files_list=csv_files,"
-        f" split_name='{set_type}', output_location=output_path, ncores={ncores})"
+        f" split_name='{set_type}', output_location=output_path, ncores={workers})"
     )
     # printed into the job's output file, so the outcome can be read without opening
     # the report itself

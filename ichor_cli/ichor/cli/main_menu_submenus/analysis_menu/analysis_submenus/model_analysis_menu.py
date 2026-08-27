@@ -13,6 +13,7 @@ from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus.model_analysis
     batch_system_is_set_up,
     discover_model_folders,
     EXTERNAL_SET_TYPE,
+    largest_training_set,
     INTERNAL_SET_TYPE,
     METRICS_CSV_NAME,
     models_directory_selected,
@@ -20,11 +21,13 @@ from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus.model_analysis
     selected_models_path,
     selected_set_type,
     overfitting_submission_notes,
+    overfitting_worker_memory_gb,
     pause,
     S_CURVES_CSV_NAME,
     S_CURVES_EXCEL_NAME,
     S_CURVES_PLOT_NAME,
     submit_overfitting_for_folders,
+    workers_that_fit,
 )
 from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus.overfitting_submenu import (  # noqa: E501
     overfitting_menu,
@@ -472,12 +475,17 @@ class ModelAnalysisFunctions:
                 f"\nSubmitting the overfitting check of {len(analysed_folders)} "
                 "batch(es).\n"
             )
+            ncores = overfitting_menu_options.selected_number_of_cores
+            # what one check of these batches needs, so the jobs do not run more of them
+            # at once than their memory holds
+            workers = workers_that_fit(
+                ncores,
+                overfitting_worker_memory_gb(*largest_training_set(analysed_folders)),
+            )
             submitted, failed_to_submit = submit_overfitting_for_folders(
-                analysed_folders, overfitting_menu_options.selected_number_of_cores
+                analysed_folders, ncores, workers=workers
             )
-            overfitting_notes = overfitting_submission_notes(
-                overfitting_menu_options.selected_number_of_cores
-            )
+            overfitting_notes = overfitting_submission_notes(ncores, workers)
         else:
             overfitting_notes = [
                 f"The overfitting check was skipped. {no_batch_system_note()}"
@@ -488,17 +496,19 @@ class ModelAnalysisFunctions:
             {
                 "Models path": root,
                 "Held-out split": set_type,
-                "Batches analysed": f"{analysed} of {len(model_folders)}",
+                "S-curves and metrics written": (
+                    f"{analysed} of {len(model_folders)} batches"
+                ),
                 "Batches skipped": skipped,
-                "Overfitting jobs submitted": (
-                    f"{len(submitted)} of {len(analysed_folders)}"
-                    if analysed_folders
-                    else 0
+                "Overfitting checks queued": (
+                    f"{len(submitted)} job(s), one per batch"
+                    if submitted
+                    else "none (see below)"
                 ),
             },
             [
-                "The S-curves and quality metrics of each batch are in its own "
-                f"{ANALYSIS_SUBFOLDER} folder.",
+                "The S-curves and quality metrics are done and written into each "
+                f"batch's own {ANALYSIS_SUBFOLDER} folder.",
                 *overfitting_notes,
                 *(
                     [

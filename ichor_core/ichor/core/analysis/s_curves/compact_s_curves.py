@@ -76,6 +76,16 @@ def ferebus_csv_index(
         # the property column is the (single) non-feature column, named after the property
         property_name = str(property_cols[-1])
         atom_name = atom_name_from_ferebus_csv(csv_file.name)
+
+        # two CSVs of the same atom and property are two versions of the same held-out
+        # data, so one of them is being thrown away; say which rather than silently
+        # keeping whichever was read last
+        if (atom_name, property_name) in csv_index:
+            print(
+                f"{csv_file.name} is a second {property_name} CSV for {atom_name}; "
+                f"the one read last ({csv_file}) is the one used."
+            )
+
         csv_index[(atom_name, property_name)] = (
             df[feature_cols].values,
             df[property_name].values,
@@ -138,12 +148,19 @@ def true_predicted_from_ferebus_csvs(
     nested_dict = lambda: defaultdict(nested_dict)  # noqa: E731
     total_dict = nested_dict()
 
+    # models with no held-out CSV cannot be evaluated and so are left out of every
+    # result made from this dict, which is worth saying: a whole property missing from
+    # the S-curves and the metrics otherwise looks like the analysis is at fault when
+    # the data it was given is what was short
+    models_without_csv = []
+
     for model in tqdm(models, desc="Predicting"):
         atom_name = model.atom_name
         property_name = model.prop
 
         key = match_model_to_csv_key(csv_index, atom_name, property_name)
         if key is None:
+            models_without_csv.append((property_name, atom_name))
             continue
 
         features_array, true_values = csv_index[key]
@@ -156,6 +173,31 @@ def true_predicted_from_ferebus_csvs(
         total_dict[property_name][atom_name]["true"] = true_values
         total_dict[property_name][atom_name]["predicted"] = predicted
         total_dict[property_name][atom_name]["error"] = errors
+
+    if models_without_csv:
+        missing_properties = natsorted(
+            {property_name for property_name, _ in models_without_csv},
+            key=ignore_alpha,
+        )
+        print(
+            f"No held-out CSV was found for {len(models_without_csv)} of the "
+            f"{len(models)} models, so they are not in these results. The properties "
+            f"they are of: {', '.join(missing_properties)}."
+        )
+        # a property with no CSV at all for any of its atoms is the sign of held-out
+        # data that was never written (or was overwritten on its way here), rather than
+        # of a model or two having been trained without it
+        wholly_missing = [
+            property_name
+            for property_name in missing_properties
+            if not any(prop == property_name for _, prop in csv_index)
+        ]
+        if wholly_missing:
+            print(
+                f"None of the atoms of {', '.join(wholly_missing)} have a held-out CSV. "
+                "Check that the extract step copied the CSVs of every property out of "
+                "the training folder."
+            )
 
     return total_dict
 

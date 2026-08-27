@@ -99,22 +99,42 @@ class ExtractModelsScript(WriteFile, File):
 
                 # 7. Also co-locate the held-out CSVs with the models so the set can
                 #    be evaluated later without needing 5_TRAINING. External validation
-                #    goes to test_set/, internal validation to valid_set/. The
-                #    per-property subfolder is preserved because the CSV file names are
-                #    identical across properties (the property is only in the folder
-                #    name and the CSV column header).
+                #    goes to test_set/, internal validation to valid_set/.
+                #
+                #    The CSV file names are identical across properties (the property is
+                #    only in the folder name and the CSV column header), so the folders
+                #    they sit in are recreated exactly as they are under the SEQ folder.
+                #    Copying them into a folder named after the one directly holding them
+                #    only keeps the properties apart when that folder IS the property;
+                #    where the CSVs sit a level deeper (e.g. <property>/datasets/), every
+                #    property lands in the same place and only the last one copied
+                #    survives, which silently leaves the analysis with one property.
                 for set_suffix, dest_name in (
                     ("EXT_VALIDATION_SET", "test_set"),
                     ("INT_VALIDATION_SET", "valid_set"),
                 ):
                     csv_pattern = os.path.join(str(current_dir), "**", "*_" + set_suffix + ".csv")
                     csv_files = glob.glob(csv_pattern, recursive=True)
+                    # what this run has written, so that two CSVs landing on the same
+                    # name can be reported. Files already there from an earlier run are
+                    # meant to be replaced, so they are not what is counted.
+                    written_this_run = set()
+                    collisions = 0
                     for csv_path in tqdm(csv_files, desc="Copying " + set_suffix):
-                        prop_name = os.path.basename(os.path.dirname(csv_path))
-                        csv_dest_dir = os.path.join(models_dir, dest_name, prop_name)
-                        os.makedirs(csv_dest_dir, exist_ok=True)
-                        shutil.copy(csv_path, csv_dest_dir)
+                        # the place the CSV had under the SEQ folder, kept so that no two
+                        # of them can land on the same name
+                        relative_path = os.path.relpath(csv_path, str(current_dir))
+                        csv_dest = os.path.join(models_dir, dest_name, relative_path)
+                        os.makedirs(os.path.dirname(csv_dest), exist_ok=True)
+                        if csv_dest in written_this_run:
+                            collisions += 1
+                        written_this_run.add(csv_dest)
+                        shutil.copy(csv_path, csv_dest)
                     print("Copied " + str(len(csv_files)) + " " + set_suffix + " CSVs into " + dest_name)
+                    if collisions:
+                        print("WARNING: " + str(collisions) + " of the " + set_suffix
+                              + " CSVs landed on a name this run had already written,"
+                              + " so that many are missing from " + dest_name)
 
                 print(f"system_name = {system_name}")
                 print(f"leaf_dir = {leaf_dir}")
