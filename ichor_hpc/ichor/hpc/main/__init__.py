@@ -21,6 +21,7 @@ from ichor.hpc.main.opt import (
     single_geometry_optimisation_directory,
 )
 from ichor.hpc.main.orca import submit_points_directory_to_orca
+from ichor.hpc.main.overfitting import submit_overfitting_report
 
 __all__ = [
     "submit_points_directory_to_aimall",
@@ -38,4 +39,5 @@ __all__ = [
     "write_extract_models_script",
     "find_and_setup_ferebus_subdirs",
     "pyferebus_platform",
+    "submit_overfitting_report",
 ]

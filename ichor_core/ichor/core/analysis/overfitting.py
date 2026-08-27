@@ -120,12 +120,24 @@ class LeaveOneOutResult:
         ``||w_stored - R^-1 (y - m)|| / ||R^-1 (y - m)||``. Should be ~0; a large
         value means the file is internally inconsistent. NaN if the file stored no
         weights.
+    :param covariance: the training covariance matrix ``R`` (with the model's jitter on
+        its diagonal).
+    :param inv_covariance: ``R^-1``.
+
+    ``covariance`` and ``inv_covariance`` are handed back so that the rest of the report
+    can be built from them. Every one of ``Model.R``, ``Model.invR`` and
+    ``Model.lower_cholesky`` is a plain property which rebuilds the covariance matrix
+    from the kernel on each access, and building it is the most expensive part of the
+    whole check (more so than inverting it), so it is built once here and passed on
+    rather than asked for again.
     """
 
     predicted: np.ndarray
     variance: np.ndarray
     signal_variance: float
     weights_mismatch: float
+    covariance: np.ndarray
+    inv_covariance: np.ndarray
 
 
 def leave_one_out_predictions(model: Model) -> LeaveOneOutResult:
@@ -143,7 +155,9 @@ def leave_one_out_predictions(model: Model) -> LeaveOneOutResult:
 
     y_minus_mean = y - np.asarray(model.mean.value(model.x), dtype=float).reshape(-1, 1)
 
-    inv_r = model.invR
+    # the one covariance build of the whole check
+    r_matrix = model.R
+    inv_r = np.linalg.inv(r_matrix)
     # alpha = R^-1 (y - m), the same quantity the model file stores as its weights
     alpha = inv_r @ y_minus_mean
     diag_inv_r = np.diag(inv_r).astype(float).copy()
@@ -167,6 +181,8 @@ def leave_one_out_predictions(model: Model) -> LeaveOneOutResult:
         variance=loo_variance,
         signal_variance=signal_variance,
         weights_mismatch=weights_mismatch(model, alpha),
+        covariance=r_matrix,
+        inv_covariance=inv_r,
     )
 
 
@@ -201,25 +217,63 @@ def weights_mismatch(model: Model, implied_weights: np.ndarray) -> float:
     return float(np.linalg.norm(stored - implied) / implied_norm)
 
 
-def predictive_variance(
-    model: Model, x_test: np.ndarray, signal_variance: float
+def predict_from_covariance(
+    model: Model, x_test: np.ndarray, train_test_covariance: np.ndarray
 ) -> np.ndarray:
-    """Returns the predictive variance of ``model`` at ``x_test``, in the units of
-    ``y`` squared.
+    """Returns the predictions of ``model`` at ``x_test``, from a train/test covariance
+    matrix which has already been built.
 
-    :meth:`Model.variance` returns the unnormalised ``1 - v^T v``, which is only
-    useful for ranking points against each other, so it is multiplied here by the
-    signal variance estimated from the training data.
+    This is :meth:`Model.predict` with the ``r(x_test)`` it would build itself passed in
+    instead, so that the same matrix can serve both the predictions and the variances.
+    Like :meth:`Model.predict` it uses the weights stored in the model file, so the two
+    give the same answer.
 
     :param model: the model to predict with.
     :param x_test: a 2D array of test features.
+    :param train_test_covariance: ``r(x_test)``, of shape (n_train, n_test).
+    :return: a 1D array of predictions, one per test point.
+    """
+
+    return (
+        model.mean.value(x_test) + np.dot(train_test_covariance.T, model.weights)[:, -1]
+    ).flatten()
+
+
+def predictive_variance(
+    model: Model,
+    train_test_covariance: np.ndarray,
+    inv_covariance: np.ndarray,
+    signal_variance: float,
+) -> np.ndarray:
+    """Returns the predictive variance of ``model`` at the test points, in the units of
+    ``y`` squared.
+
+    This is :meth:`Model.variance` written in terms of the inverse covariance matrix
+    which the leave-one-out step has already computed, rather than of a Cholesky
+    factorisation of a freshly rebuilt one: ``v^T v`` for ``v = L^-1 r`` is
+    ``r^T R^-1 r``, so the two are the same number (they differ in their last few
+    figures, as subtracting a quadratic form from 1 loses the same significance either
+    way; a test point which nearly coincides with a training point therefore has a
+    variance which is only meaningful as "indistinguishable from zero"). :meth:`Model.variance` also returns
+    the unnormalised value, which is only useful for ranking points against each other,
+    so it is multiplied here by the signal variance estimated from the training data.
+
+    :param model: the model the variance is of. Only used for its jitter.
+    :param train_test_covariance: ``r(x_test)``, of shape (n_train, n_test).
+    :param inv_covariance: ``R^-1``, from :class:`LeaveOneOutResult`.
     :param signal_variance: ``tau^2``, from :class:`LeaveOneOutResult`.
     :return: a 1D array of variances, one per test point.
     """
 
+    # only the diagonal of r^T R^-1 r is wanted, so it is summed column by column
+    # rather than by forming the whole n_test by n_test matrix
+    quadratic_form = np.einsum(
+        "ij,ij->j", train_test_covariance, inv_covariance @ train_test_covariance
+    )
+
     # tiny negative values come out of the unnormalised variance for test points that
     # nearly coincide with a training point, so it is clipped at zero first
-    unnormalised = np.maximum(np.asarray(model.variance(x_test), dtype=float), 0.0)
+    unnormalised = np.maximum(1.0 - quadratic_form, 0.0)
 
     return unnormalised * signal_variance
 
@@ -362,8 +416,15 @@ def overfitting_row_for_model(
     # own training data, so this should be near zero and says nothing about
     # generalisation. A large value means the model is not reproducing the data it was
     # fitted to, which points at the model file rather than at overfitting.
+    # r(x_train) is the training covariance matrix without the jitter that was added
+    # to its diagonal, so the predictions on the training data need no covariance build
+    # of their own
+    train_covariance = loo.covariance - model.jitter * np.identity(model.ntrain)
     train_metrics = metrics_from_true_predicted(
-        y_train, model.predict(model.x), percentiles=(), error_scale=error_scale
+        y_train,
+        predict_from_covariance(model, model.x, train_covariance),
+        percentiles=(),
+        error_scale=error_scale,
     )
     row["train_rmse"] = train_metrics["rmse"]
 
@@ -400,9 +461,13 @@ def overfitting_row_for_model(
         )
         return row
 
-    held_out_predicted = model.predict(held_out_features)
+    # one train/test covariance build, shared by the predictions and the variances
+    held_out_covariance = model.r(held_out_features)
+    held_out_predicted = predict_from_covariance(
+        model, held_out_features, held_out_covariance
+    )
     held_out_variance = predictive_variance(
-        model, held_out_features, loo.signal_variance
+        model, held_out_covariance, loo.inv_covariance, loo.signal_variance
     )
 
     held_out_metrics = metrics_from_true_predicted(
@@ -456,12 +521,53 @@ def overfitting_row_for_model(
     return row
 
 
+# the state each worker process of a parallel report needs, set once per worker by the
+# initializer rather than pickled with every model. Module level (rather than closed
+# over) because a process pool can only run a function it is able to import.
+_worker_state = {}
+
+
+def _overfitting_worker_init(
+    csv_index: dict, split_name: str, percentiles: Sequence[int]
+):
+    """Gives a worker process the held-out data and settings the whole report shares."""
+
+    _worker_state["csv_index"] = csv_index
+    _worker_state["split_name"] = split_name
+    _worker_state["percentiles"] = percentiles
+
+
+def _overfitting_worker(model_path: Union[str, Path]) -> dict:
+    """Builds one row of the report in a worker process.
+
+    The model is read from its file here rather than being handed over, as a ``Model``
+    carries its training data and would have to be pickled and sent to the worker
+    otherwise.
+    """
+
+    from ichor.core.analysis.s_curves.compact_s_curves import match_model_to_csv_key
+
+    model = Model(model_path)
+    csv_index = _worker_state["csv_index"]
+    key = match_model_to_csv_key(csv_index, model.atom_name, model.prop)
+    features, true_values = csv_index[key] if key is not None else (None, None)
+
+    return overfitting_row_for_model(
+        model,
+        held_out_features=features,
+        held_out_true=true_values,
+        split_name=_worker_state["split_name"],
+        percentiles=_worker_state["percentiles"],
+    )
+
+
 def overfitting_report(
     models: Models,
     csv_files_list: Optional[List[Union[str, Path]]] = None,
     split_name: str = "",
     output_location: Optional[Union[str, Path]] = "overfitting_report.csv",
     percentiles: Sequence[int] = DEFAULT_PERCENTILES,
+    ncores: int = 1,
 ) -> pd.DataFrame:
     """Checks a set of models for overfitting and (optionally) writes the report to a
     CSV file.
@@ -479,31 +585,21 @@ def overfitting_report(
     :param output_location: path of the CSV file to write the report to. If ``None``,
         no file is written and the DataFrame is only returned.
     :param percentiles: percentiles of the absolute error to add to the report.
+    :param ncores: how many models to check at once. Every model is independent of every
+        other, and the check of one is dominated by numpy work that no more than one core
+        goes at, so this scales close to linearly. Defaults to 1, i.e. no parallelism.
     :return: the report DataFrame, one row per (atom, property).
     """
 
     # imported lazily to avoid any package-initialisation ordering issues
-    from ichor.core.analysis.s_curves.compact_s_curves import (
-        ferebus_csv_index,
-        match_model_to_csv_key,
-    )
+    from ichor.core.analysis.s_curves.compact_s_curves import ferebus_csv_index
 
     csv_index = ferebus_csv_index(csv_files_list) if csv_files_list else {}
 
-    rows = []
-    for model in tqdm(models, desc="Checking for overfitting"):
-        key = match_model_to_csv_key(csv_index, model.atom_name, model.prop)
-        features, true_values = csv_index[key] if key is not None else (None, None)
-
-        rows.append(
-            overfitting_row_for_model(
-                model,
-                held_out_features=features,
-                held_out_true=true_values,
-                split_name=split_name,
-                percentiles=percentiles,
-            )
-        )
+    if ncores > 1 and len(models) > 1:
+        rows = _rows_in_parallel(models, csv_index, split_name, percentiles, ncores)
+    else:
+        rows = _rows_in_series(models, csv_index, split_name, percentiles)
 
     report_df = pd.DataFrame(rows)
 
@@ -524,6 +620,92 @@ def overfitting_report(
         append_average_rows(report_df).to_csv(output_location, index=False)
 
     return report_df
+
+
+def _rows_in_series(
+    models: Models,
+    csv_index: dict,
+    split_name: str,
+    percentiles: Sequence[int],
+) -> List[dict]:
+    """Builds the rows of the report one model after another.
+
+    :param models: the models to check.
+    :param csv_index: the held-out data, indexed by (atom, property).
+    :param split_name: name of the held-out split.
+    :param percentiles: percentiles of the absolute error to add to the report.
+    :return: the rows, in the same order as ``models``.
+    """
+
+    from ichor.core.analysis.s_curves.compact_s_curves import match_model_to_csv_key
+
+    rows = []
+    for model in tqdm(models, desc="Checking for overfitting"):
+        key = match_model_to_csv_key(csv_index, model.atom_name, model.prop)
+        features, true_values = csv_index[key] if key is not None else (None, None)
+
+        rows.append(
+            overfitting_row_for_model(
+                model,
+                held_out_features=features,
+                held_out_true=true_values,
+                split_name=split_name,
+                percentiles=percentiles,
+            )
+        )
+
+    return rows
+
+
+def _rows_in_parallel(
+    models: Models,
+    csv_index: dict,
+    split_name: str,
+    percentiles: Sequence[int],
+    ncores: int,
+) -> List[dict]:
+    """Builds the rows of the report with one model per core.
+
+    :param models: the models to check.
+    :param csv_index: the held-out data, indexed by (atom, property).
+    :param split_name: name of the held-out split.
+    :param percentiles: percentiles of the absolute error to add to the report.
+    :param ncores: how many models to check at once, held to the number of cores this
+        machine actually has.
+    :return: the rows, in the same order as ``models``.
+    """
+
+    import concurrent.futures
+    import multiprocessing
+
+    workers = max(1, min(ncores, multiprocessing.cpu_count(), len(models)))
+
+    # the models are read from their files by the workers, so only their paths go over
+    model_paths = [model.path for model in models]
+
+    try:
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=workers,
+            initializer=_overfitting_worker_init,
+            initargs=(csv_index, split_name, percentiles),
+        ) as executor:
+            # map keeps the order of the models, which the report is then sorted from
+            return list(
+                tqdm(
+                    executor.map(_overfitting_worker, model_paths),
+                    total=len(model_paths),
+                    desc=f"Checking for overfitting ({workers} cores)",
+                )
+            )
+    # starting worker processes is not always possible (an interpreter which cannot
+    # spawn them, a machine which will not allow it), and a report which is slow to
+    # produce is better than no report at all
+    except Exception as error:  # noqa: BLE001 - reported, then worked around
+        print(
+            f"Could not check the models on {workers} cores ({error}); "
+            "checking them one after another instead."
+        )
+        return _rows_in_series(models, csv_index, split_name, percentiles)
 
 
 def summarise_diagnoses(report_df: pd.DataFrame) -> str:

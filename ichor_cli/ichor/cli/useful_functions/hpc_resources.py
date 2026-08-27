@@ -8,11 +8,24 @@ from the ichor config.
 """
 
 import ichor.hpc.global_variables
+from ichor.hpc.batch_system import LocalBatchSystem
 from ichor.hpc.global_variables import get_param_from_config
 
 # used when the machine is not in the config (e.g. running the menu on a laptop), where
 # a small budget is the safe way to be wrong
 FALLBACK_MEMORY_PER_CORE_GB = 4
+
+
+def batch_system_available() -> bool:
+    """Whether there is a batch system to submit jobs to on this machine.
+
+    ichor falls back to a stand-in batch system when it finds neither SGE nor SLURM,
+    which is what running on a laptop (or on a machine where the batch system has not
+    been set up) looks like. Submitting to that stand-in does not queue anything, so an
+    option which would submit a job has to know whether there is a queue to submit to.
+    """
+
+    return ichor.hpc.global_variables.BATCH_SYSTEM is not LocalBatchSystem
 
 
 def memory_per_core_gb() -> float:

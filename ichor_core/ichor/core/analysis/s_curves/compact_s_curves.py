@@ -816,8 +816,8 @@ def plot_with_matplotlib(
     try:
         import matplotlib
 
-        import matplotlib.pyplot as plt
         from matplotlib import ticker as mticker
+        from matplotlib.figure import Figure
 
         matplotlib.rcParams.update(
             {
@@ -863,7 +863,14 @@ def plot_with_matplotlib(
     # one separate figure/file per property
     for property_name in tqdm(property_names, desc="Plotting S-curves"):
 
-        fig, ax = plt.subplots(figsize=(panel_width, panel_height))
+        # a bare Figure rather than plt.subplots: these figures are only ever saved
+        # to file, and pyplot attaches every figure it makes to whichever GUI backend
+        # matplotlib picked. The analysis runs in the menu's worker thread, where
+        # building GUI objects warns that a Matplotlib GUI outside the main thread will
+        # likely fail, and can take the process down when the toolkit is torn down. A
+        # bare Figure is not registered with pyplot either, so it needs no plt.close.
+        fig = Figure(figsize=(panel_width, panel_height))
+        ax = fig.subplots()
 
         inner_dict = total_dict[property_name]
         atom_names = natsorted(inner_dict.keys(), key=ignore_alpha)
@@ -968,7 +975,6 @@ def plot_with_matplotlib(
         )
         fig.tight_layout()
         fig.savefig(out_path, dpi=dpi, bbox_inches="tight")
-        plt.close(fig)
         saved_files.append(out_path)
 
     return saved_files

@@ -29,6 +29,9 @@ SELECTED_INPUT_FILE_PATH: Path = Path("").absolute()
 
 # Model-analysis menu options
 SELECTED_MODELS_PATH: Path = Path("").absolute()
+# which held-out split the analysis is run against, kept here (rather than only on the
+# model-analysis menu) so that its submenus are run against the same split
+SELECTED_MODEL_SET_TYPE: str = "EXT_VALIDATION_SET"
 
 # DL_FFLUX (DL_POLY) menu options
 # directory where the DL_FFLUX calculation will be set up and run

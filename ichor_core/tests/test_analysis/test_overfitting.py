@@ -164,16 +164,22 @@ def test_signal_variance_scales_predictive_variance(tmp_path):
     model = make_model(tmp_path)
     loo = leave_one_out_predictions(model)
 
-    variance = predictive_variance(model, model.x, loo.signal_variance)
+    # the covariance matrices are built by the caller and passed in, so that the whole
+    # report needs only one build of each of them
+    variance = predictive_variance(
+        model, model.r(model.x), loo.inv_covariance, loo.signal_variance
+    )
     assert np.all(variance >= 0.0)
     assert np.max(variance) < 1e-6 * loo.signal_variance
 
     rng = np.random.default_rng(3)
     x_far = rng.uniform(5.0, 6.0, (10, N_FEATURES))
     # far from any training point the model falls back on the prior variance, tau^2
-    assert np.mean(predictive_variance(model, x_far, loo.signal_variance)) == (
-        pytest.approx(loo.signal_variance, rel=1e-3)
-    )
+    assert np.mean(
+        predictive_variance(
+            model, model.r(x_far), loo.inv_covariance, loo.signal_variance
+        )
+    ) == pytest.approx(loo.signal_variance, rel=1e-3)
 
 
 def test_calibration_metrics_on_known_z_scores():

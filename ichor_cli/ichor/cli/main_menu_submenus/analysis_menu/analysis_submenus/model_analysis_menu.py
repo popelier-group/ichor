@@ -2,15 +2,40 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 import ichor.cli.global_menu_variables
-from consolemenu.items import FunctionItem
+from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
+from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus.model_analysis_common import (  # noqa: E501
+    analysis_output_path,
+    ANALYSIS_SUBFOLDER,
+    batch_system_is_set_up,
+    discover_model_folders,
+    EXTERNAL_SET_TYPE,
+    INTERNAL_SET_TYPE,
+    METRICS_CSV_NAME,
+    models_directory_selected,
+    no_batch_system_note,
+    selected_models_path,
+    selected_set_type,
+    overfitting_submission_notes,
+    pause,
+    S_CURVES_CSV_NAME,
+    S_CURVES_EXCEL_NAME,
+    S_CURVES_PLOT_NAME,
+    submit_overfitting_for_folders,
+)
+from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus.overfitting_submenu import (  # noqa: E501
+    overfitting_menu,
+    overfitting_menu_options,
+    OVERFITTING_MENU_DESCRIPTION,
+)
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     directory_selected,
+    print_summary_and_pause,
     user_input_bool,
     user_input_free_flow,
     user_input_path,
@@ -19,7 +44,6 @@ from ichor.core.analysis.model_metrics import (
     metrics_df_from_total_dict,
     write_metrics_per_element,
 )
-from ichor.core.analysis.overfitting import overfitting_report, summarise_diagnoses
 from ichor.core.analysis.s_curves.compact_s_curves import (
     plot_s_curves_per_element,
     plot_with_matplotlib,
@@ -36,10 +60,6 @@ from tqdm import tqdm
 # TODO - element type averages
 # TODO - xyz to extract atom types - Bienfait
 
-# held-out split naming used in FEREBUS/ichor training CSV file names
-EXTERNAL_SET_TYPE = "EXT_VALIDATION_SET"
-INTERNAL_SET_TYPE = "INT_VALIDATION_SET"
-
 MODEL_ANALYSIS_MENU_DESCRIPTION = MenuDescription(
     "Model Analysis Menu",
     subtitle="Use this menu to make S-curves and extract quality metrics for trained models.\n",
@@ -49,26 +69,6 @@ MODEL_ANALYSIS_MENU_DEFAULTS = {
     "default_models_path": ichor.cli.global_menu_variables.SELECTED_MODELS_PATH,
     "default_set_type": EXTERNAL_SET_TYPE,
 }
-
-# analysis outputs (S-curves, plots, metrics) are written into this subfolder of
-# the model folder, to keep each model batch's results tidy
-ANALYSIS_SUBFOLDER = "analysis"
-
-# output file names (fixed; identity comes from the analysis/ folder location)
-S_CURVES_EXCEL_NAME = "s-curves.xlsx"
-S_CURVES_PLOT_NAME = "s-curves.png"
-S_CURVES_CSV_NAME = "s-curves.csv"
-METRICS_CSV_NAME = "model_metrics.csv"
-OVERFITTING_CSV_NAME = "overfitting_report.csv"
-
-
-def _pause(message: str = ""):
-    """Shows ``message`` (if any) and then waits for the user to press enter. The
-    "Press enter to continue" prompt is always put on its own line so it is clear
-    that user interaction is needed."""
-    if message:
-        print(message)
-    user_input_free_flow("Press enter to continue: ")
 
 
 def _discover_seq_folders(root: Path) -> List[Path]:
@@ -124,40 +124,6 @@ model_analysis_menu_options = ModelAnalysisMenuOptions(
 )
 
 
-# which option selects the models the analysis is run on, so that an option which is
-# picked before it has been used says what to do about it
-SELECT_MODELS_WITH = "Use 'Select models directory' in this menu first."
-
-
-def _models_directory_selected(action: str, holds_models: bool = True) -> bool:
-    """Checks that the models directory an option is about to be run on has been
-    selected, and tells the user what to select if it has not.
-
-    The models path starts out as the directory ichor is running in, so an option which
-    is picked before it has been selected is handed the working directory: the analysis
-    of it then finds no models (or, for the options which search a whole tree of model
-    folders, walks everything below wherever ichor was started) rather than saying that
-    nothing was selected.
-
-    :param action: What the option would do with the models, e.g. ``"make the
-        S-curves"``.
-    :param holds_models: Whether the directory has to hold the ``.model`` files itself,
-        defaults to True. Pass False for the options which are pointed at a parent of
-        model folders (e.g. ``6_MODELS``), which holds no models of its own.
-    :return: True if the option can go ahead, False if it cannot (in which case the user
-        has been shown what is wrong).
-    """
-
-    return directory_selected(
-        model_analysis_menu_options.selected_models_path,
-        action,
-        what="models directory",
-        holds="*.model" if holds_models else None,
-        holds_description="models (.model files)",
-        select_with=SELECT_MODELS_WITH,
-    )
-
-
 def _get_models_and_csv_files():
     """Builds the ``Models`` instance and the list of held-out CSV file paths from
     the currently selected models path. The held-out CSVs are co-located under the
@@ -165,57 +131,13 @@ def _get_models_and_csv_files():
     extract step), so they are found by searching the model folder recursively and
     filtering to the selected held-out split (external or internal validation)."""
 
-    models_root = Path(model_analysis_menu_options.selected_models_path)
+    models_root = selected_models_path()
     models = Models(models_root)
 
-    set_type = model_analysis_menu_options.selected_set_type
+    set_type = selected_set_type()
     csv_files = sorted(models_root.rglob(f"*_{set_type}.csv"))
 
     return models, csv_files
-
-
-def _discover_model_folders(root: Path) -> List[Path]:
-    """Finds model folders (directories that directly contain ``.model`` files)
-    under ``root``. If ``root`` is itself a model folder it is returned on its own.
-    Used to run analysis over a whole parent folder of model batches, e.g. every
-    ``SEQ-XX-YY-ZZ`` folder under ``6_MODELS`` (the layout produced by the extract
-    step)."""
-
-    root = Path(root)
-    if not root.is_dir():
-        return []
-    if Models.check_path(root):
-        return [root]
-    return sorted(
-        d
-        for d in tqdm(root.rglob("*"), desc="Scanning for model folders")
-        if d.is_dir() and Models.check_path(d)
-    )
-
-
-def _analysis_output_path(base_name: str, models_path: Optional[Path] = None) -> Path:
-    """Builds the full path for an analysis output file, placed inside an
-    ``analysis`` subfolder of the model folder (created if needed), e.g.::
-
-        <models_path>/analysis/s-curves.xlsx
-
-    Writing outputs into each model's own ``analysis`` folder (rather than the
-    current directory) keeps each model batch's results tidy and self-identifying
-    by their location, so no filename prefix is needed.
-
-    :param base_name: The base output file name, e.g. ``s-curves.xlsx``.
-    :param models_path: The model folder to write into. Defaults to the currently
-        selected models path.
-    """
-
-    if models_path is None:
-        models_path = model_analysis_menu_options.selected_models_path
-    models_path = Path(models_path)
-
-    analysis_dir = models_path / ANALYSIS_SUBFOLDER
-    analysis_dir.mkdir(parents=True, exist_ok=True)
-
-    return analysis_dir / base_name
 
 
 def _error_dict_from_total_dict(total_dict: dict) -> dict:
@@ -233,12 +155,12 @@ def _report_saved_plots(saved_files):
     """Tells the user how many per-property S-curve files were written."""
     if saved_files:
         first = Path(saved_files[0]).absolute()
-        _pause(
+        pause(
             f"{len(saved_files)} S-curve plot(s) written, one per property "
             f"(e.g. {first})."
         )
     else:
-        _pause(
+        pause(
             "No S-curve plots written (matplotlib may be missing or there was no "
             "data)."
         )
@@ -264,18 +186,18 @@ def _report_written_files(written, noun: str):
     """Tells the user how many output files were written (and an example), or that
     nothing was written."""
     if written:
-        _pause(
+        pause(
             f"{len(written)} {noun} written " f"(e.g. {Path(written[0]).absolute()})."
         )
     else:
-        _pause(f"No {noun} written (no data).")
+        pause(f"No {noun} written (no data).")
 
 
 def _warn_no_csv_files():
     """Warns the user that no CSV files matched the selected split."""
-    _pause(
-        f"No '{model_analysis_menu_options.selected_set_type}' CSV files found "
-        f"under {model_analysis_menu_options.selected_models_path}. "
+    pause(
+        f"No '{selected_set_type()}' CSV files found "
+        f"under {selected_models_path()}. "
         "Check that the held-out CSVs are co-located with the models and that the "
         "split is correct."
     )
@@ -290,7 +212,7 @@ def _prepare_ferebus_analysis(action: str):
         S-curves"``, used in the message when the models have not been selected.
     """
 
-    if not _models_directory_selected(action):
+    if not models_directory_selected(action):
         return None
 
     models, csv_files = _get_models_and_csv_files()
@@ -332,7 +254,7 @@ class ModelAnalysisFunctions:
         seq_folders = _discover_seq_folders(run_path)
 
         if not seq_folders:
-            _pause(f"No SEQ folders containing models found under {run_path}.")
+            pause(f"No SEQ folders containing models found under {run_path}.")
             return
 
         print(f"Found {len(seq_folders)} SEQ folder(s) with models.")
@@ -363,7 +285,7 @@ class ModelAnalysisFunctions:
                 print(f"Extraction failed for {seq_folder}: {err}")
                 failed += 1
 
-        _pause(
+        pause(
             f"Extraction finished: {succeeded} succeeded, {failed} failed.\n"
             "Models and held-out CSVs copied into 6_MODELS."
         )
@@ -391,9 +313,14 @@ class ModelAnalysisFunctions:
             "[default external]: "
         )
         if answer is not None and answer.strip().lower().startswith("i"):
-            model_analysis_menu_options.selected_set_type = INTERNAL_SET_TYPE
+            set_type = INTERNAL_SET_TYPE
         else:
-            model_analysis_menu_options.selected_set_type = EXTERNAL_SET_TYPE
+            set_type = EXTERNAL_SET_TYPE
+
+        model_analysis_menu_options.selected_set_type = set_type
+        # kept in the global as well, so the submenus of this menu are run against the
+        # same split without having to reach into this menu's options
+        ichor.cli.global_menu_variables.SELECTED_MODEL_SET_TYPE = set_type
 
     @staticmethod
     def make_s_curves():
@@ -414,7 +341,7 @@ class ModelAnalysisFunctions:
         )
 
         if fmt == "excel":
-            output_name = _analysis_output_path(S_CURVES_EXCEL_NAME)
+            output_name = analysis_output_path(S_CURVES_EXCEL_NAME)
             simplified_write_to_excel(total_dict, output_name)
             written = [output_name]
             if per_element:
@@ -422,7 +349,7 @@ class ModelAnalysisFunctions:
             _report_written_files(written, "S-curve workbook(s)")
 
         elif fmt == "csv":
-            output_name = _analysis_output_path(S_CURVES_CSV_NAME)
+            output_name = analysis_output_path(S_CURVES_CSV_NAME)
             written = write_s_curves_to_csv(total_dict, saved_name=output_name)
             if per_element:
                 written += write_s_curves_to_csv_per_element(
@@ -431,7 +358,7 @@ class ModelAnalysisFunctions:
             _report_written_files(written, "S-curve CSV(s)")
 
         else:  # matplotlib
-            output_name = _analysis_output_path(S_CURVES_PLOT_NAME)
+            output_name = analysis_output_path(S_CURVES_PLOT_NAME)
             written = plot_with_matplotlib(total_dict, saved_name=output_name)
             if per_element:
                 written += plot_s_curves_per_element(total_dict, saved_name=output_name)
@@ -450,7 +377,7 @@ class ModelAnalysisFunctions:
             return
         _, total_dict = result
 
-        output_name = _analysis_output_path(METRICS_CSV_NAME)
+        output_name = analysis_output_path(METRICS_CSV_NAME)
         metrics_df = metrics_df_from_total_dict(total_dict, output_location=output_name)
         print(metrics_df.to_string(index=False))
 
@@ -465,63 +392,13 @@ class ModelAnalysisFunctions:
         _report_written_files(written, "metrics CSV(s)")
 
     @staticmethod
-    def check_overfitting():
-        """Writes a CSV reporting whether the selected models are overfitting. Each
-        model is scored against itself by closed-form leave-one-out cross validation on
-        the training data stored in its own ``.model`` file, and against the held-out
-        FEREBUS CSVs of the selected split. Comparing the two, alongside how large the
-        model says its own uncertainty is, separates a model which has memorised its
-        training set from one which is merely being asked about parts of configuration
-        space the training set never covered."""
-
-        if not _models_directory_selected("check for overfitting"):
-            return
-
-        models, csv_files = _get_models_and_csv_files()
-        set_type = model_analysis_menu_options.selected_set_type
-
-        # the leave-one-out half of the check needs nothing but the models themselves,
-        # so it is still worth running when no held-out CSVs were found
-        if not csv_files:
-            print(
-                f"No '{set_type}' CSV files found under "
-                f"{model_analysis_menu_options.selected_models_path}.\n"
-                "Reporting leave-one-out cross validation only; without a held-out "
-                "set there is nothing to compare it against."
-            )
-            set_type = ""
-
-        output_name = _analysis_output_path(OVERFITTING_CSV_NAME)
-        report_df = overfitting_report(
-            models,
-            csv_files_list=csv_files,
-            split_name=set_type,
-            output_location=output_name,
-        )
-
-        if report_df.empty:
-            _pause("No models could be checked.")
-            return
-
-        print(report_df.to_string(index=False))
-        print()
-        print(summarise_diagnoses(report_df))
-
-        written = [output_name]
-        per_element = user_input_bool(
-            "Also write a per-element-type breakdown? (y/n) [default no]: ",
-            default=False,
-        )
-        if per_element:
-            written += write_metrics_per_element(report_df, output_name)
-
-        _report_written_files(written, "overfitting report(s)")
-
-    @staticmethod
     def run_batch_analysis():
         """Runs CSV-based analysis (S-curve Excel + per-property plots + metrics
         CSV) on *every* model batch found under the selected models path - like the
-        extract script runs over every SEQ folder. Each batch uses its own
+        extract script runs over every SEQ folder. The overfitting check of each batch
+        is submitted to the queue afterwards rather than run here, as it is far slower
+        than the rest; when there is no batch system to submit it to, it is skipped and
+        the user is told so. Each batch uses its own
         co-located held-out CSVs of the selected split (external/internal), and all
         outputs are prefixed with the batch identifier so nothing is overwritten.
 
@@ -532,19 +409,20 @@ class ModelAnalysisFunctions:
 
         # a parent folder of model batches holds no models of its own, so only the
         # choice of the directory is checked here; the batches in it are found below
-        if not _models_directory_selected("run the analysis", holds_models=False):
+        if not models_directory_selected("run the analysis", holds_models=False):
             return
 
-        root = Path(model_analysis_menu_options.selected_models_path)
-        model_folders = _discover_model_folders(root)
+        root = selected_models_path()
+        model_folders = discover_model_folders(root)
         if not model_folders:
-            _pause(f"No model folders (containing .model files) found under {root}.")
+            pause(f"No model folders (containing .model files) found under {root}.")
             return
 
-        set_type = model_analysis_menu_options.selected_set_type
+        set_type = selected_set_type()
         print(f"Found {len(model_folders)} model batch(es) to analyse.")
 
         analysed, skipped = 0, 0
+        analysed_folders = []
         for model_folder in model_folders:
 
             print(f"\n=== Analysing {model_folder} ===")
@@ -563,39 +441,74 @@ class ModelAnalysisFunctions:
             total_dict = true_predicted_from_ferebus_csvs(csv_files, models)
 
             # S-curve Excel workbook
-            excel_out = _analysis_output_path(S_CURVES_EXCEL_NAME, model_folder)
+            excel_out = analysis_output_path(S_CURVES_EXCEL_NAME, model_folder)
             simplified_write_to_excel(total_dict, excel_out)
 
             # per-property S-curve images (plotter only needs the errors), plus a
             # per-element set (each element's atoms in their own file)
             error_dict = _error_dict_from_total_dict(total_dict)
-            plot_out = _analysis_output_path(S_CURVES_PLOT_NAME, model_folder)
+            plot_out = analysis_output_path(S_CURVES_PLOT_NAME, model_folder)
             plot_with_matplotlib(error_dict, saved_name=plot_out)
             plot_s_curves_per_element(error_dict, saved_name=plot_out)
 
             # quality metrics CSV (combined, plus one CSV per element type)
-            metrics_out = _analysis_output_path(METRICS_CSV_NAME, model_folder)
+            metrics_out = analysis_output_path(METRICS_CSV_NAME, model_folder)
             metrics_df = metrics_df_from_total_dict(
                 total_dict, output_location=metrics_out
             )
             write_metrics_per_element(metrics_df, metrics_out)
 
-            # overfitting report (leave-one-out from the models themselves, compared
-            # against the same held-out CSVs)
-            overfitting_out = _analysis_output_path(OVERFITTING_CSV_NAME, model_folder)
-            report_df = overfitting_report(
-                models,
-                csv_files_list=csv_files,
-                split_name=set_type,
-                output_location=overfitting_out,
-            )
-            print(summarise_diagnoses(report_df))
-
             analysed += 1
+            analysed_folders.append(model_folder)
 
-        _pause(
-            f"Batch analysis complete: {analysed} analysed, {skipped} skipped. "
-            "Outputs are prefixed with each batch identifier."
+        # the overfitting check is the slow half of the analysis (it inverts the
+        # training covariance matrix of every model), so it is queued rather than run
+        # here, once the batches it is checking are known
+        submitted, failed_to_submit = [], []
+        if not analysed_folders:
+            overfitting_notes = []
+        elif batch_system_is_set_up():
+            print(
+                f"\nSubmitting the overfitting check of {len(analysed_folders)} "
+                "batch(es).\n"
+            )
+            submitted, failed_to_submit = submit_overfitting_for_folders(
+                analysed_folders, overfitting_menu_options.selected_number_of_cores
+            )
+            overfitting_notes = overfitting_submission_notes(
+                overfitting_menu_options.selected_number_of_cores
+            )
+        else:
+            overfitting_notes = [
+                f"The overfitting check was skipped. {no_batch_system_note()}"
+            ]
+
+        print_summary_and_pause(
+            "BATCH ANALYSIS COMPLETE",
+            {
+                "Models path": root,
+                "Held-out split": set_type,
+                "Batches analysed": f"{analysed} of {len(model_folders)}",
+                "Batches skipped": skipped,
+                "Overfitting jobs submitted": (
+                    f"{len(submitted)} of {len(analysed_folders)}"
+                    if analysed_folders
+                    else 0
+                ),
+            },
+            [
+                "The S-curves and quality metrics of each batch are in its own "
+                f"{ANALYSIS_SUBFOLDER} folder.",
+                *overfitting_notes,
+                *(
+                    [
+                        f"{len(failed_to_submit)} overfitting job(s) could not be "
+                        "submitted; the error given for each is printed above."
+                    ]
+                    if failed_to_submit
+                    else []
+                ),
+            ],
         )
 
 
@@ -622,10 +535,6 @@ model_analysis_menu_items = [
         "Extract quality metrics (CSV)",
         ModelAnalysisFunctions.extract_metrics,
     ),
-    FunctionItem(
-        "Check for overfitting (leave-one-out vs held-out)",
-        ModelAnalysisFunctions.check_overfitting,
-    ),
     # Batch: run analysis on every model folder under the selected path
     FunctionItem(
         "[Batch] Run all analysis under the selected path",
@@ -641,6 +550,17 @@ model_analysis_menu = ConsoleMenu(
     prologue_text=MODEL_ANALYSIS_MENU_DESCRIPTION.prologue_description_text,
     epilogue_text=MODEL_ANALYSIS_MENU_DESCRIPTION.epilogue_description_text,
     show_exit_option=MODEL_ANALYSIS_MENU_DESCRIPTION.show_exit_option,
+)
+
+# the overfitting check is a submenu rather than an option, as it is submitted to the
+# queue with settings of its own. It sits directly underneath the batch analysis, which
+# submits it for every batch it analyses.
+model_analysis_menu_items.append(
+    SubmenuItem(
+        OVERFITTING_MENU_DESCRIPTION.title,
+        overfitting_menu,
+        model_analysis_menu,
+    )
 )
 
 add_items_to_menu(model_analysis_menu, model_analysis_menu_items)

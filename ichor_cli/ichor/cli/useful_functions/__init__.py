@@ -1,4 +1,5 @@
 from ichor.cli.useful_functions.hpc_resources import (
+    batch_system_available,
     FALLBACK_MEMORY_PER_CORE_GB,
     format_memory_gb,
     job_memory_gb,
@@ -26,6 +27,7 @@ from ichor.cli.useful_functions.user_input import (
 __all__ = [
     "FALLBACK_MEMORY_PER_CORE_GB",
     "format_memory_gb",
+    "batch_system_available",
     "job_memory_gb",
     "maximum_cores",
     "memory_per_core_gb",

@@ -244,6 +244,7 @@ SCRIPT_NAMES = ScriptNames(
         "center_trajectory": "center_trajectory.sh",
         "stability_check": "stability_check.sh",
         "diversity_sampling": "diversity_sampling.sh",
+        "overfitting": "overfitting_report.sh",
         "datasets": "datasets_prep.sh",
         "gaussian": "GAUSSIAN.sh",
         "training_models": "training_models.sh",

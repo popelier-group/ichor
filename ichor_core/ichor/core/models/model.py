@@ -395,9 +395,12 @@ class Model(ReadFile, WriteFile):
         # temporary matrix, see Rasmussen Williams page 19 algo. 2.1
         v = np.linalg.solve(self.lower_cholesky, train_test_covar)
 
+        # only the diagonal of v^T v is wanted, so it is summed column by column
+        # rather than by forming the whole n_test by n_test matrix and throwing all
+        # but its diagonal away (which costs n_test times as much time and memory)
         # TODO: need to multiply by tau^2 in order to get "true" variance which can be used for error estimations.
         # here it can only be used to compare points to figure out which point has the largest variance.
-        return 1.0 - np.diag(np.matmul(v.T, v)).flatten()
+        return 1.0 - np.einsum("ij,ij->j", v, v)
 
     def _write_file(self, path: Path) -> None:
         if not path.parent.exists():
