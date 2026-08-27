@@ -2,7 +2,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import ichor.cli.global_menu_variables
 from consolemenu.items import FunctionItem, SubmenuItem
@@ -154,27 +154,34 @@ def _error_dict_from_total_dict(total_dict: dict) -> dict:
     }
 
 
-def _report_saved_plots(saved_files):
-    """Tells the user how many per-property S-curve files were written."""
+def _report_saved_plots(saved_files, extra: str = ""):
+    """Tells the user how many per-property S-curve files were written.
+
+    :param saved_files: The plot files that were written.
+    :param extra: A further sentence to add to the message, e.g. the note about the
+        CSVs written alongside the plots.
+    """
     if saved_files:
         first = Path(saved_files[0]).absolute()
-        pause(
+        message = (
             f"{len(saved_files)} S-curve plot(s) written, one per property "
             f"(e.g. {first})."
         )
     else:
-        pause(
+        message = (
             "No S-curve plots written (matplotlib may be missing or there was no "
             "data)."
         )
+    pause(message + extra)
 
 
 def _prompt_s_curve_format() -> str:
-    """Asks the user which S-curve output format to produce. Returns one of
-    ``"excel"``, ``"matplotlib"`` or ``"csv"`` (defaulting to Excel)."""
+    """Asks the user which S-curve output format to produce, on top of the plain CSV
+    data which is always written. Returns one of ``"excel"``, ``"matplotlib"`` or
+    ``"csv"`` (defaulting to Excel), where ``"csv"`` means that data on its own."""
     answer = user_input_free_flow(
         "Output format - (e)xcel workbook / (m)atplotlib images / (c)sv data only? "
-        "[default excel]: "
+        "The CSV data is written either way. [default excel]: "
     )
     if answer is not None:
         first = answer.strip().lower()[:1]
@@ -185,15 +192,62 @@ def _prompt_s_curve_format() -> str:
     return "excel"
 
 
-def _report_written_files(written, noun: str):
+def _report_written_files(written, noun: str, extra: str = ""):
     """Tells the user how many output files were written (and an example), or that
-    nothing was written."""
+    nothing was written.
+
+    :param written: The files that were written.
+    :param noun: What they are, e.g. ``"S-curve workbook(s)"``.
+    :param extra: A further sentence to add to the message, e.g. the note about the
+        CSVs written alongside them.
+    """
     if written:
-        pause(
+        message = (
             f"{len(written)} {noun} written " f"(e.g. {Path(written[0]).absolute()})."
         )
     else:
-        pause(f"No {noun} written (no data).")
+        message = f"No {noun} written (no data)."
+    pause(message + extra)
+
+
+def _write_s_curve_csvs(
+    total_dict: dict, per_element: bool, models_path: Optional[Path] = None
+) -> List[Path]:
+    """Writes the numbers behind the S-curves (sorted absolute error against the
+    cumulative percentage of points) as plain CSV, one file per property, into the
+    model folder's ``analysis`` folder.
+
+    These are written whichever output format was asked for, so that the curves can
+    be replotted with the user's own scripts (e.g. for a publication figure) without
+    having to dig the numbers back out of a workbook or an image.
+
+    :param total_dict: The nested dict of true/predicted/error values the S-curves
+        are made from.
+    :param per_element: Whether to also write a separate set of CSVs per element type.
+    :param models_path: The model folder to write into, defaulting to the selected one.
+    :return: The CSV paths that were written.
+    """
+
+    csv_out = analysis_output_path(S_CURVES_CSV_NAME, models_path)
+    written = write_s_curves_to_csv(total_dict, saved_name=csv_out)
+    if per_element:
+        written += write_s_curves_to_csv_per_element(total_dict, saved_name=csv_out)
+
+    return written
+
+
+def _csv_note(csv_written: List[Path]) -> str:
+    """The sentence added to an S-curve message saying that the plotted numbers were
+    written as CSV as well, or that there were none to write."""
+
+    if not csv_written:
+        return "\nNo S-curve CSV data was written (there was no data to write)."
+
+    return (
+        f"\nThe numbers behind the curves were also written as {len(csv_written)} "
+        f"CSV file(s), one per property (e.g. {Path(csv_written[0]).absolute()}), "
+        "so they can be replotted with your own scripts."
+    )
 
 
 def _warn_no_csv_files():
@@ -330,7 +384,11 @@ class ModelAnalysisFunctions:
         """Makes S-curves from the selected models and the held-out FEREBUS CSVs of
         the selected split. Prompts at runtime for the output format (Excel workbook
         / matplotlib images / CSV data only) and whether to also write a
-        per-element-type breakdown (a separate set of files for each element)."""
+        per-element-type breakdown (a separate set of files for each element).
+
+        The plain CSV data behind the curves is written whichever format is picked,
+        so the curves can be replotted with the user's own scripts; picking CSV means
+        that data on its own, without a workbook or images."""
 
         result = _prepare_ferebus_analysis("make the S-curves")
         if result is None:
@@ -343,29 +401,29 @@ class ModelAnalysisFunctions:
             default=False,
         )
 
-        if fmt == "excel":
+        # written whatever was picked, so the curves can be replotted elsewhere; when
+        # CSV was picked these are the whole output rather than an extra
+        csv_written = _write_s_curve_csvs(total_dict, per_element)
+
+        if fmt == "csv":
+            _report_written_files(csv_written, "S-curve CSV(s)")
+
+        elif fmt == "excel":
             output_name = analysis_output_path(S_CURVES_EXCEL_NAME)
             simplified_write_to_excel(total_dict, output_name)
             written = [output_name]
             if per_element:
                 written += write_s_curves_to_excel_per_element(total_dict, output_name)
-            _report_written_files(written, "S-curve workbook(s)")
-
-        elif fmt == "csv":
-            output_name = analysis_output_path(S_CURVES_CSV_NAME)
-            written = write_s_curves_to_csv(total_dict, saved_name=output_name)
-            if per_element:
-                written += write_s_curves_to_csv_per_element(
-                    total_dict, saved_name=output_name
-                )
-            _report_written_files(written, "S-curve CSV(s)")
+            _report_written_files(
+                written, "S-curve workbook(s)", extra=_csv_note(csv_written)
+            )
 
         else:  # matplotlib
             output_name = analysis_output_path(S_CURVES_PLOT_NAME)
             written = plot_with_matplotlib(total_dict, saved_name=output_name)
             if per_element:
                 written += plot_s_curves_per_element(total_dict, saved_name=output_name)
-            _report_saved_plots(written)
+            _report_saved_plots(written, extra=_csv_note(csv_written))
 
     @staticmethod
     def extract_metrics():
@@ -396,9 +454,9 @@ class ModelAnalysisFunctions:
 
     @staticmethod
     def run_batch_analysis():
-        """Runs CSV-based analysis (S-curve Excel + per-property plots + metrics
-        CSV) on *every* model batch found under the selected models path - like the
-        extract script runs over every SEQ folder. The overfitting check of each batch
+        """Runs CSV-based analysis (S-curve Excel + per-property plots + S-curve data
+        CSVs + metrics CSV) on *every* model batch found under the selected models
+        path - like the extract script runs over every SEQ folder. The overfitting check of each batch
         is submitted to the queue afterwards rather than run here, as it is far slower
         than the rest; when there is no batch system to submit it to, it is skipped and
         the user is told so. Each batch uses its own
@@ -454,6 +512,10 @@ class ModelAnalysisFunctions:
             plot_with_matplotlib(error_dict, saved_name=plot_out)
             plot_s_curves_per_element(error_dict, saved_name=plot_out)
 
+            # the numbers behind those curves, so they can be replotted with the
+            # user's own scripts (the CSV writer needs only the errors as well)
+            _write_s_curve_csvs(error_dict, per_element=True, models_path=model_folder)
+
             # quality metrics CSV (combined, plus one CSV per element type)
             metrics_out = analysis_output_path(METRICS_CSV_NAME, model_folder)
             metrics_df = metrics_df_from_total_dict(
@@ -508,7 +570,10 @@ class ModelAnalysisFunctions:
             },
             [
                 "The S-curves and quality metrics are done and written into each "
-                f"batch's own {ANALYSIS_SUBFOLDER} folder.",
+                f"batch's own {ANALYSIS_SUBFOLDER} folder. The S-curves are written "
+                "as a workbook, as images, and as plain CSV data (one file per "
+                "property, and one per element type) for replotting with your own "
+                "scripts.",
                 *overfitting_notes,
                 *(
                     [
@@ -538,7 +603,7 @@ model_analysis_menu_items = [
     ),
     # analysis of the selected model folder using its held-out CSVs
     FunctionItem(
-        "Make S-curves (choose Excel / matplotlib / CSV at runtime)",
+        "Make S-curves (CSV data always written; Excel / matplotlib at runtime)",
         ModelAnalysisFunctions.make_s_curves,
     ),
     FunctionItem(
