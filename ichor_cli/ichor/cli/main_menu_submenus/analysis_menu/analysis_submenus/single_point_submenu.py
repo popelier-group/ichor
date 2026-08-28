@@ -198,7 +198,7 @@ class SinglePointMenuFunctions:
     @staticmethod
     def select_executable_path():
         """Select an optional DL_FFLUX (DLPOLY.Z) executable path that overrides the
-        path configured in ichor_config.yaml. Leave blank to use the configured path."""
+        path configured in the ichor config file. Leave blank to use the configured path."""
         single_point_menu_options.selected_executable_path = user_input_free_flow(
             "Enter DL_FFLUX executable path (blank = use config): ",
             single_point_menu_options.selected_executable_path,

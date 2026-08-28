@@ -117,15 +117,17 @@ To load conda, use
 
 .. code-block:: text
 
-    module load apps/binapps/anaconda3/2022.10
+    module load apps/binapps/anaconda3/2024.10
 
-To activate the ``base`` conda environment, which should have Python ``3.9`` with the above module, do
+To activate the ``base`` conda environment, do
 
 .. code-block:: text
 
     conda activate
 
-and you should see a ``(base)`` on the left of the terminal, you can check the version by doing ``python3 --version``.
+and you should see a ``(base)`` on the left of the terminal. Check the version with
+``python3 --version`` and make sure it is ``3.10`` or newer before going any further --
+if it is not, load a newer anaconda module.
 
 On CSF3, you need to do ``qrsh -l short`` as the network proxy is no longer available.
 This goes into a submit (compute) node, you can access the internet and install packages as well as make new conda environments with different python versions.
@@ -195,15 +197,20 @@ All three are given to pip at once so that it can resolve the dependencies betwe
 The ``-e`` flag installs the package in editable mode,
 meaning that changes in the ichor source code will be directly made in the installed package. As ichor is still work in progress, it makes it easier to make changes and then test the changes.
 
+Finally, create the config file:
+
+.. code-block:: text
+
+    ichor-config-init
+
+and edit the block for the cluster you are on, as described above.
+
 .. warning::
 
-    You will need to have access to the relevant
-    software on the computer cluster if submitting jobs with `ichor.hpc` or
-    `ichor.cli`. Currently, the paths to programs are hard coded into the ichor code, so
-    they will need to exist at the correct paths.
-
-    Also, make sure that you have access to the right versions of the software
-    on the right cluster.
+    You will need to have access to the relevant software on the computer cluster if
+    submitting jobs with `ichor.hpc` or `ichor.cli`. The paths to those programs, and the
+    modules that have to be loaded for them, are what you set in the config file, so they
+    need to be right for the cluster you are on and for the versions you have access to.
 
 .. note::
 

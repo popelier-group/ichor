@@ -43,3 +43,6 @@ Dockerfile
 # setuptools build directories (created by `pip wheel` / `python -m build`)
 build/
 dist/
+
+# Claude Code machine-local settings
+.claude/settings.local.json

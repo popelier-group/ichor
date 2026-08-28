@@ -58,8 +58,9 @@ class DlpolyCommand(SubmissionCommand):
             raise ValueError(
                 "The DL_POLY / DL_FFLUX executable path is not set. Please set "
                 "'software.dlpoly.executable_path' for the current machine "
-                f"('{ichor.hpc.global_variables.MACHINE}') in your ichor_config.yaml "
-                "(in your home directory) to the path of your compiled DLPOLY.Z executable."
+                f"('{ichor.hpc.global_variables.MACHINE}') in "
+                f"{ichor.hpc.global_variables.CONFIG_DESCRIPTION} to the path of "
+                "your compiled DLPOLY.Z executable."
             )
         return executable_path
 
