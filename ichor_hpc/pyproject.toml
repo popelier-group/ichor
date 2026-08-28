@@ -1,0 +1,7 @@
+# Declaring the build backend explicitly means pip always builds this package
+# with setuptools rather than guessing a legacy default, and it lets
+# `pip install --no-build-isolation` be used on machines with no network access
+# on the login node.
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"

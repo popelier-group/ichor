@@ -5,10 +5,14 @@
 Install the development version of the packages which will install all extra packages needed to build documentation and run unit tests.
 
 ```
-pip install -e ichor_core[dev]
-pip install -e ichor_hpc
-pip install -e ichor_cli
+python3 -m pip install -e ichor_core[dev] -e ichor_hpc -e ichor_cli
 ```
+
+All three packages are installed in one command so that pip resolves them
+together. `ichor-hpc` and `ichor-cli` depend on `ichor-core`, which is not
+published on PyPI, so installing them one at a time only works if they happen to
+be done in the right order.
+
 ## Set up pre-commit
 
 [Pre-commit](https://pre-commit.com/) is used to run hooks such as [black](https://github.com/psf/black) for formatting and others. Run

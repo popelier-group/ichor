@@ -54,7 +54,7 @@ def get_dlpoly_energies(
             if len(wfn_files) > 0:
                 data["gaussian"] += [read_wfn_energy(wfn_files[0])]
             else:
-                data["gaussian"] += [np.NaN]
+                data["gaussian"] += [np.nan]
 
     data = dict_of_list_to_dict_of_array(data)
 

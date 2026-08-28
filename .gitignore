@@ -39,3 +39,7 @@ output.txt
 .__*.lock
 docs/build
 Dockerfile
+
+# setuptools build directories (created by `pip wheel` / `python -m build`)
+build/
+dist/
