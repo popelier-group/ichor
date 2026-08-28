@@ -38,17 +38,31 @@ from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_m
 
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
+from ichor.hpc.config_file import config_search_locations
 
 
 @dataclass
 class MainMenuMenuOptions(MenuOptions):
-    # defaults to the current working directory
-    selected_ichor_config_file: Path
+    # the config file ichor.hpc found, or None if there is not one yet
+    selected_ichor_config_file: Union[Path, None]
 
     def check_selected_points_directory_path(self) -> Union[str, None]:
-        """Checks whether the ichor_config.yaml is present in the user home directory."""
+        """Checks whether a config file was found in any of the locations ichor
+        looks in, as the menu system cannot submit anything without one."""
+        if self.selected_ichor_config_file is None:
+            searched = "\n".join(
+                f"  {location}" for location in config_search_locations()
+            )
+            return (
+                "No ichor config file was found, it is required to use the menu "
+                "system.\nRun `ichor-config-init` to create one, then edit it for "
+                f"the machine you are on.\nSearched, in order:\n{searched}"
+            )
         if not self.selected_ichor_config_file.exists():
-            return "The ichor_config.yaml file is not in the home directory!\nIt is required to use the menu system."
+            return (
+                f"The config file {self.selected_ichor_config_file} no longer exists!"
+                "\nIt is required to use the menu system."
+            )
 
 
 # initialize dataclass for storing information for menu

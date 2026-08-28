@@ -2,6 +2,7 @@ import platform
 import warnings
 
 from pathlib import Path
+from typing import Optional
 
 import yaml
 
@@ -9,6 +10,7 @@ from ichor.core.common.types import FileTree, FileType
 
 from ichor.hpc.batch_system import init_batch_system
 from ichor.hpc.batch_system.parallel_environment import ParallelEnvironment
+from ichor.hpc.config_file import config_search_locations, find_config_file
 from ichor.hpc.log import setup_logger
 from ichor.hpc.submission_script.script_names import ScriptNames
 from ichor.hpc.useful_functions import get_current_python_environment_path, init_machine
@@ -18,12 +20,6 @@ try:
     __building_docs__ = __sphinx_build__
 except NameError:
     __building_docs__ = False
-
-
-class MissingIchorConfig(Exception):
-    """Exception for missing ichor config file"""
-
-    pass
 
 
 def get_param_from_config(ichor_config: dict, *keys, default=None):
@@ -59,27 +55,43 @@ def initialize_config(config_path):
     return ichor_config
 
 
-ICHOR_CONFIG_PATH: Path = Path.home() / "ichor_config.yaml"
-# check that config file exists
+# the config file that is actually being used, or None if there is not one yet.
+# `ichor-config-init` creates it, see `ichor.hpc.config_file` for where it is looked for
+ICHOR_CONFIG_PATH: Optional[Path] = None if __building_docs__ else find_config_file()
 
 if not __building_docs__:
-    if not ICHOR_CONFIG_PATH.exists():
-        raise MissingIchorConfig(
-            "The ichor_config.yaml file is not found in the home directory. Please add it in order to use ichor.hpc"
+    if ICHOR_CONFIG_PATH is None:
+        # importing ichor.hpc must not fail just because the config has not been
+        # written yet, otherwise a freshly installed ichor cannot even start up to
+        # tell the user what is missing. The parts that need the config check for
+        # themselves that it is there
+        searched = "\n".join(f"  {location}" for location in config_search_locations())
+        warnings.warn(
+            "No ichor config file was found. Run `ichor-config-init` to create one, "
+            "then edit it for the machine you are on.\nThe following locations were "
+            f"searched, in order:\n{searched}"
         )
-
-if not __building_docs__:
-    ICHOR_CONFIG: dict = initialize_config(ICHOR_CONFIG_PATH)
+        ICHOR_CONFIG: dict = {}
+    else:
+        ICHOR_CONFIG: dict = initialize_config(ICHOR_CONFIG_PATH)
 else:
     ICHOR_CONFIG = None
 
+# used in the warnings below so they name the file that was actually read
+CONFIG_DESCRIPTION: str = (
+    str(ICHOR_CONFIG_PATH) if ICHOR_CONFIG_PATH is not None else "the ichor config file"
+)
+
 # the MACHINE will be a key from the top layer of the config file
 # if it not found, it will be None
-MACHINE: str = init_machine(platform.node(), ICHOR_CONFIG)
+MACHINE: Optional[str] = init_machine(platform.node(), ICHOR_CONFIG)
 if not __building_docs__:
     if not MACHINE:
         warnings.warn(
-            "The current machine is not defined in the ichor_config.yaml file."
+            f"The machine this is running on ({platform.node()}) does not match "
+            f"any of the machine names in {CONFIG_DESCRIPTION}, so ichor does not "
+            "know which modules to load or where any of the programs are. "
+            "Add a block for this machine before submitting any jobs."
         )
 
 # do not raise error that machine is not defined here, because it could be running on local
@@ -101,20 +113,20 @@ if not __building_docs__:
         # if parallel_environment is not found, but machine is defined
         except KeyError:
             warnings.warn(
-                "The parallel environment variables are not defined in the ichor_config.yaml file."
+                f"No hpc.parallel_environments block is defined for {MACHINE} in "
+                f"{CONFIG_DESCRIPTION}, so jobs cannot be given more than one core."
             )
         # if the machine is not defined (and so parallel environment is also not defined)
         except TypeError:
             warnings.warn(
-                "The current machine is not defined in the ichor_config.yaml file."
+                f"The machine this is running on ({platform.node()}) does not match "
+                f"any of the machine names in {CONFIG_DESCRIPTION}, so ichor does "
+                "not know which modules to load or where any of the programs are. "
+                "Add a block for this machine before submitting any jobs."
             )
-    else:
-        warnings.warn(
-            "The current machine is not defined in the ichor_config.yaml file."
-        )
-        # raise KeyError(
-        #     "The parallel environments are not defined for the current machine."
-        # )
+    # no `else` warning here: when there is no MACHINE the warning above has
+    # already said so, and repeating it makes the startup output of a fresh
+    # install look like two separate problems rather than one
 
 # default file structure to be used for file handling
 FILE_STRUCTURE = FileTree()
