@@ -3,44 +3,104 @@ Installing ichor
 
 To install ichor, simply do
 
-.. code-block:: python
+.. code-block:: text
 
-    python3 -m pip install -e ichor_core
-    python3 -m pip install -e ichor_hpc
-    python3 -m pip install -e ichor_cli
+    python3 -m pip install -e ichor_core -e ichor_hpc -e ichor_cli
 
 This will install all the packages in editable mode, so that any changes to the source code will
 be available to the user directly.
 
-.. warning::
+.. note::
 
-    The ``xtb`` package is only published on PyPI for CPython ``3.11`` and older, so
-    ``pip install -e ichor_core`` skips it on Python ``3.12+``. ichor itself never
-    imports ``xtb``, so the install and the rest of ichor work fine -- but the ASE
-    optimisation and metadynamics jobs will fail at *run* time with
-    ``ModuleNotFoundError: No module named 'xtb'`` in their error file.
+    All three packages are installed with a single command. ``ichor-hpc`` and ``ichor-cli``
+    depend on ``ichor-core``, which is not published on PyPI, so pip can only satisfy those
+    dependencies if all three are given to it at once. Installing them one at a time fails
+    unless it happens to be done in the right order.
 
-    These jobs run in **ichor's own environment** (the submission script activates
-    whatever ``venv``/``conda`` environment ichor was launched from, and loads no
-    modules), so ``xtb`` must be importable *there*. Putting ``xtb-python`` in a
-    separate conda environment does not help -- nothing activates it.
+++++++++++++++++++++++++++++++++++++++
+The conda environment for the ASE jobs
+++++++++++++++++++++++++++++++++++++++
 
-    On Python ``3.12+`` your options are therefore:
+The ASE optimisation and metadynamics jobs do not run in ichor's environment. The
+scripts ichor writes for them import ``ase``, ``xtb`` and (for metadynamics)
+``plumed``, and import nothing from ichor, so they run in a conda environment of
+their own which the submission script activates.
 
-    * Install ichor into a **conda** environment and add xtb to that same environment
-      with ``conda install -c conda-forge xtb-python``.
-    * Use a Python ``3.11`` environment, where ``pip`` installs ``xtb`` automatically
-      alongside ``ichor_core``. This is the only option if ichor lives in a ``venv``,
-      as conda-forge packages cannot be pip-installed.
+They get their own environment because ``xtb`` and the PLUMED Python wrappers are
+only distributed for current Python versions through conda-forge -- the ``xtb``
+wheels on PyPI stop at CPython ``3.11``. Keeping them out of ichor's own
+dependencies is what lets ichor be installed with pip on any supported Python.
 
-+++++++++++++++++++++++++++++++++
-Setting up ichor_config.yaml file
-+++++++++++++++++++++++++++++++++
+Create the environment from the ``environment.yml`` in the ichor repository:
 
-The **ichor_config.yaml** file is used to store configuration settings for the high performance computing (HPC)
-clusters. This file is needed if you are using `ichor.hpc` and `ichor.cli` as these interface with the workload
-manager on the HPC cluster. An example of the config file can be found in a separate page in the documentation,
-as well as in the Github repo.
+.. code-block:: text
+
+    conda env create -f environment.yml
+
+Then tell ichor where it is, in the block for the machine you are on in your config
+file:
+
+.. code-block:: text
+
+    software:
+      python:
+        env_name: ichor_ase
+        python_path: ~/.conda/envs/ichor_ase/bin/python
+        modules: [<the anaconda module for this cluster>]
+
+Which environment each kind of job uses:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 30 40
+
+   * - Job
+     - Environment
+     - What the script imports
+   * - ASE optimisation
+     - the conda environment above
+     - ``ase``, ``xtb``
+   * - Metadynamics
+     - the conda environment above
+     - ``ase``, ``xtb``, ``plumed``, ``numpy``
+   * - polus sampling
+     - ichor's own environment
+     - ``polus``, ``numpy``
+   * - Everything else
+     - ichor's own environment
+     - ichor itself
+
+.. note::
+
+    ichor checks that this environment exists and has what the job imports *before*
+    submitting anything, so a missing package is reported on the login node rather
+    than turning up as a ``ModuleNotFoundError`` in a job error file later on.
+
+++++++++++++++++++++++++++
+Setting up the config file
+++++++++++++++++++++++++++
+
+The config file stores settings for the high performance computing (HPC) clusters. It is
+needed if you are using `ichor.hpc` and `ichor.cli` as these interface with the workload
+manager on the HPC cluster. To create one, run
+
+.. code-block:: text
+
+    ichor-config-init
+
+which writes an example config file to ``~/.config/ichor/config.yaml`` and prints the path
+it wrote to. Edit the block for the cluster you are on before submitting any jobs.
+
+One config file covers every cluster, as each top level key is the name of a machine and
+ichor selects the block whose name appears in the hostname. There is no need for a separate
+config file, or a separate Python environment, per cluster.
+
+If you already have an ``~/ichor_config.yaml`` from an older version of ichor, the same
+command moves it to the new location. That old location is still read, so nothing breaks
+straight away, but it warns and should be migrated.
+
+See :doc:`ichor_config_setup` for what goes in the file and for the full list of locations
+that are searched.
 
 ++++++++++++++++++++++++++++++
 Setting up Python environments
@@ -48,19 +108,10 @@ Setting up Python environments
 
 Below is a more thorough explanation on how to set up ichor on a compute cluster such as CSF3 (used by the University of Manchester).
 
-
-.. warning::
-
-    You will need to make separate environments for CSF3 and CSF4.
-
-    .. For CSF3 use ``source activate my_env`` to activate a CONDA environment in both the login node and when submitting jobs.
-    .. Check out the guide here. Not sure why this is required.
-
-    .. * `Anaconda CSF3 <https://ri.itservices.manchester.ac.uk/csf3/software/applications/anaconda-python/>`_
-
-CSF3/CSF4 have a very old Python 3 installed, so you will need to load in an anaconda module file to gain access to recent python versions.
-Please make sure that you are using the latest version of conda on CSF3/CSF4.
-At the time of writing this guide, the latest version of Python with conda is ``3.9``. Using an older conda version will make it harder to install ichor as the python/setuptools/pip version supplied are older.
+ichor needs Python ``3.10`` or newer. CSF3/CSF4 have a much older Python 3 installed as the
+system Python, so you will need to load an anaconda module file to get a recent enough
+version. Use the newest anaconda module available on the cluster: an older one supplies an
+older pip and setuptools, which makes installing ichor harder than it needs to be.
 
 To load conda, use
 
@@ -107,7 +158,7 @@ To activate on GitBash, do ``. ~/.venv/ichor/Scripts/activate``.
 You should see ``(ichor)`` show up on the left side of the terminal, which indicates you are in the ``ichor`` environment. This is the
 same for both venv and conda.
 
-Make sure that you have at least python 3.7 in the current venv or conda environment and that setuptools and pip are all up to date.
+Make sure that the venv or conda environment has Python ``3.10`` or newer, and that setuptools and pip are up to date.
 
 To make sure you are using the latest versions of the packages, use
 
@@ -133,15 +184,13 @@ If you download the code as a zip, you will not be able to pull from github and 
     * `Github Personal Access Token <https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens>`_
 
 
-To install each of the sub-packages, do
+To install the sub-packages, do
 
-.. code-block:: python
+.. code-block:: text
 
-    python3 -m pip install -e ichor_core
-    python3 -m pip install -e ichor_hpc
-    python3 -m pip install -e ichor_cli
+    python3 -m pip install -e ichor_core -e ichor_hpc -e ichor_cli
 
-Please install these in the given order, as there are dependencies between the packages.
+All three are given to pip at once so that it can resolve the dependencies between them.
 
 The ``-e`` flag installs the package in editable mode,
 meaning that changes in the ichor source code will be directly made in the installed package. As ichor is still work in progress, it makes it easier to make changes and then test the changes.

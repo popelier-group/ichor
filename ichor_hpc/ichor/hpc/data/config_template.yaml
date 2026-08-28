@@ -37,9 +37,11 @@ csf3:
     pandora:
       modules: ["mpi/intel-18.0/openmpi/4.0.1"]
 
+    # the conda environment that the ASE optimisation and metadynamics jobs run in.
+    # create it with `conda env create -f environment.yml` from the ichor repository
     python:
-      env_name: "ase_plumed_env"
-      python_path: "~/.conda/envs/ase_plumed_env/bin/python"
+      env_name: "ichor_ase"
+      python_path: "~/.conda/envs/ichor_ase/bin/python"
       modules: ["apps/binapps/anaconda3/2024.10"]
 
     tyche:
@@ -84,9 +86,11 @@ csf4:
     pandora:
       modules: ["iomkl/2020.02"]
 
+    # the conda environment that the ASE optimisation and metadynamics jobs run in.
+    # create it with `conda env create -f environment.yml` from the ichor repository
     python:
-      env_name: "ase_plumed_env"
-      python_path: "~/.conda/envs/ase_plumed_env/bin/python"
+      env_name: "ichor_ase"
+      python_path: "~/.conda/envs/ichor_ase/bin/python"
       modules: ["anaconda3/2024.02"]
 
     tyche:
@@ -124,7 +128,11 @@ ffluxlab:
     pandora:
       modules: ["compilers/intel/18.0.3", "libs/python/pyscf/1.7.4"]
 
+    # the conda environment that the ASE optimisation and metadynamics jobs run in.
+    # create it with `conda env create -f environment.yml` from the ichor repository
     python:
+      env_name: "ichor_ase"
+      python_path: "~/.conda/envs/ichor_ase/bin/python"
       modules: ["apps/anaconda3/3.7.6"]
 
     tyche:

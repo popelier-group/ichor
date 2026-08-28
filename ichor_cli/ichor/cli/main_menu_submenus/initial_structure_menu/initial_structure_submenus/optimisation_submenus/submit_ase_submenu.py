@@ -15,9 +15,9 @@ from ichor.cli.useful_functions import (
     user_input_int,
     xyz_file_selected,
 )
+from ichor.hpc.check_python_env import ConfiguredPythonEnvironmentError
 from ichor.hpc.main.ase import submit_single_ase_xyz
 from ichor.hpc.main.opt import single_geometry_optimisation_directory
-from ichor.hpc.useful_functions import XTBNotFound
 
 SUBMIT_ASE_MENU_DESCRIPTION = MenuDescription(
     "Submit ASE Menu",
@@ -168,8 +168,8 @@ class SubmitAseFunctions:
         xyz_path = Path(ichor.cli.global_menu_variables.SELECTED_XYZ_PATH)
         optimisation_dir = single_geometry_optimisation_directory(xyz_path.stem, "ase")
 
-        # xtb is not installed in the environment the submitted job would activate,
-        # so nothing is submitted as every job would fail on the compute node
+        # the conda environment the submitted job would activate is not set up with
+        # what the job imports, so nothing is submitted as every job would fail
         try:
             job_id = submit_single_ase_xyz(
                 input_xyz_path=xyz_path,
@@ -181,7 +181,7 @@ class SubmitAseFunctions:
                 fmax=fmax,
                 overwrite=overwrite,
             )
-        except XTBNotFound as e:
+        except ConfiguredPythonEnvironmentError as e:
             ichor.hpc.global_variables.LOGGER.error(
                 f"ASE optimisation not submitted: {e}"
             )
@@ -189,10 +189,11 @@ class SubmitAseFunctions:
                 "ASE OPTIMISATION NOT SUBMITTED",
                 {"Structure": xyz_path, "Reason": e},
                 [
-                    "The optimisation runs xtb through ASE on the compute node, and "
-                    "xtb was not found in the environment the job would activate, so "
-                    "every job would have failed. Nothing has been submitted.",
-                    "Install xtb into that environment (or use the Gaussian "
+                    "The optimisation runs xtb through ASE on the compute node, in "
+                    "the conda environment named in the ichor config file. That "
+                    "environment is not set up to run it, so every job would have "
+                    "failed. Nothing has been submitted.",
+                    "Follow the instructions above (or use the Gaussian "
                     "optimisation menu instead) and try again.",
                 ],
             )

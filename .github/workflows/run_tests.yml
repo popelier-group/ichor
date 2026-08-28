@@ -40,7 +40,7 @@ jobs:
         pip install -e ichor_core[dev] -e ichor_hpc -e ichor_cli
     - name: Run pytest
       run: |
-        pytest ichor_core/tests
+        pytest ichor_core/tests ichor_hpc/tests
 
   run_examples:
     runs-on: ubuntu-latest

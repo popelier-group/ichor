@@ -31,10 +31,10 @@ git ls-files -- '*.py' | xargs pre-commit run --files
 
 # Unit Testing
 
-Currently only `ichor.core` has unit tests because this is the only part of the code that can be tested in an easy way.
+Most of the unit tests are for `ichor.core`, as it is the part of the code that can be tested without a workload manager. `ichor.hpc` has tests for the parts that do not need one, such as where the config file is looked for.
 
 ```
-pytest ichor_core/tests
+pytest ichor_core/tests ichor_hpc/tests
 ```
 
 will run all the tests in the repository. Similarly, you can run specific unit tests by giving the exact path to the directory/file containing the unit tests you want to run.

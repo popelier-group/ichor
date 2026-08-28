@@ -28,6 +28,7 @@ from ichor.core.files.mtd import (
     geometry_write_interval,
     number_of_geometries_written,
 )
+from ichor.hpc.check_python_env import ConfiguredPythonEnvironmentError
 from ichor.hpc.molecular_dynamics import prep_mtd, submit_mtd
 
 METADYNAMICS_MENU_DEFAULTS = {
@@ -268,11 +269,33 @@ class MetadynamicsMenuFunctions:
                 )
                 return
 
-            job_id = submit_mtd(
-                input_script=mtd_script,
-                script_name=ichor.hpc.global_variables.SCRIPT_NAMES["mtd"],
-                ncores=ncores,
-            )
+            # the conda environment the job would activate is not set up with what
+            # the generated script imports, so nothing is submitted as the job
+            # would fail on the compute node
+            try:
+                job_id = submit_mtd(
+                    input_script=mtd_script,
+                    script_name=ichor.hpc.global_variables.SCRIPT_NAMES["mtd"],
+                    ncores=ncores,
+                )
+            except ConfiguredPythonEnvironmentError as e:
+                ichor.hpc.global_variables.LOGGER.error(
+                    f"Metadynamics job not submitted: {e}"
+                )
+                print_summary_and_pause(
+                    "METADYNAMICS JOB NOT SUBMITTED",
+                    {"Starting geometry": xyz_path, "Reason": e},
+                    [
+                        "The run drives xtb through ASE with PLUMED on the compute "
+                        "node, in the conda environment named in the ichor config "
+                        "file. That environment is not set up to run it, so the job "
+                        "would have failed. Nothing has been submitted.",
+                        "Follow the instructions above and try again. The run "
+                        "directory has been left in place, so selecting overwrite "
+                        "is not needed when you do.",
+                    ],
+                )
+                return
 
             # describe the collective variables by type and the atoms they involve,
             # as they are what makes this run different from a plain MD run

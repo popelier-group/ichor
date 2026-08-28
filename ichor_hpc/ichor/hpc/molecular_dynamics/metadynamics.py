@@ -7,6 +7,10 @@ from ichor.core.common.io import mkdir
 from ichor.core.files.mtd import MtdTrajScript
 
 from ichor.hpc.batch_system import JobID
+from ichor.hpc.check_python_env import (
+    check_configured_python_environment,
+    METADYNAMICS_MODULES,
+)
 from ichor.hpc.submission_commands import AnacondaCommand
 from ichor.hpc.submission_script import SubmissionScript
 
@@ -69,6 +73,18 @@ def submit_mtd(
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
     **kwargs,
 ) -> JobID:
+    """Submits a metadynamics run to the queue.
+
+    :raises ConfiguredPythonEnvironmentError: If the conda environment named in the
+        ichor config file is not set up with the packages the generated script imports
+    :return: The JobID of the submitted job.
+    """
+
+    # the generated script imports ase, xtb, plumed and numpy and runs in the conda
+    # environment named in the config, so a run that could not possibly work is
+    # reported here rather than in an error file on a compute node
+    check_configured_python_environment(METADYNAMICS_MODULES, "metadynamics jobs")
+
     # make a SubmissionScript instance which is going to contain all the jobs that are going to be ran
     # the submission_script object can be accessed even after the context manager
     with SubmissionScript(

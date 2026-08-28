@@ -40,8 +40,15 @@ class AnacondaCommand(SubmissionCommand):
 
     @classproperty
     def command(self) -> str:
-        """For a Python command, this loads in the virtual environment. The same python environment is going to be used
-        as the one that is used for ichor."""
+        """Returns the line which activates the conda environment that the job runs
+        in, which is the one named by `software.python.env_name` in the ichor config
+        file rather than the environment ichor itself is running from.
+
+        :raises PythonEnvironmentNotFound: If the config file does not name an
+            environment for this machine, as an unset value would otherwise be
+            written into the submission script as the literal text `None` and the
+            job would fail on the compute node.
+        """
         # load in environment
         anaconda_env = get_param_from_config(
             ichor.hpc.global_variables.ICHOR_CONFIG,
@@ -50,16 +57,22 @@ class AnacondaCommand(SubmissionCommand):
             "python",
             "env_name",
         )
-        # here is where we can set plumed anaconda environment
-        try:
-            return f"source activate {str(anaconda_env)}"
-        except Exception:
+
+        if not anaconda_env:
             raise PythonEnvironmentNotFound(
-                "Python environment was not found. Cannot submit Python command."
+                "software.python.env_name is not set for this machine in "
+                f"{ichor.hpc.global_variables.CONFIG_DESCRIPTION}, so there is no "
+                "conda environment to activate. Cannot submit Python command."
             )
 
+        return f"source activate {anaconda_env}"
+
     def repr(self, variables: Optional[List[str]] = None) -> str:
-        """Returns a string which is then written into the submission script in order to run a python job."""
+        """Returns a string which is then written into the submission script in order to run a python job.
+
+        :raises PythonEnvironmentNotFound: If the config file does not name an
+            environment or an interpreter for this machine.
+        """
         activate_env = AnacondaCommand.command + "\n"
         anaconda_python_path = get_param_from_config(
             ichor.hpc.global_variables.ICHOR_CONFIG,
@@ -68,6 +81,14 @@ class AnacondaCommand(SubmissionCommand):
             "python",
             "python_path",
         )
+
+        if not anaconda_python_path:
+            raise PythonEnvironmentNotFound(
+                "software.python.python_path is not set for this machine in "
+                f"{ichor.hpc.global_variables.CONFIG_DESCRIPTION}, so there is no "
+                "interpreter to run the script with. Cannot submit Python command."
+            )
+
         python_script_to_run = (
             f"{anaconda_python_path} {self.script} {' '.join(self.args)}"
         )

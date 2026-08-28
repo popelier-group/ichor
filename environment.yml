@@ -1,0 +1,43 @@
+# The conda environment that ichor's ASE jobs run in.
+#
+# This is NOT the environment ichor itself is installed into -- ichor is installed
+# with pip, into a venv or a conda environment of your choosing, and never imports
+# anything listed here.
+#
+# The ASE optimisation and metadynamics scripts that ichor generates import ase,
+# xtb, plumed and numpy, and the submission script activates this environment to
+# run them. xtb and the PLUMED Python wrappers are only distributed for current
+# Python versions through conda-forge, which is why these jobs get an environment
+# of their own rather than sharing ichor's.
+#
+# Create it with:
+#     conda env create -f environment.yml
+#
+# Then point ichor at it in your config file (see `ichor-config-init`), under the
+# machine you are on:
+#     software:
+#       python:
+#         env_name: ichor_ase
+#         python_path: ~/.conda/envs/ichor_ase/bin/python
+#         modules: [<the anaconda module for this cluster>]
+#
+# ichor checks this environment has everything it needs before submitting, so if
+# a package is missing you are told on the login node rather than in a job error
+# file.
+
+name: ichor_ase
+
+channels:
+  - conda-forge
+
+dependencies:
+  # xtb-python's builds are the reason this environment exists, so the Python
+  # version is chosen to be one it is reliably built for rather than the newest
+  - python=3.11
+  - ase
+  # provides `import xtb`, used by both the optimisation and metadynamics scripts
+  - xtb-python
+  # provides `import plumed`; the `plumed` package is the library and executable,
+  # this is the Python wrapper the metadynamics script drives it through
+  - py-plumed
+  - numpy

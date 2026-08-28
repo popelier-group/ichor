@@ -30,6 +30,26 @@ If you use `ichor`, please cite the following two papers:
 
 Documentation of all three packages, including examples, can be found [here](https://ichor.readthedocs.io/en/latest/).
 
+## Installation
+---
+
+ichor needs Python 3.10 or newer. From a clone of this repository:
+
+```
+python3 -m pip install -e ichor_core -e ichor_hpc -e ichor_cli
+ichor-config-init
+```
+
+All three packages go in one command: they depend on each other and are not on PyPI, so pip can only resolve them if it is given all three at once. `ichor-config-init` writes an example config to `~/.config/ichor/config.yaml`, which you then edit for the cluster you are on.
+
+The ASE optimisation and metadynamics jobs run in a separate conda environment, because `xtb` and the PLUMED Python wrappers are only built for current Python versions on conda-forge. If you use those jobs, also run
+
+```
+conda env create -f environment.yml
+```
+
+and point the `software.python` block of your config file at it. See the [installation documentation](https://ichor.readthedocs.io/en/latest/installation.html) for the full walkthrough on a compute cluster.
+
 ## Getting Started
 ---
 The namespace package `ichor` is divided into three parts, `ichor.core`, `ichor.hpc`, and `ichor.cli`.
@@ -43,7 +63,15 @@ The `ichor.hpc` package is used to submit jobs on compute clusters (SGE/SLURM).
 ### `ichor.cli`
 The `ichor.cli` package provides a simple to use command line interface (CLI), providing an easy access to access the most commonly used tools from ichor.
 
-**You will need to have an `ichor_config.yaml` file in your home directory for configuration settings relating to HPC clusters, refer to the documentation for examples. An example `ichor_config.yaml` is provided in the repository.**
+### Configuration
+
+`ichor.hpc` and `ichor.cli` need a config file describing the HPC clusters you run on: which modules to load, where each program lives, and what parallel environments are available. After installing, run
+
+```
+ichor-config-init
+```
+
+which writes an example config to `~/.config/ichor/config.yaml` for you to edit. If you already have an `ichor_config.yaml` in your home directory from an older version of ichor, the same command moves it to the new location. Refer to the documentation for what goes in it.
 
 ## Contributing
 
