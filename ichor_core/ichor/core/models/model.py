@@ -6,7 +6,12 @@ from ichor.core.atoms import ALF
 from ichor.core.common.io import mkdir
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
-from ichor.core.files.file import FileContents, ReadFile, WriteFile
+from ichor.core.files.file import (
+    FileContents,
+    FileReadError,
+    ReadFile,
+    WriteFile,
+)
 from ichor.core.models.kernels import (
     ConstantKernel,
     Kernel,
@@ -94,6 +99,60 @@ class Model(ReadFile, WriteFile):
         self.weights = weights
         self.program_version = program_version
         self.notes = notes
+
+    def _read_data_block(self, f, block_name: str, ncols: int) -> np.ndarray:
+        """Reads one of the fixed-size data blocks of a model file (the training
+        inputs, the training labels or the weights) into an array.
+
+        Every one of those blocks holds one row per training point, so the array is
+        allocated from the ``number_of_training_points`` of the header and the block
+        is required to fill it exactly. A block which does not is an error rather than
+        something to work around: the rows are read into uninitialised memory, so a
+        short block would otherwise leave whatever happened to be on the heap in the
+        tail of the array and go on to be used as if it were data. That is silent -
+        the model still predicts, it just predicts from values that were never in the
+        file - and it is the sort of thing a Fortran write overflow produces for one
+        atom of a system while leaving every other file intact.
+
+        :param f: the open model file, positioned on the line naming the block.
+        :param block_name: the name of the block, used in the error messages.
+        :param ncols: how many values each row of the block holds.
+        :raises FileReadError: if the block is not exactly ``ntrain`` rows of
+            ``ncols`` numbers.
+        :return: the block, of shape (ntrain, ncols).
+        """
+
+        rows = []
+        # the block runs to the next blank line, or to the end of the file if it is
+        # the last one (the weights usually are)
+        for line in f:
+            if not line.strip():
+                break
+            rows.append(line.split())
+
+        if len(rows) != self.ntrain:
+            raise FileReadError(
+                f"The [{block_name}] block of {self.path} holds {len(rows)} row(s), "
+                f"but its header says the model has {self.ntrain} training point(s). "
+                "The file is truncated or its header does not describe its contents."
+            )
+
+        block = np.empty((self.ntrain, ncols))
+        for i, row in enumerate(rows):
+            if len(row) != ncols:
+                raise FileReadError(
+                    f"Row {i + 1} of the [{block_name}] block of {self.path} holds "
+                    f"{len(row)} value(s), but {ncols} were expected."
+                )
+            try:
+                block[i, :] = [float(value) for value in row]
+            except ValueError as error:
+                raise FileReadError(
+                    f"Row {i + 1} of the [{block_name}] block of {self.path} could "
+                    f"not be read as {ncols} number(s): {error}"
+                ) from error
+
+        return block
 
     def _read_file(self, up_to: Optional[str] = None):
         """Read in a FEREBUS output file which contains the optimized
@@ -259,41 +318,20 @@ class Model(ReadFile, WriteFile):
 
                 # training inputs data
                 if "[training_data.x]" in line:
-                    line = next(f)
-                    x = np.empty((self.ntrain, self.nfeats))
-                    i = 0
-                    while line.strip() != "":
-                        x[i, :] = np.array([float(num) for num in line.split()])
-                        i += 1
-                        line = next(f)
-                    self.x = self.x or x
+                    self.x = self.x or self._read_data_block(
+                        f, "training_data.x", self.nfeats
+                    )
                     continue
 
                 # training labels data
                 if "[training_data.y]" in line:
-                    line = next(f)
-                    y = np.empty((self.ntrain, 1))
-                    i = 0
-                    while line.strip() != "":
-                        y[i, 0] = float(line)
-                        i += 1
-                        line = next(f)
-                    self.y = self.y or y
+                    self.y = self.y or self._read_data_block(f, "training_data.y", 1)
                     continue
 
                 if "[weights]" in line:
-                    line = next(f)
-                    weights = np.empty((self.ntrain, 1))
-                    i = 0
-                    while line.strip() != "":
-                        weights[i, 0] = float(line)
-                        i += 1
-                        try:
-                            line = next(f)
-                        except StopIteration:
-                            break
-
-                    self.weights = self.weights or weights
+                    self.weights = self.weights or self._read_data_block(
+                        f, "weights", 1
+                    )
 
         self.kernel = (
             self.kernel

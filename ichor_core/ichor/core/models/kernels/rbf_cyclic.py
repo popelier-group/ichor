@@ -65,9 +65,34 @@ class RBFCyclic(Kernel):
     def params(self):
         return self._thetas
 
+    # the features of an atom are two distances and the angle between them, followed
+    # by one (distance, theta, phi) triple per remaining atom, so the phi features are
+    # the feature indices 5, 8, 11, ... of the full feature set
+    _FIRST_PHI_FEATURE = 5
+    _FEATURES_PER_ATOM = 3
+
     @cached_property
     def mask(self):
-        return np.arange(2, len(self._thetas), 3)
+        """The columns of this kernel's own active dimensions that hold a phi angle,
+        i.e. the ones the cyclic correction of :meth:`k` applies to.
+
+        The correction has to follow the phi features wherever they sit among the
+        active dimensions, which is not the same as every third column of the block
+        this kernel selects. FEREBUS writes models whose features are split across
+        two kernels - an ``rbf-cyclic`` over the distances and theta angles alongside
+        a ``periodic`` over the phi angles - and in that block every third column is a
+        distance or a theta angle instead. Wrapping one of those modulo 2 pi is only
+        invisible while no two training points differ by more than pi in it; a
+        distance feature with a wider range than that gets a badly wrong covariance,
+        which shows up as an ``inconsistent`` row of an overfitting report.
+        """
+
+        active_dims = np.asarray(self.active_dims)
+
+        return np.flatnonzero(
+            (active_dims >= self._FIRST_PHI_FEATURE)
+            & ((active_dims - self._FIRST_PHI_FEATURE) % self._FEATURES_PER_ATOM == 0)
+        )
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """Calcualtes cyclic RBF covariance matrix from two sets of points
