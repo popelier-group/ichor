@@ -19,6 +19,19 @@ Here is a list of things that the package is intended to do:
 
 Realistically, the file management portion of `ichor` (as well as the workload manager integration) is very general, so it can be used for any type of data that might not even be computational chemistry related. However, the focus of the source code itself is on computational chemistry and machine learning force field development.
 
+## Versions
+
+ichor carries two numbers, because they answer different questions:
+
+| | example | what it means |
+| --- | --- | --- |
+| Release | `ICHOR 2` | the iteration of ICHOR, as published and cited |
+| Version | `5.0.0` | the packaging version, reported by `pip show ichor-core` |
+
+The release is what you cite: this rewrite is **ICHOR 2**, the follow up to the 2022 ICHOR paper listed below. The version is what pip, the git tags and the changelog use, and it only ever increases -- it was already past `4` by the time this rewrite was named, and packaging versions cannot go backwards, so one number could not do both jobs.
+
+Both are shown at the top of `ichor-cli`, and the release name lives in `ichor.core.ICHOR_RELEASE`.
+
 ## Citing Us
 
 If you use `ichor`, please cite the following two papers:

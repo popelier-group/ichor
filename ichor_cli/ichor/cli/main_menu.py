@@ -38,6 +38,7 @@ from ichor.cli.main_menu_submenus.trajectory_creation_menu.trajectory_creation_m
 
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
+from ichor.core import __version__, ICHOR_RELEASE
 from ichor.hpc.config_file import config_search_locations
 
 
@@ -70,8 +71,12 @@ main_menu_menu_options = MainMenuMenuOptions(
     ichor.hpc.global_variables.ICHOR_CONFIG_PATH
 )
 
+# the version is shown here because it is the one place every user of the menu
+# system looks, and knowing which ichor is running is the first thing needed when
+# reporting anything that goes wrong
 MAIN_MENU_DESCRIPTION = MenuDescription(
-    "Main Menu", subtitle="Welcome to ichor's main menu!"
+    "Main Menu",
+    subtitle=f"Welcome to {ICHOR_RELEASE}'s main menu! (version {__version__})",
 )
 
 # no main menu options for now

@@ -16,10 +16,19 @@ sys.path.append(Path("../../ichor_core/ichor/"))
 sys.path.append(Path("../../ichor_hpc/ichor/"))
 
 
+from ichor.core import ICHOR_RELEASE, __version__
+
 project = 'ichor'
 copyright = '2024, Yulian Manchev'
 author = 'Yulian Manchev, Matthew Burn'
-release = '4.0.2'
+
+# read from the package so that these cannot go stale, as `release` did. note that
+# Sphinx's `release`/`version` are the packaging version in full and short form,
+# which is a different thing from ICHOR_RELEASE, the iteration ICHOR is published
+# under. the published name is what belongs in the title a reader sees.
+release = __version__
+version = '.'.join(__version__.split('.')[:2])
+html_title = f'{ICHOR_RELEASE} documentation'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

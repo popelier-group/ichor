@@ -4,8 +4,20 @@
 # cyclic imports are seen...
 from ichor.core.common.types import Version  # noqa: F401
 
-# Kept as a plain string literal so that setuptools can read it statically for
-# `version = attr: ichor.core.__version__` in setup.cfg. Wrapping it in `Version`
-# would force setuptools to import ichor.core at build time, when the
-# dependencies it imports are not installed yet.
-__version__ = "4.0.3"
+# The packaging version, which setuptools reads through `version = attr:` in
+# setup.cfg. Kept as a plain string literal so that it can be parsed without
+# importing ichor.core at build time, when its dependencies are not installed yet.
+#
+# This only ever increases, so that pip, the git tags and any published artifacts
+# stay in order. It is not the number ICHOR is published under -- see ICHOR_RELEASE.
+__version__ = "5.0.0"
+
+# The iteration of ICHOR that this is, as it is referred to in the literature.
+# ICHOR 1 is the 2022 paper; this rewrite is published as its follow up, so it is
+# ICHOR 2 no matter what the packaging version happens to be.
+#
+# The two are deliberately separate. __version__ was already past 4 by the time this
+# rewrite was named, and packaging versions are not allowed to go backwards, so one
+# number cannot do both jobs. When ICHOR 3 is published, this becomes "ICHOR 3" and
+# __version__ takes its next major bump.
+ICHOR_RELEASE = "ICHOR 2"
