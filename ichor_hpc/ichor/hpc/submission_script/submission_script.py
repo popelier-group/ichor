@@ -4,9 +4,36 @@ from typing import List, Optional, Tuple, Union
 import ichor.hpc.global_variables
 
 from ichor.core.common.io import mkdir
-from ichor.hpc.batch_system import JobID, NodeType
+from ichor.hpc.batch_system import JobID, NodeType, SLURM
 from ichor.hpc.submission_script.command_group import CommandGroup
 from ichor.hpc.uid import get_uid
+
+
+def max_walltime() -> Optional[str]:
+    """Returns the walltime that jobs are submitted with, as the batch system wants
+    it written (for SLURM, something like ``7-0`` or ``24:00:00``).
+
+    Read from ``hpc.max_walltime`` for the machine ichor is running on. A cluster
+    whose partitions allow less than the default has to say so, as SLURM rejects a
+    job asking for longer than its partition permits. Setting it to ``none`` leaves
+    the limit off the submission script entirely, so that whatever default the
+    partition applies is used.
+
+    :return: The walltime to write, or None to write no time limit at all.
+    """
+
+    walltime = ichor.hpc.global_variables.get_param_from_config(
+        ichor.hpc.global_variables.ICHOR_CONFIG,
+        ichor.hpc.global_variables.MACHINE,
+        "hpc",
+        "max_walltime",
+        default=ichor.hpc.global_variables.DEFAULT_MAX_WALLTIME,
+    )
+
+    if str(walltime).strip().lower() == ichor.hpc.global_variables.NO_WALLTIME:
+        return None
+
+    return str(walltime).strip()
 
 
 class SubmissionScript:
@@ -351,8 +378,15 @@ class SubmissionScript:
             with open(self.path, "w") as f:
 
                 f.write("#!/bin/bash -l\n")
-                # have to write time limit for new csf3
-                f.write("#SBATCH -t 7-0\n")
+
+                # SLURM rejects a job asking for longer than its partition allows,
+                # so the limit comes from hpc.max_walltime rather than being fixed
+                # here. Only SLURM is given one: SGE takes its walltime in a
+                # different form and never had one written for it, the fixed
+                # `#SBATCH` line having been a no-op comment in an SGE script.
+                walltime = max_walltime()
+                if walltime and ichor.hpc.global_variables.BATCH_SYSTEM is SLURM:
+                    f.write(f"#{SLURM.OptionCmd} -t {walltime}\n")
                 # write any options to be given to the batch system,
                 # such as working directory, where to write outputs/errors, etc.
                 for option in self.options:

@@ -9,11 +9,7 @@ from the ichor config.
 
 import ichor.hpc.global_variables
 from ichor.hpc.batch_system import LocalBatchSystem
-from ichor.hpc.global_variables import get_param_from_config
-
-# used when the machine is not in the config (e.g. running the menu on a laptop), where
-# a small budget is the safe way to be wrong
-FALLBACK_MEMORY_PER_CORE_GB = 4
+from ichor.hpc.global_variables import DEFAULT_MEMORY_PER_CORE_GB, get_param_from_config
 
 
 def batch_system_available() -> bool:
@@ -36,7 +32,7 @@ def memory_per_core_gb() -> float:
         ichor.hpc.global_variables.MACHINE,
         "hpc",
         "memory_per_core_gb",
-        default=FALLBACK_MEMORY_PER_CORE_GB,
+        default=DEFAULT_MEMORY_PER_CORE_GB,
     )
 
 

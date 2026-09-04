@@ -25,6 +25,42 @@ class JobStatus(EnumStrList):
     Error = ["F", "ST", "TO", "OOM", "NF", "BF", "CA"]
 
 
+class NoPartitionForCoreCount(Exception):
+    """No SLURM partition in the config covers the number of cores a job asked for,
+    so there is nothing to write as ``#SBATCH -p``."""
+
+
+def _no_partition_message(ncores: int) -> str:
+    """Builds the error shown when a job's core count maps to no partition, listing
+    what is configured so that the gap is visible.
+
+    :param ncores: The number of cores the job asked for.
+    :return: The message to raise with.
+    """
+
+    import ichor.hpc.global_variables
+
+    configured = ichor.hpc.global_variables.PARALLEL_ENVIRONMENT
+
+    if configured:
+        ranges = "\n".join(
+            f"    {name}: [{low}, {high}]" for name, (low, high) in configured.items()
+        )
+        have = f"The partitions configured for this machine are:\n{ranges}"
+    else:
+        have = "No partitions are configured for this machine."
+
+    return (
+        f"A job asked for {ncores} core{'' if ncores == 1 else 's'} but no configured "
+        f"partition covers that many. {have}\n"
+        "Partitions are set under hpc.parallel_environments in "
+        f"{ichor.hpc.global_variables.CONFIG_DESCRIPTION}, where each key is the "
+        "name of a SLURM partition and the value is the range of core counts it "
+        'should be used for. `sinfo -o "%P %c"` lists the partitions on this '
+        "cluster and how many cores their nodes have."
+    )
+
+
 class SLURM(BatchSystem):
     """A class that implements methods ICHOR uses to submit jobs to the Sun Grid Engine (SGE)
     batch system. These methods/properties are used to construct job scripts
@@ -201,8 +237,20 @@ class SLURM(BatchSystem):
         """
         import ichor.hpc.global_variables
 
+        try:
+            partition = ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ncores]
+        except KeyError:
+            raise NoPartitionForCoreCount(_no_partition_message(ncores)) from None
+
+        # RangeDict answers a one core job with an empty string, which is right for
+        # SGE (where a single core job needs no parallel environment) but not for
+        # SLURM, where it would be written out as a bare `-p` and rejected at
+        # submission with nothing to say which setting was missing
+        if not partition:
+            raise NoPartitionForCoreCount(_no_partition_message(ncores))
+
         return (
-            f"-p {ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ncores]}\n"
+            f"-p {partition}\n"
             f"#{cls.OptionCmd} --nodes=1\n"
             f"#{cls.OptionCmd} --ntasks=1\n"
             f"#{cls.OptionCmd} --cpus-per-task={ncores}"

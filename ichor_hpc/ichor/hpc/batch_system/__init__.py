@@ -3,7 +3,7 @@ from ichor.hpc.batch_system.local import LocalBatchSystem
 from ichor.hpc.batch_system.node import NodeType
 from ichor.hpc.batch_system.parallel_environment import ParallelEnvironment
 from ichor.hpc.batch_system.sge import SunGridEngine
-from ichor.hpc.batch_system.slurm import SLURM
+from ichor.hpc.batch_system.slurm import NoPartitionForCoreCount, SLURM
 
 
 def init_batch_system():
@@ -25,5 +25,6 @@ __all__ = [
     "ParallelEnvironment",
     "SunGridEngine",
     "SLURM",
+    "NoPartitionForCoreCount",
     "init_batch_system",
 ]

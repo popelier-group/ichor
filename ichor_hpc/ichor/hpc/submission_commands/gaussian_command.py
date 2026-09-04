@@ -1,3 +1,5 @@
+import warnings
+
 from pathlib import Path
 from typing import List, Optional
 
@@ -62,14 +64,34 @@ class GaussianCommand(SubmissionCommand):
 
     @classproperty
     def memory_per_core(self) -> int:
-        """Returns the memory per core user wants per Gaussian job"""
+        """Returns the memory per core that a Gaussian job is sized around.
 
-        return get_param_from_config(
+        Read from ``hpc.memory_per_core_gb``. A machine which does not set it falls
+        back to a small budget and warns, rather than failing with a TypeError when
+        the missing value reaches the arithmetic below. The fallback is deliberately
+        conservative: asking for more memory than a core actually brings gets the
+        job killed on the node.
+        """
+
+        memory_per_core = get_param_from_config(
             ichor.hpc.global_variables.ICHOR_CONFIG,
             ichor.hpc.global_variables.MACHINE,
             "hpc",
             "memory_per_core_gb",
         )
+
+        if memory_per_core is None:
+            warnings.warn(
+                "hpc.memory_per_core_gb is not set for this machine in "
+                f"{ichor.hpc.global_variables.CONFIG_DESCRIPTION}, so Gaussian jobs "
+                "are being sized with an assumed "
+                f"{ichor.hpc.global_variables.DEFAULT_MEMORY_PER_CORE_GB} GB per "
+                "core. Set it to what a core actually brings on this machine, or "
+                "jobs may ask for more memory than they are given."
+            )
+            return ichor.hpc.global_variables.DEFAULT_MEMORY_PER_CORE_GB
+
+        return memory_per_core
 
     def total_gaussian_memory(self) -> str:
         """Calculates the total memory to tell Gaussian to use

@@ -22,6 +22,22 @@ except NameError:
     __building_docs__ = False
 
 
+# Used when hpc.memory_per_core_gb is not set for this machine. Jobs are sized around
+# how much memory a core brings, so something has to be assumed when the config does
+# not say; a small budget is the safe way to be wrong, as asking for too little memory
+# wastes cores while asking for too much gets the job killed on the node.
+DEFAULT_MEMORY_PER_CORE_GB = 4
+
+# Used when hpc.max_walltime is not set for this machine. SLURM rejects a job asking
+# for longer than its partition allows, so a site whose limit is shorter than this has
+# to say so in the config. Set hpc.max_walltime to "none" to write no limit at all and
+# let the partition default apply.
+DEFAULT_MAX_WALLTIME = "7-0"
+
+# what hpc.max_walltime is set to in order to leave the time limit off entirely
+NO_WALLTIME = "none"
+
+
 def get_param_from_config(ichor_config: dict, *keys, default=None):
     """Given a config and keys, this loops over
 

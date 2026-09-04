@@ -69,6 +69,45 @@ every cluster you run on and no per-machine copies are needed.
 If ichor cannot find a block matching the machine it is running on, it warns on
 startup and will not know how to run any of the programs.
 
+The ``hpc`` block
+-----------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 55
+
+   * - Key
+     - Default
+     - What it is
+   * - ``parallel_environments``
+     - none
+     - How a job's core count picks what to ask the queue for. Each key is the name
+       of a SLURM **partition** (or an SGE parallel environment) and the value is the
+       ``[minimum, maximum]`` range of cores to use it for. Every core count you
+       submit with has to fall in one of the ranges, including one core jobs.
+   * - ``memory_per_core_gb``
+     - ``4``
+     - How much memory one core brings on this machine. Jobs are sized around it,
+       and Gaussian is told how much to use from it. The default is deliberately
+       small and warns when it is used, as asking for more memory than a core
+       actually brings gets the job killed.
+   * - ``max_walltime``
+     - ``7-0``
+     - How long jobs may run for, written as the batch system wants it (``7-0`` or
+       ``24:00:00``). SLURM rejects a job asking for longer than its partition
+       allows, so a cluster with a shorter limit must set this. ``none`` leaves the
+       limit out of the submission script so the partition's own default applies.
+
+On a SLURM cluster these three come from the queue itself:
+
+.. code-block:: text
+
+    sinfo -o "%P %c %m %l"    # partition, cores per node, memory per node, time limit
+
+which gives the partition names and core counts for ``parallel_environments``, the
+time limit for ``max_walltime``, and enough to work out ``memory_per_core_gb`` (the
+memory of a node divided by its cores).
+
 The full example that ``ichor-config-init`` writes out is below.
 
 :download:`ichor config example <../../ichor_hpc/ichor/hpc/data/config_template.yaml>`

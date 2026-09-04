@@ -3,6 +3,10 @@ csf3:
   hpc:
 
     memory_per_core_gb: 8
+    # how long jobs may run for, as the batch system wants it written. SLURM
+    # rejects anything longer than the partition allows. Set to "none" to leave
+    # the limit off and use whatever the partition defaults to
+    max_walltime: "7-0"
     parallel_environments:
       serial: [1, 1]
       multicore: [2, 168]
@@ -52,6 +56,7 @@ csf4:
   hpc:
 
     memory_per_core_gb: 4
+    max_walltime: "7-0"
     parallel_environments:
       serial: [1, 1]
       multicore: [2, 32]
@@ -99,6 +104,9 @@ csf4:
 ffluxlab:
 
   hpc:
+
+    memory_per_core_gb: 4
+    max_walltime: "7-0"
 
     parallel_environments:
       smp: [2, 44]
