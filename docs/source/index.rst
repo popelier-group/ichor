@@ -43,19 +43,19 @@ ichor carries two numbers, which answer different questions.
      - Example
      - What it means
    * - Release
-     - ``ICHOR V2``
+     - ``ICHOR v2.0``
      - the iteration of ICHOR, as published and cited
-   * - Version
+   * - Package version
      - ``5.0.0``
-     - the packaging version, reported by ``pip show ichor-core``
+     - what ``pip show ichor-core`` reports, and what the git tags use
 
-The release is what you cite: this rewrite is **ICHOR V2**, the follow up to the
+The release is what you cite: this rewrite is **ICHOR v2.0**, the follow up to the
 2022 ICHOR paper (Burn and Popelier, *Materials Advances* **2022**, 3(23), 8729).
-The version is what pip, the git tags and the changelog use, and it only ever
-increases -- it was already past ``4`` by the time this rewrite was named, and
+The package version is what pip, the git tags and the changelog use, and it only
+ever increases -- it was already past ``4`` by the time this rewrite was named, and
 packaging versions are not allowed to go backwards, so one number could not do both
-jobs. When the next iteration is published, the release becomes ``ICHOR V3`` and the
-version takes its next major bump.
+jobs. When the next iteration is published, the release becomes ``ICHOR v3.0`` and
+the package version takes its next major bump.
 
 Both are shown at the top of ``ichor-cli``, and the release name is available as
 ``ichor.core.ICHOR_RELEASE``.

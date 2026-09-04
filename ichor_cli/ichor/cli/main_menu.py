@@ -76,7 +76,7 @@ main_menu_menu_options = MainMenuMenuOptions(
 # reporting anything that goes wrong
 MAIN_MENU_DESCRIPTION = MenuDescription(
     "Main Menu",
-    subtitle=f"Welcome to {ICHOR_RELEASE}'s main menu! (version {__version__})",
+    subtitle=f"Welcome to {ICHOR_RELEASE}! (package version {__version__})",
 )
 
 # no main menu options for now
