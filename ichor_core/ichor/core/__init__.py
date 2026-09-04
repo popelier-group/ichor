@@ -13,11 +13,11 @@ from ichor.core.common.types import Version  # noqa: F401
 __version__ = "5.0.0"
 
 # The iteration of ICHOR that this is, as it is referred to in the literature.
-# ICHOR 1 is the 2022 paper; this rewrite is published as its follow up, so it is
-# ICHOR 2 no matter what the packaging version happens to be.
+# The 2022 paper is plain ICHOR; this rewrite is published as its follow up, so
+# it is ICHOR V2 no matter what the packaging version happens to be.
 #
 # The two are deliberately separate. __version__ was already past 4 by the time this
 # rewrite was named, and packaging versions are not allowed to go backwards, so one
-# number cannot do both jobs. When ICHOR 3 is published, this becomes "ICHOR 3" and
-# __version__ takes its next major bump.
-ICHOR_RELEASE = "ICHOR 2"
+# number cannot do both jobs. When the next iteration is published, this becomes
+# "ICHOR V3" and __version__ takes its next major bump.
+ICHOR_RELEASE = "ICHOR V2"

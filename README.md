@@ -25,10 +25,10 @@ ichor carries two numbers, because they answer different questions:
 
 | | example | what it means |
 | --- | --- | --- |
-| Release | `ICHOR 2` | the iteration of ICHOR, as published and cited |
+| Release | `ICHOR V2` | the iteration of ICHOR, as published and cited |
 | Version | `5.0.0` | the packaging version, reported by `pip show ichor-core` |
 
-The release is what you cite: this rewrite is **ICHOR 2**, the follow up to the 2022 ICHOR paper listed below. The version is what pip, the git tags and the changelog use, and it only ever increases -- it was already past `4` by the time this rewrite was named, and packaging versions cannot go backwards, so one number could not do both jobs.
+The release is what you cite: this rewrite is **ICHOR V2**, the follow up to the 2022 ICHOR paper listed below. The version is what pip, the git tags and the changelog use, and it only ever increases -- it was already past `4` by the time this rewrite was named, and packaging versions cannot go backwards, so one number could not do both jobs.
 
 Both are shown at the top of `ichor-cli`, and the release name lives in `ichor.core.ICHOR_RELEASE`.
 
