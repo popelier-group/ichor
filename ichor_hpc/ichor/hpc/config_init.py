@@ -20,6 +20,14 @@ from ichor.hpc.config_file import (
     write_config_template,
 )
 
+from ichor.hpc.detect_hpc import (
+    default_partition,
+    detect_partitions,
+    detected_config_text,
+    DetectionUnavailable,
+    suggested_machine_key,
+)
+
 
 def parse_arguments(argv: Optional[List[str]] = None) -> argparse.Namespace:
     """Parses the command line arguments of ``ichor-config-init``.
@@ -64,6 +72,15 @@ def parse_arguments(argv: Optional[List[str]] = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--detect",
+        action="store_true",
+        help=(
+            "Read the queue settings of this cluster with sinfo and write a config "
+            "with the hpc block already filled in. SLURM only, and has to be run "
+            "somewhere sinfo works, which usually means a login node."
+        ),
+    )
+    parser.add_argument(
         "--force",
         action="store_true",
         help="Overwrite the config file if one is already there.",
@@ -91,6 +108,52 @@ def resolve_destination(explicit_path: Optional[Path]) -> Path:
     return default_config_path()
 
 
+def write_detected_config(destination: Path, overwrite: bool = False) -> int:
+    """Reads this cluster's queue settings and writes a config built around them.
+
+    :param destination: The path to write the config file to.
+    :param overwrite: Whether to replace an existing file, defaults to False.
+    :return: 0 if the config was written, 1 if it could not be.
+    """
+
+    try:
+        partitions = detect_partitions()
+    except DetectionUnavailable as error:
+        print(error, file=sys.stderr)
+        return 1
+
+    machine_key = suggested_machine_key()
+
+    try:
+        if destination.exists() and not overwrite:
+            raise FileExistsError(
+                f"{destination} already exists. Pass --force to overwrite it."
+            )
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(detected_config_text(partitions, machine_key))
+    except FileExistsError as error:
+        print(error, file=sys.stderr)
+        return 1
+
+    chosen = default_partition(partitions)
+    print(f"Wrote a config for this cluster to {destination}")
+    print(
+        f"\nRead from sinfo: {len(partitions)} partition(s), of which {chosen.name} "
+        f"is the default,\nwith {chosen.cores_per_node} cores per node and a time "
+        f"limit of {chosen.time_limit}."
+    )
+    print(
+        "\nTwo things still need you:\n"
+        f"  - the machine key, which was guessed as '{machine_key}' from the "
+        "hostname. It has to\n    appear in the hostname of the compute nodes too, "
+        "which differ from this one.\n"
+        "  - the software block, which says where each program is and which module "
+        "loads it.\n    sinfo cannot know any of that."
+    )
+
+    return 0
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     """Creates ichor's config file and tells the user what to do with it.
 
@@ -101,9 +164,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     arguments = parse_arguments(argv)
     destination = resolve_destination(arguments.path)
 
-    if arguments.template and arguments.migrate:
-        print("--template and --migrate cannot be used together.", file=sys.stderr)
+    exclusive = [
+        name for name in ("template", "migrate", "detect") if getattr(arguments, name)
+    ]
+    if len(exclusive) > 1:
+        given = " and ".join(f"--{name}" for name in exclusive)
+        print(f"{given} cannot be used together.", file=sys.stderr)
         return 1
+
+    if arguments.detect:
+        return write_detected_config(destination, overwrite=arguments.force)
 
     # moving an existing config is preferred over writing a fresh template, as the
     # existing one has already been filled in for the machines the user runs on

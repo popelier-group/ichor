@@ -22,6 +22,35 @@ If you have used an older version of ichor and already have an
 ``~/ichor_config.yaml``, the same command moves it to the new location rather than
 overwriting it with the example.
 
+Letting ichor read the cluster's settings
++++++++++++++++++++++++++++++++++++++++++
+
+On a SLURM cluster, the whole ``hpc`` block can be read from the queue rather than
+written by hand:
+
+.. code-block:: text
+
+    ichor-config-init --detect
+
+This runs ``sinfo``, and writes a config for this cluster with the partitions, the
+memory per core and the time limit already filled in. It has to be run somewhere
+``sinfo`` works, which normally means a login node, and it only works on SLURM --
+the SGE equivalents differ too much between sites to guess at.
+
+Two things it cannot do for you, and says so when it finishes:
+
+* **The machine key.** It is guessed from the hostname, preferring the domain part,
+  because the key has to appear in the hostname of the *compute* nodes as well and
+  those differ from the login node. Check it against a compute node.
+* **The software block.** Where each program lives and which module loads it is not
+  something the queue knows. A skeleton is written out for you to fill in, and
+  ``module avail`` lists what the cluster has.
+
+The generated config gives the default partition the whole range of core counts.
+Splitting the range between partitions is a decision about which job sizes belong
+where, which is the site's to make, so the other partitions are listed as comments
+with their core counts rather than guessed at.
+
 .. note::
     The config file is likely to be updated as more functionality is added.
 
