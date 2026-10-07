@@ -1,5 +1,6 @@
 # Run on the cluster login node:
-# python -c "from ichor.hpc.main.data_generation import submit_data_generation_from_yaml; print(submit_data_generation_from_yaml('data_generation.yaml'))"
+# ichor submit_datagen
+# Or: ichor submit_datagen /path/to/custom_workflow.yaml
 # Relative input paths are resolved against this YAML file's directory.
 input:
   path: trajectory.xyz  # Or an existing system.pointsdir

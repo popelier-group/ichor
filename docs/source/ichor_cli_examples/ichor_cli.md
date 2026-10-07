@@ -38,6 +38,24 @@ The directory defaults to the current `.pointsdir`. `--hold`, `--script-name`,
 options include `--title`, `--link0` (values without the leading `%`), and
 `--output-chk`. Help works without HPC configuration.
 
+# Submitting data generation from YAML
+
+Place `ichor_workflow.yaml` in your current directory, set `input.path` to your
+XYZ trajectory or existing `.pointsdir`, and run on the cluster login node:
+
+```sh
+ichor submit_datagen
+ichor submit_datagen /path/to/custom_workflow.yaml
+ichor submit_datagen --help
+```
+
+The command calls `submit_data_generation_from_yaml` and reports the points
+directory and submitted job IDs. Relative input paths are resolved against the
+YAML file's directory. The workflow queues Gaussian, AIMAll, and the enabled
+database/CSV stages with scheduler dependencies. Enabling CSVs also enables
+SQLite database creation. Machine and software settings still come from
+`~/ichor_config.yaml`. Help works without HPC configuration.
+
 # Launching the Menu
 
 After installing `ichor.cli`, it can be launched from the command line using `ichor-cli`. Many common tools to submit jobs are available in the command line interface (CLI). Behind the scenes, the `console-menu` package is used to make the menus.

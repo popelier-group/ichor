@@ -14,6 +14,13 @@ def positive_int(value):
 def build_parser():
     parser = argparse.ArgumentParser(prog="ichor")
     commands = parser.add_subparsers(dest="command", required=True)
+    datagen = commands.add_parser(
+        "submit_datagen", help="Submit the data-generation workflow from YAML."
+    )
+    datagen.add_argument(
+        "config", nargs="?", type=Path, default=Path("ichor_workflow.yaml"),
+        help="Workflow YAML file (default: ichor_workflow.yaml in the current directory).",
+    )
     gaussian = commands.add_parser(
         "submit_gaussian", help="Write Gaussian inputs and submit a points directory."
     )
@@ -121,6 +128,21 @@ def main(argv=None):
     parser = build_parser()
     options = vars(parser.parse_args(argv))
     command = options.pop("command")
+    if command == "submit_datagen":
+        config = options["config"].expanduser().resolve()
+        if not config.is_file():
+            parser.error(f"workflow YAML file does not exist: {config}")
+
+        from ichor.hpc.main.data_generation import submit_data_generation_from_yaml
+
+        result = submit_data_generation_from_yaml(config)
+        print(f"Points directory: {result.points_directory}")
+        for name in ("gaussian", "aimall", "database", "csvs"):
+            job = getattr(result, name)
+            if job is not None:
+                print(f"Submitted {name} job {job.id}")
+        return 0
+
     path = options["points_directory"].expanduser().resolve()
     if not path.is_dir() or path.suffix != ".pointsdir":
         parser.error("points_directory must be an existing .pointsdir directory")
