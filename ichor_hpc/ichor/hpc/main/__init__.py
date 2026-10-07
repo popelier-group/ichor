@@ -14,6 +14,7 @@ from ichor.hpc.main.gaussian import (
     submit_single_gaussian_xyz,
 )
 from ichor.hpc.main.data_generation import submit_data_generation
+from ichor.hpc.main.workflow import submit_workflow, submit_workflow_from_yaml
 from ichor.hpc.main.orca import submit_points_directory_to_orca
 
 __all__ = [
@@ -29,4 +30,6 @@ __all__ = [
     "write_extract_models_script",
     "find_and_setup_ferebus_subdirs",
     "submit_data_generation",
+    "submit_workflow",
+    "submit_workflow_from_yaml",
 ]
