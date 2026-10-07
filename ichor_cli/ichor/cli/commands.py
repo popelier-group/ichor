@@ -2,8 +2,6 @@
 
 import argparse
 from pathlib import Path
-from ichor.hpc.batch_system import JobID
-from ichor.hpc.main.aimall import submit_points_directory_to_aimall
 
 
 def positive_int(value):
@@ -110,6 +108,9 @@ def main(argv=None):
             options.pop(name)
     if options.get("atidsprops") == "some":
         options["atidsprops"] = 0.001
+
+    from ichor.hpc.batch_system import JobID
+    from ichor.hpc.main.aimall import submit_points_directory_to_aimall
 
     if options["hold"] is not None:
         options["hold"] = JobID("", options["hold"])
