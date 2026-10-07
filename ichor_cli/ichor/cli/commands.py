@@ -21,15 +21,6 @@ def build_parser():
         "config", nargs="?", type=Path, default=Path("ichor_workflow.yaml"),
         help="Workflow YAML file (default: ichor_workflow.yaml in the current directory).",
     )
-    workflow = commands.add_parser(
-        "workflow", aliases=["submit_workflow"],
-        help="Run optimisation, metadynamics, diversity sampling and data generation.",
-        description="Coordinate stages from the login node. Keep this command running while intermediate jobs finish. The final stage is submitted without waiting.",
-    )
-    workflow.add_argument("config", nargs="?", type=Path, default=Path("ichor_workflow.yaml"))
-    stages = ("optimisation", "metadynamics", "diversity", "datagen")
-    workflow.add_argument("--stages", nargs="+", choices=stages,
-                          help="Stages to run in workflow order (overrides workflow.stages in YAML).")
     gaussian = commands.add_parser(
         "submit_gaussian", help="Write Gaussian inputs and submit a points directory."
     )
@@ -144,26 +135,14 @@ def main(argv=None):
     options = vars(parser.parse_args(argv))
     command = options.pop("command")
     action = options.pop("action", "run")
-    if command in ("datagen", "submit_datagen", "workflow", "submit_workflow"):
+    if command in ("datagen", "submit_datagen"):
         config = options["config"].expanduser().resolve()
         if not config.is_file():
             parser.error(f"workflow YAML file does not exist: {config}")
 
-        if command in ("workflow", "submit_workflow"):
-            from ichor.hpc.main.workflow import submit_workflow_from_yaml
+        from ichor.hpc.main.data_generation import submit_data_generation_from_yaml
 
-            try:
-                workflow = submit_workflow_from_yaml(config, stages=options["stages"])
-            except ValueError as error:
-                parser.error(str(error))
-            print(f"Workflow output: {workflow.output_path}")
-            result = workflow.data_generation
-            if result is None:
-                return 0
-        else:
-            from ichor.hpc.main.data_generation import submit_data_generation_from_yaml
-
-            result = submit_data_generation_from_yaml(config)
+        result = submit_data_generation_from_yaml(config)
         print(f"Points directory: {result.points_directory}")
         for name in ("gaussian", "aimall", "database", "csvs"):
             job = getattr(result, name)

@@ -1,54 +1,11 @@
 # Run on the cluster login node:
-# ichor workflow
-# Keep the command running on the login node until intermediate jobs finish.
-# Run only selected stages: ichor workflow --stages metadynamics diversity
-# To resume, set input.path to the preceding stage's output.
-# The final requested stage is submitted without waiting.
+# ichor submit_datagen
+# Or: ichor submit_datagen /path/to/custom_workflow.yaml
 # Relative input paths are resolved against this YAML file's directory.
-workflow:
-  stages: [optimisation, metadynamics, diversity, datagen]
-  directory: workflow_runs
-  poll_interval: 30  # Scheduler polling interval in seconds
-
 input:
-  path: structure.xyz  # Input to the first selected stage
+  path: trajectory.xyz  # Or an existing system.pointsdir
   every: 1
   center: true
-
-optimisation:
-  ncores: 2
-  output: workflow_runs/optimisation/optimised.xyz
-  options:
-    method: GFN2-xTB
-    fmax: 0.01
-    solvent: none
-    electronic_temperature: 300
-    max_iterations: 2048
-
-metadynamics:
-  ncores: 2
-  output: workflow_runs/metadynamics/trajectory_mtd_out.xyz
-  options:
-    calculator: GFN2-xTB
-    collective_variables: [[1, 2]]  # PLUMED uses 1-based atom indices; customise!
-    sigma: [0.2]
-    grid_min: [0.0]  # Distance CV in angstroms; use -pi/pi for torsions
-    grid_max: [5.0]
-    temperature: 300
-    bias_factor: 5
-    md_runsteps: 10000
-    md_freq_out: 1000
-
-diversity:
-  ncores: 2
-  # Set this to the actual XYZ output filename produced by your POLUS version.
-  output: workflow_runs/diversity/molecule.xyz
-  # seed_geom: optimised.xyz  # Required when starting from a trajectory without a seed
-  options:
-    system_name: molecule
-    sample_size: 1000
-    chunk_size: 500
-    weights_vector: 'HL1:1'
 
 electronic_structure:
   program: gaussian
