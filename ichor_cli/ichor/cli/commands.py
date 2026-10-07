@@ -15,7 +15,7 @@ def build_parser():
     parser = argparse.ArgumentParser(prog="ichor")
     commands = parser.add_subparsers(dest="command", required=True)
     datagen = commands.add_parser(
-        "submit_datagen", help="Submit the data-generation workflow from YAML."
+        "datagen", aliases=["submit_datagen"], help="Submit the data-generation workflow from YAML."
     )
     datagen.add_argument(
         "config", nargs="?", type=Path, default=Path("ichor_workflow.yaml"),
@@ -121,6 +121,12 @@ def build_parser():
         group.add_argument(
             "--no-" + name, dest=name, action="store_false", default=argparse.SUPPRESS
         )
+    for name, legacy in (("gaussian", gaussian), ("aimall", aimall)):
+        program = commands.add_parser(name, help=f"Run or inspect {name} calculations.")
+        actions = program.add_subparsers(dest="action", required=True)
+        actions.add_parser("run", parents=[legacy], add_help=False)
+        status = actions.add_parser("status", help="Show calculation progress.")
+        status.add_argument("points_directory", nargs="?", type=Path, default=Path.cwd())
     return parser
 
 
@@ -128,7 +134,8 @@ def main(argv=None):
     parser = build_parser()
     options = vars(parser.parse_args(argv))
     command = options.pop("command")
-    if command == "submit_datagen":
+    action = options.pop("action", "run")
+    if command in ("datagen", "submit_datagen"):
         config = options["config"].expanduser().resolve()
         if not config.is_file():
             parser.error(f"workflow YAML file does not exist: {config}")
@@ -141,12 +148,21 @@ def main(argv=None):
             job = getattr(result, name)
             if job is not None:
                 print(f"Submitted {name} job {job.id}")
+        from ichor.hpc.calculation_status import print_status
+
+        for software in ("gaussian", "aimall"):
+            print_status(result.points_directory, software)
         return 0
 
     path = options["points_directory"].expanduser().resolve()
     if not path.is_dir() or path.suffix != ".pointsdir":
         parser.error("points_directory must be an existing .pointsdir directory")
     options["points_directory"] = path
+    if action == "status":
+        from ichor.hpc.calculation_status import print_status
+
+        print_status(path, command)
+        return 0
     for name in ("script_name", "outputs_dir_path", "errors_dir_path"):
         if options[name] is None:
             options.pop(name)
@@ -156,7 +172,7 @@ def main(argv=None):
     from ichor.hpc.batch_system import JobID
     if options["hold"] is not None:
         options["hold"] = JobID("", options["hold"])
-    if command == "submit_gaussian":
+    if command in ("gaussian", "submit_gaussian"):
         from ichor.hpc.main.gaussian import submit_points_directory_to_gaussian
 
         software = "Gaussian"
