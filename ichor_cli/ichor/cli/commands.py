@@ -2,6 +2,8 @@
 
 import argparse
 from pathlib import Path
+from ichor.hpc.batch_system import JobID
+from ichor.hpc.main.aimall import submit_points_directory_to_aimall
 
 
 def positive_int(value):
@@ -22,8 +24,13 @@ def build_parser():
     aimall.add_argument("--ncores", type=positive_int, default=2)
     aimall.add_argument("--naat", type=positive_int, default=1)
     aimall.add_argument("--atoms", "--aimall-atoms", dest="aimall_atoms", nargs="+")
-    aimall.add_argument("--force", "--force-calculate-ints", dest="force_calculate_ints",
-                        action="store_true", help="Recalculate existing integrations.")
+    aimall.add_argument(
+        "--force",
+        "--force-calculate-ints",
+        dest="force_calculate_ints",
+        action="store_true",
+        help="Recalculate existing integrations.",
+    )
     aimall.add_argument("--hold", help="Scheduler job ID to wait for.")
     aimall.add_argument("--script-name")
     aimall.add_argument("--outputs-dir-path", type=Path)
@@ -34,9 +41,12 @@ def build_parser():
         "encomp": (int, [0, 1, 2, 3, 4]),
         "ehren": (int, [0, 1, 2]),
         "shm_lmax": (int, [-1, 0, 1, 2, 3, 4, 5]),
-        "boaq": (str, ["auto", "auto_gs2", "auto_gs4"]
-                 + ["gs" + str(n) for n in list(range(1, 11)) + list(range(15, 65, 5))]
-                 + ["leb" + str(n) for n in [23, 25, 27, 29, 31, 32]]),
+        "boaq": (
+            str,
+            ["auto", "auto_gs2", "auto_gs4"]
+            + ["gs" + str(n) for n in list(range(1, 11)) + list(range(15, 65, 5))]
+            + ["leb" + str(n) for n in [23, 25, 27, 29, 31, 32]],
+        ),
         "iasmesh": (str, ["fine", "medium", "veryfine", "superfine"]),
         "bim": (str, ["auto", "proaim", "promega", "promega1", "promega5"]),
         "capture": (str, ["auto", "basic", "extended"]),
@@ -49,20 +59,41 @@ def build_parser():
         "verifyw": (str, ["no", "yes", "only"]),
     }
     for name, (value_type, values) in choices.items():
-        aimall.add_argument("--" + name.replace("_", "-"), dest=name,
-                            type=value_type, choices=values, default=argparse.SUPPRESS)
+        aimall.add_argument(
+            "--" + name.replace("_", "-"),
+            dest=name,
+            type=value_type,
+            choices=values,
+            default=argparse.SUPPRESS,
+        )
     aimall.add_argument("--maxmem", type=positive_int, default=argparse.SUPPRESS)
-    aimall.add_argument("--atidsprops", choices=["no", "some", "all"],
-                        default=argparse.SUPPRESS, help="'some' corresponds to 0.001.")
+    aimall.add_argument(
+        "--atidsprops",
+        choices=["no", "some", "all"],
+        default=argparse.SUPPRESS,
+        help="'some' corresponds to 0.001.",
+    )
     for name in (
-        "feynman", "iasprops", "source", "iaswrite", "warn", "delmog",
-        "skipint", "f2wonly", "atlaprhocps", "wsp", "saw", "autonnacps",
+        "feynman",
+        "iasprops",
+        "source",
+        "iaswrite",
+        "warn",
+        "delmog",
+        "skipint",
+        "f2wonly",
+        "atlaprhocps",
+        "wsp",
+        "saw",
+        "autonnacps",
     ):
         group = aimall.add_mutually_exclusive_group()
-        group.add_argument("--" + name, dest=name, action="store_true",
-                           default=argparse.SUPPRESS)
-        group.add_argument("--no-" + name, dest=name, action="store_false",
-                           default=argparse.SUPPRESS)
+        group.add_argument(
+            "--" + name, dest=name, action="store_true", default=argparse.SUPPRESS
+        )
+        group.add_argument(
+            "--no-" + name, dest=name, action="store_false", default=argparse.SUPPRESS
+        )
     return parser
 
 
@@ -79,9 +110,6 @@ def main(argv=None):
             options.pop(name)
     if options.get("atidsprops") == "some":
         options["atidsprops"] = 0.001
-
-    from ichor.hpc.batch_system import JobID
-    from ichor.hpc.main.aimall import submit_points_directory_to_aimall
 
     if options["hold"] is not None:
         options["hold"] = JobID("", options["hold"])
