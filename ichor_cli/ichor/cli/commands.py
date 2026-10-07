@@ -14,6 +14,28 @@ def positive_int(value):
 def build_parser():
     parser = argparse.ArgumentParser(prog="ichor")
     commands = parser.add_subparsers(dest="command", required=True)
+    gaussian = commands.add_parser(
+        "submit_gaussian", help="Write Gaussian inputs and submit a points directory."
+    )
+    gaussian.add_argument("points_directory", nargs="?", type=Path, default=Path.cwd())
+    gaussian.add_argument("--ncores", type=positive_int, default=2)
+    gaussian.add_argument("--method", default=argparse.SUPPRESS)
+    gaussian.add_argument("--basis-set", default=argparse.SUPPRESS)
+    gaussian.add_argument("--keywords", nargs="+", default=argparse.SUPPRESS)
+    gaussian.add_argument("--charge", type=int, default=argparse.SUPPRESS)
+    gaussian.add_argument("--spin-multiplicity", type=positive_int, default=argparse.SUPPRESS)
+    gaussian.add_argument("--title", default=argparse.SUPPRESS)
+    gaussian.add_argument("--link0", nargs="+", default=argparse.SUPPRESS,
+                          help="Link 0 settings without the leading percent sign.")
+    gaussian.add_argument("--output-chk", action="store_true", default=argparse.SUPPRESS)
+    gaussian.add_argument("--overwrite-existing", action="store_true",
+                          help="Replace existing GJF files with the requested settings.")
+    gaussian.add_argument("--force", "--force-calculate-wfn", dest="force_calculate_wfn",
+                          action="store_true", help="Recalculate existing wavefunctions.")
+    gaussian.add_argument("--hold", help="Scheduler job ID to wait for.")
+    gaussian.add_argument("--script-name")
+    gaussian.add_argument("--outputs-dir-path", type=Path)
+    gaussian.add_argument("--errors-dir-path", type=Path)
     aimall = commands.add_parser(
         "submit_aimall", help="Submit a points directory to AIMAll."
     )
@@ -98,7 +120,7 @@ def build_parser():
 def main(argv=None):
     parser = build_parser()
     options = vars(parser.parse_args(argv))
-    options.pop("command")
+    command = options.pop("command")
     path = options["points_directory"].expanduser().resolve()
     if not path.is_dir() or path.suffix != ".pointsdir":
         parser.error("points_directory must be an existing .pointsdir directory")
@@ -110,13 +132,25 @@ def main(argv=None):
         options["atidsprops"] = 0.001
 
     from ichor.hpc.batch_system import JobID
-    from ichor.hpc.main.aimall import submit_points_directory_to_aimall
-
     if options["hold"] is not None:
         options["hold"] = JobID("", options["hold"])
-    job = submit_points_directory_to_aimall(**options)
-    if job is None:
-        print("There are no AIMAll jobs to submit.")
+    if command == "submit_gaussian":
+        from ichor.hpc.main.gaussian import submit_points_directory_to_gaussian
+
+        software = "Gaussian"
+        try:
+            job = submit_points_directory_to_gaussian(**options)
+        except ValueError as error:
+            if str(error) != "There are no jobs to submit in the submission script.":
+                raise
+            job = None
     else:
-        print("Submitted AIMAll job " + str(job.id))
+        from ichor.hpc.main.aimall import submit_points_directory_to_aimall
+
+        software = "AIMAll"
+        job = submit_points_directory_to_aimall(**options)
+    if job is None:
+        print("There are no " + software + " jobs to submit.")
+    else:
+        print("Submitted " + software + " job " + str(job.id))
     return 0
