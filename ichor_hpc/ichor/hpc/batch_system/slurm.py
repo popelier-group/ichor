@@ -71,31 +71,20 @@ class SLURM(BatchSystem):
 
     @classmethod
     def get_queued_jobs(cls) -> List[Job]:
+        # Delimit fields explicitly: site defaults and spaces in job names or
+        # timestamps must not change the meaning of a column.
         stdout, _ = run_cmd(cls.status() + [
-            "--noheader", "-r", "--format",
-            "%i %p %P %j %u %a %t %V %S %M %D %C %R",
+            "--noheader", "-r", "--format=%i|%p|%P|%j|%u|%t|%S|%C",
         ])
 
         jobs = []
-        #     JOBID PRIORITY  PARTITION NAME            USER     ACCOUNT ST SUBMIT_TIME    START_TIME  ...
-        #    TIME        NODES  CPUS NODELIST(REASON)
         for line in stdout.splitlines():
             if not line.strip():
                 continue
-            tokens = line.split()
-            job_id = tokens[0] if len(tokens) >= 1 else None
-            priority = tokens[1] if len(tokens) >= 2 else None
-            partition = tokens[2] if len(tokens) >= 3 else None
-            name = tokens[3] if len(tokens) >= 4 else None
-            user = tokens[4] if len(tokens) >= 5 else None
-            _ = tokens[5] if len(tokens) >= 6 else None  # account
-            state = tokens[6] if len(tokens) >= 7 else None
-            _ = tokens[7] if len(tokens) >= 8 else None  # submit_time
-            start_time = tokens[8] if len(tokens) >= 9 else None
-            _ = tokens[9] if len(tokens) >= 10 else None  # time_taken
-            _ = tokens[10] if len(tokens) >= 11 else None  # nodes
-            cpus = tokens[11] if len(tokens) >= 12 else None
-            _ = tokens[12] if len(tokens) >= 13 else None  # nodelist
+            tokens = [token.strip() for token in line.split("|")]
+            if len(tokens) != 8:
+                raise ValueError(f"Unexpected squeue output: {line!r}")
+            job_id, priority, partition, name, user, state, start_time, cpus = tokens
 
             task_id = None
             if "_" in job_id:
@@ -104,7 +93,7 @@ class SLURM(BatchSystem):
             state = JobStatus(state).name
             try:
                 start_time = datetime.strptime(
-                    start_time, os.environ["SLURM_TIME_FORMAT"]
+                    start_time, os.environ.get("SLURM_TIME_FORMAT", "%Y-%m-%dT%H:%M:%S")
                 )
             except ValueError:
                 start_time = None
