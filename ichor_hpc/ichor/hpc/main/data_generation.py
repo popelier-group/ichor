@@ -26,6 +26,90 @@ class DataGeneration:
     csvs: Optional[JobID]
 
 
+def submit_data_generation_from_yaml(config_path: Union[str, Path]) -> DataGeneration:
+    """Read a workflow YAML and submit its stages with scheduler dependencies.
+
+    Relative input paths are interpreted relative to the configuration file.
+    Machine/software configuration still comes from ``ichor_config.yaml``.
+    """
+    import yaml
+
+    config_path = Path(config_path).resolve()
+    with config_path.open() as stream:
+        config = yaml.safe_load(stream)
+    if not isinstance(config, dict):
+        raise ValueError("Data-generation YAML must contain a mapping.")
+
+    def section(name, defaults):
+        values = config.pop(name, {})
+        if not isinstance(values, dict):
+            raise ValueError(f"'{name}' must contain a mapping.")
+        unknown = values.keys() - defaults.keys()
+        if unknown:
+            raise ValueError(f"Unknown settings in '{name}': {sorted(unknown)}")
+        return {**defaults, **values}
+
+    inputs = section("input", dict(path=None, system_name=None, every=1, center=True))
+    electronic = section(
+        "electronic_structure",
+        dict(
+            program="gaussian",
+            method="B3LYP",
+            basis="6-31+g(d,p)",
+            ncores=2,
+            overwrite_existing_gjfs=False,
+            force_calculate_wfn=False,
+            options={},
+        ),
+    )
+    aim = section(
+        "aim",
+        dict(
+            program="aimall",
+            ncores=2,
+            force_calculate_ints=False,
+            options={},
+        ),
+    )
+    database = section("database", dict(enabled=False, ncores=1))
+    csvs = section("csvs", dict(enabled=False, ncores=1, options={}))
+    if config:
+        raise ValueError(f"Unknown workflow sections: {sorted(config)}")
+    for settings, program in ((electronic, "gaussian"), (aim, "aimall")):
+        if str(settings["program"]).lower() != program:
+            raise ValueError(f"This workflow requires program '{program}'.")
+    for name, settings in (
+        ("electronic_structure", electronic),
+        ("aim", aim),
+        ("csvs", csvs),
+    ):
+        if not isinstance(settings["options"], dict):
+            raise ValueError(f"'{name}.options' must contain a mapping.")
+    if not inputs["path"]:
+        raise ValueError("'input.path' is required.")
+    input_path = Path(inputs.pop("path"))
+    if not input_path.is_absolute():
+        input_path = config_path.parent / input_path
+
+    return submit_data_generation(
+        input_path,
+        **inputs,
+        method=electronic["method"],
+        gaussian_ncores=electronic["ncores"],
+        aimall_ncores=aim["ncores"],
+        database_ncores=database["ncores"],
+        csv_ncores=csvs["ncores"],
+        create_database=database["enabled"],
+        create_csvs=csvs["enabled"],
+        overwrite_existing_gjfs=electronic["overwrite_existing_gjfs"],
+        force_calculate_wfn=electronic["force_calculate_wfn"],
+        force_calculate_ints=aim["force_calculate_ints"],
+        gaussian_kwargs={"basis_set": electronic["basis"], **electronic["options"]},
+        aimall_kwargs=aim["options"],
+        csv_kwargs=csvs["options"],
+    )
+
+
 def submit_data_generation(
     input_path: Union[str, Path, PointsDirectory],
     system_name: Optional[str] = None,
@@ -79,9 +163,7 @@ def submit_data_generation(
             )
 
     gaussian_kwargs.setdefault("method", method)
-    aimall_kwargs.setdefault(
-        "method", str(gaussian_kwargs["method"]).upper().strip()
-    )
+    aimall_kwargs.setdefault("method", str(gaussian_kwargs["method"]).upper().strip())
     gjfs = write_gjfs(points, overwrite_existing_gjfs, **gaussian_kwargs)
     expected_wfns = [gjf.with_suffix(".wfn") for gjf in gjfs]
 

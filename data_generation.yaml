@@ -1,0 +1,41 @@
+# Run on the cluster login node:
+# python -c "from ichor.hpc.main.data_generation import submit_data_generation_from_yaml; print(submit_data_generation_from_yaml('data_generation.yaml'))"
+# Relative input paths are resolved against this YAML file's directory.
+input:
+  path: trajectory.xyz  # Or an existing system.pointsdir
+  every: 1
+  center: true
+
+electronic_structure:
+  program: gaussian
+  method: B3LYP
+  basis: 6-311+G(d,p)
+  ncores: 2
+  overwrite_existing_gjfs: false
+  force_calculate_wfn: false
+  options:
+    charge: 0
+    spin_multiplicity: 1
+    # Additional GJF settings, e.g. keywords or link0.
+
+aim:
+  program: aimall
+  ncores: 2
+  force_calculate_ints: false
+  options:
+    naat: 1
+    aimall_atoms: null  # All atoms; alternatively [O1, H2, H3]
+    # Method is inherited from electronic_structure.
+
+database:
+  enabled: true
+  ncores: 1
+
+csvs:
+  enabled: true  # Also enables database creation
+  ncores: 1
+  options:
+    float_difference_iqa_wfn: 4.184
+    float_integration_error: 0.001
+    rotate_multipole_moments: true
+    calculate_feature_forces: false
