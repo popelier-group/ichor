@@ -2,8 +2,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional, Union
 
-import ichor.hpc.global_variables
-
 from ichor.core.common.functools import classproperty
 from ichor.core.common.os import run_cmd
 
@@ -33,6 +31,9 @@ class BatchSystem(ABC):
         hold: Optional[Union[JobID, List[JobID]]] = None,
     ) -> JobID:
         """Submit a job script to the batch system in order to queue/run jobs."""
+        # Configuration initializes the batch system; load it only when submitting.
+        import ichor.hpc.global_variables
+
         cmd = cls.submit_script_command
         if hold:
             cmd += cls.hold_job(hold)
