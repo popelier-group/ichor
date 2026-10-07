@@ -13,6 +13,40 @@ from ichor.cli.commands import build_parser, main
 
 
 class CommandTests(unittest.TestCase):
+    def test_datagen_dispatch(self):
+        datagen = ModuleType("ichor.hpc.main.data_generation")
+        submit = datagen.submit_data_generation_from_yaml = Mock(
+            return_value=SimpleNamespace(
+                points_directory=Path("water.pointsdir"),
+                gaussian=SimpleNamespace(id="101"),
+                aimall=SimpleNamespace(id="102"), database=None, csvs=None,
+            )
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            config = Path(tmp) / "custom.yaml"
+            config.write_text("input:\n  path: water.xyz\n")
+            output = io.StringIO()
+            with patch.dict(sys.modules, {datagen.__name__: datagen}), contextlib.redirect_stdout(output):
+                self.assertEqual(main(["submit_datagen", str(config)]), 0)
+            submit.assert_called_once_with(config.resolve())
+            self.assertIn("Submitted gaussian job 101", output.getvalue())
+            self.assertIn("Submitted aimall job 102", output.getvalue())
+            self.assertNotIn("Submitted database", output.getvalue())
+
+    def test_datagen_default_help_and_missing_file(self):
+        self.assertEqual(
+            build_parser().parse_args(["submit_datagen"]).config,
+            Path("ichor_workflow.yaml"),
+        )
+        with patch.dict(sys.modules, {"ichor.hpc": None}), contextlib.redirect_stdout(io.StringIO()):
+            with self.assertRaises(SystemExit) as result:
+                main(["submit_datagen", "--help"])
+            self.assertEqual(result.exception.code, 0)
+        with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit) as result:
+                main(["submit_datagen", str(Path(tmp) / "missing.yaml")])
+            self.assertEqual(result.exception.code, 2)
+
     def test_gaussian_dispatch(self):
         batch = ModuleType("ichor.hpc.batch_system")
         batch.JobID = lambda script, id: SimpleNamespace(script=script, id=id)
