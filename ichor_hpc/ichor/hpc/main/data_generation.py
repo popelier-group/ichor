@@ -9,6 +9,7 @@ from ichor.core.files import PointsDirectory
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.main.aimall import submit_wfns
 from ichor.hpc.main.database import (
+    database_path,
     submit_make_csvs_from_database,
     submit_make_database,
 )
@@ -132,9 +133,13 @@ def submit_data_generation(
     """Create/accept a points directory and submit dependent data-generation jobs.
 
     ``input_path`` may be an existing ``.pointsdir`` directory or an XYZ
-    trajectory. Separate scripts are submitted for Gaussian, AIMAll, optional
-    database creation, and optional CSV creation, so no single allocation spans
+    trajectory. Separate scripts are submitted for Gaussian, AIMAll, database
+    creation, and optional CSV creation, so no single allocation spans
     the whole workflow. Each requested stage is held for the preceding stage.
+
+    Submitting AIMAll jobs automatically submits database creation, held for
+    AIMAll to finish. ``create_database=True`` also requests database creation
+    when no AIMAll jobs need to be submitted.
 
     Requesting ``create_csvs=True`` always enables and submits database creation,
     even when ``create_database=False`` was passed. CSVs therefore cannot be
@@ -191,7 +196,7 @@ def submit_data_generation(
     database_job = None
     csv_job = None
 
-    if create_database:
+    if create_database or aimall_job is not None:
         database_job = submit_make_database(
             points.path,
             database_format="sqlite",
@@ -199,12 +204,11 @@ def submit_data_generation(
             hold=aimall_job,
             script_name=ichor.hpc.global_variables.SCRIPT_NAMES["pd_to_database"],
         )
-        database_path = points.path.stem
-        database_path = database_path.with_suffix(".sqlite")
+        db_path = database_path(points.path)
 
     if create_csvs:
         csv_job = submit_make_csvs_from_database(
-            database_path,
+            db_path,
             db_type="sqlite",
             ncores=csv_ncores,
             hold=database_job,
