@@ -1,3 +1,29 @@
+# Submitting a single-geometry optimisation
+
+```sh
+ichor opt gaussian water.xyz --method b3lyp --basis-set '6-31+g(d,p)' --ncores 4
+ichor opt gaussian water.xyz --charge -1 --spin-multiplicity 2 --keywords 'opt=tight' nosymm
+ichor opt xtb water.xyz --method GFN2-xTB --solvent water --fmax 0.01 --ncores 4
+ichor opt gaussian --help
+ichor opt xtb --help
+```
+
+Submission uses the configured HPC scheduler and does not wait for completion.
+The first geometry in the XYZ file is used. Results are written to
+`optimised_geoms/NAME_gaussian` or `optimised_geoms/NAME_ase`, including
+`NAME_optimised.xyz`. Gaussian automatically queues the XYZ conversion after
+the optimisation. xTB runs through ASE and requires xtb in the job environment.
+
+Both commands accept `--hold JOB_ID` and `--overwrite` (also
+`--overwrite-existing`) to replace an existing optimisation directory. Existing
+directories are preserved by default; a skipped submission exits with status 1.
+Gaussian defaults to b3lyp/6-31+g(d,p), and ensures an `opt` keyword is present.
+It also accepts `--title`, `--link0` and `--output-chk`.
+xTB defaults to GFN2-xTB, no solvent, 300 K electronic temperature,
+2048 calculator iterations and 0.01 eV/Angstrom force convergence. Use
+`--electronic-temperature`, `--max-iterations` and `--fmax` to change these.
+Both default to two cores. Help works without HPC configuration.
+
 # Submitting AIMAll from the command line
 
 Install or update `ichor-cli` to register the `ichor` command (for a source

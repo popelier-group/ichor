@@ -1,6 +1,7 @@
 """Non-interactive commands, with HPC imports deferred until submission."""
 
 import argparse
+import math
 from pathlib import Path
 
 
@@ -11,9 +12,48 @@ def positive_int(value):
     return value
 
 
+def positive_float(value):
+    value = float(value)
+    if not math.isfinite(value) or value <= 0:
+        raise argparse.ArgumentTypeError("must be a finite positive number")
+    return value
+
+
 def build_parser():
     parser = argparse.ArgumentParser(prog="ichor")
     commands = parser.add_subparsers(dest="command", required=True)
+    opt = commands.add_parser("opt", help="Submit a single-geometry optimisation.")
+    backends = opt.add_subparsers(dest="backend", required=True)
+    for backend in ("gaussian", "xtb"):
+        optimisation = backends.add_parser(
+            backend, help=f"Optimise an XYZ geometry with {backend}.",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        )
+        optimisation.add_argument("input_xyz_path", type=Path, help="Starting XYZ file (first geometry is used).")
+        optimisation.add_argument("--ncores", "--cores", type=positive_int, default=2, help="CPU cores.")
+        optimisation.add_argument("--hold", help="Scheduler job ID to wait for.")
+        optimisation.add_argument("--overwrite", "--overwrite-existing", dest="overwrite_existing",
+                                  action="store_true", help="Replace the existing optimisation directory.")
+        if backend == "gaussian":
+            optimisation.add_argument("--method", default="b3lyp", help="Electronic structure method.")
+            optimisation.add_argument("--basis-set", default="6-31+g(d,p)", help="Basis set.")
+            optimisation.add_argument("--keywords", nargs="+", default=["opt"],
+                                      help="Route keywords; opt is added if absent.")
+            optimisation.add_argument("--charge", type=int, default=argparse.SUPPRESS)
+            optimisation.add_argument("--spin-multiplicity", type=positive_int, default=argparse.SUPPRESS)
+            optimisation.add_argument("--title", default=argparse.SUPPRESS)
+            optimisation.add_argument("--link0", nargs="+", default=argparse.SUPPRESS,
+                                      help="Link 0 settings without the leading percent sign.")
+            optimisation.add_argument("--output-chk", action="store_true", default=argparse.SUPPRESS)
+        else:
+            optimisation.add_argument("--method", default="GFN2-xTB", help="ASE xTB calculator method.")
+            optimisation.add_argument("--solvent", default="none", help="Solvent name.")
+            optimisation.add_argument("--electronic-temperature", type=positive_int, default=300,
+                                      help="Electronic temperature in K.")
+            optimisation.add_argument("--max-iterations", type=positive_int, default=2048,
+                                      help="Maximum calculator iterations.")
+            optimisation.add_argument("--fmax", type=positive_float, default=0.01,
+                                      help="Force convergence in eV/Angstrom.")
     datagen = commands.add_parser(
         "datagen", aliases=["submit_datagen"], help="Submit the data-generation workflow from YAML."
     )
@@ -135,6 +175,44 @@ def main(argv=None):
     options = vars(parser.parse_args(argv))
     command = options.pop("command")
     action = options.pop("action", "run")
+    if command == "opt":
+        backend = options.pop("backend")
+        path = options["input_xyz_path"].expanduser().resolve()
+        if not path.is_file() or path.suffix.lower() != ".xyz":
+            parser.error("input_xyz_path must be an existing .xyz file")
+        options["input_xyz_path"] = path
+        if options["hold"] is not None:
+            from ichor.hpc.batch_system import JobID
+
+            options["hold"] = JobID("", options["hold"])
+        if backend == "gaussian":
+            from ichor.hpc.main.gaussian import submit_single_gaussian_xyz
+
+            keywords = options["keywords"]
+            if not any(k.lower().split("=", 1)[0].split("(", 1)[0] == "opt" for k in keywords):
+                keywords.insert(0, "opt")
+            job = submit_single_gaussian_xyz(**options)
+            program = "gaussian"
+        else:
+            from ichor.hpc.main.ase import submit_single_ase_xyz
+            from ichor.hpc.useful_functions import XTBNotFound
+
+            options["overwrite"] = options.pop("overwrite_existing")
+            try:
+                job = submit_single_ase_xyz(**options)
+            except XTBNotFound as error:
+                parser.exit(1, f"xTB optimisation not submitted: {error}\n")
+            program = "ase"
+        from ichor.hpc.main.opt import single_geometry_optimisation_directory
+
+        directory = single_geometry_optimisation_directory(path.stem, program)
+        if job is None:
+            print(f"Optimisation not submitted: {directory} already exists; use --overwrite to replace it.")
+            return 1
+        print(f"Submitted {backend} optimisation job {job.id}")
+        print(f"Optimisation directory: {directory}")
+        print(f"Optimised geometry: {directory / (path.stem + '_optimised.xyz')}")
+        return 0
     if command in ("datagen", "submit_datagen"):
         config = options["config"].expanduser().resolve()
         if not config.is_file():

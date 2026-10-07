@@ -13,6 +13,61 @@ from ichor.cli.commands import build_parser, main
 
 
 class CommandTests(unittest.TestCase):
+    def test_opt_help_and_validation(self):
+        for backend in ("gaussian", "xtb"):
+            with patch.dict(sys.modules, {"ichor.hpc": None}), contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaises(SystemExit) as result:
+                    main(["opt", backend, "--help"])
+                self.assertEqual(result.exception.code, 0)
+            with contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit) as result:
+                    main(["opt", backend, "missing.xyz"])
+                self.assertEqual(result.exception.code, 2)
+        for flag, value in (("--ncores", "0"), ("--fmax", "nan"), ("--fmax", "-1"), ("--max-iterations", "0")):
+            with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                build_parser().parse_args(["opt", "xtb", "water.xyz", flag, value])
+
+    def test_opt_dispatch(self):
+        opt = ModuleType("ichor.hpc.main.opt")
+        opt.single_geometry_optimisation_directory = Mock(return_value=Path("optimised_geoms/water"))
+        gaussian = ModuleType("ichor.hpc.main.gaussian")
+        gaussian.submit_single_gaussian_xyz = Mock(return_value=SimpleNamespace(id="123"))
+        ase = ModuleType("ichor.hpc.main.ase")
+        ase.submit_single_ase_xyz = Mock(return_value=SimpleNamespace(id="456"))
+        helpers = ModuleType("ichor.hpc.useful_functions")
+        helpers.XTBNotFound = type("XTBNotFound", (Exception,), {})
+        batch = ModuleType("ichor.hpc.batch_system")
+        batch.JobID = Mock(return_value="dependency")
+        modules = {m.__name__: m for m in (opt, gaussian, ase, helpers, batch)}
+        with tempfile.TemporaryDirectory() as tmp:
+            xyz = Path(tmp) / "water.xyz"
+            xyz.write_text("1\n\nH 0 0 0\n")
+            output = io.StringIO()
+            with patch.dict(sys.modules, modules), contextlib.redirect_stdout(output):
+                self.assertEqual(main(["opt", "gaussian", str(xyz), "--keywords", "nosymm", "opt=tight",
+                                       "--charge", "-1", "--cores", "4", "--hold", "42"]), 0)
+                kwargs = gaussian.submit_single_gaussian_xyz.call_args.kwargs
+                self.assertEqual(kwargs["keywords"], ["nosymm", "opt=tight"])
+                self.assertEqual(kwargs["charge"], -1)
+                self.assertEqual(kwargs["ncores"], 4)
+                self.assertEqual(kwargs["hold"], "dependency")
+                self.assertEqual(kwargs["input_xyz_path"], xyz.resolve())
+                self.assertEqual(main(["opt", "gaussian", str(xyz), "--keywords", "freq"]), 0)
+                self.assertEqual(gaussian.submit_single_gaussian_xyz.call_args.kwargs["keywords"], ["opt", "freq"])
+                self.assertEqual(main(["opt", "xtb", str(xyz), "--overwrite", "--solvent", "water", "--fmax", "0.02"]), 0)
+                kwargs = ase.submit_single_ase_xyz.call_args.kwargs
+                self.assertTrue(kwargs["overwrite"])
+                self.assertEqual(kwargs["solvent"], "water")
+                self.assertEqual(kwargs["fmax"], 0.02)
+                self.assertNotIn("overwrite_existing", kwargs)
+                ase.submit_single_ase_xyz.return_value = None
+                self.assertEqual(main(["opt", "xtb", str(xyz)]), 1)
+                ase.submit_single_ase_xyz.side_effect = helpers.XTBNotFound("Install xtb")
+                with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as result:
+                    main(["opt", "xtb", str(xyz)])
+                self.assertEqual(result.exception.code, 1)
+            self.assertIn("optimised.xyz", output.getvalue())
+
     def test_grouped_commands(self):
         for software in ("gaussian", "aimall"):
             for action in ("run", "status"):
