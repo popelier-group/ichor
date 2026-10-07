@@ -40,6 +40,10 @@ def submit_data_generation_from_yaml(config_path: Union[str, Path]) -> DataGener
     if not isinstance(config, dict):
         raise ValueError("Data-generation YAML must contain a mapping.")
 
+    # Legacy datagen commands run only the final stage of a full workflow file.
+    for name in ("workflow", "optimisation", "metadynamics", "diversity"):
+        config.pop(name, None)
+
     def section(name, defaults):
         values = config.pop(name, {})
         if not isinstance(values, dict):

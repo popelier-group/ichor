@@ -21,6 +21,7 @@ from ichor.hpc.main.opt import (
     single_geometry_optimisation_directory,
 )
 from ichor.hpc.main.data_generation import submit_data_generation
+from ichor.hpc.main.workflow import submit_workflow, submit_workflow_from_yaml
 from ichor.hpc.main.orca import submit_points_directory_to_orca
 from ichor.hpc.main.overfitting import submit_overfitting_report
 
@@ -43,4 +44,6 @@ __all__ = [
     "pyferebus_platform",
     "submit_overfitting_report",
     "submit_data_generation",
+    "submit_workflow",
+    "submit_workflow_from_yaml",
 ]
