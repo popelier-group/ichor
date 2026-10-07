@@ -18,6 +18,26 @@ Use `--hold JOB_ID` to wait for another scheduler job, and `--script-name`,
 `--outputs-dir-path`, or `--errors-dir-path` to override submission paths.
 The command reports the submitted job ID or that no jobs require submission.
 
+# Submitting Gaussian from the command line
+
+```sh
+ichor submit_gaussian WATER.pointsdir --method B3LYP --basis-set '6-31+g(d,p)' --ncores 4
+ichor submit_gaussian WATER.pointsdir --charge -1 --spin-multiplicity 2 --keywords opt nosymm --overwrite-existing --force
+ichor submit_gaussian --help
+```
+
+The command creates missing GJF files from the XYZ geometries and submits them
+through the configured scheduler. Existing GJF files keep their settings unless
+`--overwrite-existing` is supplied. `--force` (or `--force-calculate-wfn`)
+requests recalculation even when wavefunctions already exist. Unspecified input
+settings use the existing GJF writer defaults. Quote basis sets containing shell
+metacharacters, as shown above.
+
+The directory defaults to the current `.pointsdir`. `--hold`, `--script-name`,
+`--outputs-dir-path`, and `--errors-dir-path` work as for AIMAll. Additional input
+options include `--title`, `--link0` (values without the leading `%`), and
+`--output-chk`. Help works without HPC configuration.
+
 # Launching the Menu
 
 After installing `ichor.cli`, it can be launched from the command line using `ichor-cli`. Many common tools to submit jobs are available in the command line interface (CLI). Behind the scenes, the `console-menu` package is used to make the menus.
