@@ -148,10 +148,6 @@ def main(argv=None):
             job = getattr(result, name)
             if job is not None:
                 print(f"Submitted {name} job {job.id}")
-        from ichor.hpc.calculation_status import print_status
-
-        for software in ("gaussian", "aimall"):
-            print_status(result.points_directory, software)
         return 0
 
     path = options["points_directory"].expanduser().resolve()

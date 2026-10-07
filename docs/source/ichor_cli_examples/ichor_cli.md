@@ -61,16 +61,9 @@ ichor datagen --help
 ```
 
 The command calls `submit_data_generation_from_yaml` and reports the points
-directory, submitted job IDs, and a progress snapshot for Gaussian and AIMAll:
-
-```text
-✓ Gaussian             997 / 1000
-! Gaussian             3 failed
-○ AIMAll               1000 pending
-```
-
-Run the stage status commands again to refresh progress; submission does not
-wait for the workflow to finish. Relative input paths are resolved against the
+directory and submitted job IDs. Use the stage status commands to check
+progress. Submission does not wait for the workflow to finish. Relative input
+paths are resolved against the
 YAML file's directory. The workflow queues Gaussian, AIMAll, and the enabled
 database/CSV stages with scheduler dependencies. Enabling CSVs also enables
 SQLite database creation. Machine and software settings still come from
