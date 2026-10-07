@@ -90,6 +90,8 @@ class SunGridEngine(BatchSystem):
         # ...  queue                          slots ja-task-ID
         # --------------------------------------------------------------------
         for line in stdout.split("\n")[2:]:
+            if not line.strip():
+                continue
             tokens = split_by(
                 line,
                 [8, 8, 11, 13, 6, 20, 31, 6],

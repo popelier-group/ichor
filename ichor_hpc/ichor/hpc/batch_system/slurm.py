@@ -71,12 +71,17 @@ class SLURM(BatchSystem):
 
     @classmethod
     def get_queued_jobs(cls) -> List[Job]:
-        stdout, _ = run_cmd(cls.status() + ["--array-unique", "-r"])
+        stdout, _ = run_cmd(cls.status() + [
+            "--noheader", "-r", "--format",
+            "%i %p %P %j %u %a %t %V %S %M %D %C %R",
+        ])
 
         jobs = []
         #     JOBID PRIORITY  PARTITION NAME            USER     ACCOUNT ST SUBMIT_TIME    START_TIME  ...
         #    TIME        NODES  CPUS NODELIST(REASON)
-        for line in stdout.split("\n")[2:]:
+        for line in stdout.splitlines():
+            if not line.strip():
+                continue
             tokens = line.split()
             job_id = tokens[0] if len(tokens) >= 1 else None
             priority = tokens[1] if len(tokens) >= 2 else None

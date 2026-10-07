@@ -440,9 +440,14 @@ class SubmissionScript:
             ichor.hpc.global_variables.BATCH_SYSTEM.current_node()
             is not NodeType.ComputeNode
         ):
-            return ichor.hpc.global_variables.BATCH_SYSTEM.submit_script(
+            job = ichor.hpc.global_variables.BATCH_SYSTEM.submit_script(
                 self.path, hold
             )
+            if job is not None:
+                from ichor.hpc.calculation_status import record_submission
+
+                record_submission(job, self.grouped_commands)
+            return job
 
     def __enter__(self) -> "SubmissionScript":
         """

@@ -13,6 +13,70 @@ from ichor.cli.commands import build_parser, main
 
 
 class CommandTests(unittest.TestCase):
+    def test_grouped_commands(self):
+        for software in ("gaussian", "aimall"):
+            for action in ("run", "status"):
+                options = build_parser().parse_args([software, action])
+                self.assertEqual(options.command, software)
+                self.assertEqual(options.action, action)
+        self.assertEqual(build_parser().parse_args(["datagen"]).config, Path("ichor_workflow.yaml"))
+
+    def test_status_dispatch(self):
+        status = ModuleType("ichor.hpc.calculation_status")
+        status.print_status = Mock()
+        with tempfile.TemporaryDirectory() as tmp:
+            points = Path(tmp) / "water.pointsdir"
+            points.mkdir()
+            with patch.dict(sys.modules, {status.__name__: status}):
+                for software in ("gaussian", "aimall"):
+                    self.assertEqual(main([software, "status", str(points)]), 0)
+                    status.print_status.assert_called_with(points.resolve(), software)
+
+    def test_gaussian_progress_and_retries(self):
+        from ichor.hpc.calculation_status import calculation_status, record_submission
+
+        with tempfile.TemporaryDirectory() as tmp:
+            points = Path(tmp) / "water.pointsdir"
+            points.mkdir()
+            directories = []
+            for index in range(5):
+                point = points / f"water{index}.pointdir"
+                point.mkdir()
+                directories.append(point)
+            (directories[0] / "water.gau").write_text("Normal termination of Gaussian")
+            (directories[1] / "water.gau").write_text("Error termination")
+            (directories[2] / "water.gau").write_text("Still writing output")
+            command_type = type("GaussianCommand", (), {})
+            command = command_type()
+            command.data = [str(directories[1] / "water.gjf")]
+            record_submission(SimpleNamespace(id="42"), [command])
+            jobs = [SimpleNamespace(id="42", task_id="1", state="Running")]
+            counts = calculation_status(points, "gaussian", jobs=jobs)
+            self.assertEqual(counts, dict(completed=1, failed=0, running=1, pending=2, unknown=1, total=5))
+            counts = calculation_status(points, "gaussian", jobs=[])
+            self.assertEqual(counts["failed"], 1)
+            self.assertEqual(counts["running"], 0)
+
+    def test_aimall_progress(self):
+        from ichor.hpc.calculation_status import calculation_status, print_status
+
+        helper = ModuleType("ichor.core.useful_functions.check_aimall_completed")
+        helper.aimall_completed = Mock(return_value=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            points = Path(tmp) / "water.pointsdir"
+            points.mkdir()
+            point = points / "water.pointdir"
+            point.mkdir()
+            (point / "water.wfn").touch()
+            with patch.dict(sys.modules, {helper.__name__: helper}):
+                self.assertEqual(calculation_status(points, "aimall", jobs=[])["completed"], 1)
+                output = io.StringIO()
+                with contextlib.redirect_stdout(output):
+                    print_status(points, "aimall")
+                self.assertIn("1 / 1", output.getvalue())
+                helper.aimall_completed.return_value = False
+                self.assertEqual(calculation_status(points, "aimall", jobs=[])["pending"], 1)
+
     def test_datagen_dispatch(self):
         datagen = ModuleType("ichor.hpc.main.data_generation")
         submit = datagen.submit_data_generation_from_yaml = Mock(
