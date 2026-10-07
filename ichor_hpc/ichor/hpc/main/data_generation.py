@@ -199,7 +199,7 @@ def submit_data_generation(
             hold=aimall_job,
             script_name=ichor.hpc.global_variables.SCRIPT_NAMES["pd_to_database"],
         )
-        database_path = points.path / points.path.stem
+        database_path = points.path.stem
         database_path = database_path.with_suffix(".sqlite")
 
     if create_csvs:
