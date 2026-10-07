@@ -79,6 +79,9 @@ def submit_data_generation(
             )
 
     gaussian_kwargs.setdefault("method", method)
+    aimall_kwargs.setdefault(
+        "method", str(gaussian_kwargs["method"]).upper().strip()
+    )
     gjfs = write_gjfs(points, overwrite_existing_gjfs, **gaussian_kwargs)
     expected_wfns = [gjf.with_suffix(".wfn") for gjf in gjfs]
 
@@ -99,7 +102,6 @@ def submit_data_generation(
         force_calculate_ints=force_calculate_ints,
         ncores=aimall_ncores,
         hold=gaussian_job,
-        method=method.upper().strip(),
         script_name=ichor.hpc.global_variables.SCRIPT_NAMES["aimall"],
         **aimall_kwargs,
     )
