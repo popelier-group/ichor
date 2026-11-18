@@ -15,6 +15,7 @@ from ichor.core.analysis.overfitting import (
 )
 from ichor.core.models import Model
 from ichor.core.models.kernels import RBFCyclic
+
 from tests.path import get_cwd
 
 # the real FEREBUS models the wrapping bug was found on

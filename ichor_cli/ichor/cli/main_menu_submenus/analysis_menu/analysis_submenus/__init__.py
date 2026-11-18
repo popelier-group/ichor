@@ -11,8 +11,8 @@ from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus.robustness_sub
     ROBUSTNESS_MENU_DESCRIPTION,
 )
 from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus.single_point_submenu import (  # noqa: E501
-    SINGLE_POINT_MENU_DESCRIPTION,
     single_point_menu,
+    SINGLE_POINT_MENU_DESCRIPTION,
 )
 
 __all__ = [
