@@ -183,7 +183,7 @@ class GJF(ReadFile, WriteFile, HasAtoms):
 
     def output_wfn(self):
         """Helper method to add 'output=wfn' to the GJF keyword list"""
-        self.add_keyword("output=wfx")
+        self.add_keyword("output=wfn")
 
     @classmethod
     def parse_route_card(cls, route_card: str) -> RouteCard:
@@ -271,7 +271,7 @@ class GJF(ReadFile, WriteFile, HasAtoms):
         self.basis_set = self.basis_set or "6-31+g(d,p)"
         self.keywords = self.keywords or [
             "nosymm",
-            "output=wfx",
+            "output=wfn",
             "force",
             "geom=notest",
             # do not use these as default
@@ -314,10 +314,10 @@ class GJF(ReadFile, WriteFile, HasAtoms):
             write_str += (
                 f"{atom.type} {atom.x:{fmtstr}} {atom.y:{fmtstr}} {atom.z:{fmtstr}}\n"
             )
-        if "output=wfx" in self.keywords:
-            write_str += f"\n{self.path.with_suffix('.wfx')}"
+        if "output=wfn" in self.keywords:
+            write_str += f"\n{self.path.with_suffix('.wfn')}"
         # add newline character because Gaussian otherwise crashes
-        # if requesting using other keywords but not output=wfx
+        # if requesting using other keywords but not output=wfn
         else:
             write_str += "\n"
 

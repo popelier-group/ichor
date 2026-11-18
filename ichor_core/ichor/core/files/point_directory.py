@@ -7,7 +7,7 @@ from ichor.core.files.aimall import Aim, IntDirectory
 from ichor.core.files.ase.opt import XTB
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file_data import HasAtoms, HasData
-from ichor.core.files.gaussian import GaussianOutput, GJF, WFX
+from ichor.core.files.gaussian import GaussianOutput, GJF, WFN
 from ichor.core.files.xyz import XYZ
 
 
@@ -28,7 +28,7 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
         "orca_input": OrcaInput,
         "orca_output": OrcaOutput,
         "aim": Aim,
-        "wfx": WFX,
+        "wfn": WFN,
         "ints": IntDirectory,
     }
 
@@ -64,11 +64,11 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
         # and will error out if an xyz is not present
         if self.xyz:
             return self.xyz.atoms
-        elif self.wfx:
-            return self.wfx.atoms.to_angstroms()
+        elif self.wfn:
+            return self.wfn.atoms.to_angstroms()
 
         raise FileNotFoundError(
-            f"There is no .xyz or .wfx file in the current {self.__class__.__name__} instance: {self.path.absolute()}"
+            f"There is no .xyz or .wfn file in the current {self.__class__.__name__} instance: {self.path.absolute()}"
         )
 
     def atoms_from_file(self, file_with_atoms: HasAtoms) -> Atoms:
