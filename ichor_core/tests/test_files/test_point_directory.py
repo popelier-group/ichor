@@ -39,7 +39,7 @@ def _test_point_directory(
     xyz_inst = point_dir_inst.xyz.path
     ints_path = point_dir_inst.ints.path
     aim_path = point_dir_inst.aim.path
-    wfn_path = point_dir_inst.wfn.path
+    wavefunction_path = point_dir_inst.wavefunction.path
 
     # check that each file/dir type can be accessed as an attribute
     # by the contents class variable
@@ -48,7 +48,7 @@ def _test_point_directory(
     assert xyz_inst.exists() is True
     assert ints_path.exists() is True
     assert aim_path.exists() is True
-    assert wfn_path.exists() is True
+    assert wavefunction_path.exists() is True
 
     expected_raw_data = {
         "gaussian_output": {
