@@ -271,7 +271,7 @@ class GJF(ReadFile, WriteFile, HasAtoms):
         self.basis_set = self.basis_set or "6-31+g(d,p)"
         self.keywords = self.keywords or [
             "nosymm",
-            "output=wfn",
+            "output=wfx",
             "force",
             "geom=notest",
             # do not use these as default
@@ -314,10 +314,10 @@ class GJF(ReadFile, WriteFile, HasAtoms):
             write_str += (
                 f"{atom.type} {atom.x:{fmtstr}} {atom.y:{fmtstr}} {atom.z:{fmtstr}}\n"
             )
-        if "output=wfn" in self.keywords:
-            write_str += f"\n{self.path.with_suffix('.wfn')}"
+        if "output=wfx" in self.keywords:
+            write_str += f"\n{self.path.with_suffix('.wfx')}"
         # add newline character because Gaussian otherwise crashes
-        # if requesting using other keywords but not output=wfn
+        # if requesting using other keywords but not output=wfx
         else:
             write_str += "\n"
 
