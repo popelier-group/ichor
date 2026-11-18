@@ -156,7 +156,7 @@ def plot_true_vs_predicted_from_arrays(
         for pd in true_energies_array_hartree:
             one_system_energies = []
             for p in pd:
-                one_system_energies.append(p.wfn.total_energy)
+                one_system_energies.append(p.wavefunction.total_energy)
             all_true_energies.append(one_system_energies)
         true_energies_array_hartree = np.array(all_true_energies)
     else:
@@ -337,7 +337,7 @@ def plot_true_vs_predicted_from_arrays_one_system(
     if isinstance(true_energies_array_hartree, PointsDirectory):
         all_true_energies = []
         for p in true_energies_array_hartree:
-            all_true_energies.append(p.wfn.total_energy)
+            all_true_energies.append(p.wavefunction.total_energy)
         true_energies_array_hartree = np.array(all_true_energies)
 
     diff = (predicted_energies_array_hartree - true_energies_array_hartree) * 2625.5

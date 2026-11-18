@@ -119,7 +119,7 @@ SAMPLED_POINTS = 5
 # The files of a point which are read into the database. The rest of what AIMAll leaves
 # behind (.sumviz and .mgpviz in particular, which are the largest files there) is never
 # read, so counting it would put the estimate out by an order of magnitude.
-FILES_READ_INTO_DATABASE = {".wfn", ".xyz", ".gjf"}
+FILES_READ_INTO_DATABASE = {".wfx", ".wfn", ".xyz", ".gjf"}
 
 
 def points_directories_in(points_directory_path: Path) -> List[Path]:
@@ -540,7 +540,7 @@ class SubmitDatabaseFunctions:
     @staticmethod
     def select_database():
         """Asks user to update the method for AIMALL. The method
-        needs to be added to the WFN file so that AIMALL does the correct
+        needs to be added to the WFX file so that AIMALL does the correct
         calculation."""
 
         submit_database_menu_options.selected_database_format = user_input_restricted(

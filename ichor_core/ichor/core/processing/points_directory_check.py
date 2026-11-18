@@ -1,6 +1,6 @@
 """Checks that the Gaussian and AIMAll calculations of a PointsDirectory have finished.
 
-A property calculation is done in two steps: Gaussian writes a wavefunction (.wfn) file
+A property calculation is done in two steps: Gaussian writes a wavefunction (.wfx) file
 for every geometry, and AIMAll then partitions each of those wavefunctions into atomic
 basins, writing one .int file per atom into a ``<point>_atomicfiles`` directory next to
 the wavefunction. Both steps are submitted as job arrays of many independent tasks, of
@@ -8,11 +8,9 @@ which a few tend to fail or to be killed by the queue, so before the results are
 collected into a database it is worth knowing which points, if any, are missing or
 incomplete.
 
-The checks only look at the files themselves, i.e. no wavefunction or .int file is fully
-parsed (only the last line of a file is read, to see whether the program that wrote it
-got to the end), so that checking a PointsDirectory containing many thousands of points
-stays cheap. What a check spends its time on is the filesystem rather than the CPU, so
-each point directory is listed once with :func:`os.scandir` (see :class:`DirectoryScan`)
+The Gaussian check streams each WFX file to verify its sections and metadata. The
+AIMAll check reads the end of each .int file to find its completion marker.
+Each point directory is listed once with :func:`os.scandir` (see :class:`DirectoryScan`)
 and several points are looked at at a time (see ``nthreads``), which is what makes
 checking a large set on the shared filesystem of a cluster take seconds rather than
 minutes.
@@ -31,7 +29,7 @@ from ichor.core.files import (
     IntDirectory,
     PointDirectory,
     PointsDirectory,
-    WFN,
+    WFX,
     XTB,
     XYZ,
 )
@@ -48,6 +46,7 @@ __all__ = [
     "AimallCheck",
     "point_directory_paths_in",
     "points_directory_paths_in",
+    "wfx_is_finished",
     "wfn_is_finished",
     "OK",
     "MISSING",
@@ -56,12 +55,12 @@ __all__ = [
 
 # the point has everything the checked calculation should have written
 OK = "OK"
-# the calculation has not written its main output at all (no .wfn / no _atomicfiles)
+# the calculation has not written its main output at all (no .wfx / no _atomicfiles)
 MISSING = "MISSING"
 # the output is there, but it is incomplete or the program that wrote it crashed
 INCOMPLETE = "INCOMPLETE"
 
-# the last line Gaussian writes into a .wfn file, and the last line AIMAll writes into an
+# the last line Gaussian writes into a legacy WFN file, and the last line AIMAll writes into an
 # .int file. A file which does not end with these was cut short.
 WFN_FINAL_LINE = "TOTAL ENERGY ="
 INT_FINAL_LINE = "AIMInt is Done."
@@ -161,9 +160,9 @@ class DirectoryScan:
                 self.file_paths.append(Path(entry.path))
 
     def files(self, file_class: Type[File]) -> List[Path]:
-        """The paths of the files which are of a kind, e.g. the .wfn files.
+        """The paths of the files which are of a kind, e.g. the .wfx files.
 
-        :param file_class: The class which wraps that kind of file, e.g. ``WFN``.
+        :param file_class: The class which wraps that kind of file, e.g. ``WFX``.
         """
         return [path for path in self.file_paths if file_class.check_path(path)]
 
@@ -237,6 +236,18 @@ def wfn_is_finished(path: Union[str, Path]) -> bool:
     """
 
     return _ends_with(Path(path), WFN_FINAL_LINE)
+
+
+def wfx_is_finished(path: Union[str, Path]) -> bool:
+    """Return whether the WFX has readable metadata and no unclosed sections."""
+    path = Path(path)
+    if not path.is_file():
+        return False
+    try:
+        WFX(path).read()
+    except (OSError, ValueError):
+        return False
+    return True
 
 
 def _shorten(names: Sequence[str]) -> str:
@@ -515,8 +526,8 @@ class GaussianCheck(PointsDirectoryCheck):
     """Checks that Gaussian has written a wavefunction for every point of a
     PointsDirectory (or of many PointsDirectory-ies).
 
-    A point is ``MISSING`` when it has no .wfn file at all, i.e. Gaussian has not run on
-    it (or crashed before writing anything), and ``INCOMPLETE`` when the .wfn file is
+    A point is ``MISSING`` when it has no .wfx file at all, i.e. Gaussian has not run on
+    it (or crashed before writing anything), and ``INCOMPLETE`` when the .wfx file is
     there but was not written to the end, which happens when a job runs out of time or is
     killed. Both need the point to be submitted to Gaussian again; an incomplete point
     needs the recalculate option as well, as the file which is there is unusable but
@@ -531,8 +542,8 @@ class GaussianCheck(PointsDirectoryCheck):
 
     :param path: Path to a PointsDirectory, or to a parent directory containing many
         PointsDirectory-ies.
-    :param check_file_contents: Whether to also check that each .wfn file ends with the
-        total energy line Gaussian finishes it with, defaults to True.
+    :param check_file_contents: Whether to also check that each .wfx file has complete
+        sections and readable metadata, defaults to True.
     :param nthreads: How many points to look at at the same time.
     """
 
@@ -542,34 +553,34 @@ class GaussianCheck(PointsDirectoryCheck):
         """Checks that one point has a (finished) wavefunction file."""
 
         problems = []
-        wfns = point.files(WFN)
+        wfxs = point.files(WFX)
 
-        if not wfns:
+        if not wfxs:
             if not point.files(GJF):
                 problems.append(
-                    "no .wfn and no .gjf file, so the point has not been set up for Gaussian"
+                    "no .wfx and no .gjf file, so the point has not been set up for Gaussian"
                 )
             elif point.files(GaussianOutput):
                 problems.append(
-                    "no .wfn file, but a Gaussian output file is there, so look in it for errors"
+                    "no .wfx file, but a Gaussian output file is there, so look in it for errors"
                 )
             else:
-                problems.append("no .wfn file, so Gaussian has not run on this point")
+                problems.append("no .wfx file, so Gaussian has not run on this point")
 
             return MISSING, problems
 
-        if len(wfns) > 1:
+        if len(wfxs) > 1:
             problems.append(
-                f"{len(wfns)} .wfn files found ({_shorten([w.name for w in wfns])}), "
+                f"{len(wfxs)} .wfx files found ({_shorten([w.name for w in wfxs])}), "
                 "only one is expected"
             )
 
-        for wfn in wfns:
-            if _is_empty(wfn):
-                problems.append(f"{wfn.name} is empty")
-            elif self.check_file_contents and not wfn_is_finished(wfn):
+        for wfx in wfxs:
+            if _is_empty(wfx):
+                problems.append(f"{wfx.name} is empty")
+            elif self.check_file_contents and not wfx_is_finished(wfx):
                 problems.append(
-                    f"{wfn.name} does not end with a total energy line, "
+                    f"{wfx.name} is missing valid WFX data or has an unclosed section, "
                     "so Gaussian did not finish writing it"
                 )
 
@@ -659,9 +670,9 @@ class AimallCheck(PointsDirectoryCheck):
         int_directories = point.directories(IntDirectory)
 
         if not int_directories:
-            if not point.files(WFN):
+            if not point.files(WFX):
                 problems.append(
-                    "no _atomicfiles directory and no .wfn file, so AIMAll had nothing to run on"
+                    "no _atomicfiles directory and no .wfx file, so AIMAll had nothing to run on"
                 )
             else:
                 problems.append(

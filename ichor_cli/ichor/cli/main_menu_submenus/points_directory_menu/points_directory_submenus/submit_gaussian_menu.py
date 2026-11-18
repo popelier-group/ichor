@@ -31,7 +31,7 @@ SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
     "default_basis_set": "6-31+g(d,p)",
     "default_ncores": 2,
     "default_overwrite_existing_gjfs": False,
-    "default_force_calculate_wfn": False,
+    "default_force_calculate_wfx": False,
 }
 
 
@@ -43,7 +43,7 @@ class SubmitGaussianMenuOptions(MenuOptions):
     selected_basis_set: str
     selected_number_of_cores: int
     selected_overwrite_existing_gjfs: bool
-    selected_force_calculate_wfn: bool
+    selected_force_calculate_wfx: bool
 
     # defaults to the current working directory
     selected_points_directory_path: Path = field(default_factory=lambda: Path.cwd())
@@ -115,12 +115,12 @@ class SubmitGaussianFunctions:
         )
 
     @staticmethod
-    def select_force_calculate_wfns():
-        """Whether or not to recalculate wfns if they are already present"""
+    def select_force_calculate_wfxs():
+        """Whether or not to recalculate wfxs if they are already present"""
 
-        submit_gaussian_menu_options.selected_force_calculate_wfn = user_input_bool(
-            "Recalculate present wfns (yes/no): ",
-            submit_gaussian_menu_options.selected_force_calculate_wfn,
+        submit_gaussian_menu_options.selected_force_calculate_wfx = user_input_bool(
+            "Recalculate present wfxs (yes/no): ",
+            submit_gaussian_menu_options.selected_force_calculate_wfx,
         )
 
     @staticmethod
@@ -138,12 +138,12 @@ class SubmitGaussianFunctions:
 
         print("STARTING GAUSSIAN JOB SUBMISSION\n")
 
-        (method, basis_set, ncores, overwrite_existing, force_calculate_wfn) = (
+        (method, basis_set, ncores, overwrite_existing, force_calculate_wfx) = (
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
             submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
-            submit_gaussian_menu_options.selected_force_calculate_wfn,
+            submit_gaussian_menu_options.selected_force_calculate_wfx,
         )
 
         # add memory link0 to GJF
@@ -175,7 +175,7 @@ class SubmitGaussianFunctions:
             submit_points_directory_to_gaussian(
                 points_directory=pd,
                 overwrite_existing=overwrite_existing,
-                force_calculate_wfn=force_calculate_wfn,
+                force_calculate_wfn=force_calculate_wfx,
                 ncores=ncores,
                 method=method,
                 basis_set=basis_set,
@@ -203,14 +203,14 @@ class SubmitGaussianFunctions:
                 "CPU cores per point": ncores,
                 "Memory per point": f"{mem} GB",
                 "Overwrite existing gjfs": overwrite_existing,
-                "Recalculate existing wfns": force_calculate_wfn,
+                "Recalculate existing wfxs": force_calculate_wfx,
             },
             [
                 "A gjf file has been written for every geometry and submitted as a job "
                 "array, so the points are calculated in parallel as the queue allows. "
                 "Check on them with your batch system's queue command (e.g. qstat / "
                 "squeue).",
-                "Each point's wfn file is written next to its gjf inside the "
+                "Each point's wfx file is written next to its gjf inside the "
                 "PointsDirectory; stdout and stderr go to the GAUSSIAN subfolders of "
                 "the outputs and errors directories.",
                 "Once the wavefunctions are there, use the AIMAll menu to get the "
@@ -243,8 +243,8 @@ submit_gaussian_menu_items = [
         SubmitGaussianFunctions.select_overwrite_existing_gjfs,
     ),
     FunctionItem(
-        "Recalculate all WFNs (if any are already present)",
-        SubmitGaussianFunctions.select_force_calculate_wfns,
+        "Recalculate all WFXs (if any are already present)",
+        SubmitGaussianFunctions.select_force_calculate_wfxs,
     ),
     FunctionItem(
         "Submit to Gaussian",

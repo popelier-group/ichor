@@ -6,7 +6,7 @@ import pandas as pd
 from ichor.core.common.constants import ha_to_kj_mol
 from ichor.core.common.io import get_files_of_type
 from ichor.core.common.np import dict_of_list_to_dict_of_array
-from ichor.core.files import WFN
+from ichor.core.files import WFN, WFX
 from ichor.core.models import Models
 
 
@@ -32,7 +32,8 @@ def read_fflux(fflux_file: Path) -> Dict[str, np.ndarray]:
 
 
 def read_wfn_energy(wfn_file: Path) -> float:
-    return WFN(wfn_file).energy
+    wavefunction_type = WFX if WFX.check_path(wfn_file) else WFN
+    return wavefunction_type(wfn_file).total_energy
 
 
 def get_dlpoly_energies(
@@ -50,7 +51,9 @@ def get_dlpoly_energies(
         if d.is_dir() and (d / "FFLUX").exists():
             data["ntrain"] += [Models(d / "model_krig").ntrain]
             data["fflux"] += [read_fflux(d / "FFLUX")["e_iqa"][-1]]
-            wfn_files = get_files_of_type(WFN.get_filetype(), d)
+            wfn_files = get_files_of_type(WFX.get_filetype(), d) or get_files_of_type(
+                WFN.get_filetype(), d
+            )
             if len(wfn_files) > 0:
                 data["gaussian"] += [read_wfn_energy(wfn_files[0])]
             else:

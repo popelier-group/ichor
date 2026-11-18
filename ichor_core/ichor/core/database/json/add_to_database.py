@@ -39,9 +39,9 @@ def get_data_for_point(
     ###############################
 
     # if wfn file exists
-    if point.wfn:
+    if point.wavefunction:
         point_dict["date_added"] = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-        point_dict["wfn_energy"] = point.wfn.total_energy
+        point_dict["wfn_energy"] = point.wavefunction.total_energy
 
     # if file does not exist, still add to database, but do not contain wfn information
     else:
@@ -50,7 +50,7 @@ def get_data_for_point(
 
         if print_missing_data:
             print(
-                f"Point {point.path} does not contain a Gaussian wavefunction (.wfn) file."
+                f"Point {point.path} does not contain a Gaussian wavefunction file."
             )
 
     ###############################

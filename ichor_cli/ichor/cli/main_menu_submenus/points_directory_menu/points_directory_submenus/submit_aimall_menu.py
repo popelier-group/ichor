@@ -84,7 +84,7 @@ class SubmitAIMALLFunctions:
     @staticmethod
     def select_method():
         """Asks user to update the method for AIMALL. The method
-        needs to be added to the WFN file so that AIMALL does the correct
+        needs to be added to the WFX file so that AIMALL does the correct
         calculation."""
 
         submit_aimall_menu_options.selected_method = user_input_free_flow(
@@ -188,10 +188,10 @@ class SubmitAIMALLFunctions:
             },
             [
                 "AIMAll partitions each wavefunction into atomic basins, so every point "
-                "needs a wfn file from a finished Gaussian job; points without one are "
+                "needs a wfx file from a finished Gaussian job; points without one are "
                 "skipped.",
                 "The results are written into a <point>_atomicfiles folder next to each "
-                "wfn inside the PointsDirectory; stdout and stderr go to the AIMALL "
+                "wfx inside the PointsDirectory; stdout and stderr go to the AIMALL "
                 "subfolders of the outputs and errors directories.",
                 "The calculations are submitted as a job array, so check on them with "
                 "your batch system's queue command (e.g. qstat / squeue). Once they "

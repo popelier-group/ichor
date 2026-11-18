@@ -50,7 +50,7 @@ def fflux_point_directory_processing(
         # the final dictionary that will be returned
         all_processed_data = {}
 
-        all_processed_data["wfn"] = point_directory.wfn.raw_data
+        all_processed_data["wfn"] = point_directory.wavefunction.raw_data
         all_processed_data["ints"] = point_directory.ints.processed_data(
             fflux_ints_directory_processing_function(c_matrix_dict)
         )
