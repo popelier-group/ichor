@@ -120,8 +120,12 @@ class WFX(HasAtoms, HasData, ReadFile):
         self.method = self.method or sections.get("model") or None
 
     @property
-    def properties(self) -> Dict[str, float]:
+    def raw_data(self) -> Dict[str, float]:
         return {"energy": self.total_energy, "virial_ratio": self.virial_ratio}
+
+    @property
+    def properties(self) -> Dict[str, float]:
+        return self.raw_data
 
     def ensure_model(self, method: str):
         """Add a missing AIMAll model while preserving all other WFX sections."""

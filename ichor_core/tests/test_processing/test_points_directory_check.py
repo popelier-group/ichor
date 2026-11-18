@@ -218,7 +218,7 @@ def test_point_directory_prefers_wfx_and_can_read_its_geometry(points_directory)
     point = PointDirectory(point_path)
 
     assert isinstance(point.wavefunction, WFX)
-    assert point.wavefunction.total_energy == -76.5
+    assert point.raw_data["wfx"] == {"energy": -76.5, "virial_ratio": 2.0}
     assert point.wavefunction.atoms[1].units == AtomicDistance.Bohr
     assert point.atoms[1].x == pytest.approx(0.740848, abs=1e-6)
 
