@@ -43,7 +43,7 @@ repos:
     hooks:
       - id: ascii-check
         name: ASCII Compliance Check
-        entry: python check_ascii.py
-        language: system
+        language: pygrep
+        entry: '[^\x00-\x7F]'
         types: [text]
         exclude: ^(examples|\.github/ISSUE_TEMPLATE|docs/source|docs/build)/
