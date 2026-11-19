@@ -80,6 +80,17 @@ class ShortcutItem(MenuItem):
         self.menu.open_on_top(self.shortcut.get_menu())
 
 
+class SeparatorItem(MenuItem):
+    """A blank row above the exit item, setting it apart from the rest. It does nothing
+    if chosen, which is only possible by typing the number of its row."""
+
+    def __init__(self, menu: "ConsoleMenu"):
+        super().__init__(text="", menu=menu)
+
+    def show(self, index):
+        return ""
+
+
 class ConsoleMenu(OriginalConsoleMenu):
     """Subclasses from `consolemenu.ConsoleMenu`, which is the base menu class. This subclass
     adds the `this_menu_options` attribute, which contains options for the menus,
@@ -139,8 +150,11 @@ class ConsoleMenu(OriginalConsoleMenu):
 
         self.this_menu_options = this_menu_options
         self.show_parent_options = show_parent_options
-        # the exit item text the formatter has been told to draw a line above
-        self._exit_border_text = None
+        # every section pads above and below itself, so two blank rows end up between
+        # each; the items need no padding of their own to leave one, as the sections
+        # either side of them already do (the header bottom is handled in `draw`)
+        self.formatter.set_items_top_padding(0)
+        self.formatter.set_items_bottom_padding(0)
         # the ">>" prompt, taken out of the drawn menu by `draw` so that it can be
         # handed to `input` by `get_input` instead (see those methods)
         self._input_prompt = ""
@@ -159,15 +173,20 @@ class ConsoleMenu(OriginalConsoleMenu):
         cursor to that edge, it draws what has been typed over the `">>"` and the prompt
         disappears. Giving the prompt to `input` instead tells `readline` how many columns
         to leave alone, so the prompt survives editing.
+
+        A prologue or epilogue with no text is left out rather than passed on empty, as
+        the formatter still draws the blank rows that pad it.
         """
 
-        self._separate_exit_item()
+        prologue_text = self.get_prologue_text() or None
+        # a prologue pads above itself, so the header only needs to when there is not one
+        self.formatter.set_header_bottom_padding(0 if prologue_text else 1)
         formatted_menu = self.formatter.format(
             title=self.get_title(),
             subtitle=self.get_subtitle(),
             items=self.items,
-            prologue_text=self.get_prologue_text(),
-            epilogue_text=self.get_epilogue_text(),
+            prologue_text=prologue_text,
+            epilogue_text=self.get_epilogue_text() or None,
         )
         # everything after the last newline is the prompt, as the section before it
         # (the menu footer) is newline terminated but the prompt itself is not
@@ -191,15 +210,20 @@ class ConsoleMenu(OriginalConsoleMenu):
 
     def start(self, show_exit_option=None):
         """Starts the menu, first adding an item for each global shortcut, so that they
-        sit together at the bottom of every menu, above the exit item."""
+        sit together at the bottom of every menu, followed by a blank row setting the
+        exit item apart."""
 
         self.items = [
             item
             for item in self.items
-            if not isinstance(item, ShortcutItem) and item is not self.exit_item
+            if not isinstance(item, (ShortcutItem, SeparatorItem))
+            and item is not self.exit_item
         ]
         for key, shortcut in self._shortcuts_available_here().items():
             self.items.append(ShortcutItem(key, shortcut, self))
+
+        if self.show_exit_option if show_exit_option is None else show_exit_option:
+            self.items.append(SeparatorItem(self))
 
         super().start(show_exit_option)
 
@@ -230,23 +254,6 @@ class ConsoleMenu(OriginalConsoleMenu):
             # the item's own clean up never ran, and it is what resumes this menu
             # after the item paused it to run
             self.selected_item.clean_up()
-
-    def _separate_exit_item(self):
-        """Draws a line above the exit item, setting it apart from the menu's own items.
-
-        The formatter picks the items to draw a line above by their text, and the exit
-        item's text changes to "Return to <parent>" when it is first drawn, so that
-        text is worked out here, ahead of the formatter needing it.
-        """
-
-        if self.parent is not None and self.exit_item.text == "Exit":
-            self.exit_item.text = f"Return to {self.parent.get_title()}"
-
-        if self._exit_border_text != self.exit_item.text:
-            if self._exit_border_text is not None:
-                self.formatter.show_item_top_border(self._exit_border_text, False)
-            self.formatter.show_item_top_border(self.exit_item.text, True)
-            self._exit_border_text = self.exit_item.text
 
     def open_on_top(self, menu: "ConsoleMenu"):
         """Opens a menu as though it were a submenu of this one, the way `SubmenuItem`
