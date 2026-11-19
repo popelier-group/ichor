@@ -130,17 +130,17 @@ main_menu_items = [
         main_menu,
     ),
     SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
-    SubmenuItem(JOB_SUBMISSION_MENU_DESCRIPTION.title, job_submission_menu, main_menu),
 ]
 
 # add items to menu
 add_items_to_menu(main_menu, main_menu_items)
 
-# the job submission options are also one key away from every menu, as they tend to be
-# wanted just before submitting, from whichever menu that is
+# the job submission options are one key away from every menu (shown above the exit
+# item of each), as they tend to be wanted just before submitting, from whichever menu
+# that is
 register_global_shortcut(
     JOB_SUBMISSION_MENU_KEY,
-    "job submission options",
+    JOB_SUBMISSION_MENU_DESCRIPTION.title,
     lambda: job_submission_menu,
 )
 

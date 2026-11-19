@@ -25,6 +25,10 @@ AMBER_MENU_DEFAULTS = {
     "default_write_coord_every": 10,
     "default_dt": 0.001,
     "default_ln_gamma": 0.7,
+    # AMBER runs a single molecule on one core whatever the job asks for, so this only
+    # decides which partition the job goes to and how much memory it is given. 2 keeps
+    # it out of the 1 core queue, which on CSF3 can be slow to start
+    "default_number_of_cores": 2,
 }
 
 AMBER_MENU_DESCRIPTION = MenuDescription(
@@ -55,6 +59,7 @@ class AmberMenuOptions(MenuOptions):
     selected_write_coordinates_every_nth_timestep: int
     selected_dt: float
     selected_ln_gamma: float
+    selected_number_of_cores: int
 
 
 amber_menu_options = AmberMenuOptions(*AMBER_MENU_DEFAULTS.values())
@@ -112,6 +117,21 @@ class AmberMenuFunctions:
         )
 
     @staticmethod
+    def select_number_of_cores():
+        """
+        Select the number of cores the AMBER job asks for.
+        """
+        print(
+            "AMBER runs a single molecule on one core, so asking for more only changes "
+            "which partition the job goes to and how much memory it is given."
+        )
+        amber_menu_options.selected_number_of_cores = user_input_int(
+            "Enter number of cores: ",
+            amber_menu_options.selected_number_of_cores,
+            minimum=1,
+        )
+
+    @staticmethod
     def submit_amber_to_compute():
         """Asks for user input and submits AMBER job to compute node."""
 
@@ -132,6 +152,7 @@ class AmberMenuFunctions:
         )
         dt = amber_menu_options.selected_dt
         ln_gamma = amber_menu_options.selected_ln_gamma
+        ncores = amber_menu_options.selected_number_of_cores
 
         xyz_path = ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
 
@@ -143,6 +164,7 @@ class AmberMenuFunctions:
             system_name=xyz_path.stem,
             dt=dt,
             ln_gamma=ln_gamma,
+            ncores=ncores,
         )
 
         amber_directory = Path(ichor.hpc.global_variables.FILE_STRUCTURE["amber"])
@@ -161,6 +183,7 @@ class AmberMenuFunctions:
                 "Write coordinates": f"every {write_coord_every} timestep(s), "
                 f"~{nsteps // write_coord_every:,} geometries",
                 "Collision frequency": f"{ln_gamma} ps",
+                "Cores": ncores,
             },
             [
                 "The job is now queued on a compute node, so it will not start "
@@ -270,6 +293,10 @@ amber_menu_items = [
     FunctionItem(
         "Select ln_gamma",
         AmberMenuFunctions.select_ln_gamma,
+    ),
+    FunctionItem(
+        "Select number of cores",
+        AmberMenuFunctions.select_number_of_cores,
     ),
     FunctionItem(
         "Submit AMBER simulation",

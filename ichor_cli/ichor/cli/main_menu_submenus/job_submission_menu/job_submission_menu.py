@@ -4,8 +4,8 @@ for, and how much memory a core brings.
 
 It can be opened from every menu by pressing ``j``, as these are settings that tend to
 be wanted just before submitting something, from whichever menu that is. Each change is
-written to the config file straight away and applies to the next job submitted, so
-nothing has to be saved or restarted.
+written to the config file straight away and applies to every job submitted after it,
+in this session and later ones, so nothing has to be saved or restarted.
 """
 
 from dataclasses import dataclass
@@ -15,7 +15,7 @@ import ichor.hpc.global_variables
 from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
-from ichor.cli.menu_options import MenuOptions
+from ichor.cli.menu_options import MenuOptions, shorten_path_for_display
 from ichor.cli.useful_functions import (
     print_summary_and_pause,
     user_input_bool,
@@ -33,17 +33,53 @@ from ichor.hpc.detect_hpc import (
 )
 from ichor.hpc.global_variables import get_param_from_config
 
+try:
+    from termcolor import colored
+except ImportError:
+
+    def colored(text, *args, **kwargs):
+        return text
+
+
 JOB_SUBMISSION_MENU_DESCRIPTION = MenuDescription(
     "Job Submission Options",
-    subtitle=(
-        "Change which partition jobs are sent to, how long they may run for, and how\n"
-        "much memory a core brings. Changes are saved to the config file and apply to\n"
-        "the next job submitted.\n"
-    ),
+    subtitle="Changes are saved to your config file and kept for all future jobs.",
 )
 
 # the key that opens this menu from any other
 JOB_SUBMISSION_MENU_KEY = "j"
+
+# the menu items, which messages elsewhere in the menu refer the user to
+SEND_JOBS_BY_SIZE = "Send jobs of a given size to a partition, e.g. 2-32 cores"
+SWAP_PARTITION = "Send a partition's jobs somewhere else, e.g. to multicore_small"
+STOP_USING_PARTITION = "Stop using a partition"
+CHANGE_TIME_LIMIT = "Change the time limit"
+CHANGE_MEMORY = "Change the memory per core"
+
+# jobs which always ask for 1 core, as they are too quick to be worth more, and so are
+# what a partition taking 1 core jobs is kept for
+ONE_CORE_JOBS_NOTE = (
+    "That includes centring a trajectory on an atom (Analysis menu) and writing out "
+    "the .xyz after a Gaussian optimisation, which always use 1 core."
+)
+
+
+def covers_one_core(core_range) -> bool:
+    """Whether a range of core counts includes 1 core jobs."""
+
+    return core_range[0] <= 1 <= core_range[1]
+
+
+def partition_problems() -> List[str]:
+    """Overlapping ranges and core counts no partition covers, worded for the user."""
+
+    ranges = hpc_settings.partitions(current_hpc_block())
+    problems = hpc_settings.range_problems(ranges)
+    # the 1 core jobs cannot be moved by giving them more cores, so say which they are
+    if any(covers_one_core(gap) for gap in hpc_settings.uncovered_core_counts(ranges)):
+        problems.append(ONE_CORE_JOBS_NOTE)
+
+    return problems
 
 
 def current_hpc_block() -> dict:
@@ -60,15 +96,18 @@ def current_hpc_block() -> dict:
     )
 
 
-def format_partitions(ranges: Dict[str, tuple]) -> str:
-    """e.g. ``serial [1, 1], multicore [2, 168]``"""
+def format_cores(low: int, high: int) -> str:
+    """e.g. ``1 core`` or ``2-168 cores``"""
 
-    return ", ".join(f"{name} [{low}, {high}]" for name, (low, high) in ranges.items())
+    return (
+        "1 core"
+        if low == high == 1
+        else (f"{low} cores" if low == high else f"{low}-{high} cores")
+    )
 
 
 def format_memory(memory) -> str:
-    """Memory per core as the prologue shows it, whether one number or one per
-    partition."""
+    """Memory per core, whether one number or one per partition."""
 
     if memory is None:
         return (
@@ -82,45 +121,72 @@ def format_memory(memory) -> str:
 
 
 def format_walltime(walltime) -> str:
-    """The time limit as the prologue shows it."""
+    """The time limit as the menu shows it."""
 
     if walltime is None:
-        return f"not set ({ichor.hpc.global_variables.DEFAULT_MAX_WALLTIME} is used)"
+        return f"{ichor.hpc.global_variables.DEFAULT_MAX_WALLTIME} (the default)"
     if str(walltime).strip().lower() == hpc_settings.NO_WALLTIME:
         return "none (the partition's own limit applies)"
 
     return str(walltime)
 
 
+def partition_table(numbered: bool = False) -> List[str]:
+    """The configured partitions, smallest jobs first, one per line, e.g.
+    ``1 core         serial      5 GB per core``. Memory is only shown when it is
+    given per partition, as otherwise it is the same for all of them."""
+
+    hpc = current_hpc_block()
+    ranges = hpc_settings.partitions(hpc)
+    memory = hpc.get("memory_per_core_gb")
+
+    rows = sorted(ranges.items(), key=lambda item: item[1])
+    cores_width = max((len(format_cores(*r)) for _, r in rows), default=0)
+    name_width = max((len(name) for name, _ in rows), default=0)
+
+    lines = []
+    for i, (name, core_range) in enumerate(rows, start=1):
+        line = f"{format_cores(*core_range):<{cores_width}}   {name:<{name_width}}"
+        if isinstance(memory, Mapping):
+            gb = memory.get(name)
+            line += f"   {gb:g} GB per core" if gb is not None else "   memory not set"
+        lines.append((f"{i}. " if numbered else "") + line.rstrip())
+
+    return lines
+
+
 @dataclass
 class JobSubmissionMenuOptions(MenuOptions):
-    """What the job submission options currently are. These are read from the config
-    each time the menu is drawn rather than stored here, as they are the config's to
-    keep, and could have been changed by hand since."""
+    """Shows the current job submission options. They are read from the config each
+    time the menu is drawn rather than stored here, as they are the config's to keep,
+    and could have been changed by hand since."""
 
-    config_file: str = ""
-    machine: str = ""
-    partitions: str = ""
-    time_limit: str = ""
-    memory_per_core: str = ""
-
-    def refresh(self):
-        """Reads the current settings out of the config."""
-
+    def __str__(self):
         hpc = current_hpc_block()
         config_path = ichor.hpc.global_variables.ICHOR_CONFIG_PATH
 
-        self.config_file = str(config_path) if config_path else "none found"
-        self.machine = ichor.hpc.global_variables.MACHINE or "not in the config"
-        self.partitions = (
-            format_partitions(hpc_settings.partitions(hpc)) or "none configured"
-        )
-        self.time_limit = format_walltime(hpc.get("max_walltime"))
-        self.memory_per_core = format_memory(hpc.get("memory_per_core_gb"))
+        def value(text) -> str:
+            return colored(str(text), "green")
 
-    def __call__(self):
-        self.refresh()
-        return super().__call__()
+        lines = [
+            "-- Machine: "
+            + value(ichor.hpc.global_variables.MACHINE or "not in the config"),
+            "-- Config file: "
+            + value(shorten_path_for_display(config_path) if config_path else "none"),
+            "-- Jobs are sent to:",
+        ]
+        table = partition_table()
+        lines += [f"     {value(line)}" for line in table] or [
+            f"     {value('no partitions configured')}"
+        ]
+        lines.append(
+            "-- Time limit: " + value(format_walltime(hpc.get("max_walltime")))
+        )
+        memory = hpc.get("memory_per_core_gb")
+        if not isinstance(memory, Mapping):
+            lines.append("-- Memory per core: " + value(format_memory(memory)))
+
+        return "\n".join(lines) + "\n"
 
     def check_can_edit(self) -> Optional[str]:
         """Whether there is a config and a block in it for this machine to change."""
@@ -130,10 +196,7 @@ class JobSubmissionMenuOptions(MenuOptions):
     def check_partitions(self) -> Optional[str]:
         """Overlapping ranges, and core counts no partition covers."""
 
-        problems = hpc_settings.range_problems(
-            hpc_settings.partitions(current_hpc_block())
-        )
-        return "\n! ".join(problems) or None
+        return "\n! ".join(partition_problems()) or None
 
     def check_memory_per_partition(self) -> Optional[str]:
         """Partitions with no memory given for them, when memory is per partition.
@@ -141,14 +204,14 @@ class JobSubmissionMenuOptions(MenuOptions):
 
         hpc = current_hpc_block()
         memory = hpc.get("memory_per_core_gb")
-        if not isinstance(memory, dict):
+        if not isinstance(memory, Mapping):
             return None
 
         missing = [name for name in hpc_settings.partitions(hpc) if name not in memory]
         if missing:
             return (
-                f"No memory per core is given for {', '.join(missing)}. Use 'Change "
-                "the memory per core' to set it."
+                f"No memory per core is set for {', '.join(missing)}. Use "
+                f"'{CHANGE_MEMORY}' to set it."
             )
 
     def check_time_limit(self) -> Optional[str]:
@@ -232,15 +295,12 @@ def print_queue_partitions():
     print()
 
 
-def print_configured_partitions():
-    """Lists the partitions in the config, numbered so that one can be chosen."""
+def print_configured_partitions(numbered: bool = False):
+    """Shows where jobs are sent now, numbered when one is to be chosen."""
 
-    ranges = hpc_settings.partitions(current_hpc_block())
-    print("Partitions in the config:")
-    if not ranges:
-        print("  none")
-    for i, (name, (low, high)) in enumerate(ranges.items(), start=1):
-        print(f"  {i}. {name}: {low}-{high} cores")
+    print("Jobs are currently sent to:")
+    for line in partition_table(numbered) or ["no partitions configured"]:
+        print(f"  {line}")
     print()
 
 
@@ -267,9 +327,10 @@ def confirm_unknown_partition(name: str) -> bool:
     )
 
 
-def choose_configured_partition(action: str) -> Optional[str]:
+def choose_configured_partition(prompt: str) -> Optional[str]:
     """Asks for one of the configured partitions, by number or by name.
 
+    :param prompt: The question, which is followed by how to answer it.
     :return: The partition's name, or None if nothing was chosen.
     """
 
@@ -277,17 +338,16 @@ def choose_configured_partition(action: str) -> Optional[str]:
     if not ranges:
         print_summary_and_pause(
             "NO PARTITIONS CONFIGURED",
-            notes=["Add one with 'Set the partition for a range of core counts'."],
+            notes=[f"Add one with '{SEND_JOBS_BY_SIZE}'."],
         )
         return None
 
-    print_configured_partitions()
-    names = list(ranges)
+    print_configured_partitions(numbered=True)
+    # numbered in the order the table shows them, smallest jobs first
+    names = [name for name, _ in sorted(ranges.items(), key=lambda item: item[1])]
 
     while True:
-        answer = user_input_free_flow(
-            f"Partition to {action} (number or name, enter to cancel): "
-        )
+        answer = user_input_free_flow(f"{prompt} (number or name, enter to cancel): ")
         if not answer:
             return None
         answer = answer.strip()
@@ -296,6 +356,20 @@ def choose_configured_partition(action: str) -> Optional[str]:
         if answer.isdigit() and 1 <= int(answer) <= len(names):
             return names[int(answer) - 1]
         print(f"{answer} is not one of the partitions above.")
+
+
+def ask_partition_name(prompt: str) -> Optional[str]:
+    """Asks for the name of a partition, checking it against what the queue has.
+
+    :return: The name, or None if nothing was given or the user backed out.
+    """
+
+    name = user_input_free_flow(f"{prompt} (enter to cancel): ")
+    if not name or not name.strip():
+        return None
+    name = name.strip()
+
+    return name if confirm_unknown_partition(name) else None
 
 
 def user_input_positive_float(prompt: str, default: Optional[float]) -> Optional[float]:
@@ -316,14 +390,20 @@ def user_input_positive_float(prompt: str, default: Optional[float]) -> Optional
         return value
 
 
+def with_default(prompt: str, default) -> str:
+    """Adds the answer used when nothing is typed to a prompt, e.g. ``From [2]: ``."""
+
+    return f"{prompt} [{default:g}]: " if default else f"{prompt}: "
+
+
 def apply_change(
     change: Callable[[MutableMapping], None],
     title: str,
     details: Dict[str, object],
     notes: Optional[List[str]] = None,
 ):
-    """Makes a change to the hpc block in the config file, reloads the config so the
-    next job uses it, and says what was done.
+    """Makes a change to the hpc block in the config file, reloads the config so that
+    every job submitted from now on uses it, and says what was done.
 
     :param change: Changes the ``hpc`` block it is given.
     :param title: The headline of the summary shown once it has been saved.
@@ -356,15 +436,20 @@ def apply_change(
     ichor.hpc.global_variables.reload_config()
     ichor.hpc.global_variables.LOGGER.info(f"{title}: {details}")
 
-    problems = hpc_settings.range_problems(hpc_settings.partitions(current_hpc_block()))
+    problems = partition_problems()
     print_summary_and_pause(
         title,
-        {**details, "Config file": config_path},
+        details,
         (notes or [])
         + problems
         + [
-            "This applies to the next job submitted. The previous version of the "
-            f"config is kept in {hpc_settings.backup_path(config_path).name}."
+            # the name rather than the path, which the menu shows already and which
+            # would be broken across lines here
+            f"Saved to {config_path.name}, so it is used for every job submitted from "
+            "now on, in this and later ichor sessions, until it is changed again. "
+            "Jobs already in the queue keep the settings they were submitted with. "
+            "The previous version of the config is kept in "
+            f"{hpc_settings.backup_path(config_path).name}."
         ],
     )
 
@@ -373,10 +458,10 @@ class JobSubmissionFunctions:
     """Functions that run when menu items are selected"""
 
     @staticmethod
-    def set_partition():
-        """Sends a range of core counts to a partition, e.g. 2-32 cores to
-        multicore_small. Partitions whose ranges the new one overlaps have the overlap
-        taken out of them (after asking), so each core count has one place to go."""
+    def send_jobs_by_size():
+        """Sends jobs of a range of core counts to a partition, e.g. 2-32 cores to
+        multicore_small. Partitions that took any of those jobs before have them taken
+        off them (after asking), so each job size has one place to go."""
 
         if report_cannot_edit():
             return
@@ -384,11 +469,8 @@ class JobSubmissionFunctions:
         print_queue_partitions()
         print_configured_partitions()
 
-        name = user_input_free_flow("Partition name (enter to cancel): ")
-        if not name or not name.strip():
-            return
-        name = name.strip()
-        if not confirm_unknown_partition(name):
+        name = ask_partition_name("Partition to send them to")
+        if name is None:
             return
 
         hpc = current_hpc_block()
@@ -403,19 +485,16 @@ class JobSubmissionFunctions:
             default_low = gaps[0][0] if gaps else None
             default_high = on_queue.cores_per_node if on_queue else None
 
-        low_prompt = f" [{default_low}]" if default_low else ""
+        print(
+            f"\nWhich jobs should go to {name}? Give the number of cores they ask for."
+        )
         low = user_input_int(
-            f"Smallest number of cores to send to {name}{low_prompt}: ",
-            default_low,
-            minimum=1,
+            with_default("  From", default_low), default_low, minimum=1
         )
         if low is None:
             return
-        high_prompt = f" [{default_high}]" if default_high else ""
         high = user_input_int(
-            f"Largest number of cores to send to {name}{high_prompt}: ",
-            default_high,
-            minimum=low,
+            with_default("  Up to", default_high), default_high, minimum=low
         )
         if high is None:
             return
@@ -438,10 +517,11 @@ class JobSubmissionFunctions:
                 print_summary_and_pause(
                     "NOTHING CHANGED",
                     notes=[
-                        f"{low}-{high} cores falls in the middle of {other} "
-                        f"[{other_range[0]}, {other_range[1]}], which would split it "
-                        f"in two. Change {other}'s range first, so that {low}-{high} "
-                        "is at one end of it."
+                        f"{other} takes jobs of {format_cores(*other_range)}, and "
+                        f"{format_cores(low, high)} is in the middle of that, which "
+                        f"would leave {other} with two separate ranges. A partition "
+                        "can only have one, so choose a range at one end of "
+                        f"{other}'s instead."
                     ],
                 )
                 return
@@ -451,14 +531,15 @@ class JobSubmissionFunctions:
                 removals.append((other, other_range))
 
         knock_on = [
-            f"{other} [{old[0]}, {old[1]}] becomes [{new[0]}, {new[1]}]"
+            f"{other} goes from {format_cores(*old)} to {format_cores(*new)}"
             for other, old, new in trims
         ] + [
-            f"{other} [{old[0]}, {old[1]}] is removed, as {name} now covers all of it"
+            f"{other} ({format_cores(*old)}) is no longer used, as all its jobs now "
+            f"go to {name}"
             for other, old in removals
         ]
         if knock_on:
-            print(f"\n{name} [{low}, {high}] overlaps other partitions, so:")
+            print("\nSome of these jobs go to another partition now, so:")
             for line in knock_on:
                 print(f"  {line}")
             if not user_input_bool("Go ahead? (yes/no): ", False):
@@ -466,15 +547,14 @@ class JobSubmissionFunctions:
 
         memory = hpc.get("memory_per_core_gb")
         partition_memory = None
-        if isinstance(memory, dict) and name not in memory:
+        if isinstance(memory, Mapping) and name not in memory:
             suggested = (
                 round(on_queue.memory_per_core_gb, 1)
                 if on_queue and on_queue.memory_per_core_gb
                 else min(memory.values(), default=None)
             )
-            suggestion = f" [{suggested}]" if suggested else ""
             partition_memory = user_input_positive_float(
-                f"Memory per core on {name}, in GB{suggestion}: ", suggested
+                with_default(f"Memory per core on {name}, in GB", suggested), suggested
             )
             if partition_memory is None:
                 return
@@ -490,54 +570,57 @@ class JobSubmissionFunctions:
                     hpc, name, partition_memory
                 )
 
-        details = {"Partition": name, "Cores": f"{low}-{high}"}
+        details = {"Jobs of": format_cores(low, high), "Now go to": name}
         if partition_memory is not None:
             details["Memory per core"] = f"{partition_memory:g} GB"
-        apply_change(change, "PARTITION SET", details, knock_on)
+        apply_change(change, "PARTITION CHANGED", details, knock_on)
 
     @staticmethod
-    def rename_partition():
-        """Sends a partition's core counts somewhere else, e.g. multicore to
-        multicore_small, keeping the range it covers."""
+    def swap_partition():
+        """Sends all of one partition's jobs to another, e.g. multicore's to
+        multicore_small, keeping the job sizes it takes."""
 
-        old = choose_configured_partition("rename")
+        old = choose_configured_partition("Which partition's jobs should move?")
         if old is None:
             return
 
+        cores = format_cores(*hpc_settings.partitions(current_hpc_block())[old])
+        print()
         print_queue_partitions()
-        new = user_input_free_flow(f"New name for {old} (enter to cancel): ")
-        if not new or not new.strip():
-            return
-        new = new.strip()
-        if not confirm_unknown_partition(new):
+        new = ask_partition_name(f"Send its jobs ({cores}) to")
+        if new is None:
             return
 
         apply_change(
             lambda hpc: hpc_settings.rename_partition(hpc, old, new),
-            "PARTITION RENAMED",
-            {"Was": old, "Now": new},
+            "PARTITION CHANGED",
+            {"Jobs of": cores, "Went to": old, "Now go to": new},
         )
 
     @staticmethod
-    def remove_partition():
+    def stop_using_partition():
         """Stops sending jobs to a partition."""
 
-        name = choose_configured_partition("remove")
+        name = choose_configured_partition("Which partition should no longer be used?")
         if name is None:
             return
 
-        low, high = hpc_settings.partitions(current_hpc_block())[name]
-        if not user_input_bool(
-            f"Remove {name}? Jobs of {low}-{high} cores will have nowhere to go until "
-            "another partition covers them. (yes/no): ",
-            False,
-        ):
+        core_range = hpc_settings.partitions(current_hpc_block())[name]
+        cores = format_cores(*core_range)
+        print(
+            f"\nJobs of {cores} will have nowhere to go until another partition takes "
+            "them."
+        )
+        if covers_one_core(core_range):
+            print(f"{ONE_CORE_JOBS_NOTE} They cannot be submitted without it.")
+        if not user_input_bool(f"Stop using {name}? (yes/no): ", False):
             return
 
         apply_change(
             lambda hpc: hpc_settings.remove_partition(hpc, name),
-            "PARTITION REMOVED",
-            {"Partition": name, "Cores it covered": f"{low}-{high}"},
+            "PARTITION NO LONGER USED",
+            {"Partition": name, "Jobs it took": cores},
+            [f"Use '{SEND_JOBS_BY_SIZE}' to send jobs of {cores} somewhere else."],
         )
 
     @staticmethod
@@ -548,11 +631,12 @@ class JobSubmissionFunctions:
             return
 
         current = current_hpc_block().get("max_walltime")
-        print(f"Current time limit: {format_walltime(current)}")
+        print(f"Jobs may currently run for: {format_walltime(current)}\n")
         print_queue_partitions()
         print(
-            "Write it as days-hours (3-0), hours:minutes:seconds (24:00:00), or "
-            f"{hpc_settings.NO_WALLTIME!r} to leave it to the partition.\n"
+            "Write it as days-hours (3-0 is three days), hours:minutes:seconds "
+            f"(12:00:00), or {hpc_settings.NO_WALLTIME} to use the partition's own "
+            "limit.\n"
         )
 
         while True:
@@ -582,14 +666,14 @@ class JobSubmissionFunctions:
         hpc = current_hpc_block()
         current = hpc.get("memory_per_core_gb")
         ranges = hpc_settings.partitions(hpc)
-        print(f"Current memory per core: {format_memory(current)}\n")
+        print(f"Memory per core is currently: {format_memory(current)}\n")
 
         per_partition = False
         if len(ranges) > 1:
             per_partition = user_input_bool(
-                "Give each partition its own memory per core? (yes/no) "
-                f"[{'yes' if isinstance(current, dict) else 'no'}]: ",
-                isinstance(current, dict),
+                "Do the partitions have different amounts of memory per core? "
+                f"(yes/no) [{'yes' if isinstance(current, Mapping) else 'no'}]: ",
+                isinstance(current, Mapping),
             )
 
         value: Union[float, Dict[str, float]]
@@ -597,44 +681,40 @@ class JobSubmissionFunctions:
             value = {}
             for name in ranges:
                 on_queue = queue_partition(name)
-                if isinstance(current, dict) and name in current:
+                if isinstance(current, Mapping) and name in current:
                     suggested = current[name]
                 elif on_queue and on_queue.memory_per_core_gb:
                     suggested = round(on_queue.memory_per_core_gb, 1)
-                elif current is not None and not isinstance(current, dict):
+                elif current is not None and not isinstance(current, Mapping):
                     suggested = current
                 else:
                     suggested = None
-                suggestion = f" [{suggested}]" if suggested else ""
                 gb = user_input_positive_float(
-                    f"Memory per core on {name}, in GB{suggestion}: ", suggested
+                    with_default(f"Memory per core on {name}, in GB", suggested),
+                    suggested,
                 )
                 if gb is None:
                     return
                 value[name] = gb
-            shown = format_memory(value)
         else:
             suggested = (
                 min(current.values(), default=None)
-                if isinstance(current, dict)
+                if isinstance(current, Mapping)
                 else current
             )
-            suggestion = f" [{suggested}]" if suggested else ""
             value = user_input_positive_float(
-                f"Memory per core, in GB{suggestion}: ", suggested
+                with_default("Memory per core, in GB", suggested), suggested
             )
             if value is None:
                 return
-            shown = format_memory(value)
 
         apply_change(
             lambda hpc: hpc_settings.set_memory_per_core_gb(hpc, value),
             "MEMORY PER CORE CHANGED",
-            {"Was": format_memory(current), "Now": shown},
+            {"Was": format_memory(current), "Now": format_memory(value)},
             [
                 "Asking for more memory than a core brings gets jobs killed on the "
-                "node, so this should be what the node really has, divided by its "
-                "cores."
+                "node, so this should be the memory of a node divided by its cores."
             ],
         )
 
@@ -651,16 +731,11 @@ job_submission_menu = ConsoleMenu(
 )
 
 job_submission_menu_items = [
-    FunctionItem(
-        "Set the partition for a range of core counts",
-        JobSubmissionFunctions.set_partition,
-    ),
-    FunctionItem("Rename a partition", JobSubmissionFunctions.rename_partition),
-    FunctionItem("Remove a partition", JobSubmissionFunctions.remove_partition),
-    FunctionItem("Change the time limit", JobSubmissionFunctions.change_time_limit),
-    FunctionItem(
-        "Change the memory per core", JobSubmissionFunctions.change_memory_per_core
-    ),
+    FunctionItem(SEND_JOBS_BY_SIZE, JobSubmissionFunctions.send_jobs_by_size),
+    FunctionItem(SWAP_PARTITION, JobSubmissionFunctions.swap_partition),
+    FunctionItem(STOP_USING_PARTITION, JobSubmissionFunctions.stop_using_partition),
+    FunctionItem(CHANGE_TIME_LIMIT, JobSubmissionFunctions.change_time_limit),
+    FunctionItem(CHANGE_MEMORY, JobSubmissionFunctions.change_memory_per_core),
 ]
 
 add_items_to_menu(job_submission_menu, job_submission_menu_items)

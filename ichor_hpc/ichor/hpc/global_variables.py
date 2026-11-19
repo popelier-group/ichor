@@ -166,7 +166,8 @@ if not __building_docs__:
 
 def reload_config():
     """Reads the config file again, so that changes made to it while ichor is running
-    (by the job submission options menu, or by hand) apply to the next job submitted.
+    (by the job submission options menu, or by hand) apply to every job submitted
+    after it.
 
     Most settings are looked up in ``ICHOR_CONFIG`` each time they are used, but the
     partitions are built once into ``PARALLEL_ENVIRONMENT``, so that is rebuilt too.

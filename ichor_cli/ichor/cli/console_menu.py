@@ -5,6 +5,8 @@ from consolemenu.items import MenuItem
 from consolemenu.screen import Screen as OriginalScreen
 from ichor.cli.completers.tab_completer import DoNothingCompleter
 from ichor.cli.menu_options import MenuOptions
+from ichor.cli.useful_functions.summary import print_summary_and_pause
+from ichor.hpc.batch_system import NoPartitionForCoreCount
 
 # from consolemenu.menu_formatter import MenuFormatBuilder
 # from consolemenu.menu_component import Dimension
@@ -59,11 +61,23 @@ def register_global_shortcut(
 
     :param key: A single letter, which must not be one a menu uses for an item (the
         exit item uses ``q``).
-    :param text: What the menu is called in the hint shown under every menu.
+    :param text: What the menu is called in the item shown for it in every menu.
     :param get_menu: Returns the menu to open.
     """
 
-    GLOBAL_SHORTCUTS[key.lower()] = GlobalShortcut(text, get_menu)
+    GLOBAL_SHORTCUTS[key] = GlobalShortcut(text, get_menu)
+
+
+class ShortcutItem(MenuItem):
+    """The item a global shortcut adds to each menu, shown as e.g.
+    ``j - Job submission options`` just above the exit item."""
+
+    def __init__(self, key: str, shortcut: GlobalShortcut, menu: "ConsoleMenu"):
+        super().__init__(text=shortcut.text, menu=menu, menu_char=key)
+        self.shortcut = shortcut
+
+    def action(self):
+        self.menu.open_on_top(self.shortcut.get_menu())
 
 
 class ConsoleMenu(OriginalConsoleMenu):
@@ -125,6 +139,8 @@ class ConsoleMenu(OriginalConsoleMenu):
 
         self.this_menu_options = this_menu_options
         self.show_parent_options = show_parent_options
+        # the exit item text the formatter has been told to draw a line above
+        self._exit_border_text = None
         # the ">>" prompt, taken out of the drawn menu by `draw` so that it can be
         # handed to `input` by `get_input` instead (see those methods)
         self._input_prompt = ""
@@ -145,6 +161,7 @@ class ConsoleMenu(OriginalConsoleMenu):
         to leave alone, so the prompt survives editing.
         """
 
+        self._separate_exit_item()
         formatted_menu = self.formatter.format(
             title=self.get_title(),
             subtitle=self.get_subtitle(),
@@ -172,53 +189,64 @@ class ConsoleMenu(OriginalConsoleMenu):
             if shortcut.get_menu() is not self
         }
 
-    def get_epilogue_text(self) -> str:
-        """The menu's own epilogue, followed by a hint for each global shortcut, so that
-        they can be found from whichever menu the user is in."""
+    def start(self, show_exit_option=None):
+        """Starts the menu, first adding an item for each global shortcut, so that they
+        sit together at the bottom of every menu, above the exit item."""
 
-        epilogue = super().get_epilogue_text() or ""
-        hints = [
-            f"Press {key} for {shortcut.text}"
-            for key, shortcut in self._shortcuts_available_here().items()
+        self.items = [
+            item
+            for item in self.items
+            if not isinstance(item, ShortcutItem) and item is not self.exit_item
         ]
-        if not hints:
-            return epilogue
+        for key, shortcut in self._shortcuts_available_here().items():
+            self.items.append(ShortcutItem(key, shortcut, self))
 
-        return (epilogue + "\n" if epilogue else "") + "\n".join(hints)
+        super().start(show_exit_option)
 
-    def process_user_input(self):
-        """Handles the selection as the library does, apart from the keys registered with
-        `register_global_shortcut`, which open their menu on top of this one."""
+    def select(self):
+        """Runs the selected item, as the library does, but reports a job that no
+        partition will take rather than letting the error end the menu.
 
-        try:
-            user_input = self.get_input()
-        except EOFError:
-            self.should_exit = True
-            return
-
-        shortcut = self._shortcuts_available_here().get(user_input.strip().lower())
-        # a key a menu item claims for itself keeps meaning that item
-        claimed = any(item.menu_char == user_input for item in self.items)
-        if shortcut is not None and not claimed:
-            self.open_on_top(shortcut.get_menu())
-            return user_input
-
-        # the rest is the library's own handling of the input
-        for i, item in enumerate(self.items):
-            if item.menu_char == user_input:
-                self.current_option = i
-                self.select()
-                return user_input
+        Which partition a job goes to depends on its core count, and the partitions can
+        be changed from the job submission options, so a core count that none of them
+        covers is something the user can fix, not a bug. Every option that submits a
+        job goes through here, so it is caught once rather than in each of them.
+        """
 
         try:
-            num = int(user_input)
-        except ValueError:
-            return
-        if 0 < num < len(self.items) + 1:
-            self.current_option = num - 1
-            self.select()
+            super().select()
+        except NoPartitionForCoreCount as error:
+            print_summary_and_pause(
+                "JOB NOT SUBMITTED",
+                notes=[
+                    str(error),
+                    "Press j for the job submission options to choose a partition "
+                    "for jobs of this size, or change the number of cores the job "
+                    "asks for.",
+                    "Anything this option submitted before it got this far is still "
+                    "in the queue.",
+                ],
+            )
+            # the item's own clean up never ran, and it is what resumes this menu
+            # after the item paused it to run
+            self.selected_item.clean_up()
 
-        return user_input
+    def _separate_exit_item(self):
+        """Draws a line above the exit item, setting it apart from the menu's own items.
+
+        The formatter picks the items to draw a line above by their text, and the exit
+        item's text changes to "Return to <parent>" when it is first drawn, so that
+        text is worked out here, ahead of the formatter needing it.
+        """
+
+        if self.parent is not None and self.exit_item.text == "Exit":
+            self.exit_item.text = f"Return to {self.parent.get_title()}"
+
+        if self._exit_border_text != self.exit_item.text:
+            if self._exit_border_text is not None:
+                self.formatter.show_item_top_border(self._exit_border_text, False)
+            self.formatter.show_item_top_border(self.exit_item.text, True)
+            self._exit_border_text = self.exit_item.text
 
     def open_on_top(self, menu: "ConsoleMenu"):
         """Opens a menu as though it were a submenu of this one, the way `SubmenuItem`

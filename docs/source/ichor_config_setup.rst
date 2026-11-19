@@ -133,23 +133,25 @@ Changing them from the menu
 +++++++++++++++++++++++++++
 
 The three settings in the ``hpc`` block can be changed from inside ``ichor-cli``
-rather than by editing the file. Press ``j`` at any menu (or pick **Job Submission
-Options** from the main menu) to:
+rather than by editing the file. Press ``j`` at any menu to open **Job Submission
+Options**, which shows which partition each size of job goes to, and can:
 
-* send a range of core counts to a partition, e.g. 2-32 core jobs to
-  ``multicore_small`` rather than ``multicore``. Any partition whose range the new
-  one overlaps has the overlap taken out of it, after asking, so every core count
-  still has exactly one partition to go to
-* rename or remove a partition, which also renames or removes its entry in
-  ``memory_per_core_gb``
+* send jobs of a given size to a partition, e.g. 2-32 core jobs to
+  ``multicore_small`` rather than ``multicore``. Any partition that took some of
+  those jobs before has them taken off it, after asking, so every job size still
+  has exactly one partition to go to
+* send all of one partition's jobs to another, or stop using a partition. Its
+  entry in ``memory_per_core_gb`` is moved or removed along with it
 * change ``max_walltime``
 * change ``memory_per_core_gb``, as one number or one per partition
 
 On SLURM the partitions ``sinfo`` reports are listed alongside, so a name can be
 checked before it is used.
 
-Each change is written to the config file straight away and applies to the next job
-submitted. Only the lines that changed are rewritten: comments, ordering and
+Each change is written to the config file straight away, so it applies to every
+job submitted from then on, in that session and later ones, until it is changed
+again. Jobs already in the queue are not affected. An ichor already running in
+another terminal keeps the settings it started with until it is restarted. Only the lines that changed are rewritten: comments, ordering and
 quoting are kept as they were. The previous version of the file is kept next to it
 as ``config.yaml.bak``.
 
