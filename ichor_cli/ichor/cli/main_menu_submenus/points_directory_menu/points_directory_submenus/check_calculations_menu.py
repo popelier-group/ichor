@@ -59,7 +59,7 @@ from ichor.core.processing import (
     points_are_centred,
     PointsDirectoryCheck,
     restore_missing_points,
-    wfn_is_finished,
+    wfx_is_finished,
 )
 from ichor.hpc.main import (
     submit_points_directory_to_aimall,
@@ -134,16 +134,16 @@ def has_geometry(point: PointDirectory) -> bool:
     return bool(point.xyz) or bool(point.gjf)
 
 
-def has_usable_wfn(point: PointDirectory) -> bool:
+def has_usable_wfx(point: PointDirectory) -> bool:
     """Whether a point has a wavefunction AIMAll can be given, i.e. one which Gaussian
     finished writing. A wavefunction which was cut short is of no use to AIMAll, and
     reading it (as submitting it would) fails, so such a point is left for Gaussian to
     calculate again first."""
 
-    # the wfn attribute is a list if a point somehow holds more than one wfn file
-    wfns = point.wfn if isinstance(point.wfn, list) else [point.wfn]
+    # the wfx attribute is a list if a point somehow holds more than one wfx file
+    wfxs = point.wfx if isinstance(point.wfx, list) else [point.wfx]
 
-    return any(wfn and wfn_is_finished(wfn.path) for wfn in wfns)
+    return any(wfx and wfx_is_finished(wfx.path) for wfx in wfxs)
 
 
 def make_check(
@@ -778,9 +778,9 @@ class CheckCalculationsFunctions:
         run_check(
             GaussianCheck,
             [
-                "A point with missing output has no wfn file, so Gaussian either has "
+                "A point with missing output has no wfx file, so Gaussian either has "
                 "not run on it yet or crashed before writing anything; a point with "
-                "incomplete output has a wfn file which was not written to the end, "
+                "incomplete output has a wfx file which was not written to the end, "
                 "which usually means the job ran out of time or was killed.",
                 "Use the resubmit option of this menu to calculate the unfinished "
                 "points again. Only those points are submitted, so the ones which are "
@@ -836,7 +836,7 @@ class CheckCalculationsFunctions:
         while True:
 
             # add memory link0 to GJF, as the Submit Gaussian Menu does
-            mem = (GaussianCommand.memory_per_core - 1) * ncores
+            mem = GaussianCommand.memory_for_cores(ncores)
             settings = {
                 "Method": method,
                 "Basis set": basis_set,
@@ -883,7 +883,7 @@ class CheckCalculationsFunctions:
                 submit_points_directory_to_gaussian(
                     points_directory=points,
                     overwrite_existing=overwrite_existing_gjfs,
-                    # the points being resubmitted are exactly the ones whose wfn is
+                    # the points being resubmitted are exactly the ones whose wfx is
                     # missing or unusable, so nothing is to be skipped here
                     force_calculate_wfn=True,
                     ncores=ncores,
@@ -916,7 +916,7 @@ class CheckCalculationsFunctions:
 
         notes = [
             "Only the points which need calculating have been submitted, so the "
-            "wavefunctions which are already there are left alone. The wfn file of "
+            "wavefunctions which are already there are left alone. The wfx file of "
             "a point which was cut short is overwritten when its job runs.",
             "The jobs are queued, so they will not start immediately and this menu "
             "does not wait for them. Check on them with your batch system's queue "
@@ -973,7 +973,7 @@ class CheckCalculationsFunctions:
         # AIMAll partitions a wavefunction, so a point without a usable one has nothing
         # to run on
         points_by_points_directory, skipped_points = problem_points_by_points_directory(
-            check, has_usable_wfn
+            check, has_usable_wfx
         )
         skipped_reason = (
             "Gaussian has not finished writing their wavefunction, so calculate them "

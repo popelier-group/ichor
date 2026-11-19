@@ -16,6 +16,7 @@ def get_atoms_from_path(path: Path) -> "ichor.core.atoms.Atoms":  # noqa F821
         PointsDirectory,
         Trajectory,
         WFN,
+        WFX,
         XYZ,
     )
 
@@ -32,6 +33,8 @@ def get_atoms_from_path(path: Path) -> "ichor.core.atoms.Atoms":  # noqa F821
     elif path.is_file():
         if GJF.check_path(path):
             return GJF(path).atoms
+        elif WFX.check_path(path):
+            return WFX(path).atoms
         elif WFN.check_path(path):
             return WFN(path).atoms
         elif Trajectory.check_path(path):

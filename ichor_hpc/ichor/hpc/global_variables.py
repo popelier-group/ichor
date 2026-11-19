@@ -32,7 +32,7 @@ DEFAULT_MEMORY_PER_CORE_GB = 4
 # for longer than its partition allows, so a site whose limit is shorter than this has
 # to say so in the config. Set hpc.max_walltime to "none" to write no limit at all and
 # let the partition default apply.
-DEFAULT_MAX_WALLTIME = "7-0"
+DEFAULT_MAX_WALLTIME = "3-0"
 
 # what hpc.max_walltime is set to in order to leave the time limit off entirely
 NO_WALLTIME = "none"

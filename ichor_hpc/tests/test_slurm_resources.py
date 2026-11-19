@@ -10,6 +10,7 @@ import pytest
 
 from ichor.hpc.batch_system import NoPartitionForCoreCount, SLURM
 from ichor.hpc.submission_commands import GaussianCommand
+from ichor.hpc.submission_commands.gaussian_command import MissingGaussianMemorySetting
 from ichor.hpc.submission_script.submission_script import max_walltime
 
 MACHINE = "test_machine"
@@ -74,7 +75,7 @@ def test_walltime_can_be_turned_off(hpc_config):
 
 def test_walltime_off_is_case_insensitive(hpc_config):
     """The value is written by hand into a YAML file, so the capitalisation of it
-    should not decide whether jobs get a seven day limit."""
+    should not decide whether jobs get a time limit."""
 
     hpc_config(max_walltime="None")
 
@@ -89,7 +90,7 @@ def test_gaussian_memory_falls_back_rather_than_failing(hpc_config):
 
     with pytest.warns(UserWarning, match="memory_per_core_gb"):
         assert (
-            GaussianCommand.memory_per_core
+            GaussianCommand.memory_per_core(2)
             == ichor.hpc.global_variables.DEFAULT_MEMORY_PER_CORE_GB
         )
 
@@ -99,7 +100,29 @@ def test_gaussian_memory_is_read_from_the_config(hpc_config):
 
     hpc_config(memory_per_core_gb=16)
 
-    assert GaussianCommand.memory_per_core == 16
+    assert GaussianCommand.memory_per_core(2) == 16
+    assert GaussianCommand.memory_for_cores(2) == 30
+
+
+def test_gaussian_memory_can_be_given_per_partition(hpc_config, partitions):
+    """Partitions whose nodes bring different memory per core each get their own."""
+
+    hpc_config(memory_per_core_gb={"serial": 5, "multicore": 8})
+    partitions(serial=(1, 1), multicore=(2, 168))
+
+    assert GaussianCommand.memory_per_core(1) == 5
+    assert GaussianCommand.memory_per_core(4) == 8
+
+
+def test_gaussian_memory_missing_for_a_partition_is_an_error(hpc_config, partitions):
+    """A per-partition mapping which leaves out the partition a job goes to says
+    which partition is missing rather than guessing."""
+
+    hpc_config(memory_per_core_gb={"multicore": 8})
+    partitions(serial=(1, 1), multicore=(2, 168))
+
+    with pytest.raises(MissingGaussianMemorySetting, match="'serial'"):
+        GaussianCommand.memory_per_core(1)
 
 
 def test_core_count_below_every_partition_is_an_error(hpc_config, partitions):

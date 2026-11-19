@@ -7,7 +7,7 @@ from ichor.core.files.aimall import Aim, IntDirectory
 from ichor.core.files.ase.opt import XTB
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file_data import HasAtoms, HasData
-from ichor.core.files.gaussian import GaussianOutput, GJF, WFN
+from ichor.core.files.gaussian import GaussianOutput, GJF, WFN, WFX
 from ichor.core.files.xyz import XYZ
 
 
@@ -28,6 +28,7 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
         "orca_input": OrcaInput,
         "orca_output": OrcaOutput,
         "aim": Aim,
+        "wfx": WFX,
         "wfn": WFN,
         "ints": IntDirectory,
     }
@@ -47,6 +48,8 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
 
         for attr_name in self.contents.keys():
             # all contents which subclass from HasData should have raw_data attribute implemented
+            if attr_name == "wfn" and self.wfx:
+                continue
             attr = getattr(self, attr_name)
             # this also automatically checks for OptionalContent
             if isinstance(attr, HasData):
@@ -54,6 +57,11 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
                 all_data[attr_name] = d
 
         return all_data
+
+    @property
+    def wavefunction(self):
+        """Return the WFX output, falling back to WFN for archived points."""
+        return self.wfx or self.wfn
 
     @property
     def atoms(self) -> Atoms:
@@ -64,11 +72,11 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
         # and will error out if an xyz is not present
         if self.xyz:
             return self.xyz.atoms
-        elif self.wfn:
-            return self.wfn.atoms.to_angstroms()
+        elif self.wavefunction:
+            return self.wavefunction.atoms.to_angstroms()
 
         raise FileNotFoundError(
-            f"There is no .xyz or .wfn file in the current {self.__class__.__name__} instance: {self.path.absolute()}"
+            f"There is no .xyz or wavefunction file in the current {self.__class__.__name__} instance: {self.path.absolute()}"
         )
 
     def atoms_from_file(self, file_with_atoms: HasAtoms) -> Atoms:

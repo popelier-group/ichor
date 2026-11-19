@@ -13,6 +13,10 @@ from ichor.hpc.global_variables import get_param_from_config
 from ichor.hpc.submission_command import SubmissionCommand
 
 
+class MissingGaussianMemorySetting(ValueError):
+    """Gaussian memory per core is missing from the HPC configuration."""
+
+
 class GaussianCommand(SubmissionCommand):
     """
     A class which is used to add Gaussian-related commands to a submission script.
@@ -62,25 +66,32 @@ class GaussianCommand(SubmissionCommand):
             "executable_path",
         )
 
-    @classproperty
-    def memory_per_core(self) -> int:
-        """Returns the memory per core that a Gaussian job is sized around.
+    @staticmethod
+    def memory_per_core(ncores: int) -> int:
+        """Returns the memory per core that a Gaussian job on ``ncores`` cores is sized
+        around.
 
-        Read from ``hpc.memory_per_core_gb``. A machine which does not set it falls
-        back to a small budget and warns, rather than failing with a TypeError when
-        the missing value reaches the arithmetic below. The fallback is deliberately
-        conservative: asking for more memory than a core actually brings gets the
-        job killed on the node.
+        Read from ``hpc.memory_per_core_gb``, which is either one number for the whole
+        machine or a mapping from partition (parallel environment) name to the memory a
+        core brings on it, e.g. ``{serial: 5, multicore: 8}``. A machine which does not
+        set it at all falls back to a small budget and warns, rather than failing with a
+        TypeError when the missing value reaches the arithmetic below. The fallback is
+        deliberately conservative: asking for more memory than a core actually brings
+        gets the job killed on the node.
+
+        :raises MissingGaussianMemorySetting: if a mapping is given but has no entry for
+            the partition a job on ``ncores`` cores is sent to.
         """
 
-        memory_per_core = get_param_from_config(
+        machine = ichor.hpc.global_variables.MACHINE
+        partition_memory = get_param_from_config(
             ichor.hpc.global_variables.ICHOR_CONFIG,
-            ichor.hpc.global_variables.MACHINE,
+            machine,
             "hpc",
             "memory_per_core_gb",
         )
 
-        if memory_per_core is None:
+        if partition_memory is None:
             warnings.warn(
                 "hpc.memory_per_core_gb is not set for this machine in "
                 f"{ichor.hpc.global_variables.CONFIG_DESCRIPTION}, so Gaussian jobs "
@@ -91,15 +102,27 @@ class GaussianCommand(SubmissionCommand):
             )
             return ichor.hpc.global_variables.DEFAULT_MEMORY_PER_CORE_GB
 
-        return memory_per_core
+        if isinstance(partition_memory, dict):
+            partition = ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ncores]
+            memory = partition_memory.get(partition)
+            if memory is None:
+                raise MissingGaussianMemorySetting(
+                    f"hpc.memory_per_core_gb has no entry for partition {partition!r} "
+                    f"on machine {machine!r} in "
+                    f"{ichor.hpc.global_variables.CONFIG_DESCRIPTION}."
+                )
+            return memory
+
+        return partition_memory
+
+    @classmethod
+    def memory_for_cores(cls, ncores: int) -> int:
+        """Return Gaussian memory in GB, leaving 1 GB of headroom per core."""
+        return (cls.memory_per_core(ncores) - 1) * ncores
 
     def total_gaussian_memory(self) -> str:
-        """Calculates the total memory to tell Gaussian to use
-        Calculated as (memory_per_core - 1) * number_of_cores"""
-
-        mem = (GaussianCommand.memory_per_core - 1) * self.ncores
-
-        return f"export GAUSS_MDEF={mem}GB"
+        """Return the shell directive setting Gaussian's default memory."""
+        return f"export GAUSS_MDEF={self.memory_for_cores(self.ncores)}GB"
 
     @classproperty
     def group(self) -> bool:

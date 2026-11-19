@@ -1,5 +1,6 @@
 # functions to check files / directories are present
 from ichor.core.files import PointDirectory
+from ichor.core.processing.points_directory_check import wfx_is_finished
 
 
 def check_gaussian_and_aimall(pd_instance: PointDirectory):
@@ -18,14 +19,10 @@ def check_gaussian_and_aimall(pd_instance: PointDirectory):
     if not pd_instance.gaussian_output:
         print(f"{abs_path}: GaussianOutput file is missing.")
 
-    if not pd_instance.wfn:
-        print(f"{abs_path}: WFN file is missing.")
-    else:
-        wfn_instance = pd_instance.wfn
-        try:
-            wfn_instance.read()
-        except StopIteration:
-            print(f"{abs_path}: Problem reading the wfn file.")
+    if not pd_instance.wfx:
+        print(f"{abs_path}: WFX file is missing.")
+    elif not wfx_is_finished(pd_instance.wfx.path):
+        print(f"{abs_path}: Problem reading the WFX file.")
 
     if not pd_instance.ints:
         print(f"{abs_path}: IntDirectory directory is missing.")

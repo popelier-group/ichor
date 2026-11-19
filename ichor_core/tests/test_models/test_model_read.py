@@ -13,6 +13,7 @@ import numpy as np
 import pytest
 from ichor.core.files.file import FileReadError
 from ichor.core.models import Model
+
 from tests.path import get_cwd
 
 MODEL_CHECK_DIR = (

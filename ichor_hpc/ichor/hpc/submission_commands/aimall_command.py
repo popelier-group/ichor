@@ -7,7 +7,7 @@ import ichor.hpc.global_variables
 from ichor.core.atoms import Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.str import get_digits
-from ichor.core.files import WFN
+from ichor.core.files import WFX
 from ichor.hpc.global_variables import get_param_from_config
 from ichor.hpc.submission_command import SubmissionCommand
 
@@ -152,7 +152,7 @@ class AIMAllCommand(SubmissionCommand):
     AIMALL is ran on a specified array of files (usually
     AIMALL is ran as an array job because we want to run hundreds of AIMALL tasks in parallel).
 
-    :param wfn_file: Path to a .wfn file. This is not needed when running auto-run for a whole directory.
+    :param wfn_file: Path to a .wfx file. This is not needed when running auto-run for a whole directory.
     :param atoms: A list of strings of atom names (e.g. C1)
         which aimall to integrate or an Atoms instance (from which the names will be obtained)
     """
@@ -194,7 +194,10 @@ class AIMAllCommand(SubmissionCommand):
         autonnacps: bool = True,
     ):
 
-        self.wfn_file = WFN(wfn_file_path)
+        wfn_file_path = Path(wfn_file_path)
+        if not WFX.check_path(wfn_file_path):
+            raise ValueError(f"AIMAll requires a .wfx input: {wfn_file_path}")
+        self.wfx_file = WFX(wfn_file_path)
 
         self.usetwoe = UseTwoe(usetwoe)
 
@@ -237,7 +240,7 @@ class AIMAllCommand(SubmissionCommand):
     @property
     def data(self) -> List[str]:
         """Returns the data needed for the AIMAll job to run successfully"""
-        return [str(self.wfn_file.path.absolute()), str(self.aimall_output.absolute())]
+        return [str(self.wfx_file.path.absolute()), str(self.aimall_output.absolute())]
 
     @classproperty
     def modules(self) -> list:

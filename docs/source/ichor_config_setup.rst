@@ -119,10 +119,12 @@ The ``hpc`` block
      - How much memory one core brings on this machine. Jobs are sized around it,
        and Gaussian is told how much to use from it. The default is deliberately
        small and warns when it is used, as asking for more memory than a core
-       actually brings gets the job killed.
+       actually brings gets the job killed. When the partitions differ it can be
+       given per partition instead of as one number, keyed by the names in
+       ``parallel_environments`` (e.g. ``{serial: 5, multicore: 8}``).
    * - ``max_walltime``
-     - ``7-0``
-     - How long jobs may run for, written as the batch system wants it (``7-0`` or
+     - ``3-0``
+     - How long jobs may run for, written as the batch system wants it (``3-0`` or
        ``24:00:00``). SLURM rejects a job asking for longer than its partition
        allows, so a cluster with a shorter limit must set this. ``none`` leaves the
        limit out of the submission script so the partition's own default applies.

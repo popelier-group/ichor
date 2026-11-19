@@ -25,15 +25,25 @@ def batch_system_available() -> bool:
 
 
 def memory_per_core_gb() -> float:
-    """Returns the memory (in GB) that one core is given on this machine."""
+    """Returns the memory (in GB) that one core is given on this machine.
 
-    return get_param_from_config(
+    ``hpc.memory_per_core_gb`` may be given per partition rather than as one number.
+    The menus using this size a job before they know which partition its core count
+    sends it to, so the smallest of those is used: asking for too little memory wastes
+    cores, while asking for too much gets the job killed on the node."""
+
+    memory = get_param_from_config(
         ichor.hpc.global_variables.ICHOR_CONFIG,
         ichor.hpc.global_variables.MACHINE,
         "hpc",
         "memory_per_core_gb",
         default=DEFAULT_MEMORY_PER_CORE_GB,
     )
+
+    if isinstance(memory, dict):
+        return min(memory.values(), default=DEFAULT_MEMORY_PER_CORE_GB)
+
+    return memory
 
 
 def job_memory_gb(ncores: int) -> float:

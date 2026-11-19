@@ -11,7 +11,7 @@ from ichor.hpc.uid import get_uid
 
 def max_walltime() -> Optional[str]:
     """Returns the walltime that jobs are submitted with, as the batch system wants
-    it written (for SLURM, something like ``7-0`` or ``24:00:00``).
+    it written (for SLURM, something like ``3-0`` or ``24:00:00``).
 
     Read from ``hpc.max_walltime`` for the machine ichor is running on. A cluster
     whose partitions allow less than the default has to say so, as SLURM rejects a
@@ -54,6 +54,8 @@ class SubmissionScript:
     :param outputs_dir_path: Path to the outputs directory. If not set, it will use the default global_variables one
     :param errors_dir_path: Path to the errors directory. If not set, it will use the default global_variables one
     :param datafile_path: Path to datafile containing information needed for job to run, defaults to None
+    :param time_limit: SLURM time limit for this script, e.g. "3-0". Defaults to None,
+        which uses hpc.max_walltime from the config
 
 
     Example Gaussian submission script for SGE (array job):
@@ -136,6 +138,7 @@ class SubmissionScript:
         outputs_dir_path: Path = None,
         errors_dir_path: Path = None,
         datafile_path: Path = None,
+        time_limit: Optional[str] = None,
     ):
 
         self.path = Path(submission_script_name)
@@ -145,6 +148,7 @@ class SubmissionScript:
         self.include_nodes = include_nodes or []
         self.exclude_nodes = exclude_nodes or []
         self.max_running_tasks = max_running_tasks
+        self.time_limit = time_limit
         self._options = []
         self._commands = []  # a list of commands to be submitted to batch system
 
@@ -196,12 +200,12 @@ class SubmissionScript:
 
     @property
     def default_options(self) -> List[str]:
-
         """Returns a list of default options to use in a submission script for a job.
         This list containing the current working directory, the output directory (where .o files are written),
         the errors directory (where .e files are written). If the number of cores is more than 1, the keyword
         needed when specifying more than 1 cores is also written to the options list. This keyword depends on
-        the system on which the job is ran, as well as on the number of cores that the job needs."""
+        the system on which the job is ran, as well as on the number of cores that the job needs.
+        """
 
         task_array = len(self.grouped_commands) > 1
 
@@ -380,11 +384,12 @@ class SubmissionScript:
                 f.write("#!/bin/bash -l\n")
 
                 # SLURM rejects a job asking for longer than its partition allows,
-                # so the limit comes from hpc.max_walltime rather than being fixed
-                # here. Only SLURM is given one: SGE takes its walltime in a
-                # different form and never had one written for it, the fixed
-                # `#SBATCH` line having been a no-op comment in an SGE script.
-                walltime = max_walltime()
+                # so unless this script was given a time limit, it comes from
+                # hpc.max_walltime rather than being fixed here. Only SLURM is given
+                # one: SGE takes its walltime in a different form and never had one
+                # written for it, the fixed `#SBATCH` line having been a no-op
+                # comment in an SGE script.
+                walltime = self.time_limit or max_walltime()
                 if walltime and ichor.hpc.global_variables.BATCH_SYSTEM is SLURM:
                     f.write(f"#{SLURM.OptionCmd} -t {walltime}\n")
                 # write any options to be given to the batch system,

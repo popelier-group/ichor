@@ -3,7 +3,8 @@ from typing import List, Optional, Union
 
 import ichor.hpc.global_variables
 
-from ichor.core.files import GaussianOutput, GJF, PointDirectory, PointsDirectory, WFN
+from ichor.core.files import GaussianOutput, GJF, PointDirectory, PointsDirectory
+from ichor.core.processing.points_directory_check import wfx_is_finished
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.main.opt import (
     read_single_geometry,
@@ -77,6 +78,7 @@ def submit_single_gaussian_xyz(
     gaussian_job_id = submit_gjfs(
         [gjf.path],
         force_calculate_wfn=False,
+        require_wfx=False,
         script_name=ichor.hpc.global_variables.SCRIPT_NAMES["opt"]["gaussian"],
         ncores=ncores,
         hold=hold,
@@ -158,7 +160,7 @@ def submit_points_directory_to_gaussian(
     **kwargs,
 ) -> Optional[JobID]:
     """Function that writes out .gjf files from .xyz files that are in each directory and
-    calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
+    calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfx files.
 
     :param points_directory: The points to submit, given either as the path of a
         directory which contains points (commonly training set path, sample pool path,
@@ -166,7 +168,7 @@ def submit_points_directory_to_gaussian(
         The last of these is used to submit only some of the points of a PointsDirectory,
         such as the ones which have to be calculated again.
     :param force_calculate_wfn: Run Gaussian calculations on given .gjf files,
-        even if .wfn files already exist. Defaults to False.
+        even if .wfx files already exist. Defaults to False.
     :param kwargs: Key word arguments to pass to GJF class. These are things like number of cores, basis set,
         level of theory, spin multiplicity, charge, etc.
         These will get used in the new written gjf files (overwriting
@@ -180,6 +182,7 @@ def submit_points_directory_to_gaussian(
     gjf_files = write_gjfs(points_directory, overwrite_existing, **kwargs)
     return submit_gjfs(
         gjf_files,
+        require_wfx=True,
         script_name=script_name,
         force_calculate_wfn=force_calculate_wfn,
         ncores=ncores,
@@ -252,6 +255,8 @@ def submit_gjfs(
     ncores=2,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
+    *,
+    require_wfx: bool = True,
 ) -> JobID:
     """Function that writes out a submission script which contains an array of
     Gaussian jobs to be ran on compute nodes. If calling this function from
@@ -265,7 +270,8 @@ def submit_gjfs(
 
     :param gjfs: A list of Path objects pointing to .gjf files
     :param force_calculate_wfn: Run Gaussian calculations on given .gjf files,
-        even if .wfn files already exist. Defaults to False.
+        even if .wfx files already exist. Defaults to False.
+    :param require_wfx: Request WFX even for inputs without a wavefunction directive.
     :script_name: Path to write submission script out to defaults to ichor.hpc.global_variables.SCRIPT_NAMES["gaussian"]
     :param hold: An optional JobID for which this job to hold.
         This is used in auto-run to hold this job for the previous job to finish, defaults to None
@@ -285,25 +291,11 @@ def submit_gjfs(
 
         for gjf in tqdm(gjfs, desc="Submitting GJF files"):
 
-            # (even if wfn file exits) or a wfn file does not exist
-            if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():
-                # make a list of GaussianCommand instances.
+            gjf = Path(gjf)
+            wfx_path = GJF.prepare_wfx_output(gjf, required=require_wfx)
+            if force_calculate_wfn or wfx_path is None or not wfx_is_finished(wfx_path):
                 submission_script.add_command(GaussianCommand(ncores, gjf))
                 number_of_jobs += 1
-
-            # case where the wfn file exists but does not have total energy
-            # or something else is wrong with the file
-            elif gjf.with_suffix(".wfn").exists():
-                # make a list of GaussianCommand instances.
-                try:
-                    wfn_file = WFN(gjf.with_suffix(".wfn"))
-                    wfn_file.read()  # file is being read here
-                # if file is empty, then stopiteration should be raised
-                # then add to list of files to run Gaussian on
-                except StopIteration:
-
-                    submission_script.add_command(GaussianCommand(ncores, gjf))
-                    number_of_jobs += 1
 
         ichor.hpc.global_variables.LOGGER.info(
             f"Added {number_of_jobs} / {len(gjfs)} Gaussian jobs to {submission_script.path}"

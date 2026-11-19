@@ -203,7 +203,7 @@ class SubmitGaussianFunctions:
             return
 
         ncores = submit_gaussian_menu_options.selected_number_of_cores
-        job_id = submit_gjfs([gjf_path], force_calculate_wfn=False, ncores=ncores)
+        job_id = submit_gjfs([gjf_path], ncores=ncores, require_wfx=False)
 
         # write out the final geometry as an xyz file next to the gjf file
         # once the Gaussian job it comes from has finished

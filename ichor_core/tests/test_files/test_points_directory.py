@@ -42,7 +42,7 @@ def _test_points_directory(
     xyz_inst = first_poindir.xyz.path
     ints_path = first_poindir.ints.path
     aim_path = first_poindir.aim.path
-    wfn_path = first_poindir.wfn.path
+    wavefunction_path = first_poindir.wavefunction.path
 
     # check that each file/dir type can be accessed as an attribute
     # by the contents class variable for the first point
@@ -51,7 +51,7 @@ def _test_points_directory(
     assert xyz_inst.exists() is True
     assert ints_path.exists() is True
     assert aim_path.exists() is True
-    assert wfn_path.exists() is True
+    assert wavefunction_path.exists() is True
 
     # check that number of PointDirectory instances is ok
     assert len(point_dir_inst) == 4

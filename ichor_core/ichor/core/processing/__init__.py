@@ -18,6 +18,7 @@ from ichor.core.processing.points_directory_check import (
     PointCheckResult,
     PointsDirectoryCheck,
     wfn_is_finished,
+    wfx_is_finished,
 )
 
 __all__ = [
@@ -29,6 +30,7 @@ __all__ = [
     "GaussianCheck",
     "AimallCheck",
     "wfn_is_finished",
+    "wfx_is_finished",
     "MissingPoint",
     "MissingPointsCheck",
     "PointSequence",

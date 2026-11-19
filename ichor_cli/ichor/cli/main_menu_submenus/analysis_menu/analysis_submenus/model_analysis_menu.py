@@ -13,26 +13,26 @@ from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus.model_analysis
     batch_system_is_set_up,
     discover_model_folders,
     EXTERNAL_SET_TYPE,
-    largest_training_set,
     INTERNAL_SET_TYPE,
+    largest_training_set,
     METRICS_CSV_NAME,
     models_directory_selected,
     no_batch_system_note,
-    selected_models_path,
-    selected_set_type,
     overfitting_submission_notes,
     overfitting_worker_memory_gb,
     pause,
     S_CURVES_CSV_NAME,
     S_CURVES_EXCEL_NAME,
     S_CURVES_PLOT_NAME,
+    selected_models_path,
+    selected_set_type,
     submit_overfitting_for_folders,
     workers_that_fit,
 )
 from ichor.cli.main_menu_submenus.analysis_menu.analysis_submenus.overfitting_submenu import (  # noqa: E501
     overfitting_menu,
-    overfitting_menu_options,
     OVERFITTING_MENU_DESCRIPTION,
+    overfitting_menu_options,
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions

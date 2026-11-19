@@ -99,12 +99,12 @@ def add_point_to_database(
     ###############################
 
     # if wfn file exists
-    if point.wfn:
+    if point.wavefunction:
         # ORM for points table
         db_point = Points(
             date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
             name=point.name_without_suffix,
-            wfn_energy=point.wfn.total_energy,
+            wfn_energy=point.wavefunction.total_energy,
         )
     # if file does not exist, still add to database, but do not contain wfn information
     else:
@@ -117,9 +117,7 @@ def add_point_to_database(
             wfn_energy=None,
         )
         if print_missing_data:
-            print(
-                f"Point {point.path} does not contain a Gaussian wavefunction (.wfn) file."
-            )
+            print(f"Point {point.path} does not contain a Gaussian wavefunction file.")
 
     ###############################
     # gaussian output file check

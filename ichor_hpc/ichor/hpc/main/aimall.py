@@ -7,7 +7,8 @@ import ichor.hpc.global_variables
 from ichor.core.common.constants import AIMALL_FUNCTIONALS
 
 from ichor.core.files import PointDirectory, PointsDirectory
-from ichor.core.files.file import FileWriteError
+from ichor.core.files.gaussian import WFX
+from ichor.core.processing.points_directory_check import wfx_is_finished
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import AIMAllCommand
 from ichor.hpc.submission_script import SubmissionScript
@@ -27,14 +28,14 @@ def submit_points_directory_to_aimall(
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
     **kwargs,
 ) -> Optional[JobID]:
-    """Submits .wfn files which will be partitioned into .int files by
+    """Submits .wfx files which will be partitioned into .int files by
     AIMALL. Each topological atom i the system has its own .int file
 
     :param points_directory: A path to a `PointsDirectory`-structured directory, a
         PointsDirectory instance, or a list of the PointDirectory-ies of interest. The
         last of these is used to submit only some of the points of a PointsDirectory,
         such as the ones which have to be calculated again.
-    :param method: Functional to be written to the .wfn file because AIMAll needs to know it to function correctly.
+    :param method: Fallback functional when the WFX has no Model and the GJF has no method.
         Note that only HF, B3LYP, M062X, PBE are supported.
     :param ncores: Number of cores to run AIMAll with, defaults to 2
     :param naat: Number of atoms at a time, defaults to 1
@@ -56,11 +57,11 @@ def submit_points_directory_to_aimall(
     if method not in AIMALL_FUNCTIONALS:
         warn("The functional provided might not be supported by AIMAll.")
 
-    list_of_wfn_paths = add_method_and_get_wfn_paths(points_directory, method)
+    list_of_wfx_paths = add_method_and_get_wfx_paths(points_directory, method)
 
     ichor.hpc.global_variables.LOGGER.info("Submitting wavefunctions to AIMAll.")
-    return submit_wfns(
-        list_of_wfn_paths,
+    return submit_wfxs(
+        list_of_wfx_paths,
         aimall_atoms=aimall_atoms,
         ncores=ncores,
         naat=naat,
@@ -73,41 +74,41 @@ def submit_points_directory_to_aimall(
     )
 
 
-def add_method_and_get_wfn_paths(
+def add_method_and_get_wfx_paths(
     points: Union[PointsDirectory, List[PointDirectory]], method: str
 ) -> List[Path]:
-    """AIMALL needs to know the method from the wfn file. The method needs to be
-    added in the wfn file, otherwise AIMALL gets the method wrong and
-    gives the wrong results.
+    """Collect WFX inputs and fill in missing AIMAll Model sections.
 
     :param points: A PointsDirectory instance, or a list of the PointDirectory-ies whose
         wavefunctions are to be written out with the method in them.
     :param method: The method (functional) used in the Gaussian calculation.
     """
 
-    wfns = []
-    for point in tqdm(points, desc="Extracting WFN files"):
-        # write out the wfn file with the method modified because AIMAll needs to know the functional used
-        if point.wfn and point.wfn.exists():
-            try:
-                point.wfn.method = method
-                point.wfn.write()
-                wfns.append(point.wfn.path)
-            except FileWriteError:
-                ichor.hpc.global_variables.LOGGER.info(
-                    f"Exception occured for {point.path} wavefunction file. Point skipped."
-                )
-                continue
-        else:
-            warn(f"Wavefunction file of point {point.path} does not exist.")
-            ichor.hpc.global_variables.LOGGER.info(
-                f"Wavefunction not found for {point.path}."
-            )
-    return wfns
+    wfxs = []
+    for point in tqdm(points, desc="Extracting WFX files"):
+        wfx = point.wfx
+        if isinstance(wfx, list):
+            warn(f"Multiple WFX files found for {point.path}. Point skipped.")
+            continue
+        if not wfx or not wfx.exists():
+            warn(f"WFX file of point {point.path} does not exist.")
+            continue
+        try:
+            model = wfx.method
+            if not model:
+                gjf = point.gjf
+                gjf_method = gjf.method if gjf and not isinstance(gjf, list) else None
+                model = gjf_method or method
+            wfx.ensure_model(model)
+        except (OSError, ValueError, StopIteration) as exc:
+            warn(f"Could not prepare {wfx.path} for AIMAll: {exc}")
+            continue
+        wfxs.append(wfx.path)
+    return wfxs
 
 
-def submit_wfns(
-    wfns: List[Path],
+def submit_wfxs(
+    wfxs: List[Path],
     aimall_atoms: Optional[List[str]] = None,
     script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["aimall"],
     ncores=2,
@@ -120,10 +121,10 @@ def submit_wfns(
 ) -> Optional[JobID]:
     """Write out submission script and submit wavefunctions to AIMALL on a cluster.
 
-    :param wfns: a list of wavefunction paths which to write to the submission script
+    :param wfxs: a list of wavefunction paths which to write to the submission script
     :param atoms: a list of stings corresponding to atom names.
         These will be the atoms for which AIMALL computes properties.
-    :param force: Whether or not to compute AIMALL for this wfn. If force is True, AIMALL will be ran again
+    :param force: Whether or not to compute AIMALL for this wfx. If force is True, AIMALL will be ran again
     :param hold: An optional JobID to hold for. The AIMALL job will not run until that other job is finished.
 
     """
@@ -136,31 +137,39 @@ def submit_wfns(
 
         nsubmitted_jobs = 0
 
-        for wfn in tqdm(wfns, desc="Submitting WFN files"):
+        for wfx in tqdm(wfxs, desc="Submitting WFX files"):
 
+            wfx = Path(wfx)
+            if not WFX.check_path(wfx) or not wfx_is_finished(wfx):
+                warn(f"AIMAll requires a complete WFX file. Skipping {wfx}.")
+                continue
+            atomic_files = wfx.with_name(f"{wfx.stem}_atomicfiles")
+            aim_output = wfx.with_suffix(".aim")
             if (
                 force_calculate_ints
-                or not wfn.with_suffix("").with_name(f"{wfn.stem}_atomicfiles").exists()
+                or not atomic_files.is_dir()
+                or not aim_output.is_file()
+                or aim_output.stat().st_mtime_ns < wfx.stat().st_mtime_ns
             ):
 
                 submission_script.add_command(
                     AIMAllCommand(
-                        wfn, atoms=aimall_atoms, ncores=ncores, naat=naat, **kwargs
+                        wfx, atoms=aimall_atoms, ncores=ncores, naat=naat, **kwargs
                     )
                 )
 
                 nsubmitted_jobs += 1
 
         ichor.hpc.global_variables.LOGGER.info(
-            f"Adding {nsubmitted_jobs}/{len(wfns)} to {submission_script.path}. \
-                                               {len(wfns) - nsubmitted_jobs} already have INTs calculated."
+            f"Adding {nsubmitted_jobs}/{len(wfxs)} to {submission_script.path}. \
+                                               {len(wfxs) - nsubmitted_jobs} already have INTs calculated."
         )
 
     # todo this will get executed when running from a compute node,
-    # but this does not submit any wfns to aimall, it is just used to make the datafile.
+    # but this does not submit any wfxs to aimall, it is just used to make the datafile.
     if len(submission_script.grouped_commands) > 0:
         ichor.hpc.global_variables.LOGGER.info(
-            f"Submitting {len(submission_script.grouped_commands)} WFN(s) to AIMAll"
+            f"Submitting {len(submission_script.grouped_commands)} WFX(s) to AIMAll"
         )
         return submission_script.submit(hold=hold)
     else:

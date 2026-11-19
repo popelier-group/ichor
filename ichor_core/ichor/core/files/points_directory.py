@@ -157,7 +157,7 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
 
         :return: np array of total energy (in Hartree) for all points
         """
-        return np.array([point.wfn.total_energy for point in self])
+        return np.array([point.wavefunction.total_energy for point in self])
 
     # TODO: move to processing function
     @property
@@ -622,7 +622,7 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
                 calculate_alf_features, alf_list
             )
             nfeatures = len(features)
-            wfn_energy = point_dir.wfn.total_energy
+            wfn_energy = point_dir.wavefunction.total_energy
             b_matrix = form_b_matrix(atoms, alf_list, central_atom_idx)
             cart_forces = np.array(
                 list(point_dir.gaussian_output.global_forces.values())

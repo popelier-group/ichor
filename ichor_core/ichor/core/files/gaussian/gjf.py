@@ -1,3 +1,4 @@
+import re
 import warnings
 from pathlib import Path
 from typing import List, NamedTuple, Optional, Union
@@ -45,7 +46,7 @@ class GJF(ReadFile, WriteFile, HasAtoms):
 
         extra_details_str (containing basis sets for individual atoms, what to freeze, etc.)
 
-        <wfn-name>
+        <wfx-name>
         blank line
         blank line
         blank line
@@ -181,9 +182,65 @@ class GJF(ReadFile, WriteFile, HasAtoms):
         for keyword in keywords:
             self.add_keyword(keyword)
 
-    def output_wfn(self):
-        """Helper method to add 'output=wfn' to the GJF keyword list"""
-        self.add_keyword("output=wfn")
+    def output_wfx(self):
+        """Request extended wavefunction output from Gaussian."""
+        self.add_keyword("output=wfx")
+
+    output_wfn = output_wfx
+
+    @staticmethod
+    def prepare_wfx_output(path: Path, required: bool = False) -> Optional[Path]:
+        """Update a Gaussian input in place, preserving its other sections."""
+        path = Path(path)
+        original = path.read_bytes()
+        # Decode losslessly so that titles and additional input survive the edit.
+        text = original.decode("latin-1")
+        newline = "\r\n" if "\r\n" in text else "\n"
+        route = re.search(
+            r"^[ \t]*#[^\r\n]*(?:\r?\n[ \t]*\S[^\r\n]*)*",
+            text,
+            re.MULTILINE,
+        )
+        if route is None:
+            raise ValueError(f"Gaussian route section missing in {path}")
+
+        route_text = route.group()
+        output = re.search(
+            r"(?:^|(?<=\s))output\s*(?:=\s*)?(\([^)]*\)|[^\s]+)",
+            route_text,
+            re.IGNORECASE,
+        )
+        wavefunction = re.compile(r"\b(?:wfnx?|wfx)\b", re.IGNORECASE)
+        if output and wavefunction.search(output[1]):
+            start, end = output.span(1)
+            route_text = (
+                route_text[:start]
+                + wavefunction.sub("wfx", output[1])
+                + route_text[end:]
+            )
+            footer = re.search(r"(?im)^[^\r\n]+\.wf[nx][ \t]*(?:\r?\n[ \t]*)*\Z", text)
+            if footer is None:
+                raise ValueError(
+                    f"Gaussian wavefunction filename missing at end of {path}"
+                )
+            text = text[: footer.start()]
+        elif not required:
+            return None
+        else:
+            if output:
+                raise ValueError(
+                    f"Cannot add WFX to the existing Output directive in {path}"
+                )
+            route_text += " output=wfx"
+
+        wfx_path = path.absolute().with_suffix(".wfx")
+        text = text[: route.start()] + route_text + text[route.end() :]
+        updated = text.rstrip().encode(
+            "latin-1"
+        ) + f"{newline * 2}{wfx_path}{newline * 2}".encode("utf-8")
+        if updated != original:
+            path.write_bytes(updated)
+        return wfx_path
 
     @classmethod
     def parse_route_card(cls, route_card: str) -> RouteCard:
@@ -271,7 +328,7 @@ class GJF(ReadFile, WriteFile, HasAtoms):
         self.basis_set = self.basis_set or "6-31+g(d,p)"
         self.keywords = self.keywords or [
             "nosymm",
-            "output=wfn",
+            "output=wfx",
             "force",
             "geom=notest",
             # do not use these as default
@@ -314,8 +371,8 @@ class GJF(ReadFile, WriteFile, HasAtoms):
             write_str += (
                 f"{atom.type} {atom.x:{fmtstr}} {atom.y:{fmtstr}} {atom.z:{fmtstr}}\n"
             )
-        if "output=wfn" in self.keywords:
-            write_str += f"\n{self.path.with_suffix('.wfn')}"
+        if any(keyword.lower() == "output=wfx" for keyword in self.keywords):
+            write_str += f"\n{path.absolute().with_suffix('.wfx')}\n\n"
         # add newline character because Gaussian otherwise crashes
         # if requesting using other keywords but not output=wfn
         else:
