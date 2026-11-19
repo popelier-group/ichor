@@ -20,6 +20,7 @@ from ichor.core.files import PointsDirectory, PointsDirectoryParent
 from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main import submit_points_directory_to_gaussian
 from ichor.hpc.submission_commands import GaussianCommand
+from ichor.hpc.submission_commands.gaussian_command import MissingGaussianMemorySetting
 
 SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
     "Submit Gaussian Menu",
@@ -147,7 +148,11 @@ class SubmitGaussianFunctions:
         )
 
         # add memory link0 to GJF
-        mem = GaussianCommand.memory_for_cores(ncores)
+        try:
+            mem = GaussianCommand.memory_for_cores(ncores)
+        except MissingGaussianMemorySetting as exc:
+            print(f"Error: {exc}")
+            return
         link0 = [f"NProcShared={ncores}", f"Mem={mem}GB"]
 
         is_parent_directory_to_many_points_directories = (

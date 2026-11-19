@@ -6,9 +6,12 @@ import ichor.hpc.global_variables
 from ichor.core.common.functools import classproperty
 from ichor.core.files import GaussianOutput
 from ichor.hpc.global_variables import get_param_from_config
-
 # from ichor.hpc.submission_script.check_manager import CheckManager
 from ichor.hpc.submission_command import SubmissionCommand
+
+
+class MissingGaussianMemorySetting(ValueError):
+    """Gaussian memory per core is missing from the HPC configuration."""
 
 
 class GaussianCommand(SubmissionCommand):
@@ -68,12 +71,23 @@ class GaussianCommand(SubmissionCommand):
         partition_memory = get_param_from_config(
             config, machine, "hpc", "memory_per_core_gb"
         )
-        if partition_memory:
-            partition = ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ncores]
-            if partition in partition_memory:
-                return partition_memory[partition]
+        if partition_memory is None:
+            raise MissingGaussianMemorySetting(
+                f"hpc.memory_per_core_gb does not exist for machine {machine!r} "
+                "in ~/ichor_config.yaml."
+            )
 
-        return get_param_from_config(config, machine, "hpc", "memory_per_core_gb")
+        if isinstance(partition_memory, dict):
+            partition = ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ncores]
+            memory = partition_memory.get(partition)
+            if memory is None:
+                raise MissingGaussianMemorySetting(
+                    f"hpc.memory_per_core_gb has no entry for partition {partition!r} "
+                    f"on machine {machine!r} in ~/ichor_config.yaml."
+                )
+            return memory
+
+        return partition_memory
 
     @classmethod
     def memory_for_cores(cls, ncores: int) -> int:
