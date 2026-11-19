@@ -6,12 +6,7 @@ from ichor.core.atoms import ALF
 from ichor.core.common.io import mkdir
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
-from ichor.core.files.file import (
-    FileContents,
-    FileReadError,
-    ReadFile,
-    WriteFile,
-)
+from ichor.core.files.file import FileContents, FileReadError, ReadFile, WriteFile
 from ichor.core.models.kernels import (
     ConstantKernel,
     Kernel,
