@@ -235,6 +235,20 @@ def test_wfx_model_is_added_without_changing_the_payload(tmp_path):
     assert WFX(path).method == "B3LYP"
 
 
+@pytest.mark.parametrize("existing_model", ["", "PBE"])
+def test_wfx_model_sections_are_deduplicated(tmp_path, existing_model):
+    path = tmp_path / "water.wfx"
+    path.write_text(
+        f"<Model>\n{existing_model}\n</Model>\n{WFX_TEXT}<Model>\n\n</Model>\n"
+    )
+
+    WFX(path).ensure_model("B3LYP")
+
+    assert path.read_text().count("<Model>") == 1
+    assert WFX(path).method == (existing_model or "B3LYP")
+    assert WFX_TEXT in path.read_text()
+
+
 def test_existing_gaussian_input_is_migrated_without_losing_extra_sections(tmp_path):
     gjf = tmp_path / "water.gjf"
     gjf.write_text(

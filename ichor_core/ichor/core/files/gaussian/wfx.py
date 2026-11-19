@@ -1,6 +1,6 @@
 from math import isfinite
 from pathlib import Path
-from shutil import copyfileobj, copymode
+from shutil import copymode
 from tempfile import NamedTemporaryFile
 from typing import Dict, Union
 
@@ -56,23 +56,28 @@ class WFX(HasAtoms, HasData, ReadFile):
         # WFX tags can contain spaces and are not XML element names.
         sections = {}
         stack = []
+        lines = None
         with self.path.open(encoding="utf-8", errors="surrogateescape") as stream:
             for line in stream:
                 line = line.strip()
                 if line.startswith("</") and line.endswith(">"):
-                    if not stack or stack.pop() != line[2:-1].casefold():
+                    tag = line[2:-1].casefold()
+                    if not stack or stack.pop() != tag:
                         raise ValueError(f"Mismatched WFX section in {self.path}")
+                    if not stack and lines is not None:
+                        if lines or tag not in sections:
+                            sections[tag] = " ".join(lines)
+                        lines = None
                 elif line.startswith("<") and line.endswith(">"):
                     tag = line[1:-1].casefold()
                     stack.append(tag)
                     if len(stack) == 1 and tag in self._metadata:
-                        sections[tag] = []
-                elif len(stack) == 1 and stack[0] in sections:
-                    if line:
-                        sections[stack[0]].append(line)
+                        lines = []
+                elif len(stack) == 1 and lines is not None and line:
+                    lines.append(line)
         if stack:
             raise ValueError(f"Unclosed WFX section in {self.path}: {stack[-1]}")
-        return {tag: " ".join(lines) for tag, lines in sections.items()}
+        return sections
 
     @staticmethod
     def _float(value):
@@ -128,24 +133,57 @@ class WFX(HasAtoms, HasData, ReadFile):
         return self.raw_data
 
     def ensure_model(self, method: str):
-        """Add a missing AIMAll model while preserving all other WFX sections."""
-        self.read()
-        if self.method:
-            return
-        if not method or not method.isascii() or any(c in method for c in "<>\r\n"):
-            raise ValueError("Expected a WFX model on one line")
+        """Keep one populated Model section and preserve the rest of the WFX."""
+        start = None
+        model_lines = []
+        sections = {}
+        keep = None
+        with self.path.open("rb") as source:
+            for index, line in enumerate(source):
+                tag = line.strip().lower()
+                if tag == b"<model>":
+                    start = index
+                    model_lines = []
+                elif tag == b"</model>" and start is not None:
+                    sections[start] = index
+                    if model_lines:
+                        keep = start
+                        self.method = b" ".join(model_lines).decode("ascii")
+                    start = None
+                elif start is not None and tag:
+                    model_lines.append(line.strip())
 
+            if keep is not None and len(sections) == 1:
+                return
+            if keep is None and (
+                not method
+                or not method.strip()
+                or not method.isascii()
+                or any(c in method for c in "<>\r\n")
+            ):
+                raise ValueError("Expected a WFX model on one line")
+            source.seek(0)
+            self._write_model(source, method, sections, keep)
+
+        if keep is None:
+            self.method = method
+
+    def _write_model(self, source, method, sections, keep):
         temporary_path = None
         try:
-            with self.path.open("rb") as source, NamedTemporaryFile(
-                dir=self.path.parent, delete=False
-            ) as target:
+            with NamedTemporaryFile(dir=self.path.parent, delete=False) as target:
                 temporary_path = Path(target.name)
-                target.write(f"<Model>\n{method}\n</Model>\n".encode("ascii"))
-                copyfileobj(source, target)
+                if keep is None:
+                    target.write(f"<Model>\n{method}\n</Model>\n".encode("ascii"))
+                skip_through = -1
+                for index, line in enumerate(source):
+                    if index in sections and index != keep:
+                        skip_through = sections[index]
+                    if index > skip_through:
+                        target.write(line)
             copymode(self.path, temporary_path)
+            source.close()
             temporary_path.replace(self.path)
         finally:
             if temporary_path is not None:
                 temporary_path.unlink(missing_ok=True)
-        self.method = method

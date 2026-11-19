@@ -94,10 +94,12 @@ def add_method_and_get_wfx_paths(
             warn(f"WFX file of point {point.path} does not exist.")
             continue
         try:
-            if not wfx.method:
+            model = wfx.method
+            if not model:
                 gjf = point.gjf
                 gjf_method = gjf.method if gjf and not isinstance(gjf, list) else None
-                wfx.ensure_model(gjf_method or method)
+                model = gjf_method or method
+            wfx.ensure_model(model)
         except (OSError, ValueError, StopIteration) as exc:
             warn(f"Could not prepare {wfx.path} for AIMAll: {exc}")
             continue
