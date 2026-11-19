@@ -49,9 +49,7 @@ def get_data_for_point(
         point_dict["wfn_energy"] = None
 
         if print_missing_data:
-            print(
-                f"Point {point.path} does not contain a Gaussian wavefunction file."
-            )
+            print(f"Point {point.path} does not contain a Gaussian wavefunction file.")
 
     ###############################
     # gaussian output file check

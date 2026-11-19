@@ -6,6 +6,7 @@ import ichor.hpc.global_variables
 from ichor.core.common.functools import classproperty
 from ichor.core.files import GaussianOutput
 from ichor.hpc.global_variables import get_param_from_config
+
 # from ichor.hpc.submission_script.check_manager import CheckManager
 from ichor.hpc.submission_command import SubmissionCommand
 

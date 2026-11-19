@@ -117,9 +117,7 @@ def add_point_to_database(
             wfn_energy=None,
         )
         if print_missing_data:
-            print(
-                f"Point {point.path} does not contain a Gaussian wavefunction file."
-            )
+            print(f"Point {point.path} does not contain a Gaussian wavefunction file.")
 
     ###############################
     # gaussian output file check

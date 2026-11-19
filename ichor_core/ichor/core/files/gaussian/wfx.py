@@ -36,9 +36,15 @@ class WFX(HasAtoms, HasData, ReadFile):
     _energy = "energy = t + vne + vee + vnn"
     _virial = "virial ratio (-v/t)"
     _metadata = {
-        "title", "model", "number of nuclei", "number of primitives",
-        "number of occupied molecular orbitals", "atomic numbers",
-        "nuclear cartesian coordinates", _energy, _virial,
+        "title",
+        "model",
+        "number of nuclei",
+        "number of primitives",
+        "number of occupied molecular orbitals",
+        "atomic numbers",
+        "nuclear cartesian coordinates",
+        _energy,
+        _virial,
     }
 
     def __init__(self, path: Union[Path, str], method: str = None):
