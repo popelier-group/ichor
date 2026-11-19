@@ -836,7 +836,7 @@ class CheckCalculationsFunctions:
         while True:
 
             # add memory link0 to GJF, as the Submit Gaussian Menu does
-            mem = (GaussianCommand.memory_per_core - 1) * ncores
+            mem = GaussianCommand.memory_for_cores(ncores)
             settings = {
                 "Method": method,
                 "Basis set": basis_set,

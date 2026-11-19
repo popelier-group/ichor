@@ -60,27 +60,29 @@ class GaussianCommand(SubmissionCommand):
             "executable_path",
         )
 
-    @classproperty
-    def memory_per_core(self) -> int:
-        """Returns the memory per core user wants per Gaussian job"""
-
-        return get_param_from_config(
-            ichor.hpc.global_variables.ICHOR_CONFIG,
-            ichor.hpc.global_variables.MACHINE,
-            "hpc",
-            "memory_per_core_gb",
+    @staticmethod
+    def memory_per_core(ncores: int) -> int:
+        """Return the configured memory per core for the selected partition."""
+        config = ichor.hpc.global_variables.ICHOR_CONFIG
+        machine = ichor.hpc.global_variables.MACHINE
+        partition_memory = get_param_from_config(
+            config, machine, "hpc", "memory_per_core_gb_by_partition"
         )
+        if partition_memory:
+            partition = ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ncores]
+            if partition in partition_memory:
+                return partition_memory[partition]
+
+        return get_param_from_config(config, machine, "hpc", "memory_per_core_gb")
+
+    @classmethod
+    def memory_for_cores(cls, ncores: int) -> int:
+        """Return Gaussian memory in GB, leaving 1 GB of headroom per core."""
+        return (cls.memory_per_core(ncores) - 1) * ncores
 
     def total_gaussian_memory(self) -> str:
-        """Calculates the total memory to tell Gaussian to use
-        Calculated as (memory_per_core - 1) * number_of_cores"""
-
-        if self.ncores == 1:
-            mem = 4
-        else:
-            mem = (GaussianCommand.memory_per_core - 1) * self.ncores
-
-        return f"export GAUSS_MDEF={mem}GB"
+        """Return the shell directive setting Gaussian's default memory."""
+        return f"export GAUSS_MDEF={self.memory_for_cores(self.ncores)}GB"
 
     @classproperty
     def group(self) -> bool:

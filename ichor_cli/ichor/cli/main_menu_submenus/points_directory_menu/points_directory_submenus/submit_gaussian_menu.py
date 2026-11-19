@@ -138,7 +138,7 @@ class SubmitGaussianFunctions:
 
         print("STARTING GAUSSIAN JOB SUBMISSION\n")
 
-        (method, basis_set, ncores, overwrite_existing, force_calculate_wfx) = (
+        method, basis_set, ncores, overwrite_existing, force_calculate_wfx = (
             submit_gaussian_menu_options.selected_method,
             submit_gaussian_menu_options.selected_basis_set,
             submit_gaussian_menu_options.selected_number_of_cores,
@@ -147,8 +147,7 @@ class SubmitGaussianFunctions:
         )
 
         # add memory link0 to GJF
-        mem_per_core = GaussianCommand.memory_per_core
-        mem = (mem_per_core - 1) * ncores
+        mem = GaussianCommand.memory_for_cores(ncores)
         link0 = [f"NProcShared={ncores}", f"Mem={mem}GB"]
 
         is_parent_directory_to_many_points_directories = (
