@@ -111,11 +111,14 @@ def how_to_configure() -> str:
         "      software:\n"
         "        python:\n"
         "          env_name: ichor_ase\n"
-        "          python_path: ~/.conda/envs/ichor_ase/bin/python\n"
-        "          modules: [<the anaconda module for this cluster>]\n"
+        "          python_path: ~/miniforge3/envs/ichor_ase/bin/python\n"
+        "          modules: []\n"
         "The environment.yml in the ichor repository creates an environment with "
         "everything these jobs need:\n"
-        "    conda env create -f environment.yml"
+        "    conda env create -f environment.yml\n"
+        "`conda env list` shows where it was made. With a cluster's anaconda module "
+        "rather than Miniforge it is under ~/.conda/envs, and modules needs that "
+        "anaconda module."
     )
 
 

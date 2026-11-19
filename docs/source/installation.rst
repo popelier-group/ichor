@@ -45,8 +45,13 @@ file:
     software:
       python:
         env_name: ichor_ase
-        python_path: ~/.conda/envs/ichor_ase/bin/python
-        modules: [<the anaconda module for this cluster>]
+        python_path: ~/miniforge3/envs/ichor_ase/bin/python
+        modules: []
+
+That is the path for a Miniforge install in your home directory (see below). If you made
+the environment with a cluster's anaconda module instead, it will be under
+``~/.conda/envs/ichor_ase`` and ``modules`` needs that anaconda module in it. ``conda env
+list`` shows where the environment actually is.
 
 Which environment each kind of job uses:
 
@@ -106,63 +111,58 @@ that are searched.
 Setting up Python environments
 ++++++++++++++++++++++++++++++
 
-Below is a more thorough explanation on how to set up ichor on a compute cluster such as CSF3 (used by the University of Manchester).
+Below is a more thorough explanation of how to set up ichor on a compute cluster such as
+CSF3 (used by the University of Manchester). Everything here, including downloading and
+installing packages, can be done on the login node.
 
 ichor needs Python ``3.10`` or newer. CSF3/CSF4 have a much older Python 3 installed as the
-system Python, so you will need to load an anaconda module file to get a recent enough
-version. Use the newest anaconda module available on the cluster: an older one supplies an
-older pip and setuptools, which makes installing ichor harder than it needs to be.
+system Python, so you need to get a newer one first.
 
-To load conda, use
+Recommended: Miniforge
+~~~~~~~~~~~~~~~~~~~~~~
+
+`Miniforge <https://github.com/conda-forge/miniforge>`_ is a minimal conda installer which
+gets its packages from conda-forge. That is also where ``xtb`` and the PLUMED wrappers for
+the ASE jobs come from, so one install covers both ichor and that environment. Install it
+in your home directory:
+
+.. code-block:: text
+
+    wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+    bash Miniforge3-Linux-x86_64.sh
+
+Accept the default location (``~/miniforge3``) and answer yes when asked whether to
+initialise conda, so that conda is available in new shells and in the submission scripts
+of the ASE jobs. Log out and back in (or run ``source ~/.bashrc``), then create and
+activate an environment for ichor:
+
+.. code-block:: text
+
+    conda create -n ichor python=3.12
+    conda activate ichor
+
+You should see ``(ichor)`` on the left of the terminal, which shows the environment is
+active. Activate it like this whenever you use ichor.
+
+Alternative: the cluster's anaconda module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you would rather not install Miniforge, load the newest anaconda module on the cluster
+and use its Python to make a ``venv``:
 
 .. code-block:: text
 
     module load apps/binapps/anaconda3/2024.10
-
-To activate the ``base`` conda environment, do
-
-.. code-block:: text
-
     conda activate
-
-and you should see a ``(base)`` on the left of the terminal. Check the version with
-``python3 --version`` and make sure it is ``3.10`` or newer before going any further --
-if it is not, load a newer anaconda module.
-
-On CSF3, you need to do ``qrsh -l short`` as the network proxy is no longer available.
-This goes into a submit (compute) node, you can access the internet and install packages as well as make new conda environments with different python versions.
-
-.. warning::
-
-    You will need to load in the anaconda module and activate the environment again in the
-    compute node to be able to install packages in the correct environment.
-    Create environments while in the compute node which has internet access. After you have installed all the packages,
-    then you can exit out of the compute node and should be able to load in the environment on the login node.
-    You should be able to submit jobs now on the login node using the Python environment made on the compute node.
-
-Now you can make a ``venv`` environment which will use the Python version from the activated conda environment. To make a venv, do
-
-.. code-block:: text
-
+    python3 --version    # must be 3.10 or newer
     python3 -m venv ~/.venv/ichor
+    source ~/.venv/ichor/bin/activate
 
-This creates a virtual environment in the ``~/.venv/ichor`` folder and all environment packages will be installed here.
-To active the venv environment, do ``source ~/.venv/env_name/bin/activate``. Use this is you have problems with the anaconda for some reason or problems installing packages in anaconda.
-To activate on GitBash, do ``. ~/.venv/ichor/Scripts/activate``.
+An older anaconda module supplies an older Python, pip and setuptools, which makes
+installing ichor harder than it needs to be. Once the venv exists you do not need the
+anaconda module to use it, only ``source ~/.venv/ichor/bin/activate``.
 
-.. note::
-
-    You will not need the conda module anymore if using venv. If you make a venv environment, the python version will be
-    taken from the conda environment (so we are going to be using the same python version available in the conda environment),
-    however, all packages will now be installed in the venv environment instead of the conda environment. This should remove
-    problems associated with anaconda / loading anaconda modules.
-
-You should see ``(ichor)`` show up on the left side of the terminal, which indicates you are in the ``ichor`` environment. This is the
-same for both venv and conda.
-
-Make sure that the venv or conda environment has Python ``3.10`` or newer, and that setuptools and pip are up to date.
-
-To make sure you are using the latest versions of the packages, use
+Whichever you use, make sure pip and setuptools are up to date before installing ichor:
 
 .. code-block:: text
 
@@ -172,9 +172,10 @@ To make sure you are using the latest versions of the packages, use
 Downloading ichor
 ++++++++++++++++++++++++++++++
 
-First, download the ichor source code to your home directory (again you need to be on the compute node to have internet access). It is recommended to download the code as a git repository,
-so that you can pull changes from the github code when changes are made. You can follow the Github guides on how to clone.
-If you download the code as a zip, you will not be able to pull from github and will have to download the code every time a change is made!
+Download the ichor source code to your home directory. It is recommended to download the
+code as a git repository, so that you can pull changes from GitHub when they are made. If
+you download the code as a zip instead, you will have to download it again every time a
+change is made.
 
 .. warning::
 
@@ -186,16 +187,15 @@ If you download the code as a zip, you will not be able to pull from github and 
     * `Github Personal Access Token <https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens>`_
 
 
-To install the sub-packages, do
+With your environment active, install the sub-packages from the top of the repository:
 
 .. code-block:: text
 
     python3 -m pip install -e ichor_core -e ichor_hpc -e ichor_cli
 
 All three are given to pip at once so that it can resolve the dependencies between them.
-
-The ``-e`` flag installs the package in editable mode,
-meaning that changes in the ichor source code will be directly made in the installed package. As ichor is still work in progress, it makes it easier to make changes and then test the changes.
+The ``-e`` flag installs them in editable mode, so that changes to the source code (such as
+those pulled from GitHub) take effect without reinstalling.
 
 Finally, create the config file:
 
@@ -203,7 +203,8 @@ Finally, create the config file:
 
     ichor-config-init
 
-and edit the block for the cluster you are on, as described above.
+and edit the block for the cluster you are on, as described above. On a SLURM cluster,
+``ichor-config-init --detect`` fills in the queue settings for you.
 
 .. warning::
 
@@ -211,13 +212,3 @@ and edit the block for the cluster you are on, as described above.
     submitting jobs with `ichor.hpc` or `ichor.cli`. The paths to those programs, and the
     modules that have to be loaded for them, are what you set in the config file, so they
     need to be right for the cluster you are on and for the versions you have access to.
-
-.. note::
-
-    You need to be connected to the internet to be able to download and install the relevant
-    dependencies of ichor.
-
-.. note::
-
-    Note it is usually better to use venv.
-    On CSF3, activate anaconda first. After that use the python from the anaconda environment to make a venv. After this step is done, you can activate the venv and you no longer need to activate or use conda.

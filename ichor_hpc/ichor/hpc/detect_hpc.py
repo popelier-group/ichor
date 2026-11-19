@@ -335,6 +335,6 @@ def detected_config_text(partitions: List[Partition], machine_key: str) -> str:
     # from the ichor repository, then point these at it
     # python:
     #   env_name: "ichor_ase"
-    #   python_path: "~/.conda/envs/ichor_ase/bin/python"
+    #   python_path: "~/miniforge3/envs/ichor_ase/bin/python"
     #   modules: []
 """

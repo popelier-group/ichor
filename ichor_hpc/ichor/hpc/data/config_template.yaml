@@ -46,11 +46,14 @@ csf3:
       modules: ["mpi/intel-18.0/openmpi/4.0.1"]
 
     # the conda environment that the ASE optimisation and metadynamics jobs run in.
-    # create it with `conda env create -f environment.yml` from the ichor repository
+    # create it with `conda env create -f environment.yml` from the ichor repository.
+    # These are the paths for Miniforge installed in your home directory; with the
+    # anaconda module instead, use "~/.conda/envs/ichor_ase/bin/python" and
+    # modules: ["apps/binapps/anaconda3/2024.10"]
     python:
       env_name: "ichor_ase"
-      python_path: "~/.conda/envs/ichor_ase/bin/python"
-      modules: ["apps/binapps/anaconda3/2024.10"]
+      python_path: "~/miniforge3/envs/ichor_ase/bin/python"
+      modules: []
 
     tyche:
       modules: ["compilers/intel/18.0.3"]

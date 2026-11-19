@@ -18,8 +18,12 @@
 #     software:
 #       python:
 #         env_name: ichor_ase
-#         python_path: ~/.conda/envs/ichor_ase/bin/python
-#         modules: [<the anaconda module for this cluster>]
+#         python_path: ~/miniforge3/envs/ichor_ase/bin/python
+#         modules: []
+#
+# That is the path for a Miniforge install in your home directory. With a cluster's
+# anaconda module instead, the environment is under ~/.conda/envs and `modules`
+# needs that anaconda module; `conda env list` shows where it is.
 #
 # ichor checks this environment has everything it needs before submitting, so if
 # a package is missing you are told on the login node rather than in a job error
