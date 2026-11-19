@@ -70,7 +70,7 @@ def register_global_shortcut(
 
 class ShortcutItem(MenuItem):
     """The item a global shortcut adds to each menu, shown as e.g.
-    ``j - Job submission options`` just above the exit item."""
+    ``j - Job Submission Options`` just above the exit item."""
 
     def __init__(self, key: str, shortcut: GlobalShortcut, menu: "ConsoleMenu"):
         super().__init__(text=shortcut.text, menu=menu, menu_char=key)
@@ -81,8 +81,9 @@ class ShortcutItem(MenuItem):
 
 
 class SeparatorItem(MenuItem):
-    """A blank row above the exit item, setting it apart from the rest. It does nothing
-    if chosen, which is only possible by typing the number of its row."""
+    """A blank row between a menu's numbered items and its lettered ones (the global
+    shortcuts and exit). It does nothing if chosen, which is only possible by typing
+    the number of its row."""
 
     def __init__(self, menu: "ConsoleMenu"):
         super().__init__(text="", menu=menu)
@@ -210,8 +211,7 @@ class ConsoleMenu(OriginalConsoleMenu):
 
     def start(self, show_exit_option=None):
         """Starts the menu, first adding an item for each global shortcut, so that they
-        sit together at the bottom of every menu, followed by a blank row setting the
-        exit item apart."""
+        sit together with the exit item at the bottom of every menu."""
 
         self.items = [
             item
@@ -219,11 +219,19 @@ class ConsoleMenu(OriginalConsoleMenu):
             if not isinstance(item, (ShortcutItem, SeparatorItem))
             and item is not self.exit_item
         ]
-        for key, shortcut in self._shortcuts_available_here().items():
-            self.items.append(ShortcutItem(key, shortcut, self))
+        shortcut_items = [
+            ShortcutItem(key, shortcut, self)
+            for key, shortcut in self._shortcuts_available_here().items()
+        ]
+        show_exit = (
+            self.show_exit_option if show_exit_option is None else show_exit_option
+        )
 
-        if self.show_exit_option if show_exit_option is None else show_exit_option:
+        # the lettered items (the shortcuts, then exit, which the library adds) go
+        # together below a blank row, apart from the menu's own numbered items
+        if self.items and (shortcut_items or show_exit):
             self.items.append(SeparatorItem(self))
+        self.items.extend(shortcut_items)
 
         super().start(show_exit_option)
 
