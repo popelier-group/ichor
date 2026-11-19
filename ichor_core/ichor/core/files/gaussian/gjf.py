@@ -328,7 +328,7 @@ class GJF(ReadFile, WriteFile, HasAtoms):
         self.basis_set = self.basis_set or "6-31+g(d,p)"
         self.keywords = self.keywords or [
             "nosymm",
-            "output=wfn",
+            "output=wfx",
             "force",
             "geom=notest",
             # do not use these as default
