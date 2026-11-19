@@ -66,7 +66,7 @@ class GaussianCommand(SubmissionCommand):
         config = ichor.hpc.global_variables.ICHOR_CONFIG
         machine = ichor.hpc.global_variables.MACHINE
         partition_memory = get_param_from_config(
-            config, machine, "hpc", "memory_per_core_gb_by_partition"
+            config, machine, "hpc", "memory_per_core_gb"
         )
         if partition_memory:
             partition = ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ncores]
