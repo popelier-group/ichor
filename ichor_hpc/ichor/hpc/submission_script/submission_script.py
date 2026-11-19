@@ -27,6 +27,7 @@ class SubmissionScript:
     :param outputs_dir_path: Path to the outputs directory. If not set, it will use the default global_variables one
     :param errors_dir_path: Path to the errors directory. If not set, it will use the default global_variables one
     :param datafile_path: Path to datafile containing information needed for job to run, defaults to None
+    :param time_limit: Slurm time limit, defaults to seven days ("7-0")
 
 
     Example Gaussian submission script for SGE (array job):
@@ -109,6 +110,7 @@ class SubmissionScript:
         outputs_dir_path: Path = None,
         errors_dir_path: Path = None,
         datafile_path: Path = None,
+        time_limit: str = "3-0",
     ):
 
         self.path = Path(submission_script_name)
@@ -118,6 +120,7 @@ class SubmissionScript:
         self.include_nodes = include_nodes or []
         self.exclude_nodes = exclude_nodes or []
         self.max_running_tasks = max_running_tasks
+        self.time_limit = time_limit
         self._options = []
         self._commands = []  # a list of commands to be submitted to batch system
 
@@ -169,12 +172,12 @@ class SubmissionScript:
 
     @property
     def default_options(self) -> List[str]:
-
         """Returns a list of default options to use in a submission script for a job.
         This list containing the current working directory, the output directory (where .o files are written),
         the errors directory (where .e files are written). If the number of cores is more than 1, the keyword
         needed when specifying more than 1 cores is also written to the options list. This keyword depends on
-        the system on which the job is ran, as well as on the number of cores that the job needs."""
+        the system on which the job is ran, as well as on the number of cores that the job needs.
+        """
 
         task_array = len(self.grouped_commands) > 1
 
@@ -352,7 +355,7 @@ class SubmissionScript:
 
                 f.write("#!/bin/bash -l\n")
                 # have to write time limit for new csf3
-                f.write("#SBATCH -t 7-0\n")
+                f.write(f"#SBATCH -t {self.time_limit}\n")
                 # write any options to be given to the batch system,
                 # such as working directory, where to write outputs/errors, etc.
                 for option in self.options:
