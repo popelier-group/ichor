@@ -75,7 +75,10 @@ class GaussianCommand(SubmissionCommand):
         """Calculates the total memory to tell Gaussian to use
         Calculated as (memory_per_core - 1) * number_of_cores"""
 
-        mem = (GaussianCommand.memory_per_core - 1) * self.ncores
+        if self.ncores == 1:
+            mem = 4
+        else:
+            mem = (GaussianCommand.memory_per_core - 1) * self.ncores
 
         return f"export GAUSS_MDEF={mem}GB"
 
