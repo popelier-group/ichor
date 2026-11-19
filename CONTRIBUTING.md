@@ -19,10 +19,10 @@ pre-commit install
 
 to download and set up pre-commit hooks.
 
-To run all hooks on all Python files in the repository, do:
+To run all hooks on every file in the repository (as CI does), do:
 
 ```
-git ls-files -- '*.py' | xargs pre-commit run --files
+pre-commit run --all-files
 ```
 
 # Unit Testing
