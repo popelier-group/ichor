@@ -68,9 +68,12 @@ Which environment each kind of job uses:
    * - Metadynamics
      - the conda environment above
      - ``ase``, ``xtb``, ``plumed``, ``numpy``
-   * - polus sampling
+   * - Diversity sampling, dataset preparation
      - ichor's own environment
-     - ``polus``, ``numpy``
+     - ``polus``, ``numpy`` (see :ref:`polus-and-ferebus`)
+   * - Model training
+     - ichor's own environment
+     - ``pyferebus`` (see :ref:`polus-and-ferebus`)
    * - Everything else
      - ichor's own environment
      - ichor itself
@@ -196,6 +199,56 @@ With your environment active, install the sub-packages from the top of the repos
 All three are given to pip at once so that it can resolve the dependencies between them.
 The ``-e`` flag installs them in editable mode, so that changes to the source code (such as
 those pulled from GitHub) take effect without reinstalling.
+
+.. _polus-and-ferebus:
+
+++++++++++++++++++++++++++++++
+Installing polus and FEREBUS
+++++++++++++++++++++++++++++++
+
+Sampling and training use two of the group's own packages, which are kept in private
+repositories on the ``popelier-group`` GitHub organisation, so pip cannot fetch them for
+you and you need access to the organisation to download them:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 20 60
+
+   * - Package
+     - Imported as
+     - Needed for
+   * - polus
+     - ``polus``
+     - diversity sampling (Sampling menu) and dataset preparation (Training menu)
+   * - FEREBUS
+     - ``pyferebus``
+     - training models (Training menu)
+
+Skip this section if you will not use those menus. Otherwise clone each one (using HTTPS and
+your personal access token, as above) and install it into the **same environment as
+ichor**, as the jobs for these menus run in ichor's own environment:
+
+.. code-block:: text
+
+    git clone https://github.com/popelier-group/POLUS.git
+    git clone https://github.com/popelier-group/FEREBUS_CPU.git
+    python3 -m pip install -e POLUS -e FEREBUS_CPU
+
+Check that both can be found:
+
+.. code-block:: text
+
+    python3 -c "import polus, pyferebus"
+
+.. note::
+
+    The menus which need one of these packages show a warning while it is not installed,
+    and refuse to submit, printing the commands above, rather than letting the job fail
+    with a ``ModuleNotFoundError`` once it has waited in the queue.
+
+++++++++++++++++++++++++++++++
+Creating the config file
+++++++++++++++++++++++++++++++
 
 Finally, create the config file:
 

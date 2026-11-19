@@ -1,3 +1,4 @@
+from ichor.cli.useful_functions.group_packages import group_package_installed
 from ichor.cli.useful_functions.hpc_resources import (
     batch_system_available,
     format_memory_gb,
@@ -25,6 +26,7 @@ from ichor.cli.useful_functions.user_input import (
 
 __all__ = [
     "format_memory_gb",
+    "group_package_installed",
     "batch_system_available",
     "job_memory_gb",
     "maximum_cores",

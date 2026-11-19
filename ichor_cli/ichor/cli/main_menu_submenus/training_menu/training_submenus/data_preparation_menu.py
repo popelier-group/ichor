@@ -10,11 +10,13 @@ from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     directory_selected,
+    group_package_installed,
     print_summary_and_pause,
     user_input_float,
     user_input_int,
     user_input_path,
 )
+from ichor.hpc.group_packages import missing_package_warning, POLUS
 from ichor.hpc.main.database import system_name_from_processed_csvs
 from ichor.hpc.main.polus import submit_polus, write_dataset_prep
 
@@ -225,6 +227,11 @@ class SubmitDataPrepMenuOptions(MenuOptions):
     # the name of the dataset directory and of everything inside it, so it is shown here
     # rather than only turning up in the output
     system_name: str = ""
+
+    def check_polus_is_installed(self) -> Union[str, None]:
+        """Checks that polus, which the dataset preparation script imports, is
+        installed in the environment the job runs in."""
+        return missing_package_warning(POLUS)
 
     def check_path(self):
 
@@ -597,6 +604,11 @@ class SubmitDataPrepFunctions:
             "of per-atom csv files written by the Property Calculation Menu: the folder "
             "named after the system inside training_csvs, not the database or the "
             "PointsDirectory itself.",
+        ):
+            return
+
+        if not group_package_installed(
+            POLUS, "dataset preparation job", "DATASET PREPARATION NOT SUBMITTED"
         ):
             return
 

@@ -1,11 +1,29 @@
 import textwrap
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, List, Mapping, Optional, Sequence
 
 from ichor.cli.useful_functions.user_input import user_input_free_flow
 
 # width of the horizontal rules drawn around a summary block
 SUMMARY_WIDTH = 78
 SUMMARY_RULE = "=" * SUMMARY_WIDTH
+
+
+def wrap_note(note: str) -> List[str]:
+    """Wraps a note to the width of a summary block.
+
+    Each line of the note is wrapped on its own, so that line breaks in it are kept,
+    and an indented line (a command to run, or a block of config to paste) is left as
+    it is: wrapping one would break it up where it cannot be copied from.
+    """
+
+    lines = []
+    for line in str(note).splitlines() or [""]:
+        if line.startswith(" "):
+            lines.append(line)
+        else:
+            lines.extend(textwrap.wrap(line, SUMMARY_WIDTH - 2) or [""])
+
+    return lines
 
 
 def print_summary(
@@ -22,7 +40,8 @@ def print_summary(
         aligned ``name : value`` table. Insertion order is kept, so the most important
         entries should come first.
     :param notes: Sentences printed underneath the table, e.g. what happens next or
-        where the output ends up. Each one is wrapped to the width of the block.
+        where the output ends up. Each line of one is wrapped to the width of the
+        block, apart from indented lines (e.g. commands), which are printed as they are.
     """
 
     print()
@@ -42,7 +61,7 @@ def print_summary(
             # or into the table above them
             if details or i:
                 print()
-            for line in textwrap.wrap(note, SUMMARY_WIDTH - 2) or [""]:
+            for line in wrap_note(note):
                 print(f"  {line}")
 
     print(SUMMARY_RULE)

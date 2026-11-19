@@ -21,6 +21,7 @@ from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     bool_to_str,
     format_memory_gb,
+    group_package_installed,
     job_memory_gb,
     maximum_cores,
     memory_per_core_gb,
@@ -32,6 +33,7 @@ from ichor.cli.useful_functions import (
     xyz_file_selected,
 )
 from ichor.core.files import count_geometries_in_xyz
+from ichor.hpc.group_packages import missing_package_warning, POLUS
 from ichor.hpc.main.polus import submit_polus, write_diversity_sampling
 
 SUBMIT_DIVERSITY_MENU_DESCRIPTION = MenuDescription(
@@ -342,6 +344,11 @@ class SubmitDiversityMenuOptions(MenuOptions):
     # the geometries in the selected trajectory, counted when it is selected so that the
     # sample and chunk sizes can be checked (and suggested) against it. 0 = not known
     number_of_geometries_in_file: int
+
+    def check_polus_is_installed(self) -> Union[str, None]:
+        """Checks that polus, which the diversity sampling script imports, is
+        installed in the environment the job runs in."""
+        return missing_package_warning(POLUS)
 
     def check_selected_number_of_cores(self) -> Union[str, None]:
         """Checks that the job asks for at least one core."""
@@ -767,6 +774,11 @@ class SubmitDiversityFunctions:
             what="seed geometry",
             select_with="Use 'Select xyz file containing a single optimised geometry' "
             "in the Sampling Menu above this one.",
+        ):
+            return
+
+        if not group_package_installed(
+            POLUS, "diversity sampling job", "DIVERSITY SAMPLING NOT SUBMITTED"
         ):
             return
 

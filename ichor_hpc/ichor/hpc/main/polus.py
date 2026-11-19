@@ -6,6 +6,7 @@ from ichor.core.common.io import copytree, mkdir
 from ichor.core.files.polus import DatasetPrepScript, DiversityScript
 
 from ichor.hpc.batch_system import JobID
+from ichor.hpc.group_packages import POLUS, require_package
 from ichor.hpc.main.database import system_name_from_processed_csvs
 from ichor.hpc.submission_commands import PythonCommand
 from ichor.hpc.submission_script import SubmissionScript
@@ -113,7 +114,13 @@ def submit_polus(
     :param hold: An optional JobID for which this job to hold.
         This is used in auto-run to hold this job for the previous job to finish, defaults to None
     :return: The JobID of this job given by the submission system.
+    :raises GroupPackageMissing: If polus is not installed in the environment ichor is
+        running from, which is the one the job runs in.
     """
+
+    # the script runs in ichor's own environment and imports polus, so without it the
+    # job can only fail with a ModuleNotFoundError once it has waited in the queue
+    require_package(POLUS, "polus job")
 
     # make a SubmissionScript instance which is going to contain all the jobs that are going to be ran
     # the submission_script object can be accessed even after the context manager

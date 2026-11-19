@@ -61,7 +61,9 @@ The ASE optimisation and metadynamics jobs run in a separate conda environment, 
 conda env create -f environment.yml
 ```
 
-and point the `software.python` block of your config file at it. See the [installation documentation](https://ichor.readthedocs.io/en/latest/installation.html) for the full walkthrough on a compute cluster.
+and point the `software.python` block of your config file at it.
+
+Sampling and training also need polus and FEREBUS, the group's own packages. They are private repositories on the popelier-group organisation, so clone them from [POLUS](https://github.com/popelier-group/POLUS) and [FEREBUS_CPU](https://github.com/popelier-group/FEREBUS_CPU) and install them into the same environment as ichor with `python3 -m pip install -e POLUS -e FEREBUS_CPU`. See the [installation documentation](https://ichor.readthedocs.io/en/latest/installation.html) for the full walkthrough on a compute cluster.
 
 ## Getting Started
 ---

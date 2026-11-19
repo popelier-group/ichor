@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -12,6 +13,7 @@ from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
     directory_selected,
+    group_package_installed,
     maximum_cores,
     print_summary_and_pause,
     user_input_float,
@@ -20,6 +22,7 @@ from ichor.cli.useful_functions import (
     user_input_restricted,
 )
 
+from ichor.hpc.group_packages import FEREBUS, missing_package_warning
 from ichor.hpc.main import (
     find_and_setup_ferebus_subdirs,
     pyferebus_platform,
@@ -81,6 +84,11 @@ class SubmitTrainingMenuOptions(MenuOptions):
     selected_huber_delta: float
     selected_mean_type: str
     selected_gwo_cycles: int
+
+    def check_pyferebus_is_installed(self) -> Optional[str]:
+        """Checks that pyferebus, which the training script imports and which then
+        submits the training jobs itself, is installed in ichor's environment."""
+        return missing_package_warning(FEREBUS)
 
     def check_machine_is_known(self) -> Optional[str]:
         """Checks that the machine ichor is running on is in the ichor config, as it
@@ -303,6 +311,11 @@ class SubmitTrainingFunctions:
             )
             return
 
+        if not group_package_installed(
+            FEREBUS, "model training jobs", "MODEL TRAINING NOT SUBMITTED"
+        ):
+            return
+
         # the directory ichor is running in, so that it can be restored afterwards
         original_working_directory = Path.cwd()
 
@@ -346,16 +359,19 @@ class SubmitTrainingFunctions:
                 write_extract_models_script()
 
                 # run the pyferebus input script. As submit on compute is hard coded to
-                # true pyferebus will handle the submission
+                # true pyferebus will handle the submission. It is run with the
+                # interpreter ichor is running in, which is the one pyferebus was
+                # checked for above: whichever `python3` is first on the PATH need not
+                # be, e.g. when ichor is run without its environment being activated.
 
                 try:
                     subprocess.run(
-                        ["python3", pyferebus_input_script.name],
+                        [sys.executable, pyferebus_input_script.name],
                         cwd=workdir,
                         check=True,
                     )
-                # one training set failing to submit (an error from pyferebus, or no
-                # python3 on the machine) used to take the whole menu down with it,
+                # one training set failing to submit (an error from pyferebus, say)
+                # used to take the whole menu down with it,
                 # losing every setting made in it. The rest are still tried and what
                 # failed is reported at the end instead.
                 except (subprocess.CalledProcessError, OSError) as error:
