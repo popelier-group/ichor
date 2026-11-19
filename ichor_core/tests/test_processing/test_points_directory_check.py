@@ -229,7 +229,7 @@ def test_wfx_model_is_added_without_changing_the_payload(tmp_path):
     original = path.read_bytes()
     WFX(path).ensure_model("B3LYP")
 
-    assert path.read_bytes().endswith(original)
+    assert path.read_bytes() == b"<Model>\nB3LYP\n</Model>\n" + original
     assert WFX(path).method == "B3LYP"
     WFX(path).ensure_model("PBE")
     assert WFX(path).method == "B3LYP"
@@ -247,6 +247,13 @@ def test_wfx_model_sections_are_deduplicated(tmp_path, existing_model):
     assert path.read_text().count("<Model>") == 1
     assert WFX(path).method == (existing_model or "B3LYP")
     assert WFX_TEXT in path.read_text()
+
+
+def test_wfx_with_a_duplicated_payload_is_incomplete(tmp_path):
+    path = tmp_path / "water.wfx"
+    path.write_text(WFX_TEXT * 2)
+
+    assert not wfx_is_finished(path)
 
 
 def test_existing_gaussian_input_is_migrated_without_losing_extra_sections(tmp_path):

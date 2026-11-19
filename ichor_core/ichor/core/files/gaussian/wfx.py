@@ -72,6 +72,10 @@ class WFX(HasAtoms, HasData, ReadFile):
                     tag = line[1:-1].casefold()
                     stack.append(tag)
                     if len(stack) == 1 and tag in self._metadata:
+                        if tag != "model" and tag in sections:
+                            raise ValueError(
+                                f"Repeated WFX section <{tag}> in {self.path}"
+                            )
                         lines = []
                 elif len(stack) == 1 and lines is not None and line:
                     lines.append(line)
