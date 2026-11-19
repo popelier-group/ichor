@@ -6,7 +6,11 @@ import ichor.hpc.global_variables
 
 from consolemenu.items import SubmenuItem
 from ichor.cli.completers import install_completion_interrupt_handler
-from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
+from ichor.cli.console_menu import (
+    add_items_to_menu,
+    ConsoleMenu,
+    register_global_shortcut,
+)
 from ichor.cli.main_menu_submenus.analysis_menu import (
     analysis_menu,
     ANALYSIS_MENU_DESCRIPTION,
@@ -18,6 +22,11 @@ from ichor.cli.main_menu_submenus.fflux_calculations_menu import (
 from ichor.cli.main_menu_submenus.initial_structure_menu import (
     initial_structure_menu,
     INITIAL_STRUCTURE_MENU_DESCRIPTION,
+)
+from ichor.cli.main_menu_submenus.job_submission_menu import (
+    job_submission_menu,
+    JOB_SUBMISSION_MENU_DESCRIPTION,
+    JOB_SUBMISSION_MENU_KEY,
 )
 from ichor.cli.main_menu_submenus.points_directory_menu import (
     points_directory_menu,
@@ -121,10 +130,19 @@ main_menu_items = [
         main_menu,
     ),
     SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
+    SubmenuItem(JOB_SUBMISSION_MENU_DESCRIPTION.title, job_submission_menu, main_menu),
 ]
 
 # add items to menu
 add_items_to_menu(main_menu, main_menu_items)
+
+# the job submission options are also one key away from every menu, as they tend to be
+# wanted just before submitting, from whichever menu that is
+register_global_shortcut(
+    JOB_SUBMISSION_MENU_KEY,
+    "job submission options",
+    lambda: job_submission_menu,
+)
 
 
 # this function will be used by setuptools entry points

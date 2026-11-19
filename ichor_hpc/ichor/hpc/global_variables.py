@@ -115,6 +115,26 @@ if not __building_docs__:
 # if not MACHINE:
 #         raise ValueError("The current machine is not defined in the config file.")
 
+
+def parallel_environment_from_config(
+    ichor_config: dict, machine: str
+) -> ParallelEnvironment:
+    """Builds the partitions (or SGE parallel environments) a machine's jobs can be
+    sent to from its ``hpc.parallel_environments`` block.
+
+    :raises KeyError: If the machine has no ``hpc.parallel_environments`` block.
+    :raises TypeError: If the machine's block is empty.
+    """
+
+    environment = ParallelEnvironment()
+    for p_env_name, values in ichor_config[machine]["hpc"][
+        "parallel_environments"
+    ].items():
+        environment[p_env_name] = values
+
+    return environment
+
+
 # make parallel environment variables to run jobs on multiple cores
 PARALLEL_ENVIRONMENT = ParallelEnvironment()
 # if you do not specify parallel environments in config, then error out with KeyError
@@ -122,10 +142,9 @@ PARALLEL_ENVIRONMENT = ParallelEnvironment()
 if not __building_docs__:
     if MACHINE:
         try:
-            for p_env_name, values in ICHOR_CONFIG[MACHINE]["hpc"][
-                "parallel_environments"
-            ].items():
-                PARALLEL_ENVIRONMENT[p_env_name] = values
+            PARALLEL_ENVIRONMENT = parallel_environment_from_config(
+                ICHOR_CONFIG, MACHINE
+            )
         # if parallel_environment is not found, but machine is defined
         except KeyError:
             warnings.warn(
@@ -143,6 +162,31 @@ if not __building_docs__:
     # no `else` warning here: when there is no MACHINE the warning above has
     # already said so, and repeating it makes the startup output of a fresh
     # install look like two separate problems rather than one
+
+
+def reload_config():
+    """Reads the config file again, so that changes made to it while ichor is running
+    (by the job submission options menu, or by hand) apply to the next job submitted.
+
+    Most settings are looked up in ``ICHOR_CONFIG`` each time they are used, but the
+    partitions are built once into ``PARALLEL_ENVIRONMENT``, so that is rebuilt too.
+    ``MACHINE`` is left as it is, as which block of the config applies depends on the
+    hostname rather than on anything that can be changed here.
+    """
+
+    global ICHOR_CONFIG, PARALLEL_ENVIRONMENT
+
+    if ICHOR_CONFIG_PATH is None:
+        return
+
+    ICHOR_CONFIG = initialize_config(ICHOR_CONFIG_PATH) or {}
+
+    try:
+        PARALLEL_ENVIRONMENT = parallel_environment_from_config(ICHOR_CONFIG, MACHINE)
+    # no partitions configured: the submission code says so when a job needs one
+    except (KeyError, TypeError):
+        PARALLEL_ENVIRONMENT = ParallelEnvironment()
+
 
 # default file structure to be used for file handling
 FILE_STRUCTURE = FileTree()

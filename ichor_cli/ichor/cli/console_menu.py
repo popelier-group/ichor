@@ -1,4 +1,4 @@
-from typing import Iterable, List
+from typing import Callable, Dict, Iterable, List, NamedTuple
 
 from consolemenu import ConsoleMenu as OriginalConsoleMenu
 from consolemenu.items import MenuItem
@@ -38,6 +38,34 @@ class Screen(OriginalScreen):
             return input(prompt)
 
 
+class GlobalShortcut(NamedTuple):
+    """A menu that can be opened from every other menu by typing one key."""
+
+    text: str
+    # a function returning the menu, so that the module registering the shortcut does
+    # not have to be imported by this one
+    get_menu: Callable[[], "ConsoleMenu"]
+
+
+# key typed at any menu's ">>" prompt -> the menu it opens
+GLOBAL_SHORTCUTS: Dict[str, GlobalShortcut] = {}
+
+
+def register_global_shortcut(
+    key: str, text: str, get_menu: Callable[[], "ConsoleMenu"]
+):
+    """Makes a menu openable from every menu by typing ``key``, e.g. the job submission
+    options, which are wanted just before submitting from whichever menu that is.
+
+    :param key: A single letter, which must not be one a menu uses for an item (the
+        exit item uses ``q``).
+    :param text: What the menu is called in the hint shown under every menu.
+    :param get_menu: Returns the menu to open.
+    """
+
+    GLOBAL_SHORTCUTS[key.lower()] = GlobalShortcut(text, get_menu)
+
+
 class ConsoleMenu(OriginalConsoleMenu):
     """Subclasses from `consolemenu.ConsoleMenu`, which is the base menu class. This subclass
     adds the `this_menu_options` attribute, which contains options for the menus,
@@ -55,12 +83,16 @@ class ConsoleMenu(OriginalConsoleMenu):
 
     :param this_menu_options: A `MenuOptions` instance (a dataclass) containing options which can be
         changed by the user.
+    :param show_parent_options: Whether the options of the menus above this one are shown in its
+        prologue. A menu that can be opened from anywhere (see `register_global_shortcut`) has
+        nothing to do with the menu it was opened from, so it turns this off.
     :param kwargs: Key word arguments to be passed to the original `ConsoleMenu` class.
     """
 
     def __init__(
         self,
         this_menu_options: MenuOptions = None,
+        show_parent_options: bool = True,
         title=None,
         subtitle=None,
         # screen=None,
@@ -92,6 +124,7 @@ class ConsoleMenu(OriginalConsoleMenu):
         )
 
         self.this_menu_options = this_menu_options
+        self.show_parent_options = show_parent_options
         # the ">>" prompt, taken out of the drawn menu by `draw` so that it can be
         # handed to `input` by `get_input` instead (see those methods)
         self._input_prompt = ""
@@ -130,6 +163,89 @@ class ConsoleMenu(OriginalConsoleMenu):
 
         return self.screen.input(self._input_prompt)
 
+    def _shortcuts_available_here(self) -> Dict[str, GlobalShortcut]:
+        """The global shortcuts that open a menu other than this one."""
+
+        return {
+            key: shortcut
+            for key, shortcut in GLOBAL_SHORTCUTS.items()
+            if shortcut.get_menu() is not self
+        }
+
+    def get_epilogue_text(self) -> str:
+        """The menu's own epilogue, followed by a hint for each global shortcut, so that
+        they can be found from whichever menu the user is in."""
+
+        epilogue = super().get_epilogue_text() or ""
+        hints = [
+            f"Press {key} for {shortcut.text}"
+            for key, shortcut in self._shortcuts_available_here().items()
+        ]
+        if not hints:
+            return epilogue
+
+        return (epilogue + "\n" if epilogue else "") + "\n".join(hints)
+
+    def process_user_input(self):
+        """Handles the selection as the library does, apart from the keys registered with
+        `register_global_shortcut`, which open their menu on top of this one."""
+
+        try:
+            user_input = self.get_input()
+        except EOFError:
+            self.should_exit = True
+            return
+
+        shortcut = self._shortcuts_available_here().get(user_input.strip().lower())
+        # a key a menu item claims for itself keeps meaning that item
+        claimed = any(item.menu_char == user_input for item in self.items)
+        if shortcut is not None and not claimed:
+            self.open_on_top(shortcut.get_menu())
+            return user_input
+
+        # the rest is the library's own handling of the input
+        for i, item in enumerate(self.items):
+            if item.menu_char == user_input:
+                self.current_option = i
+                self.select()
+                return user_input
+
+        try:
+            num = int(user_input)
+        except ValueError:
+            return
+        if 0 < num < len(self.items) + 1:
+            self.current_option = num - 1
+            self.select()
+
+        return user_input
+
+    def open_on_top(self, menu: "ConsoleMenu"):
+        """Opens a menu as though it were a submenu of this one, the way `SubmenuItem`
+        does, and puts it back as it was once it is closed.
+
+        The menu may already be the submenu of another menu (the main menu lists the job
+        submission options too), so its parent is only borrowed while it is open.
+        Otherwise its exit item would say "Return to" whichever menu last opened it.
+        """
+
+        previous_parent = menu.parent
+        menu.parent = self
+        # the exit item works out its "Return to ..." text from the parent, but only
+        # while its text is still the default
+        menu.exit_item.text = "Exit"
+
+        self.pause()
+        self.clear_screen()
+        try:
+            menu.start()
+            menu.join()
+        finally:
+            menu.parent = previous_parent
+            menu.exit_item.text = "Exit"
+            self.clear_screen()
+            self.resume()
+
     @property
     def parent_menu_options(self) -> List[MenuOptions]:
         """Returns a list of `MenuOption` instances which contain information about options
@@ -166,7 +282,10 @@ class ConsoleMenu(OriginalConsoleMenu):
             self.prologue_text() if callable(self.prologue_text) else self.prologue_text
         )
         # add the strings that each parent gives
-        for p_options in self.parent_menu_options:
+        parent_menu_options = (
+            self.parent_menu_options if self.show_parent_options else []
+        )
+        for p_options in parent_menu_options:
             # a parent menu may not define any options (this_menu_options is None), e.g. the
             # Analysis menu; skip those so we don't call None()
             if p_options is None:
