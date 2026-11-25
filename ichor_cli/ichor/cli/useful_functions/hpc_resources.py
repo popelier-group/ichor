@@ -7,6 +7,8 @@ core brings on this machine and how many cores a job may ask for, both of which 
 from the ichor config.
 """
 
+from typing import Optional
+
 import ichor.hpc.global_variables
 from ichor.hpc.batch_system import LocalBatchSystem
 from ichor.hpc.global_variables import get_param_from_config
@@ -28,16 +30,31 @@ def batch_system_available() -> bool:
     return ichor.hpc.global_variables.BATCH_SYSTEM is not LocalBatchSystem
 
 
-def memory_per_core_gb() -> float:
-    """Returns the memory (in GB) that one core is given on this machine."""
+def memory_per_core_gb(ncores: Optional[int] = None) -> float:
+    """Return the memory per core in GB for the requested core count.
 
-    return get_param_from_config(
+    Use the lowest configured value for estimates when the partition is unknown.
+    """
+
+    configured_memory = get_param_from_config(
         ichor.hpc.global_variables.ICHOR_CONFIG,
         ichor.hpc.global_variables.MACHINE,
         "hpc",
         "memory_per_core_gb",
         default=FALLBACK_MEMORY_PER_CORE_GB,
     )
+    if not isinstance(configured_memory, dict):
+        return configured_memory
+
+    if ncores is not None:
+        try:
+            partition = ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ncores]
+            return configured_memory[partition]
+        except KeyError:
+            # Estimates can be made before the menu validates the core count.
+            pass
+
+    return min(configured_memory.values(), default=FALLBACK_MEMORY_PER_CORE_GB)
 
 
 def job_memory_gb(ncores: int) -> float:
@@ -45,7 +62,7 @@ def job_memory_gb(ncores: int) -> float:
     the batch system hands out memory per core. Asking for more cores is therefore how a
     job which needs more memory is given it, even when it has no use for the cores."""
 
-    return ncores * memory_per_core_gb()
+    return ncores * memory_per_core_gb(ncores)
 
 
 def maximum_cores() -> int:
